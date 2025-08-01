@@ -9,6 +9,11 @@ from libqtile.config import Key
 from libqtile.lazy import lazy
 from libqtile.log_utils import logger
 
+# Module imports  
+from modules.bars import create_bar_manager
+from modules.hotkeys import create_hotkey_display
+from modules.screens import refresh_screens, get_screen_count
+
 
 class LayoutAwareKeyManager:
     """Enhanced key manager with layout-aware bindings"""
@@ -41,9 +46,6 @@ class LayoutAwareKeyManager:
 
     def manual_screen_reconfigure(self, qtile):
         """Manually reconfigure screens after monitor changes"""
-        from modules.screens import refresh_screens, get_screen_count
-        from modules.bars import create_bar_manager
-
         logger.info("Manual screen reconfiguration requested")
         refresh_screens()
         new_screen_count = get_screen_count()
@@ -59,8 +61,6 @@ class LayoutAwareKeyManager:
 
     def show_hotkeys(self, qtile):
         """Show hotkey display window"""
-        from modules.hotkeys import create_hotkey_display
-
         try:
             logger.info("Showing hotkey display")
             hotkey_display = create_hotkey_display(self, self.color_manager)

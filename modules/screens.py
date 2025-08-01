@@ -4,8 +4,9 @@ Screen management module for qtile
 Handles automatic screen detection and configuration
 """
 
-import subprocess
 import json
+import os
+import subprocess
 from libqtile.log_utils import logger
 
 
@@ -22,7 +23,6 @@ class ScreenManager:
         if self.display_override == 0:
             try:
                 # Check if we're in Xephyr (testing environment)
-                import os
                 display = os.environ.get('DISPLAY', '')
                 if ':99' in display or 'Xephyr' in str(os.environ):
                     logger.info("Detected Xephyr testing environment - using single screen")

@@ -10,6 +10,12 @@ from libqtile.lazy import lazy
 from libqtile.log_utils import logger
 from qtile_config import get_config
 
+# Module imports (to be used in functions)
+from modules.bars import create_bar_manager
+from modules.hooks import create_hook_manager  
+from modules.hotkeys import create_hotkey_display
+from modules.screens import refresh_screens, get_screen_count
+
 
 class KeyManager:
     """Manages keyboard bindings and shortcuts"""
@@ -44,7 +50,6 @@ class KeyManager:
     def manual_retile_all(self, qtile):
         """Manually force all windows to tile"""
         try:
-            from modules.hooks import create_hook_manager
             hook_manager = create_hook_manager(self.color_manager)
             count = hook_manager.force_retile_all_windows(qtile)
             logger.info(f"Manual retile completed - {count} windows retiled")
@@ -53,10 +58,6 @@ class KeyManager:
 
     def manual_screen_reconfigure(self, qtile):
         """Manually reconfigure screens after monitor changes"""
-        from modules.screens import refresh_screens, get_screen_count
-        from modules.bars import create_bar_manager
-        from libqtile.log_utils import logger
-
         logger.info("Manual screen reconfiguration requested")
         refresh_screens()
         new_screen_count = get_screen_count()
@@ -210,9 +211,6 @@ class KeyManager:
 
     def show_hotkeys(self, qtile):
         """Show hotkey display window"""
-        from modules.hotkeys import create_hotkey_display
-        from libqtile.log_utils import logger
-
         try:
             logger.info("Showing hotkey display")
             hotkey_display = create_hotkey_display(self, self.color_manager)

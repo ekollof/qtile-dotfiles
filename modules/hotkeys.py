@@ -5,7 +5,9 @@ Shows a popup window with all configured keybindings
 Similar to AwesomeWM's Super+S functionality
 """
 
+import os
 import subprocess
+import tempfile
 from typing import final, TYPE_CHECKING
 from libqtile.log_utils import logger
 
@@ -255,9 +257,6 @@ element-text {{
             rofi_input = "\n".join(hotkeys)
 
             # Create temporary theme file
-            import tempfile
-            import os
-
             with tempfile.NamedTemporaryFile(mode='w', suffix='.rasi', delete=False) as theme_file:
                 theme_file.write(self.rofi_theme)
                 theme_file_path = theme_file.name

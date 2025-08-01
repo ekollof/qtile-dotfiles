@@ -5,18 +5,23 @@ Author: Andrath
 Features: Automatic color reloading, Wayland compatibility, multi-screen support
 """
 
+import importlib
+import libqtile.notify
+import notification
 import os
-from libqtile.config import Click, Drag
+import sys
+from libqtile import qtile
+from libqtile.config import Click, Drag, Key
 from libqtile.lazy import lazy
 from libqtile.log_utils import logger
 
 # Import our custom modules
-from modules.colors import color_manager
-from modules.screens import get_screen_count
 from modules.bars import create_bar_manager
-from modules.keys import create_key_manager
+from modules.colors import color_manager
 from modules.groups import create_group_manager
 from modules.hooks import create_hook_manager
+from modules.keys import create_key_manager
+from modules.screens import get_screen_count, refresh_screens
 
 # System configuration
 hostname = os.uname().nodename
@@ -85,8 +90,6 @@ hook_manager.setup_hooks()
 
 def reload(module: str) -> None:
     """Reload a Python module"""
-    import sys
-    import importlib
     if module in sys.modules:
         _ = importlib.reload(sys.modules[module])
 
@@ -98,10 +101,6 @@ def remapkeys():
 
 def manually_reconfigure_screens():
     """Manually reconfigure screens after monitor changes"""
-    from libqtile import qtile
-    from modules.screens import refresh_screens, get_screen_count
-    from modules.bars import create_bar_manager
-
     if qtile is not None:
         logger.info("Manual screen reconfiguration requested")
         _ = refresh_screens()
@@ -116,32 +115,4 @@ def manually_reconfigure_screens():
         # Restart to apply changes
         qtile.restart()
 
-
-# Optional notification setup (disabled by default)
-if False:
-    reload("notification")
-    import notification
-    import libqtile.notify
-
-    libqtile.notify.notifier.callbacks.clear()
-    libqtile.notify.notifier.close_callbacks.clear()
-
-    notifier = notification.Server(
-        background=color_manager.get_colors()["special"]["background"],
-        foreground=color_manager.get_colors()["special"]["foreground"],
-        x=50,
-        y=50,
-        width=640,
-        height=100,
-        font_size=18,
-        font="Monospace",
-        overflow=True,
-        more_width=True,
-    )
-
-    from libqtile.config import Key
-    keys.extend([
-        Key([mod], "grave", notifier.lazy_prev, desc="Previous notification"),
-        Key([mod, "shift"], "grave", notifier.lazy_next, desc="Next notification"),
-        Key(["control"], "space", notifier.lazy_close, desc="Close notification"),
-    ])
+        

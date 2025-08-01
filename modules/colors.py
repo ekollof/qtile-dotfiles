@@ -4,13 +4,18 @@ Color management module for qtile
 Handles pywal/wallust color loading and automatic reloading
 """
 
-import os
-import json
-import time
-import threading
-import shutil
 import hashlib
+import json
+import libqtile
+import os
+import shutil
+import tempfile
+import threading
+import time
+import traceback
 from libqtile.log_utils import logger
+from watchdog.observers import Observer
+from watchdog.events import FileSystemEventHandler
 
 
 class ColorManager:
@@ -45,18 +50,17 @@ class ColorManager:
         self.restart_checker_thread = None
         self._shutdown_event = threading.Event()
 
-        import time
         self._startup_time = time.time()
 
         # Create initial backup
         self._backup_current_colors()
 
-    def _ensure_directories(self):
-        """Ensure required directories exist"""
+    def _ensure_directories(self) -> None:
+        """Ensure all required directories exist"""
         try:
-            os.makedirs(os.path.dirname(self.colors_file), exist_ok=True)
-            os.makedirs(self.backup_dir, exist_ok=True)
-            os.makedirs(os.path.dirname(self.restart_trigger_file), exist_ok=True)
+            for directory in [self.backup_dir, os.path.dirname(self.restart_trigger_file)]:
+                if not os.path.exists(directory):
+                    os.makedirs(directory, exist_ok=True)
         except Exception as e:
             logger.error(f"Error creating directories: {e}")
 
@@ -243,7 +247,6 @@ class ColorManager:
                 self._backup_current_colors()
 
                 # Create restart trigger file only if Qtile has been running for a while
-                import time
                 startup_time = getattr(self, '_startup_time', time.time())
                 if time.time() - startup_time > 30:  # Only restart after 30 seconds of runtime
                     logger.info("Creating restart trigger...")
@@ -259,7 +262,6 @@ class ColorManager:
 
         except Exception as e:
             logger.error(f"Error updating colors: {e}")
-            import traceback
             logger.error(traceback.format_exc())
 
     def check_restart_trigger(self):
@@ -270,7 +272,6 @@ class ColorManager:
                 os.remove(self.restart_trigger_file)
 
                 # Use qtile's built-in restart
-                import libqtile
                 if hasattr(libqtile, 'qtile') and libqtile.qtile:
                     libqtile.qtile.restart()
                 else:
@@ -282,8 +283,8 @@ class ColorManager:
     def setup_file_watcher(self):
         """Set up file monitoring for color changes"""
         try:
-            from watchdog.observers import Observer
-            from watchdog.events import FileSystemEventHandler
+            # Watchdog imports are at the top now
+            pass
         except ImportError:
             logger.info("Watchdog not available, falling back to polling")
             return None
@@ -445,7 +446,6 @@ class ColorManager:
 
         except Exception as e:
             logger.error(f"Watch thread error: {e}")
-            import traceback
             logger.error(traceback.format_exc())
 
     def restart_trigger_checker(self):
@@ -506,7 +506,6 @@ class ColorManager:
 
         except Exception as e:
             logger.error(f"Error starting color monitoring: {e}")
-            import traceback
             logger.error(traceback.format_exc())
 
     def restart_monitoring(self):

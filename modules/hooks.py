@@ -4,10 +4,17 @@ Hooks module for qtile
 Handles qtile hooks and event management
 """
 
+import os
 import subprocess
-from libqtile import hook
+import time
+import traceback
+from libqtile import hook, qtile
 from libqtile.log_utils import logger
 from qtile_config import get_config
+
+# Module imports
+from modules.bars import create_bar_manager
+from modules.screens import refresh_screens, get_screen_count
 
 
 class HookManager:
@@ -45,7 +52,6 @@ class HookManager:
         @hook.subscribe.startup_complete
         def enforce_tiling_on_restart():
             """Force all windows to tile after qtile restart (except explicitly floating ones)"""
-            from libqtile import qtile
 
             def retile_windows():
                 if qtile:
@@ -166,10 +172,6 @@ class HookManager:
         @hook.subscribe.screen_change
         def handle_screen_change(event):
             """Handle screen configuration changes (monitor hotplug/unplug)"""
-            import time
-            from modules.screens import refresh_screens
-            from modules.bars import create_bar_manager
-
             # Add minimal delay to let the system settle
             time.sleep(self.config.screen_settings['detection_delay'])
 
@@ -186,10 +188,8 @@ class HookManager:
                         logger.info("Monitor configuration changed - updating screens")
 
                         # Get qtile instance
-                        from libqtile import qtile
                         if qtile is not None:
                             # Force screen reconfiguration
-                            from modules.screens import get_screen_count
                             new_screen_count = get_screen_count()
 
                             # Recreate screens with new configuration
@@ -208,14 +208,12 @@ class HookManager:
                         logger.info("Screen change detected but count unchanged")
                 except Exception as e:
                     logger.error(f"Error handling screen change: {e}")
-                    import traceback
                     logger.error(traceback.format_exc())
             else:
                 logger.info("Screen change detected but ignored (too soon after startup)")
 
     def autostart(self):
         """Run autostart script"""
-        import os
         autostart_script = self.config.autostart_script
 
         if os.path.exists(autostart_script) and os.access(autostart_script, os.X_OK):

@@ -4,12 +4,13 @@ Bars and widgets module for qtile
 Handles bar configuration and widget setup
 """
 
-import subprocess
 import os
 import socket
+import subprocess
 from typing import final, Any, TYPE_CHECKING
 from libqtile import widget as qtwidget
 from libqtile.bar import Bar
+from libqtile.config import Screen
 from libqtile.lazy import lazy
 from libqtile.log_utils import logger
 from qtile_extras import widget
@@ -157,8 +158,6 @@ class BarManager:
 
     def create_screens(self, screen_count: int):
         """Create screen configurations with bars"""
-        from libqtile.config import Screen
-
         screens = []
         for i in range(screen_count):
             screens.append(
