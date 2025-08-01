@@ -22,7 +22,7 @@ class GroupManager:
 
         return [
             layout.Tile(
-                margin=2,
+                margin=4,  # Increased margin for gap between windows
                 border_width=1,
                 border_focus=colordict["special"]["foreground"],
                 border_normal=colordict["special"]["background"],
@@ -34,7 +34,7 @@ class GroupManager:
                 shift_windows=True,  # Allow shifting windows between panes
             ),
             layout.MonadTall(
-                margin=2,
+                margin=4,  # Increased margin for gap between windows
                 border_width=1,
                 border_focus=colordict["special"]["foreground"],
                 border_normal=colordict["special"]["background"],
@@ -46,13 +46,13 @@ class GroupManager:
                 new_client_position='after_current',  # Where to place new windows
             ),
             layout.Matrix(
-                margin=2,
+                margin=4,  # Increased margin for gap between windows
                 border_width=1,
                 border_focus=colordict["special"]["foreground"],
                 border_normal=colordict["special"]["background"],
             ),
             layout.Bsp(
-                margin=2,
+                margin=4,  # Increased margin for gap between windows
                 border_width=1,
                 border_focus=colordict["special"]["foreground"],
                 border_normal=colordict["special"]["background"],
@@ -93,6 +93,7 @@ class GroupManager:
             ],
             border_focus=colordict["special"]["foreground"],
             border_normal=colordict["special"]["background"],
+            border_width=1,  # Consistent border width with tiling layouts
         )
 
     def get_groups(self):

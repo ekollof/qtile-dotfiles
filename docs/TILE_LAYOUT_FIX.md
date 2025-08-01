@@ -8,7 +8,7 @@ The Tile layout was not splitting windows evenly when new windows were spawned. 
 ### **Tile Layout Improvements**
 ```python
 layout.Tile(
-    margin=2,
+    margin=4,               # NEW: 4px gap between windows (was 2px)
     border_width=1,
     border_focus=colordict["special"]["foreground"],
     border_normal=colordict["special"]["background"],
@@ -24,6 +24,7 @@ layout.Tile(
 ### **MonadTall Layout Improvements**
 ```python
 layout.MonadTall(
+    margin=4,                         # NEW: 4px gap between windows
     ratio=0.6,                        # Main window takes 60% width
     min_ratio=0.25,                   # Minimum 25% width
     max_ratio=0.85,                   # Maximum 85% width
@@ -36,6 +37,7 @@ layout.MonadTall(
 ### **BSP Layout Improvements**
 ```python
 layout.Bsp(
+    margin=4,               # NEW: 4px gap between windows
     fair=True,              # Even space distribution
     grow_amount=10,         # 10px grow/shrink increments
     lower_right=True,       # New windows in lower right
@@ -43,7 +45,42 @@ layout.Bsp(
 )
 ```
 
-## 🎯 **What This Fixes**
+### **Matrix Layout Improvements**
+```python
+layout.Matrix(
+    margin=4,               # NEW: 4px gap between windows
+    border_width=1,
+    # Automatic grid arrangement
+)
+```
+
+## � **Window Spacing**
+
+### **Gap Configuration**
+All tiling layouts now use consistent 4px margins for clean window separation:
+
+```python
+margin=4,               # 4px gap around each window
+border_width=1,         # 1px border for window focus indication
+```
+
+### **Visual Spacing**
+- **Between Windows**: ~4px visible gap
+- **Screen Edges**: 4px margin from screen borders
+- **Border Focus**: 1px colored border on focused window
+- **Professional Look**: Clean, modern spacing without being excessive
+
+### **Layout-Specific Behavior**
+| Layout | Gap Behavior |
+|--------|--------------|
+| **Tile** | Even gaps between main and secondary panes |
+| **MonadTall** | Consistent spacing around main window and sidebar |
+| **BSP** | Equal gaps in all binary splits |
+| **Matrix** | Grid spacing with gaps between all cells |
+| **Max** | No gaps (fullscreen) |
+| **Floating** | 1px borders, manual positioning |
+
+## �🎯 **What This Fixes**
 
 ### **Before (Problems)**
 - ❌ New windows created uneven splits
@@ -57,6 +94,7 @@ layout.Bsp(
 - ✅ **Precise Resizing**: 10% increments for predictable sizing
 - ✅ **Smart Placement**: New windows placed logically
 - ✅ **Expandable**: Windows expand to fill available space
+- ✅ **Clean Gaps**: 4px margins create professional spacing between windows
 
 ## 🔧 **How It Works**
 
