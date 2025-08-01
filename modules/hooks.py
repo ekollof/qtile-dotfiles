@@ -42,32 +42,65 @@ class HookManager:
             logger.info("Qtile startup completed - starting color monitoring")
             self.color_manager.start_monitoring()
 
+        @hook.subscribe.startup_complete
+        def enforce_tiling_on_restart():
+            """Force all windows to tile after qtile restart (except explicitly floating ones)"""
+            from libqtile import qtile
+            if qtile:
+                try:
+                    # Force all windows to tile unless they should be floating
+                    for window in qtile.windows_map.values():
+                        if hasattr(window, 'window') and hasattr(window, 'floating'):
+                            try:
+                                # Check if this window should be floating based on our rules
+                                should_float = self._should_window_float(window)
+                                
+                                if not should_float and window.floating:
+                                    window.floating = False  # Force to tile
+                                    try:
+                                        wm_class = window.window.get_wm_class()
+                                        app_name = wm_class[1] if wm_class and len(wm_class) >= 2 else "Unknown"
+                                        logger.info(f"Re-tiled window after restart: {app_name}")
+                                    except:
+                                        logger.info("Re-tiled unnamed window after restart")
+                                        
+                            except (IndexError, AttributeError, TypeError) as e:
+                                logger.debug(f"Could not check window during retiling: {e}")
+                                continue
+                    logger.info("Completed window retiling after startup")
+                except Exception as e:
+                    logger.error(f"Error during window retiling: {e}")
+
     def _setup_client_hooks(self):
         """Setup client/window-related hooks"""
         @hook.subscribe.client_new
-        def force_electron_apps_to_tile(window):
-            """Force electron apps to tile, overriding any floating rules"""
+        def enforce_tiling_behavior(window):
+            """Enforce consistent tiling behavior for all windows"""
             try:
-                wm_class = window.window.get_wm_class()
-                wm_role = window.window.get_wm_window_role()
+                # Determine if this window should float based on our rules
+                should_float = self._should_window_float(window)
                 
-                if wm_class and len(wm_class) >= 2:
-                    app_class = wm_class[1].lower()  # Use the second element (class name)
-                    
-                    # Check if this is an electron app
-                    if any(electron_app in app_class for electron_app in self.config.electron_apps):
-                        window.floating = False  # Force to tile
-                        logger.info(f"Forced electron app to tile: {wm_class[1]} (role: {wm_role})")
-                        return
-                    
-                    # Additional check for browser-window role (common in electron apps)
-                    if wm_role == "browser-window" and "code" in app_class:
-                        # This is likely VSCode/electron app with browser-window role
-                        logger.info(f"Detected VSCode/electron app with browser-window role: {wm_class[1]}")
-                        window.floating = False  # Ensure it tiles
+                if not should_float:
+                    # Force this window to tile
+                    window.floating = False
+                    try:
+                        wm_class = window.window.get_wm_class()
+                        app_name = wm_class[1] if wm_class and len(wm_class) >= 2 else wm_class[0] if wm_class else "Unknown"
+                        logger.debug(f"Enforced tiling for: {app_name}")
+                    except:
+                        logger.debug("Enforced tiling for unnamed window")
+                else:
+                    # This window should float
+                    window.floating = True
+                    try:
+                        wm_class = window.window.get_wm_class()
+                        app_name = wm_class[1] if wm_class and len(wm_class) >= 2 else wm_class[0] if wm_class else "Unknown"
+                        logger.debug(f"Allowed floating for: {app_name}")
+                    except:
+                        logger.debug("Allowed floating for unnamed window")
                         
             except (IndexError, AttributeError, TypeError) as e:
-                logger.debug(f"Could not check window for electron app: {e}")
+                logger.debug(f"Could not determine window floating behavior: {e}")
                 pass
 
         @hook.subscribe.client_new
@@ -186,6 +219,46 @@ class HookManager:
                 logger.error(f"Failed to launch autostart script: {e}")
         else:
             logger.error(f"Autostart script not found or not executable: {autostart_script}")
+
+    def _should_window_float(self, window):
+        """Determine if a window should be floating based on our floating rules"""
+        try:
+            wm_class = window.window.get_wm_class()
+            if wm_class and len(wm_class) > 0:
+                # Check against force floating apps
+                if wm_class[0].lower() in [fc.lower() for fc in self.config.force_floating_apps]:
+                    return True
+                
+                # Check against floating rules (from qtile_config.py)
+                for rule in self.config.floating_rules:
+                    if 'wm_class' in rule:
+                        if wm_class[0].lower() == rule['wm_class'].lower():
+                            return True
+                        if len(wm_class) >= 2 and wm_class[1].lower() == rule['wm_class'].lower():
+                            return True
+                    
+                    if 'title' in rule:
+                        try:
+                            window_title = window.window.get_name() or ""
+                            if rule['title'].lower() in window_title.lower():
+                                return True
+                        except:
+                            pass
+
+            # Check if it's a transient window
+            if window.window.get_wm_transient_for():
+                return True
+                
+            # Check WM hints for max_width (dialog-like windows)
+            hints = window.window.get_wm_normal_hints()
+            if hints and hints.get("max_width"):
+                return True
+                
+            return False
+            
+        except (IndexError, AttributeError, TypeError) as e:
+            logger.debug(f"Could not determine if window should float: {e}")
+            return False  # Default to tiling if we can't determine
 
 
 def create_hook_manager(color_manager):

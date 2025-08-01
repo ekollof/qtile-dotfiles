@@ -149,25 +149,6 @@ class QtileConfig:
         ]
     
     @property
-    def electron_apps(self) -> List[str]:
-        """Electron apps that should be forced to tile"""
-        return [
-            'code',                    # VSCode
-            'code - insiders',         # VSCode Insiders
-            'discord',                 # Discord
-            'slack',                   # Slack
-            'teams',                   # Microsoft Teams
-            'atom',                    # Atom editor
-            'electron',                # Generic electron
-            'spotify',                 # Spotify
-            'whatsapp',               # WhatsApp desktop
-            'signal',                 # Signal
-            'obsidian',               # Obsidian
-            'notion',                 # Notion
-            'figma',                  # Figma desktop
-        ]
-    
-    @property
     def force_floating_apps(self) -> List[str]:
         """Apps that should always float (via hooks)"""
         return [
