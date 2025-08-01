@@ -7,6 +7,7 @@ Handles bar configuration and widget setup
 import subprocess
 import os
 import socket
+from typing import final
 from libqtile import widget as qtwidget
 from libqtile.bar import Bar
 from libqtile.lazy import lazy
@@ -14,10 +15,11 @@ from libqtile.log_utils import logger
 from qtile_extras import widget
 
 
+@final
 class BarManager:
-    """Manages bar and widget configuration"""
+    """Manages qtile bar configuration and widget creation"""
 
-    def __init__(self, color_manager):
+    def __init__(self, color_manager) -> None:
         self.color_manager = color_manager
         self.hostname = socket.gethostname()
         self.homedir = os.getenv("HOME")
@@ -44,7 +46,7 @@ class BarManager:
         """Get extension defaults"""
         return self.extension_defaults
 
-    def create_bar_config(self, screen_num):
+    def create_bar_config(self, screen_num: int):
         """Create bar configuration for a specific screen"""
         colordict = self.color_manager.get_colors()
         logger.info(f"Bar config for screen {screen_num + 1}")
@@ -150,7 +152,7 @@ class BarManager:
 
         return Bar(barconfig, 30, margin=5, opacity=0.8)
 
-    def create_screens(self, screen_count):
+    def create_screens(self, screen_count: int):
         """Create screen configurations with bars"""
         from libqtile.config import Screen
 
