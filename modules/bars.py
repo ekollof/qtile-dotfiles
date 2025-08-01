@@ -7,19 +7,22 @@ Handles bar configuration and widget setup
 import subprocess
 import os
 import socket
-from typing import final
+from typing import final, Any, TYPE_CHECKING
 from libqtile import widget as qtwidget
 from libqtile.bar import Bar
 from libqtile.lazy import lazy
 from libqtile.log_utils import logger
 from qtile_extras import widget
 
+if TYPE_CHECKING:
+    from modules.colors import ColorManager
+
 
 @final
 class BarManager:
     """Manages qtile bar configuration and widget creation"""
 
-    def __init__(self, color_manager) -> None:
+    def __init__(self, color_manager: "ColorManager") -> None:
         self.color_manager = color_manager
         self.hostname = socket.gethostname()
         self.homedir = os.getenv("HOME")
@@ -46,7 +49,7 @@ class BarManager:
         """Get extension defaults"""
         return self.extension_defaults
 
-    def create_bar_config(self, screen_num: int):
+    def create_bar_config(self, screen_num: int) -> Bar:
         """Create bar configuration for a specific screen"""
         colordict = self.color_manager.get_colors()
         logger.info(f"Bar config for screen {screen_num + 1}")
@@ -167,6 +170,6 @@ class BarManager:
 # Import subprocess for widget functions
 
 
-def create_bar_manager(color_manager):
+def create_bar_manager(color_manager: "ColorManager") -> BarManager:
     """Create and return a bar manager instance"""
     return BarManager(color_manager)

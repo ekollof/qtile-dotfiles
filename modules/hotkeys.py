@@ -27,7 +27,7 @@ class HotkeyDisplay:
                 'background': colors['special']['background'],
                 'foreground': colors['special']['foreground'],
                 'accent': colors['colors']['color4'],  # Usually blue
-                'secondary': colors['colors']['color8'],  # Usually gray
+                'secondary': colors['colors']['cdict[str, dict[str, str] | str]olor8'],  # Usually gray
                 'highlight': colors['colors']['color3']  # Usually yellow/orange
             }
         else:
