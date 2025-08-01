@@ -5,6 +5,7 @@ All user-configurable settings in one place
 """
 
 import os
+from modules.font_utils import get_available_font
 
 
 class QtileConfig:
@@ -14,6 +15,13 @@ class QtileConfig:
     
     def __init__(self):
         self.home = os.path.expanduser("~")
+
+    # ===== FONT SETTINGS =====
+
+    @property
+    def preferred_font(self) -> str:
+        """User's preferred font (change this to your preferred font)"""
+        return "BerkeleyMono Nerd Font Mono"
 
     # ===== CORE SETTINGS =====
 
@@ -277,9 +285,9 @@ class QtileConfig:
 
     @property
     def widget_defaults(self) -> dict[str, str | int]:
-        """Default widget settings"""
+        """Default widget settings with font fallback"""
         return {
-            'font': 'BerkeleyMono Nerd Font Mono',
+            'font': get_available_font(self.preferred_font),
             'fontsize': 12,
             'padding': 3,
         }
@@ -288,12 +296,12 @@ class QtileConfig:
 
     @property
     def hotkey_display(self) -> dict[str, int | float | str]:
-        """Hotkey display configuration"""
+        """Hotkey display configuration with font fallback"""
         return {
             'rofi_width': 1200,
             'rofi_lines': 25,
             'dmenu_lines': 25,
-            'font': 'BerkeleyMono Nerd Font Mono',
+            'font': get_available_font(self.preferred_font),
             'transparency': 0.95,
         }
 
