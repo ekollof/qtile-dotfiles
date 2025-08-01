@@ -5,7 +5,6 @@ All user-configurable settings in one place
 """
 
 import os
-from typing import Any
 
 
 class QtileConfig:
@@ -56,7 +55,7 @@ class QtileConfig:
     # ===== LAYOUT SETTINGS =====
 
     @property
-    def layout_defaults(self) -> dict[str, Any]:
+    def layout_defaults(self) -> dict[str, int | bool]:
         """Default settings for all layouts"""
         return {
             'margin': 4,  # Gap between windows
@@ -66,7 +65,7 @@ class QtileConfig:
         }
 
     @property
-    def tile_layout(self) -> dict[str, Any]:
+    def tile_layout(self) -> dict[str, float | int | bool | None]:
         """Tile layout specific settings"""
         return {
             'ratio': 0.5,  # 50/50 split by default
@@ -78,7 +77,7 @@ class QtileConfig:
         }
 
     @property
-    def monad_tall_layout(self) -> dict[str, Any]:
+    def monad_tall_layout(self) -> dict[str, float | int | str]:
         """MonadTall layout specific settings"""
         return {
             'ratio': 0.6,  # Main window 60% width
@@ -90,7 +89,7 @@ class QtileConfig:
         }
 
     @property
-    def bsp_layout(self) -> dict[str, Any]:
+    def bsp_layout(self) -> dict[str, bool | int | float]:
         """BSP layout specific settings"""
         return {
             'fair': True,  # Even space distribution
@@ -183,7 +182,7 @@ class QtileConfig:
         ]
 
     @property
-    def scratchpads(self) -> list[dict[str, Any]]:
+    def scratchpads(self) -> list[dict[str, str | float | int]]:
         """Scratchpad dropdown configurations"""
         return [
             {
@@ -250,7 +249,7 @@ class QtileConfig:
     # ===== MONITOR/SCREEN SETTINGS =====
 
     @property
-    def screen_settings(self) -> dict[str, Any]:
+    def screen_settings(self) -> dict[str, int | bool]:
         """Screen detection and configuration"""
         return {
             'startup_delay': 30,  # Seconds to wait before handling screen changes
@@ -268,7 +267,7 @@ class QtileConfig:
     # ===== BAR/WIDGET SETTINGS =====
 
     @property
-    def bar_settings(self) -> dict[str, Any]:
+    def bar_settings(self) -> dict[str, int | float | list[int]]:
         """Status bar configuration"""
         return {
             'height': 28,
@@ -277,7 +276,7 @@ class QtileConfig:
         }
 
     @property
-    def widget_defaults(self) -> dict[str, Any]:
+    def widget_defaults(self) -> dict[str, str | int]:
         """Default widget settings"""
         return {
             'font': 'BerkeleyMono Nerd Font Mono',
@@ -288,7 +287,7 @@ class QtileConfig:
     # ===== HOTKEY DISPLAY SETTINGS =====
 
     @property
-    def hotkey_display(self) -> dict[str, Any]:
+    def hotkey_display(self) -> dict[str, int | float | str]:
         """Hotkey display configuration"""
         return {
             'rofi_width': 1200,
