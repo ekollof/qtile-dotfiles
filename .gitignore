@@ -120,6 +120,7 @@ restart_trigger
 # Test files (if any are created temporarily)
 test_*.py
 *_test.py
+analyze*.py
 
 # Backup files
 *.bak
