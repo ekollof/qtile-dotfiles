@@ -75,7 +75,7 @@ class KeyManager:
                 # BSP: grow window
                 qtile.current_group.layout.grow_right()
             elif layout_name == 'matrix':
-                # Matrix: add column if possible
+                # Matrix: add column (horizontal growth)
                 qtile.current_group.layout.add()
             # Max and Floating layouts: no-op (but don't error)
         except Exception as e:
@@ -97,12 +97,54 @@ class KeyManager:
                 # BSP: shrink window
                 qtile.current_group.layout.grow_left()
             elif layout_name == 'matrix':
-                # Matrix: remove column if possible
-                qtile.current_group.layout.remove()
-            # Max and Floating layouts: no-op (but don't error)
+                # Matrix: remove column (horizontal shrink)
+                qtile.current_group.layout.delete()
+            # Max and Floating layouts: no-op
         except Exception as e:
             # Fallback for layouts that don't support the operation
             logger.debug(f"Smart shrink not supported in {layout_name}: {e}")
+
+    def smart_grow_vertical(self, qtile):
+        """Smart vertical grow that adapts to current layout"""
+        layout_name = qtile.current_group.layout.name.lower()
+        
+        try:
+            if layout_name in ['monadtall', 'monadwide']:
+                # MonadTall/Wide: grow main window
+                qtile.current_group.layout.grow()
+            elif layout_name in ['tile']:
+                # Tile: no vertical resize in tile layout
+                pass
+            elif layout_name in ['bsp']:
+                # BSP: grow window up
+                qtile.current_group.layout.grow_up()
+            elif layout_name == 'matrix':
+                # Matrix: no vertical resize (columns only)
+                pass
+            # Max and Floating layouts: no-op
+        except Exception as e:
+            logger.debug(f"Smart vertical grow not supported in {layout_name}: {e}")
+
+    def smart_shrink_vertical(self, qtile):
+        """Smart vertical shrink that adapts to current layout"""
+        layout_name = qtile.current_group.layout.name.lower()
+        
+        try:
+            if layout_name in ['monadtall', 'monadwide']:
+                # MonadTall/Wide: shrink main window
+                qtile.current_group.layout.shrink()
+            elif layout_name in ['tile']:
+                # Tile: no vertical resize in tile layout
+                pass
+            elif layout_name in ['bsp']:
+                # BSP: grow window down (shrink upward space)
+                qtile.current_group.layout.grow_down()
+            elif layout_name == 'matrix':
+                # Matrix: no vertical resize (columns only)
+                pass
+            # Max and Floating layouts: no-op
+        except Exception as e:
+            logger.debug(f"Smart vertical shrink not supported in {layout_name}: {e}")
 
     def smart_normalize(self, qtile):
         """Smart normalize that works with different layouts"""
@@ -179,19 +221,25 @@ class KeyManager:
                 [self.mod, "control"],
                 "l",
                 lazy.function(self.smart_grow),
-                desc="Smart grow window (adapts to layout)",
+                desc="Smart grow window horizontally (adapts to layout)",
             ),
             Key(
                 [self.mod, "control"],
                 "h",
                 lazy.function(self.smart_shrink),
-                desc="Smart shrink window (adapts to layout)",
+                desc="Smart shrink window horizontally (adapts to layout)",
             ),
             Key(
-                [self.mod, "shift"],
-                "h",
-                lazy.function(self.smart_shrink),
-                desc="Smart shrink window (adapts to layout)",
+                [self.mod, "control"],
+                "k",
+                lazy.function(self.smart_grow_vertical),
+                desc="Smart grow window vertically (adapts to layout)",
+            ),
+            Key(
+                [self.mod, "control"],
+                "j",
+                lazy.function(self.smart_shrink_vertical),
+                desc="Smart shrink window vertically (adapts to layout)",
             ),
             Key([self.mod, "shift"], "comma", lazy.function(self.window_to_previous_screen)),
             Key([self.mod, "shift"], "period", lazy.function(self.window_to_next_screen)),
