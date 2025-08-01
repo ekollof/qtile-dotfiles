@@ -6,15 +6,18 @@ Similar to AwesomeWM's Super+S functionality
 """
 
 import subprocess
-from typing import final
+from typing import final, TYPE_CHECKING
 from libqtile.log_utils import logger
+
+if TYPE_CHECKING:
+    from modules.colors import ColorManager
 
 
 @final
 class HotkeyDisplay:
     """Manages hotkey display functionality"""
 
-    def __init__(self, key_manager, color_manager=None) -> None:
+    def __init__(self, key_manager, color_manager: "ColorManager | None" = None) -> None:
         self.key_manager = key_manager
         self.color_manager = color_manager
         self.rofi_theme = self._get_rofi_theme()
@@ -27,7 +30,7 @@ class HotkeyDisplay:
                 'background': colors['special']['background'],
                 'foreground': colors['special']['foreground'],
                 'accent': colors['colors']['color4'],  # Usually blue
-                'secondary': colors['colors']['cdict[str, dict[str, str] | str]olor8'],  # Usually gray
+                'secondary': colors['colors']['color8'],  # Usually gray
                 'highlight': colors['colors']['color3']  # Usually yellow/orange
             }
         else:
@@ -354,6 +357,6 @@ element-text {{
             logger.error(f"Error showing hotkeys with dmenu: {e}")
 
 
-def create_hotkey_display(key_manager, color_manager=None):
+def create_hotkey_display(key_manager, color_manager: "ColorManager | None" = None) -> HotkeyDisplay:
     """Create and return a hotkey display instance"""
     return HotkeyDisplay(key_manager, color_manager)
