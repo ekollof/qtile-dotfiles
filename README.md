@@ -31,10 +31,12 @@ A comprehensive, modular Qtile configuration with **centralized settings**, enha
 - **Error Recovery**: Graceful handling of corrupted or missing color files
 
 ### ⌨️ **Layout-Aware Key Bindings**
+- **Universal Tiling**: All windows default to tiling (proper tiling WM behavior)
 - **Smart Resizing**: Grow/shrink commands adapt to current layout
 - **Universal Navigation**: Consistent focus and window movement across all layouts
 - **Layout Switching**: Quick access to all layouts (Tile, Max, BSP, MonadTall, Matrix)
 - **Error-Free**: No command failures in incompatible layouts (e.g., resize in Max)
+- **Post-Restart Consistency**: All windows automatically re-tile after `Super+Shift+R`
 
 ### 📋 **AwesomeWM-Style Hotkey Display**
 - **Visual Guide**: `Super+S` shows categorized list of all shortcuts
@@ -42,11 +44,13 @@ A comprehensive, modular Qtile configuration with **centralized settings**, enha
 - **Smart Categorization**: Groups by function (Window Management, Layout, System, etc.)
 - **Multiple Backends**: Rofi (preferred) → dmenu → notifications
 
-### 🪟 **Smart Window Management**
-- **Electron App Tiling**: VSCode, Discord, Slack automatically tile (no more floating)
+### 🪟 **Universal Window Management**
+- **Universal Tiling**: ALL windows default to tiling (proper tiling WM philosophy)
+- **Smart Floating Rules**: Only system dialogs, utilities, and transients float
+- **Post-Restart Consistency**: Windows automatically re-tile after qtile restart
 - **Precise Window Gaps**: Clean 4px spacing between windows
-- **Intelligent Floating Rules**: Only small utilities float, main apps tile
 - **Perfect Window Splits**: 50/50 tile splits, 60/40 MonadTall ratios
+- **No App-Specific Code**: Works consistently for any application type
 
 ### 🏗️ **Modular Architecture**
 - **Clean Structure**: Organized modules for bars, colors, groups, keys, screens
@@ -140,9 +144,11 @@ def applications(self) -> Dict[str, str]:
 ### Window Management
 | Key | Action |
 |-----|--------|
-| `Super+J/K/H/L` | Focus up/down/left/right |
-| `Super+Shift+J/K/H/L` | Move window |
-| `Super+Ctrl+L/H` | **Smart grow/shrink** (adapts to layout) |
+| `Super+H/J/K/L` | Focus left/down/up/right |
+| `Super+Shift+H/J/K/L` | Move window left/down/up/right |
+| `Super+Ctrl+H/L` | **Smart resize** (shrink/grow, adapts to layout) |
+| `Super+Ctrl+J/K` | **Smart resize** (vertical, adapts to layout) |
+| `Super+N` | **Normalize/reset layout** (works in all layouts) |
 | `Super+F` | Toggle floating |
 | `Super+Shift+F` | Toggle fullscreen |
 
@@ -163,6 +169,7 @@ def applications(self) -> Dict[str, str]:
 | `Super+Shift+Q` | Quit qtile |
 | `Super+Ctrl+C` | Reload colors |
 | `Super+Ctrl+S` | **Reconfigure screens** |
+| `Super+Ctrl+F` | **Force retile all windows** |
 
 > 💡 **Tip**: Press `Super+S` to see all shortcuts with descriptions!
 
@@ -295,14 +302,16 @@ def floating_rules(self) -> List[Dict[str, str]]:
         # ... existing rules
     ]
 
-# Force electron apps to tile:
+# Force apps to always float:
 @property
-def electron_apps(self) -> List[str]:
+def force_floating_apps(self) -> List[str]:
     return [
-        'your-electron-app',  # Add to force tiling
+        'your-floating-app',  # Add to force floating
         # ... existing apps
     ]
 ```
+
+**Note**: By default, ALL windows tile unless explicitly in floating rules. This is proper tiling WM behavior!
 
 ## 🛠️ Troubleshooting
 
@@ -338,19 +347,21 @@ python3 -c "from qtile_config import get_config; print('Config loaded successful
 python3 -c "from qtile_config import get_config; c=get_config(); print(f'Terminal: {c.terminal}, Browser: {c.browser}')"
 ```
 
-**Electron apps still floating:**
+**Window tiling not working after restart:**
 ```bash
-# Check if hook is working
-tail -f ~/.local/share/qtile/qtile.log | grep "Forced electron app"
+# Force retile all windows manually
+qtile cmd-obj -o cmd -f function -a manual_retile_all
+# Or use: Super+Ctrl+F
 
-# Verify app is in electron list
-python3 -c "from qtile_config import get_config; print(get_config().electron_apps)"
+# Check window floating rules
+python3 -c "from modules.hooks import create_hook_manager; from modules.colors import color_manager; hm = create_hook_manager(color_manager); print('Hook manager loaded')"
 ```
 
 **Key bindings not working:**
 - Check qtile logs: `tail -f ~/.local/share/qtile/qtile.log`
 - Verify configuration: `python3 -c "from modules.keys import create_key_manager; print('Keys OK')"`
 - Use `Super+S` to see all configured shortcuts
+- Check for conflicts: No duplicates should exist (49 unique bindings)
 
 ### Log Files
 - **Qtile**: `~/.local/share/qtile/qtile.log`
@@ -387,18 +398,21 @@ This configuration prioritizes:
 
 ### **Recent Major Improvements**
 - ✅ **Centralized Configuration**: All settings now in `qtile_config.py`
-- ✅ **Electron App Tiling**: VSCode Insiders, Discord, Slack properly tile
+- ✅ **Universal Tiling**: ALL windows default to tiling (proper tiling WM behavior)
+- ✅ **Post-Restart Consistency**: Windows automatically re-tile after `Super+Shift+R`
 - ✅ **Perfect Window Gaps**: Clean 4px spacing between all windows
-- ✅ **Smart Floating Rules**: Only utilities float, main apps tile
-- ✅ **Layout-Aware Commands**: Resize works perfectly in all layouts
-- ✅ **Comprehensive Documentation**: Detailed guides for everything
+- ✅ **Smart Floating Rules**: Only system dialogs and utilities float
+- ✅ **Layout-Aware Commands**: Resize and normalize work perfectly in all layouts
+- ✅ **Improved Hotkey Display**: Descriptive labels (not just "Spawn")
+- ✅ **No Key Conflicts**: 49 unique key bindings with no duplicates
 
 ### **Configuration Highlights**
-- **42 key bindings** with layout-aware smart commands
+- **49 key bindings** with layout-aware smart commands (no conflicts)
 - **5 layouts** (Tile, MonadTall, BSP, Matrix, Max) with perfect ratios
 - **30 floating rules** for system utilities and dialogs
-- **13 electron apps** forced to tile automatically
+- **Universal tiling** for all applications (no app-specific code)
 - **9 workspaces** with logical naming and layout assignments
 - **4px window gaps** for professional appearance
+- **Automatic retiling** after qtile restart
 
 Built for daily use in demanding multi-monitor development environments with zero-hassle configuration management! 🚀
