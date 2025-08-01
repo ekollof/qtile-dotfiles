@@ -297,7 +297,7 @@ class QtileConfig:
     def widget_defaults(self) -> Dict[str, Any]:
         """Default widget settings"""
         return {
-            'font': 'sans',
+            'font': 'BerkeleyMono Nerd Font Mono',
             'fontsize': 12,
             'padding': 3,
         }
@@ -311,7 +311,7 @@ class QtileConfig:
             'rofi_width': 1200,
             'rofi_lines': 25,
             'dmenu_lines': 25,
-            'font': 'Monospace-11',
+            'font': 'BerkeleyMono Nerd Font Mono',
             'transparency': 0.95,
         }
 

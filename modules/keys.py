@@ -149,6 +149,8 @@ class KeyManager:
             # Switch between windows in current stack pane
             Key([self.mod], "k", lazy.layout.down(), desc="Move focus down in stack pane"),
             Key([self.mod], "j", lazy.layout.up(), desc="Move focus up in stack pane"),
+            Key([self.mod], "h", lazy.layout.left(), desc="Move focus left in stack pane"),
+            Key([self.mod], "l", lazy.layout.right(), desc="Move focus right in stack pane"),
             Key(
                 [self.mod, "shift"],
                 "k",
@@ -159,13 +161,31 @@ class KeyManager:
                 [self.mod, "shift"],
                 "j",
                 lazy.layout.shuffle_up(),
-                desc="windows up in current stack",
+                desc="Move windows up in current stack",
+            ),
+            Key(
+                [self.mod, "shift"],
+                "h",
+                lazy.layout.shuffle_left(),
+                desc="Move windows left in current stack",
             ),
             Key(
                 [self.mod, "shift"],
                 "l",
+                lazy.layout.shuffle_right(),
+                desc="Move windows right in current stack",
+            ),
+            Key(
+                [self.mod, "control"],
+                "l",
                 lazy.function(self.smart_grow),
                 desc="Smart grow window (adapts to layout)",
+            ),
+            Key(
+                [self.mod, "control"],
+                "h",
+                lazy.function(self.smart_shrink),
+                desc="Smart shrink window (adapts to layout)",
             ),
             Key(
                 [self.mod, "shift"],
