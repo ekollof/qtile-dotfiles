@@ -57,6 +57,24 @@ class KeyManager:
         # Restart to apply changes
         qtile.restart()
 
+    def show_hotkeys(self, qtile):
+        """Show hotkey display window"""
+        from modules.hotkeys import create_hotkey_display
+        from libqtile.log_utils import logger
+        
+        try:
+            logger.info("Showing hotkey display")
+            hotkey_display = create_hotkey_display(self, self.color_manager)
+            hotkey_display.show_hotkeys()
+        except Exception as e:
+            logger.error(f"Error showing hotkeys: {e}")
+            # Fallback to simple dmenu
+            try:
+                hotkey_display = create_hotkey_display(self, self.color_manager)
+                hotkey_display.show_hotkeys_simple()
+            except Exception as e2:
+                logger.error(f"Fallback hotkey display also failed: {e2}")
+
     def get_keys(self):
         """Get all keyboard bindings"""
         return [
@@ -142,6 +160,7 @@ class KeyManager:
             Key([self.mod, "shift"], "m", lazy.group["scratch"].dropdown_toggle("ncmpcpp")),
             Key([self.mod, "control"], "c", lazy.function(self.manual_color_reload), desc="Reload colors"),
             Key([self.mod, "control"], "s", lazy.function(self.manual_screen_reconfigure), desc="Reconfigure screens"),
+            Key([self.mod], "s", lazy.function(self.show_hotkeys), desc="Show hotkeys"),
             Key([self.mod, "control"], "r", lazy.restart(), desc="Quick restart qtile"),
         ]
 
