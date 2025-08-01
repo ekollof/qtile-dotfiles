@@ -7,7 +7,6 @@ Features: Automatic color reloading, Wayland compatibility, multi-screen support
 
 import importlib
 import libqtile.notify
-import notification
 import os
 import sys
 from libqtile import qtile

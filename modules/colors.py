@@ -264,8 +264,8 @@ class ColorManager:
             logger.error(f"Error updating colors: {e}")
             logger.error(traceback.format_exc())
 
-    def check_restart_trigger(self):
-        """Check if qtile should restart due to color changes"""
+    def check_restart_trigger(self) -> bool:
+        """Check if qtile should restart due to color changes. Returns True if trigger was found."""
         try:
             if os.path.exists(self.restart_trigger_file):
                 logger.info("Color change detected - restarting qtile")
@@ -277,194 +277,328 @@ class ColorManager:
                 else:
                     # Fallback
                     _ = os.system("qtile cmd-obj -o cmd -f restart")
+                return True
+            return False
         except Exception as e:
             logger.error(f"Error in restart check: {e}")
+            return False
 
     def setup_file_watcher(self):
-        """Set up file monitoring for color changes"""
+        """Enhanced file watcher with better resource management"""
         try:
-            # Watchdog imports are at the top now
-            pass
+            from watchdog.observers.polling import PollingObserver
+            # Use PollingObserver for better reliability across filesystems
+            observer = PollingObserver(timeout=1.0)  # Check every 1 second instead of continuous
         except ImportError:
-            logger.info("Watchdog not available, falling back to polling")
-            return None
+            try:
+                # Fallback to regular Observer
+                observer = Observer()
+            except ImportError:
+                logger.info("Watchdog not available, falling back to manual polling")
+                return None
 
-        class ColorsFileHandler(FileSystemEventHandler):
+        class OptimizedColorsFileHandler(FileSystemEventHandler):
             color_manager: "ColorManager"
             last_update: float
             consecutive_errors: int
+            debounce_timer: threading.Timer | None
             
             def __init__(self, color_manager: "ColorManager"):
                 self.color_manager = color_manager
                 self.last_update = 0
                 self.consecutive_errors = 0
+                self.debounce_timer = None
+
+            def _handle_color_change(self, event_type: str):
+                """Optimized color change handler with debouncing"""
+                current_time = time.time()
+                
+                # Enhanced debouncing - only process if enough time has passed
+                if current_time - self.last_update < 2.0:
+                    logger.debug(f"Debouncing {event_type} event")
+                    return
+                
+                self.last_update = current_time
+                logger.info(f"Colors file {event_type}, scheduling update...")
+
+                # Cancel any existing timer
+                if self.debounce_timer and self.debounce_timer.is_alive():
+                    self.debounce_timer.cancel()
+
+                def optimized_update():
+                    try:
+                        # Reduced wait time for better responsiveness
+                        time.sleep(0.8)
+                        
+                        # Verify file exists and is readable before updating
+                        if not os.path.exists(self.color_manager.colors_file):
+                            logger.warning("Colors file disappeared during update")
+                            return
+                            
+                        # Check file size to ensure it's not empty/corrupted
+                        try:
+                            file_size = os.path.getsize(self.color_manager.colors_file)
+                            if file_size < 50:  # Minimum reasonable JSON size
+                                logger.warning(f"Colors file too small ({file_size} bytes), skipping update")
+                                return
+                        except OSError:
+                            logger.warning("Cannot access colors file, skipping update")
+                            return
+                        
+                        self.color_manager.update_colors()
+                        self.consecutive_errors = 0
+                        logger.debug("Color update completed successfully")
+                        
+                    except Exception as e:
+                        self.consecutive_errors += 1
+                        logger.error(f"Error in optimized color update: {e}")
+                        
+                        # Progressive error handling
+                        if self.consecutive_errors > 3:
+                            logger.warning(f"Multiple consecutive errors ({self.consecutive_errors}), increasing delays")
+                        if self.consecutive_errors > 8:
+                            logger.error("Too many consecutive errors, pausing updates temporarily")
+                            time.sleep(30)  # Pause for 30 seconds
+
+                # Use timer for better resource management
+                self.debounce_timer = threading.Timer(0.1, optimized_update)
+                self.debounce_timer.daemon = True
+                self.debounce_timer.start()
 
             def on_modified(self, event):
-                if event.is_directory:
+                if event.is_directory or event.src_path != self.color_manager.colors_file:
                     return
-                if event.src_path == self.color_manager.colors_file:
-                    current_time = time.time()
-                    # Debounce rapid changes
-                    if current_time - self.last_update > 2.0:
-                        self.last_update = current_time
-                        logger.info("Colors file changed, updating colors...")
-
-                        def delayed_update():
-                            try:
-                                # Wait for file to be fully written
-                                time.sleep(1.5)
-                                self.color_manager.update_colors()
-                                self.consecutive_errors = 0
-                            except Exception as e:
-                                self.consecutive_errors += 1
-                                logger.error(f"Error in delayed color update: {e}")
-                                if self.consecutive_errors > 5:
-                                    logger.error("Too many consecutive errors, stopping updates")
-                                    return
-
-                        threading.Thread(target=delayed_update, daemon=True).start()
+                self._handle_color_change("modified")
 
             def on_created(self, event):
-                """Handle file creation (e.g., when pywal creates new colors.json)"""
-                if not event.is_directory and event.src_path == self.color_manager.colors_file:
-                    logger.info("Colors file created")
-                    current_time = time.time()
-                    if current_time - self.last_update > 2.0:
-                        self.last_update = current_time
-
-                        def delayed_update():
-                            try:
-                                time.sleep(1.5)
-                                self.color_manager.update_colors()
-                                self.consecutive_errors = 0
-                            except Exception as e:
-                                self.consecutive_errors += 1
-                                logger.error(f"Error in delayed color update: {e}")
-
-                        threading.Thread(target=delayed_update, daemon=True).start()
+                if event.is_directory or event.src_path != self.color_manager.colors_file:
+                    return
+                self._handle_color_change("created")
 
             def on_moved(self, event):
-                """Handle file moves (e.g., atomic writes)"""
-                if not event.is_directory and event.dest_path == self.color_manager.colors_file:
-                    logger.info("Colors file moved/renamed")
-                    current_time = time.time()
-                    if current_time - self.last_update > 2.0:
-                        self.last_update = current_time
+                if event.is_directory or event.dest_path != self.color_manager.colors_file:
+                    return
+                self._handle_color_change("moved")
 
-                        def delayed_update():
-                            try:
-                                time.sleep(1.5)
-                                self.color_manager.update_colors()
-                                self.consecutive_errors = 0
-                            except Exception as e:
-                                self.consecutive_errors += 1
-                                logger.error(f"Error in delayed color update: {e}")
-
-                        threading.Thread(target=delayed_update, daemon=True).start()
-
-        event_handler = ColorsFileHandler(self)
-        observer = Observer()
+        event_handler = OptimizedColorsFileHandler(self)
         watch_dir = os.path.dirname(self.colors_file)
-        _ = observer.schedule(event_handler, watch_dir, recursive=False)
-        observer.start()
-        logger.info("Started file watcher for color changes")
-        return observer
+        
+        try:
+            observer.schedule(event_handler, watch_dir, recursive=False)
+            observer.start()
+            logger.info("Started optimized file watcher for color changes")
+            return observer
+        except Exception as e:
+            logger.error(f"Failed to start file watcher: {e}")
+            return None
 
     def watch_colors_file(self):
-        """Main file watching loop with robust error handling"""
+        """Optimized file watching loop with exponential backoff and better resource management"""
         consecutive_errors = 0
         max_errors = 10
+        check_interval = 2.0  # Start with 2-second intervals
+        max_interval = 30.0   # Maximum 30-second intervals
+        
+        # Performance monitoring
+        last_performance_log = time.time()
+        update_count = 0
 
         try:
             # Ensure directories exist
             self._ensure_directories()
 
-            # Try to use watchdog first
+            # Try to use optimized watchdog first
             observer = self.setup_file_watcher()
             if observer:
-                logger.info("Using watchdog for file monitoring")
+                logger.info("Using optimized watchdog for file monitoring")
+                observer_start_time = time.time()
+                
                 try:
                     while not self._shutdown_event.is_set():
                         if not observer.is_alive():
-                            logger.warning("Watchdog observer died, restarting...")
-                            observer.stop()
+                            observer_uptime = time.time() - observer_start_time
+                            logger.warning(f"Watchdog observer died after {observer_uptime:.1f}s, restarting...")
+                            try:
+                                observer.stop()
+                                observer.join(timeout=3)
+                            except Exception:
+                                pass
+                            
                             observer = self.setup_file_watcher()
                             if not observer:
+                                logger.error("Failed to restart watchdog, falling back to polling")
                                 break
-                        time.sleep(1)
+                            observer_start_time = time.time()
+                        
+                        # Check every 5 seconds instead of 1 for better performance
+                        self._shutdown_event.wait(5.0)
+                        
                 except Exception as e:
                     logger.error(f"Watchdog monitoring error: {e}")
                 finally:
                     if observer and observer.is_alive():
-                        observer.stop()
-                        observer.join(timeout=5)
+                        try:
+                            observer.stop()
+                            observer.join(timeout=5)
+                        except Exception as e:
+                            logger.error(f"Error stopping observer: {e}")
 
-            # Fallback to polling method
-            logger.info("Using polling for file monitoring")
+            # Optimized polling fallback with exponential backoff
+            logger.info("Using optimized polling for file monitoring")
             last_modified = 0
             last_hash = None
+            last_size = 0
 
             if os.path.exists(self.colors_file):
-                last_modified = os.path.getmtime(self.colors_file)
-                last_hash = self._get_file_hash(self.colors_file)
+                try:
+                    stat = os.stat(self.colors_file)
+                    last_modified = stat.st_mtime
+                    last_size = stat.st_size
+                    last_hash = self._get_file_hash(self.colors_file)
+                except OSError as e:
+                    logger.warning(f"Initial file stat failed: {e}")
 
             while not self._shutdown_event.is_set():
+                loop_start = time.time()
+                
                 try:
+                    file_changed = False
+                    
                     if os.path.exists(self.colors_file):
-                        current_modified = os.path.getmtime(self.colors_file)
-                        current_hash = self._get_file_hash(self.colors_file)
+                        try:
+                            stat = os.stat(self.colors_file)
+                            current_modified = stat.st_mtime
+                            current_size = stat.st_size
+                            
+                            # Quick check: size or modification time changed
+                            if current_modified != last_modified or current_size != last_size:
+                                # Double-check with hash only if initial checks indicate change
+                                current_hash = self._get_file_hash(self.colors_file)
+                                if current_hash != last_hash and current_hash is not None:
+                                    logger.info("Colors file changed (optimized polling detection)")
+                                    file_changed = True
+                                    
+                                    # Verify file is complete and valid before updating
+                                    if current_size > 50:  # Minimum reasonable size
+                                        def optimized_delayed_update():
+                                            try:
+                                                # Shorter delay for better responsiveness
+                                                time.sleep(0.8)
+                                                
+                                                # Final verification before update
+                                                if os.path.exists(self.colors_file):
+                                                    final_hash = self._get_file_hash(self.colors_file)
+                                                    if final_hash == current_hash:
+                                                        self.update_colors()
+                                                        nonlocal update_count
+                                                        update_count += 1
+                                                    else:
+                                                        logger.debug("File changed again during delay, skipping update")
+                                                
+                                                nonlocal consecutive_errors
+                                                consecutive_errors = 0
+                                                
+                                            except Exception as e:
+                                                consecutive_errors += 1
+                                                logger.error(f"Error in optimized polling update: {e}")
 
-                        # Check both modification time and hash for better detection
-                        if (current_modified != last_modified or current_hash != last_hash):
-                            logger.info("Colors file changed (polling detection)")
-
-                            def delayed_update():
-                                try:
-                                    time.sleep(1.5)
-                                    self.update_colors()
-                                    nonlocal consecutive_errors
-                                    consecutive_errors = 0
-                                except Exception as e:
-                                    consecutive_errors += 1
-                                    logger.error(f"Error in polling update: {e}")
-
-                            threading.Thread(target=delayed_update, daemon=True).start()
-                            last_modified = current_modified
-                            last_hash = current_hash
-
+                                        threading.Thread(target=optimized_delayed_update, daemon=True).start()
+                                    else:
+                                        logger.warning(f"Colors file too small ({current_size} bytes), skipping update")
+                                
+                                last_modified = current_modified
+                                last_size = current_size
+                                last_hash = current_hash
+                        except OSError as e:
+                            logger.warning(f"File stat error: {e}")
+                            # Reset values on error
+                            last_modified = 0
+                            last_size = 0
+                            last_hash = None
+                    
+                    # Dynamic interval adjustment with exponential backoff
+                    if file_changed:
+                        check_interval = 2.0  # Reset to fast checking after change
+                    else:
+                        # Gradually increase interval when no changes
+                        check_interval = min(check_interval * 1.05, max_interval)
+                    
                     consecutive_errors = 0
-                    time.sleep(1.0)  # Slightly longer polling interval
+                    
+                    # Performance logging every 5 minutes
+                    current_time = time.time()
+                    if current_time - last_performance_log > 300:
+                        logger.debug(f"Polling performance: {update_count} updates, interval: {check_interval:.1f}s")
+                        last_performance_log = current_time
+                        update_count = 0
+                    
+                    # Efficient sleep with early wake on shutdown
+                    if not self._shutdown_event.wait(check_interval):
+                        continue
 
                 except Exception as e:
                     consecutive_errors += 1
-                    logger.error(f"Polling error: {e}")
+                    logger.error(f"Optimized polling error: {e}")
+                    
                     if consecutive_errors >= max_errors:
-                        logger.error(
-                            f"Too many consecutive polling errors ({consecutive_errors}), stopping watcher")
+                        logger.error(f"Too many consecutive polling errors ({consecutive_errors}), stopping watcher")
                         break
-                    time.sleep(min(5.0 * consecutive_errors, 30.0))  # Exponential backoff
+                    
+                    # Exponential backoff for errors
+                    error_delay = min(2.0 ** consecutive_errors, 60.0)
+                    logger.warning(f"Backing off for {error_delay:.1f}s due to error")
+                    self._shutdown_event.wait(error_delay)
 
         except Exception as e:
             logger.error(f"Watch thread error: {e}")
             logger.error(traceback.format_exc())
 
     def restart_trigger_checker(self):
-        """Periodically check for restart trigger with better error handling"""
+        """Optimized restart trigger checker with exponential backoff and better resource management"""
         consecutive_errors = 0
         max_errors = 10
+        check_interval = 1.0  # Start with 1-second checks
+        max_interval = 15.0   # Maximum 15-second intervals
+        last_check_time = time.time()
 
         while not self._shutdown_event.is_set():
+            loop_start = time.time()
+            
             try:
-                self.check_restart_trigger()
+                # Only check if enough time has passed (adaptive interval)
+                if loop_start - last_check_time >= check_interval:
+                    trigger_found = self.check_restart_trigger()
+                    last_check_time = loop_start
+                    
+                    # Adjust interval based on activity
+                    if trigger_found:
+                        # If we found a trigger, reset to fast checking
+                        check_interval = 1.0
+                    else:
+                        # Gradually increase interval when no triggers found
+                        check_interval = min(check_interval * 1.02, max_interval)
+                
                 consecutive_errors = 0
-                time.sleep(1)
+                
+                # Efficient sleep that can be interrupted by shutdown
+                sleep_time = min(check_interval, 1.0)  # Never sleep more than 1 second at a time
+                if self._shutdown_event.wait(sleep_time):
+                    break  # Shutdown requested
+                    
             except Exception as e:
                 consecutive_errors += 1
-                logger.error(f"Error in restart trigger checker: {e}")
+                logger.error(f"Error in optimized restart trigger checker: {e}")
+                
                 if consecutive_errors >= max_errors:
-                    logger.error("Too many consecutive restart checker errors, stopping")
+                    logger.error(f"Too many consecutive restart checker errors ({consecutive_errors}), stopping")
                     break
-                time.sleep(min(5.0 * consecutive_errors, 30.0))
+                
+                # Exponential backoff for errors, but cap at reasonable maximum
+                error_delay = min(2.0 ** consecutive_errors, 30.0)
+                logger.warning(f"Restart checker backing off for {error_delay:.1f}s due to error")
+                
+                if self._shutdown_event.wait(error_delay):
+                    break
 
     def stop_monitoring(self):
         """Gracefully stop all monitoring threads"""
@@ -482,38 +616,78 @@ class ColorManager:
         logger.info("Color monitoring stopped")
 
     def start_monitoring(self):
-        """Start color file monitoring with improved error handling"""
+        """Start color file monitoring with improved error handling and resource management"""
         try:
             # Clear shutdown event
             self._shutdown_event.clear()
 
+            # Check if monitoring is already active
+            if self.is_monitoring():
+                logger.info("Color monitoring is already active")
+                return
+
             # Start color file watcher if not already running
             if self.watcher_thread is None or not self.watcher_thread.is_alive():
-                logger.info("Starting color file watcher...")
-                self.watcher_thread = threading.Thread(target=self.watch_colors_file, daemon=True)
+                logger.info("Starting optimized color file watcher...")
+                self.watcher_thread = threading.Thread(
+                    target=self.watch_colors_file, 
+                    daemon=True,
+                    name="ColorWatcher"
+                )
                 self.watcher_thread.start()
-                logger.info("Color file watcher started")
+                logger.info("Optimized color file watcher started")
 
             # Start restart trigger checker if not already running
-            if not hasattr(
-                    self,
-                    'restart_checker_thread') or self.restart_checker_thread is None or not self.restart_checker_thread.is_alive():
-                logger.info("Starting restart trigger checker...")
+            if not hasattr(self, 'restart_checker_thread') or self.restart_checker_thread is None or not self.restart_checker_thread.is_alive():
+                logger.info("Starting optimized restart trigger checker...")
                 self.restart_checker_thread = threading.Thread(
-                    target=self.restart_trigger_checker, daemon=True)
+                    target=self.restart_trigger_checker, 
+                    daemon=True,
+                    name="RestartChecker"
+                )
                 self.restart_checker_thread.start()
-                logger.info("Restart trigger checker started")
+                logger.info("Optimized restart trigger checker started")
+
+            # Verify threads started successfully
+            time.sleep(0.1)  # Give threads a moment to start
+            if not self.is_monitoring():
+                logger.error("Failed to start color monitoring threads")
+            else:
+                logger.info("Color monitoring started successfully with performance optimizations")
 
         except Exception as e:
-            logger.error(f"Error starting color monitoring: {e}")
+            logger.error(f"Error starting optimized color monitoring: {e}")
             logger.error(traceback.format_exc())
 
     def restart_monitoring(self):
-        """Restart color monitoring (useful for recovery)"""
-        logger.info("Restarting color monitoring...")
+        """Restart color monitoring with performance optimizations (useful for recovery)"""
+        logger.info("Restarting color monitoring with optimizations...")
+        
+        # Get current status for debugging
+        old_status = self.get_monitoring_status()
+        logger.debug(f"Pre-restart status: {old_status}")
+        
+        # Stop existing monitoring
         self.stop_monitoring()
-        time.sleep(2)  # Give threads time to stop
+        
+        # Apply performance optimizations
+        self.optimize_monitoring_performance()
+        
+        # Wait a bit longer to ensure clean shutdown
+        time.sleep(3)
+        
+        # Start fresh monitoring
         self.start_monitoring()
+        
+        # Verify restart was successful
+        time.sleep(1)
+        new_status = self.get_monitoring_status()
+        logger.info(f"Post-restart status: monitoring_active={new_status['monitoring_active']}")
+        
+        if new_status['monitoring_active']:
+            logger.info("Color monitoring restarted successfully with performance optimizations")
+        else:
+            logger.error("Failed to restart color monitoring")
 
     def is_monitoring(self):
         """Check if color monitoring is active"""
@@ -522,6 +696,47 @@ class ColorManager:
             self,
             'restart_checker_thread') and self.restart_checker_thread is not None and self.restart_checker_thread.is_alive()
         return watcher_running and checker_running
+
+    def get_monitoring_status(self) -> dict[str, any]:
+        """Get detailed monitoring status for diagnostics"""
+        status = {
+            'monitoring_active': self.is_monitoring(),
+            'watcher_thread_alive': self.watcher_thread is not None and self.watcher_thread.is_alive(),
+            'restart_checker_alive': hasattr(self, 'restart_checker_thread') and 
+                                   self.restart_checker_thread is not None and 
+                                   self.restart_checker_thread.is_alive(),
+            'shutdown_event_set': self._shutdown_event.is_set(),
+            'startup_time': getattr(self, '_startup_time', 0),
+            'uptime_seconds': time.time() - getattr(self, '_startup_time', time.time()),
+        }
+        
+        # Add thread names if available
+        if self.watcher_thread and self.watcher_thread.is_alive():
+            status['watcher_thread_name'] = getattr(self.watcher_thread, 'name', 'Unknown')
+        if hasattr(self, 'restart_checker_thread') and self.restart_checker_thread and self.restart_checker_thread.is_alive():
+            status['restart_checker_name'] = getattr(self.restart_checker_thread, 'name', 'Unknown')
+            
+        return status
+    
+    def optimize_monitoring_performance(self):
+        """Apply runtime performance optimizations"""
+        try:
+            # Force garbage collection to free memory
+            import gc
+            collected = gc.collect()
+            if collected > 0:
+                logger.debug(f"Garbage collected {collected} objects")
+            
+            # Check and log current resource usage
+            try:
+                import resource
+                memory_usage = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+                logger.debug(f"Current memory usage: {memory_usage} KB")
+            except ImportError:
+                pass
+                
+        except Exception as e:
+            logger.warning(f"Error in performance optimization: {e}")
     
     def validate_colors_public(self, colors: dict[str, dict[str, str] | str]) -> bool:
         """Public interface for color validation"""
@@ -608,6 +823,33 @@ def get_color_file_status():
         status['latest_backup'] = None
 
     return status
+
+
+def get_monitoring_performance_status():
+    """Get comprehensive monitoring performance status for debugging"""
+    status = color_manager.get_monitoring_status()
+    file_status = get_color_file_status()
+    
+    # Combine both status reports
+    combined_status = {
+        **status,
+        **file_status,
+        'performance_optimizations_active': True,
+        'color_manager_type': type(color_manager).__name__,
+    }
+    
+    return combined_status
+
+
+def optimize_color_monitoring():
+    """Manually trigger color monitoring performance optimizations"""
+    color_manager.optimize_monitoring_performance()
+    logger.info("Applied color monitoring performance optimizations")
+
+
+def restart_color_monitoring_optimized():
+    """Restart color monitoring with all performance optimizations"""
+    color_manager.restart_monitoring()
 
 
 # Load initial colors
