@@ -50,6 +50,85 @@ class BarManager:
         """Get extension defaults"""
         return self.extension_defaults
 
+    def _has_battery(self) -> bool:
+        """Check if the system has a battery (cross-platform)"""
+        import platform
+        import subprocess
+        
+        try:
+            system = platform.system().lower()
+            
+            if system == "linux":
+                # Linux: Check /sys/class/power_supply/
+                battery_paths = [
+                    "/sys/class/power_supply/BAT0",
+                    "/sys/class/power_supply/BAT1", 
+                    "/sys/class/power_supply/battery"
+                ]
+                
+                for path in battery_paths:
+                    if os.path.exists(path):
+                        # Check if it's actually a battery (not just AC adapter)
+                        type_file = os.path.join(path, "type")
+                        if os.path.exists(type_file):
+                            with open(type_file, 'r') as f:
+                                if f.read().strip().lower() == "battery":
+                                    return True
+                return False
+                
+            elif system in ["openbsd", "freebsd", "netbsd", "dragonfly"]:
+                # BSD systems: Use apm or acpiconf
+                try:
+                    if system == "openbsd":
+                        # OpenBSD: Use apm command
+                        result = subprocess.run(['apm'], capture_output=True, text=True, timeout=5)
+                        # If apm runs without error and shows battery info, we have a battery
+                        return result.returncode == 0 and 'battery' in result.stdout.lower()
+                    else:
+                        # FreeBSD/NetBSD: Try acpiconf
+                        result = subprocess.run(['acpiconf', '-i', '0'], capture_output=True, text=True, timeout=5)
+                        return result.returncode == 0
+                except (subprocess.TimeoutExpired, FileNotFoundError):
+                    return False
+                    
+            elif system == "darwin":
+                # macOS: Use pmset command
+                try:
+                    result = subprocess.run(['pmset', '-g', 'batt'], capture_output=True, text=True, timeout=5)
+                    return result.returncode == 0 and 'InternalBattery' in result.stdout
+                except (subprocess.TimeoutExpired, FileNotFoundError):
+                    return False
+                    
+            else:
+                # Unknown system: Try qtile's battery widget itself
+                # If it can initialize without error, assume battery exists
+                try:
+                    from qtile_extras import widget
+                    # Try to create a battery widget - if it fails, no battery
+                    test_widget = widget.Battery()
+                    return True
+                except Exception:
+                    return False
+                    
+        except Exception as e:
+            logger.debug(f"Error detecting battery: {e}")
+            return False
+            
+            # Fallback: check if /sys/class/power_supply/ contains any battery
+            power_supply_dir = "/sys/class/power_supply/"
+            if os.path.exists(power_supply_dir):
+                for item in os.listdir(power_supply_dir):
+                    type_file = os.path.join(power_supply_dir, item, "type")
+                    if os.path.exists(type_file):
+                        with open(type_file, 'r') as f:
+                            if f.read().strip().lower() == "battery":
+                                return True
+            
+            return False
+        except Exception as e:
+            logger.debug(f"Error checking for battery: {e}")
+            return False
+
     def create_bar_config(self, screen_num: int) -> Bar:
         """Create bar configuration for a specific screen"""
         colordict = self.color_manager.get_colors()
