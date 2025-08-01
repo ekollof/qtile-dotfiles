@@ -167,7 +167,7 @@ class LayoutAwareCommands:
             'supports_normalize': hasattr(layout, 'normalize'),
             'supports_reset': hasattr(layout, 'reset'),
             'supports_flip': hasattr(layout, 'flip'),
-            'supports_maximize': hasattr(layout, 'maximize'),
+            # Note: maximize is now handled via lazy.window.toggle_maximize() which works with all layouts
         }
 
     @staticmethod
