@@ -1,0 +1,4 @@
+
+#include ".Xresources.d/solarized"
+#include ".Xresources.d/urxvt"
+#include ".Xresources.d/rofi"
