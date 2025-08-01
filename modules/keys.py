@@ -7,6 +7,7 @@ Handles keyboard shortcuts and window management
 import os
 from libqtile.config import Key
 from libqtile.lazy import lazy
+from libqtile.log_utils import logger
 
 
 class KeyManager:
@@ -57,6 +58,71 @@ class KeyManager:
         # Restart to apply changes
         qtile.restart()
 
+    def smart_grow(self, qtile):
+        """Smart grow that adapts to current layout"""
+        layout_name = qtile.current_group.layout.name.lower()
+        
+        try:
+            if layout_name in ['monadtall', 'monadwide']:
+                # MonadTall/Wide: grow main window
+                qtile.current_group.layout.grow()
+            elif layout_name in ['tile']:
+                # Tile: increase ratio
+                qtile.current_group.layout.increase_ratio()
+            elif layout_name in ['bsp']:
+                # BSP: grow window
+                qtile.current_group.layout.grow_right()
+            elif layout_name == 'matrix':
+                # Matrix: add column if possible
+                qtile.current_group.layout.add()
+            # Max and Floating layouts: no-op (but don't error)
+        except Exception as e:
+            # Fallback for layouts that don't support the operation
+            logger.debug(f"Smart grow not supported in {layout_name}: {e}")
+
+    def smart_shrink(self, qtile):
+        """Smart shrink that adapts to current layout"""
+        layout_name = qtile.current_group.layout.name.lower()
+        
+        try:
+            if layout_name in ['monadtall', 'monadwide']:
+                # MonadTall/Wide: shrink main window
+                qtile.current_group.layout.shrink()
+            elif layout_name in ['tile']:
+                # Tile: decrease ratio
+                qtile.current_group.layout.decrease_ratio()
+            elif layout_name in ['bsp']:
+                # BSP: shrink window
+                qtile.current_group.layout.grow_left()
+            elif layout_name == 'matrix':
+                # Matrix: remove column if possible
+                qtile.current_group.layout.remove()
+            # Max and Floating layouts: no-op (but don't error)
+        except Exception as e:
+            # Fallback for layouts that don't support the operation
+            logger.debug(f"Smart shrink not supported in {layout_name}: {e}")
+
+    def smart_normalize(self, qtile):
+        """Smart normalize that works with different layouts"""
+        try:
+            if hasattr(qtile.current_group.layout, 'normalize'):
+                qtile.current_group.layout.normalize()
+            elif hasattr(qtile.current_group.layout, 'reset'):
+                qtile.current_group.layout.reset()
+        except Exception as e:
+            logger.debug(f"Normalize not supported: {e}")
+
+    def layout_safe_command(self, qtile, command_name, *args, **kwargs):
+        """Execute a layout command only if the layout supports it"""
+        try:
+            layout = qtile.current_group.layout
+            if hasattr(layout, command_name):
+                command = getattr(layout, command_name)
+                if callable(command):
+                    return command(*args, **kwargs)
+        except Exception as e:
+            logger.debug(f"Layout command {command_name} failed: {e}")
+
     def show_hotkeys(self, qtile):
         """Show hotkey display window"""
         from modules.hotkeys import create_hotkey_display
@@ -96,24 +162,22 @@ class KeyManager:
             Key(
                 [self.mod, "shift"],
                 "l",
-                lazy.layout.grow(),
-                lazy.layout.increase_ratio(),
-                desc="Grow size of current window",
+                lazy.function(self.smart_grow),
+                desc="Smart grow window (adapts to layout)",
             ),
             Key(
                 [self.mod, "shift"],
                 "h",
-                lazy.layout.shrink(),
-                lazy.layout.decrease_ratio(),
-                desc="Shrink size of current window",
+                lazy.function(self.smart_shrink),
+                desc="Smart shrink window (adapts to layout)",
             ),
             Key([self.mod, "shift"], "comma", lazy.function(self.window_to_previous_screen)),
             Key([self.mod, "shift"], "period", lazy.function(self.window_to_next_screen)),
             Key([self.mod], "comma", lazy.prev_screen()),
             Key([self.mod], "period", lazy.next_screen()),
             # Restore all windows to default size ratios
-            Key([self.mod], "n", lazy.layout.normalize()),
-            Key([self.mod], "x", lazy.layout.maximize()),
+            Key([self.mod], "n", lazy.function(self.smart_normalize), desc="Smart normalize layout"),
+            Key([self.mod], "x", lazy.layout.maximize(), desc="Maximize window (if supported)"),
             # Switch window focus to other pane(s) of stack
             Key(
                 [self.mod],
@@ -154,8 +218,12 @@ class KeyManager:
             Key([self.alt, "control"], "w", lazy.spawn(self.wallpapercmd.format(self.homedir))),
             Key([self.mod], "w", lazy.spawn("brave"), desc="Start browser"),
             Key([self.mod], "f", lazy.window.toggle_floating(), desc="Toggle floating"),
+            Key([self.mod, "shift"], "f", lazy.window.toggle_fullscreen(), desc="Toggle fullscreen"),
             Key([self.mod], "t", lazy.group.setlayout("tile"), desc="Go to tiling layout"),
             Key([self.mod], "m", lazy.group.setlayout("max"), desc="Go to max layout"),
+            Key([self.mod], "b", lazy.group.setlayout("bsp"), desc="Go to BSP layout"),
+            Key([self.mod, "control"], "t", lazy.group.setlayout("monadtall"), desc="Go to MonadTall layout"),
+            Key([self.mod, "control"], "m", lazy.group.setlayout("matrix"), desc="Go to Matrix layout"),
             Key([self.mod], "grave", lazy.group["scratch"].dropdown_toggle("notepad")),
             Key([self.mod, "shift"], "m", lazy.group["scratch"].dropdown_toggle("ncmpcpp")),
             Key([self.mod, "control"], "c", lazy.function(self.manual_color_reload), desc="Reload colors"),
