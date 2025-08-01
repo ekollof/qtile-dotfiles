@@ -70,7 +70,7 @@ sudo pacman -S rofi dmenu picom dunst unclutter xrandr
 mv ~/.config/qtile ~/.config/qtile.backup
 
 # Clone this configuration
-git clone <your-repo-url> ~/.config/qtile
+git clone https://github.com/ekollof/qtile-dotfiles.git ~/.config/qtile
 
 # Start qtile (or restart if already running)
 qtile cmd-obj -o cmd -f restart
