@@ -42,6 +42,37 @@ class BarManager:
 
         self.extension_defaults = self.widget_defaults.copy()
 
+    @property
+    def script_configs(self) -> list:
+        """Configure custom scripts for GenPollText widgets
+        
+        Users can override this property to customize their script widgets.
+        Each config should be a dict with keys: script_path, icon, update_interval, fallback, name
+        """
+        return [
+            {
+                'script_path': '~/bin/imap-checker.ksh',
+                'icon': '📭:',
+                'update_interval': 300,
+                'fallback': 'N/A',
+                'name': 'email checker'
+            },
+            {
+                'script_path': '~/bin/kayako.sh',
+                'icon': '🎫:',
+                'update_interval': 60,
+                'fallback': 'N/A',
+                'name': 'ticket checker'
+            },
+            {
+                'script_path': '~/bin/cputemp',
+                'icon': '🌡:',
+                'update_interval': 10,
+                'fallback': 'N/A',
+                'name': 'CPU temperature'
+            }
+        ]
+
     def get_widget_defaults(self):
         """Get widget defaults"""
         return self.widget_defaults
@@ -143,6 +174,63 @@ class BarManager:
             logger.debug(f"Error checking battery widget support: {e}")
             return False
 
+    def _script_exists(self, script_path: str) -> bool:
+        """Check if a script exists and is executable"""
+        expanded_path = os.path.expanduser(script_path)
+        return os.path.isfile(expanded_path) and os.access(expanded_path, os.X_OK)
+
+    def _safe_script_call(self, script_path: str, fallback_text: str = "N/A") -> callable:
+        """Create a safe wrapper for script calls that handles missing scripts gracefully"""
+        expanded_path = os.path.expanduser(script_path)
+        
+        def wrapper():
+            try:
+                if not os.path.isfile(expanded_path):
+                    return fallback_text
+                
+                result = subprocess.check_output(
+                    expanded_path, 
+                    stderr=subprocess.DEVNULL,
+                    timeout=10
+                )
+                return result.strip().decode("utf-8")
+            except subprocess.TimeoutExpired:
+                logger.debug(f"Script {script_path} timed out")
+                return "timeout"
+            except subprocess.CalledProcessError as e:
+                logger.debug(f"Script {script_path} failed with exit code {e.returncode}")
+                return "error"
+            except FileNotFoundError:
+                logger.debug(f"Script {script_path} not found")
+                return fallback_text
+            except Exception as e:
+                logger.debug(f"Error running script {script_path}: {e}")
+                return "error"
+        
+        return wrapper
+
+    def _get_script_widgets(self, colordict: dict) -> list:
+        """Create GenPollText widgets for available scripts using configuration-driven approach"""
+        
+        # Generate widgets for available scripts from configuration
+        widgets = []
+        for config in self.script_configs:
+            if self._script_exists(config['script_path']):
+                widgets.extend([
+                    widget.TextBox(config['icon']),
+                    widget.GenPollText(
+                        foreground=colordict["colors"]["color5"],
+                        background=colordict["special"]["background"],
+                        update_interval=config['update_interval'],
+                        func=self._safe_script_call(config['script_path'], config['fallback']),
+                    ),
+                ])
+                logger.debug(f"Added {config['name']} widget")
+            else:
+                logger.debug(f"{config['name']} script not found: {config['script_path']}")
+        
+        return widgets
+
     def create_bar_config(self, screen_num: int) -> Bar:
         """Create bar configuration for a specific screen"""
         colordict = self.color_manager.get_colors()
@@ -208,40 +296,11 @@ class BarManager:
                 distro="Arch_yay",
                 no_update_string="🔄: 0",
             ),
-            widget.TextBox("📭:"),
-            widget.GenPollText(
-                foreground=colordict["colors"]["color5"],
-                background=colordict["special"]["background"],
-                update_interval=300,
-                func=lambda: str(
-                    subprocess.check_output(os.path.expanduser("~/bin/imap-checker.ksh"))
-                    .strip()
-                    .decode("utf-8")
-                ),
-            ),
-            widget.TextBox("🎫:"),
-            widget.GenPollText(
-                foreground=colordict["colors"]["color5"],
-                background=colordict["special"]["background"],
-                update_interval=60,
-                func=lambda: str(
-                    subprocess.check_output(os.path.expanduser("~/bin/kayako.sh"))
-                    .strip()
-                    .decode("utf-8")
-                ),
-            ),
-            widget.TextBox("🌡:"),
-            widget.GenPollText(
-                foreground=colordict["colors"]["color5"],
-                background=colordict["special"]["background"],
-                update_interval=10,
-                func=lambda: str(
-                    subprocess.check_output(os.path.expanduser("~/bin/cputemp"))
-                    .strip()
-                    .decode("utf-8")
-                ),
-            ),
         ])
+
+        # Add script-based widgets (only if scripts are available)
+        script_widgets = self._get_script_widgets(colordict)
+        barconfig.extend(script_widgets)
 
         # Conditionally add Battery widget if supported on this platform
         if self._has_battery_widget_support():
