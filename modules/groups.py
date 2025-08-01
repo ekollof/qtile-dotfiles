@@ -73,9 +73,9 @@ class GroupManager:
                 # Specific system dialogs and utilities only
                 # NOTE: Removed *layout.Floating.default_float_rules to prevent electron apps from floating
                 
-                # Core system dialogs
+                # Core system dialogs (but exclude browser-window role to avoid catching electron apps)
                 Match(wm_class="confirm"),
-                Match(wm_class="dialog"),
+                Match(wm_class="dialog", role="!browser-window"),  # Exclude electron apps with browser-window role
                 Match(wm_class="download"),
                 Match(wm_class="error"),
                 Match(wm_class="file_progress"),
@@ -121,6 +121,8 @@ class GroupManager:
                 Match(wm_class="Gnome-calculator"),
                 
                 # Note: Electron apps (VSCode, Discord, Slack, etc.) will now tile by default
+                # VSCode Insiders: WM_CLASS="code - insiders", "Code - Insiders" with role="browser-window"
+                # This will NOT match any of the above rules and will tile properly
             ],
             border_focus=colordict["special"]["foreground"],
             border_normal=colordict["special"]["background"],

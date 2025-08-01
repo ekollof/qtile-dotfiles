@@ -43,6 +43,49 @@ class HookManager:
     def _setup_client_hooks(self):
         """Setup client/window-related hooks"""
         @hook.subscribe.client_new
+        def force_electron_apps_to_tile(window):
+            """Force electron apps to tile, overriding any floating rules"""
+            try:
+                wm_class = window.window.get_wm_class()
+                wm_role = window.window.get_wm_window_role()
+                
+                if wm_class and len(wm_class) >= 2:
+                    app_class = wm_class[1].lower()  # Use the second element (class name)
+                    
+                    # Electron apps that should always tile
+                    electron_apps = [
+                        'code',                    # VSCode
+                        'code - insiders',         # VSCode Insiders  
+                        'discord',                 # Discord
+                        'slack',                   # Slack
+                        'teams',                   # Microsoft Teams
+                        'atom',                    # Atom editor
+                        'electron',                # Generic electron
+                        'spotify',                 # Spotify
+                        'whatsapp',               # WhatsApp desktop
+                        'signal',                 # Signal
+                        'obsidian',               # Obsidian
+                        'notion',                 # Notion
+                        'figma',                  # Figma desktop
+                    ]
+                    
+                    # Check if this is an electron app
+                    if any(electron_app in app_class for electron_app in electron_apps):
+                        window.floating = False  # Force to tile
+                        logger.info(f"Forced electron app to tile: {wm_class[1]} (role: {wm_role})")
+                        return
+                    
+                    # Additional check for browser-window role (common in electron apps)
+                    if wm_role == "browser-window" and "code" in app_class:
+                        # This is likely VSCode/electron app with browser-window role
+                        logger.info(f"Detected VSCode/electron app with browser-window role: {wm_class[1]}")
+                        window.floating = False  # Ensure it tiles
+                        
+            except (IndexError, AttributeError, TypeError) as e:
+                logger.debug(f"Could not check window for electron app: {e}")
+                pass
+
+        @hook.subscribe.client_new
         def transient_window(window):
             """Handle wm hints"""
             hints = window.window.get_wm_normal_hints()
