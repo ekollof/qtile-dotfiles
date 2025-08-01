@@ -72,6 +72,10 @@ class BarManager:
                 inactive=colordict["colors"]["color1"],
                 border=colordict["colors"]["color1"],
                 this_current_screen_border=colordict["colors"]["color6"],
+                # Show only active groups (groups with windows) and current group
+                hide_unused=True,
+                # Optional: Customize what constitutes "unused"
+                # visible_groups=None,  # Use default behavior
             ),
             widget.Prompt(),
             widget.TaskList(
@@ -134,6 +138,19 @@ class BarManager:
                     .decode("utf-8")
                 ),
             ),
+            widget.TextBox("🔋:"),
+            widget.Battery(
+                foreground=colordict["colors"]["color5"],
+                background=colordict["special"]["background"],
+                charge_char="⚡",
+                discharge_char="🔋",
+                empty_char="🪫",
+                full_char="🔋",
+                format="{char} {percent:2.0%} {hour:d}:{min:02d}",
+                low_foreground=colordict["colors"]["color1"],  # Red color for low battery
+                low_percentage=0.15,  # 15% threshold for low battery warning
+                update_interval=60,
+            ),
             widget.Clock(
                 foreground=colordict["colors"]["color5"],
                 background=colordict["special"]["background"],
@@ -143,9 +160,9 @@ class BarManager:
                 foreground=colordict["colors"]["color5"],
                 background=colordict["special"]["background"],
             ),
-            qtwidget.Systray(
-                foreground=colordict["special"]["foreground"],
-                background=colordict["colors"]["color2"],
+            widget.Systray(
+                foreground=colordict["colors"]["color5"],
+                background=colordict["special"]["background"],
                 border=colordict["colors"]["color1"],
             ),
         ]
