@@ -148,13 +148,44 @@ class KeyManager:
 
     def smart_normalize(self, qtile):
         """Smart normalize that works with different layouts"""
+        layout_name = qtile.current_group.layout.name.lower()
+        
         try:
-            if hasattr(qtile.current_group.layout, 'normalize'):
+            if layout_name in ['monadtall', 'monadwide', 'monadthreecol']:
+                # Monad layouts: normalize secondary windows
+                qtile.current_group.layout.normalize()
+            elif layout_name in ['tile']:
+                # Tile: reset to default ratios
+                qtile.current_group.layout.reset()
+            elif layout_name in ['bsp']:
+                # BSP: normalize window sizes
+                qtile.current_group.layout.normalize()
+            elif layout_name in ['columns']:
+                # Columns: normalize column widths and reset ratios
+                qtile.current_group.layout.normalize()
+            elif layout_name in ['spiral']:
+                # Spiral: reset ratios to config values
+                qtile.current_group.layout.reset()
+            elif layout_name in ['verticaltile']:
+                # VerticalTile: normalize window sizes
+                qtile.current_group.layout.normalize()
+            elif layout_name in ['plasma']:
+                # Plasma: reset current window size to automatic
+                qtile.current_group.layout.reset_size()
+            elif layout_name == 'matrix':
+                # Matrix: no normalize function, but we can do nothing gracefully
+                pass
+            elif layout_name in ['max', 'floating']:
+                # Max/Floating: no normalize needed
+                pass
+            elif hasattr(qtile.current_group.layout, 'normalize'):
+                # Generic normalize fallback
                 qtile.current_group.layout.normalize()
             elif hasattr(qtile.current_group.layout, 'reset'):
+                # Generic reset fallback
                 qtile.current_group.layout.reset()
         except Exception as e:
-            logger.debug(f"Normalize not supported: {e}")
+            logger.debug(f"Normalize not supported in {layout_name}: {e}")
 
     def layout_safe_command(self, qtile, command_name, *args, **kwargs):
         """Execute a layout command only if the layout supports it"""

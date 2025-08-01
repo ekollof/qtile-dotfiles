@@ -1,6 +1,14 @@
 # Modern Qtile Configuration
 
-A comprehensive, modular Qtile configuration with **centralized settings**, enhanced monitor detection, robust color management, and layout-aware key bindings.
+A comprehensive, modular Qtile configuration with **centralized settings**, enhanced monitor detectio### Window Management
+| Key | Action |
+|-----|--------|
+| `Super+H/J/K/L` | Focus left/down/up/right |
+| `Super+Shift+H/J/K/L` | Move window left/down/up/right |
+| `Super+Ctrl+H/L` | **Smart resize** (shrink/grow, adapts to layout) |
+| `Super+Ctrl+J/K` | Resize window down/up |
+| `Super+F` | Toggle floating |
+| `Super+Shift+F` | Toggle fullscreen |t color management, and layout-aware key bindings.
 
 ## ✨ Features
 
@@ -134,7 +142,7 @@ def applications(self) -> Dict[str, str]:
 |-----|--------|
 | `Super+J/K/H/L` | Focus up/down/left/right |
 | `Super+Shift+J/K/H/L` | Move window |
-| `Super+Shift+L/H` | **Smart grow/shrink** (adapts to layout) |
+| `Super+Ctrl+L/H` | **Smart grow/shrink** (adapts to layout) |
 | `Super+F` | Toggle floating |
 | `Super+Shift+F` | Toggle fullscreen |
 
