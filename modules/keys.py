@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Keys and bindings module for qtile
+Key bindings module for qtile
 Handles keyboard shortcuts and window management
 """
 
@@ -8,6 +8,7 @@ import os
 from libqtile.config import Key
 from libqtile.lazy import lazy
 from libqtile.log_utils import logger
+from qtile_config import get_config
 
 
 class KeyManager:
@@ -15,11 +16,12 @@ class KeyManager:
 
     def __init__(self, color_manager):
         self.color_manager = color_manager
-        self.mod = "mod4"
-        self.alt = "mod1"
+        self.config = get_config()
+        self.mod = self.config.mod_key
+        self.alt = self.config.alt_key
         self.homedir = os.getenv("HOME")
-        self.terminal = "st"
-        self.wallpapercmd = str(self.homedir) + "/bin/wallpaper.ksh -r"
+        self.terminal = self.config.terminal
+        self.apps = self.config.applications
 
     def window_to_previous_screen(self, qtile):
         """Move window to previous screen"""
@@ -209,14 +211,14 @@ class KeyManager:
             Key([self.mod, "shift"], "r", lazy.restart(), desc="Restart qtile"),
             Key([self.mod, "shift"], "q", lazy.shutdown(), desc="Shutdown qtile"),
             Key([self.mod], "r", lazy.spawncmd(), desc="Spawn a command using a prompt widget"),
-            Key([self.mod], "p", lazy.spawn("rofi -show run")),
-            Key([self.mod, "shift"], "p", lazy.spawn(str(self.homedir) + "/bin/getpass")),
-            Key([self.mod, "shift"], "o", lazy.spawn(str(self.homedir) + "/bin/getpass --totp")),
-            Key([self.mod, "control"], "w", lazy.spawn(str(self.homedir) + "/bin/pickwall.sh")),
-            Key([self.mod, "shift"], "c", lazy.spawn("clipmenu")),
-            Key([self.alt, "control"], "l", lazy.spawn("loginctl lock-session")),
-            Key([self.alt, "control"], "w", lazy.spawn(self.wallpapercmd.format(self.homedir))),
-            Key([self.mod], "w", lazy.spawn("brave"), desc="Start browser"),
+            Key([self.mod], "p", lazy.spawn(self.apps['launcher'])),
+            Key([self.mod, "shift"], "p", lazy.spawn(self.apps['password_manager'])),
+            Key([self.mod, "shift"], "o", lazy.spawn(self.apps['totp_manager'])),
+            Key([self.mod, "control"], "w", lazy.spawn(self.apps['wallpaper_picker'])),
+            Key([self.mod, "shift"], "c", lazy.spawn(self.apps['clipboard'])),
+            Key([self.alt, "control"], "l", lazy.spawn(self.apps['lock_session'])),
+            Key([self.alt, "control"], "w", lazy.spawn(self.apps['wallpaper_random'])),
+            Key([self.mod], "w", lazy.spawn(self.config.browser), desc="Start browser"),
             Key([self.mod], "f", lazy.window.toggle_floating(), desc="Toggle floating"),
             Key([self.mod, "shift"], "f", lazy.window.toggle_fullscreen(), desc="Toggle fullscreen"),
             Key([self.mod], "t", lazy.group.setlayout("tile"), desc="Go to tiling layout"),

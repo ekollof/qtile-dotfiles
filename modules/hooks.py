@@ -7,6 +7,7 @@ Handles qtile hooks and event management
 import subprocess
 from libqtile import hook
 from libqtile.log_utils import logger
+from qtile_config import get_config
 
 
 class HookManager:
@@ -14,6 +15,7 @@ class HookManager:
 
     def __init__(self, color_manager):
         self.color_manager = color_manager
+        self.config = get_config()
 
     def setup_hooks(self):
         """Setup all qtile hooks"""
@@ -52,25 +54,8 @@ class HookManager:
                 if wm_class and len(wm_class) >= 2:
                     app_class = wm_class[1].lower()  # Use the second element (class name)
                     
-                    # Electron apps that should always tile
-                    electron_apps = [
-                        'code',                    # VSCode
-                        'code - insiders',         # VSCode Insiders  
-                        'discord',                 # Discord
-                        'slack',                   # Slack
-                        'teams',                   # Microsoft Teams
-                        'atom',                    # Atom editor
-                        'electron',                # Generic electron
-                        'spotify',                 # Spotify
-                        'whatsapp',               # WhatsApp desktop
-                        'signal',                 # Signal
-                        'obsidian',               # Obsidian
-                        'notion',                 # Notion
-                        'figma',                  # Figma desktop
-                    ]
-                    
                     # Check if this is an electron app
-                    if any(electron_app in app_class for electron_app in electron_apps):
+                    if any(electron_app in app_class for electron_app in self.config.electron_apps):
                         window.floating = False  # Force to tile
                         logger.info(f"Forced electron app to tile: {wm_class[1]} (role: {wm_role})")
                         return
@@ -97,22 +82,10 @@ class HookManager:
         @hook.subscribe.client_new
         def set_floating(window):
             """Set specific windows to floating"""
-            # Applications that should always float
-            floating_classes = (
-                "nm-connection-editor",  # NetworkManager GUI
-                "pavucontrol",          # PulseAudio volume control  
-                "origin.exe",           # Origin game launcher
-                "steam",                # Steam client (some windows)
-                "blueman-manager",      # Bluetooth manager
-                "arandr",              # Display settings
-                "lxappearance",        # Theme settings
-                "qt5ct",               # Qt5 configuration
-                "kvantummanager",      # Kvantum theme manager
-            )
             try:
                 wm_class = window.window.get_wm_class()
                 if wm_class and len(wm_class) > 0:
-                    if wm_class[0].lower() in [fc.lower() for fc in floating_classes]:
+                    if wm_class[0].lower() in [fc.lower() for fc in self.config.force_floating_apps]:
                         window.floating = True
                         logger.debug(f"Set {wm_class[0]} to floating via hook")
             except (IndexError, AttributeError, TypeError) as e:
@@ -152,13 +125,13 @@ class HookManager:
             from modules.bars import create_bar_manager
             
             # Add minimal delay to let the system settle
-            time.sleep(2)
+            time.sleep(self.config.screen_settings['detection_delay'])
             
             startup_time = getattr(self.color_manager, '_startup_time', time.time())
             current_time = time.time()
             
             # Only handle screen changes after qtile has been running for a while
-            if current_time - startup_time > 30:
+            if current_time - startup_time > self.config.screen_settings['startup_delay']:
                 logger.info("Screen change detected - checking for monitor changes")
                 
                 try:
@@ -197,8 +170,7 @@ class HookManager:
     def autostart(self):
         """Run autostart script"""
         import os
-        home = os.path.expanduser("~")
-        autostart_script = os.path.join(home, ".config", "qtile", "autostart.sh")
+        autostart_script = self.config.autostart_script
 
         if os.path.exists(autostart_script) and os.access(autostart_script, os.X_OK):
             try:
