@@ -41,6 +41,16 @@ class KeyManager:
         """Manually reload colors"""
         self.color_manager.update_colors()
 
+    def manual_retile_all(self, qtile):
+        """Manually force all windows to tile"""
+        try:
+            from modules.hooks import create_hook_manager
+            hook_manager = create_hook_manager(self.color_manager)
+            count = hook_manager.force_retile_all_windows(qtile)
+            logger.info(f"Manual retile completed - {count} windows retiled")
+        except Exception as e:
+            logger.error(f"Manual retile failed: {e}")
+
     def manual_screen_reconfigure(self, qtile):
         """Manually reconfigure screens after monitor changes"""
         from modules.screens import refresh_screens, get_screen_count
@@ -329,6 +339,7 @@ class KeyManager:
             Key([self.mod, "shift"], "m", lazy.group["scratch"].dropdown_toggle("ncmpcpp")),
             Key([self.mod, "control"], "c", lazy.function(self.manual_color_reload), desc="Reload colors"),
             Key([self.mod, "control"], "s", lazy.function(self.manual_screen_reconfigure), desc="Reconfigure screens"),
+            Key([self.mod, "control"], "f", lazy.function(self.manual_retile_all), desc="Force retile all windows"),
             Key([self.mod], "s", lazy.function(self.show_hotkeys), desc="Show hotkeys"),
             Key([self.mod, "control"], "r", lazy.restart(), desc="Quick restart qtile"),
         ]

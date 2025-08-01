@@ -46,30 +46,38 @@ class HookManager:
         def enforce_tiling_on_restart():
             """Force all windows to tile after qtile restart (except explicitly floating ones)"""
             from libqtile import qtile
-            if qtile:
-                try:
-                    # Force all windows to tile unless they should be floating
-                    for window in qtile.windows_map.values():
-                        if hasattr(window, 'window') and hasattr(window, 'floating'):
-                            try:
-                                # Check if this window should be floating based on our rules
-                                should_float = self._should_window_float(window)
-                                
-                                if not should_float and window.floating:
-                                    window.floating = False  # Force to tile
-                                    try:
-                                        wm_class = window.window.get_wm_class()
-                                        app_name = wm_class[1] if wm_class and len(wm_class) >= 2 else "Unknown"
-                                        logger.info(f"Re-tiled window after restart: {app_name}")
-                                    except:
-                                        logger.info("Re-tiled unnamed window after restart")
-                                        
-                            except (IndexError, AttributeError, TypeError) as e:
-                                logger.debug(f"Could not check window during retiling: {e}")
-                                continue
-                    logger.info("Completed window retiling after startup")
-                except Exception as e:
-                    logger.error(f"Error during window retiling: {e}")
+            import time
+            
+            def retile_windows():
+                if qtile:
+                    try:
+                        retiled_count = 0
+                        # Force all windows to tile unless they should be floating
+                        for window in qtile.windows_map.values():
+                            if hasattr(window, 'window') and hasattr(window, 'floating'):
+                                try:
+                                    # Check if this window should be floating based on our rules
+                                    should_float = self._should_window_float(window)
+                                    
+                                    if not should_float and window.floating:
+                                        window.floating = False  # Force to tile
+                                        retiled_count += 1
+                                        try:
+                                            wm_class = window.window.get_wm_class()
+                                            app_name = wm_class[1] if wm_class and len(wm_class) >= 2 else "Unknown"
+                                            logger.info(f"Re-tiled window after restart: {app_name}")
+                                        except:
+                                            logger.info("Re-tiled unnamed window after restart")
+                                            
+                                except (IndexError, AttributeError, TypeError) as e:
+                                    logger.debug(f"Could not check window during retiling: {e}")
+                                    continue
+                        logger.info(f"Completed window retiling after startup - retiled {retiled_count} windows")
+                    except Exception as e:
+                        logger.error(f"Error during window retiling: {e}")
+            
+            # Schedule retiling with a small delay to ensure all windows are restored
+            qtile.call_later(1.0, retile_windows)
 
     def _setup_client_hooks(self):
         """Setup client/window-related hooks"""
@@ -251,7 +259,8 @@ class HookManager:
                 
             # Check WM hints for max_width (dialog-like windows)
             hints = window.window.get_wm_normal_hints()
-            if hints and hints.get("max_width"):
+            if hints and hints.get("max_width") and hints.get("max_width") < 1000:
+                # Only consider it floating if max_width is small (dialog-like)
                 return True
                 
             return False
@@ -259,6 +268,33 @@ class HookManager:
         except (IndexError, AttributeError, TypeError) as e:
             logger.debug(f"Could not determine if window should float: {e}")
             return False  # Default to tiling if we can't determine
+
+    def force_retile_all_windows(self, qtile):
+        """Manual command to force all windows to tile (useful for testing/debugging)"""
+        try:
+            retiled_count = 0
+            for window in qtile.windows_map.values():
+                if hasattr(window, 'window') and hasattr(window, 'floating'):
+                    try:
+                        should_float = self._should_window_float(window)
+                        
+                        if not should_float and window.floating:
+                            window.floating = False
+                            retiled_count += 1
+                            try:
+                                wm_class = window.window.get_wm_class()
+                                app_name = wm_class[1] if wm_class and len(wm_class) >= 2 else "Unknown"
+                                logger.info(f"Manually re-tiled: {app_name}")
+                            except:
+                                logger.info("Manually re-tiled unnamed window")
+                    except (IndexError, AttributeError, TypeError) as e:
+                        logger.debug(f"Could not check window during manual retiling: {e}")
+                        continue
+            logger.info(f"Manual retiling complete - retiled {retiled_count} windows")
+            return retiled_count
+        except Exception as e:
+            logger.error(f"Error during manual retiling: {e}")
+            return 0
 
 
 def create_hook_manager(color_manager):
