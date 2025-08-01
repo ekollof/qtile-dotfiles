@@ -15,6 +15,17 @@ from libqtile.log_utils import logger
 
 class ColorManager:
     """Manages color loading and automatic reloading from pywal/wallust"""
+    
+    colors_file: str
+    backup_dir: str
+    restart_trigger_file: str
+    last_good_colors_file: str
+    colordict: dict
+    last_file_hash: str | None
+    watcher_thread: threading.Thread | None
+    restart_checker_thread: threading.Thread | None
+    _shutdown_event: threading.Event
+    _startup_time: float
 
     def __init__(self):
         self.colors_file = os.path.expanduser("~/.cache/wal/colors.json")
@@ -49,7 +60,7 @@ class ColorManager:
         except Exception as e:
             logger.error(f"Error creating directories: {e}")
 
-    def _get_file_hash(self, filepath):
+    def _get_file_hash(self, filepath: str) -> str | None:
         """Get SHA256 hash of file content"""
         try:
             if not os.path.exists(filepath):
@@ -60,7 +71,7 @@ class ColorManager:
             logger.error(f"Error getting file hash: {e}")
             return None
 
-    def _validate_colors(self, colors):
+    def _validate_colors(self, colors: dict) -> bool:
         """Validate color dictionary structure"""
         try:
             if not isinstance(colors, dict):
@@ -102,7 +113,7 @@ class ColorManager:
                 # Create timestamped backup
                 timestamp = time.strftime("%Y%m%d_%H%M%S")
                 backup_file = os.path.join(self.backup_dir, f"colors_{timestamp}.json")
-                shutil.copy2(self.colors_file, backup_file)
+                _ = shutil.copy2(self.colors_file, backup_file)
 
                 # Keep only last 10 backups
                 backups = sorted([f for f in os.listdir(
@@ -113,7 +124,7 @@ class ColorManager:
 
                 # Update last good colors file
                 if self._validate_colors(json.load(open(self.colors_file))):
-                    shutil.copy2(self.colors_file, self.last_good_colors_file)
+                    _ = shutil.copy2(self.colors_file, self.last_good_colors_file)
                     logger.debug(f"Created color backup: {backup_file}")
         except Exception as e:
             logger.error(f"Error creating color backup: {e}")
@@ -236,7 +247,7 @@ class ColorManager:
                     logger.info("Creating restart trigger...")
                     try:
                         with open(self.restart_trigger_file, "w") as f:
-                            f.write(f"restart_{int(time.time())}")
+                            _ = f.write(f"restart_{int(time.time())}")
                     except Exception as e:
                         logger.error(f"Error creating restart trigger: {e}")
                 else:
@@ -262,7 +273,7 @@ class ColorManager:
                     libqtile.qtile.restart()
                 else:
                     # Fallback
-                    os.system("qtile cmd-obj -o cmd -f restart")
+                    _ = os.system("qtile cmd-obj -o cmd -f restart")
         except Exception as e:
             logger.error(f"Error in restart check: {e}")
 
@@ -276,7 +287,11 @@ class ColorManager:
             return None
 
         class ColorsFileHandler(FileSystemEventHandler):
-            def __init__(self, color_manager):
+            color_manager: "ColorManager"
+            last_update: float
+            consecutive_errors: int
+            
+            def __init__(self, color_manager: "ColorManager"):
                 self.color_manager = color_manager
                 self.last_update = 0
                 self.consecutive_errors = 0
@@ -347,7 +362,7 @@ class ColorManager:
         event_handler = ColorsFileHandler(self)
         observer = Observer()
         watch_dir = os.path.dirname(self.colors_file)
-        observer.schedule(event_handler, watch_dir, recursive=False)
+        _ = observer.schedule(event_handler, watch_dir, recursive=False)
         observer.start()
         logger.info("Started file watcher for color changes")
         return observer
@@ -506,6 +521,14 @@ class ColorManager:
             self,
             'restart_checker_thread') and self.restart_checker_thread is not None and self.restart_checker_thread.is_alive()
         return watcher_running and checker_running
+    
+    def validate_colors_public(self, colors: dict) -> bool:
+        """Public interface for color validation"""
+        return self._validate_colors(colors)
+        
+    def get_file_hash_public(self, filepath: str) -> str | None:
+        """Public interface for getting file hash"""
+        return self._get_file_hash(filepath)
 
 
 # Singleton pattern to prevent multiple instances
@@ -559,20 +582,20 @@ def restart_color_monitoring():
 def validate_current_colors():
     """Validate current color configuration"""
     colors = color_manager.get_colors()
-    is_valid = color_manager._validate_colors(colors)
+    is_valid = color_manager.validate_colors_public(colors)
     logger.info(f"Current colors validation: {'PASSED' if is_valid else 'FAILED'}")
     return is_valid
 
 
-def get_color_file_status():
+def get_color_file_status() -> dict:
     """Get status information about color files"""
     status = {
         'colors_file_exists': os.path.exists(color_manager.colors_file),
         'last_good_colors_exists': os.path.exists(color_manager.last_good_colors_file),
         'backup_dir_exists': os.path.exists(color_manager.backup_dir),
         'monitoring_active': color_manager.is_monitoring(),
-        'current_hash': color_manager._get_file_hash(color_manager.colors_file),
-        'validation_passed': color_manager._validate_colors(color_manager.colordict)
+        'current_hash': color_manager.get_file_hash_public(color_manager.colors_file),
+        'validation_passed': color_manager.validate_colors_public(color_manager.colordict)
     }
 
     if os.path.exists(color_manager.backup_dir):
