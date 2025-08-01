@@ -117,7 +117,7 @@ restart_trigger
 *.lock
 *.pid
 
-# Test files
+# Test files (if any are created temporarily)
 test_*.py
 *_test.py
 
