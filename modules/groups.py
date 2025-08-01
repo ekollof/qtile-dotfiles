@@ -26,12 +26,24 @@ class GroupManager:
                 border_width=1,
                 border_focus=colordict["special"]["foreground"],
                 border_normal=colordict["special"]["background"],
+                ratio=0.5,  # Main window takes 50% of screen
+                ratio_increment=0.1,  # How much to change ratio by
+                master_match=None,  # No specific master window rules
+                expand=True,  # Allow windows to expand to fill space
+                master_length=1,  # Number of windows in master pane
+                shift_windows=True,  # Allow shifting windows between panes
             ),
             layout.MonadTall(
                 margin=2,
                 border_width=1,
                 border_focus=colordict["special"]["foreground"],
                 border_normal=colordict["special"]["background"],
+                ratio=0.6,  # Main window takes 60% of screen width
+                min_ratio=0.25,  # Minimum ratio for main window
+                max_ratio=0.85,  # Maximum ratio for main window
+                change_ratio=0.05,  # How much to change ratio by
+                change_size=20,  # How much to change window size by
+                new_client_position='after_current',  # Where to place new windows
             ),
             layout.Matrix(
                 margin=2,
@@ -44,6 +56,10 @@ class GroupManager:
                 border_width=1,
                 border_focus=colordict["special"]["foreground"],
                 border_normal=colordict["special"]["background"],
+                fair=True,  # Distribute space evenly among windows
+                grow_amount=10,  # How much to grow/shrink windows by
+                lower_right=True,  # Place new windows in lower right
+                ratio=1.6,  # Golden ratio for splits
             ),
             layout.Max(),
         ]
