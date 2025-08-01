@@ -23,8 +23,9 @@ if TYPE_CHECKING:
 class BarManager:
     """Manages qtile bar configuration and widget creation"""
 
-    def __init__(self, color_manager: "ColorManager") -> None:
+    def __init__(self, color_manager: "ColorManager", qtile_config) -> None:
         self.color_manager = color_manager
+        self.qtile_config = qtile_config
         self.hostname = socket.gethostname()
         self.homedir = os.getenv("HOME")
 
@@ -41,37 +42,6 @@ class BarManager:
         )
 
         self.extension_defaults = self.widget_defaults.copy()
-
-    @property
-    def script_configs(self) -> list:
-        """Configure custom scripts for GenPollText widgets
-        
-        Users can override this property to customize their script widgets.
-        Each config should be a dict with keys: script_path, icon, update_interval, fallback, name
-        """
-        return [
-            {
-                'script_path': '~/bin/imap-checker.ksh',
-                'icon': '📭:',
-                'update_interval': 300,
-                'fallback': 'N/A',
-                'name': 'email checker'
-            },
-            {
-                'script_path': '~/bin/kayako.sh',
-                'icon': '🎫:',
-                'update_interval': 60,
-                'fallback': 'N/A',
-                'name': 'ticket checker'
-            },
-            {
-                'script_path': '~/bin/cputemp',
-                'icon': '🌡:',
-                'update_interval': 10,
-                'fallback': 'N/A',
-                'name': 'CPU temperature'
-            }
-        ]
 
     def get_widget_defaults(self):
         """Get widget defaults"""
@@ -212,9 +182,9 @@ class BarManager:
     def _get_script_widgets(self, colordict: dict) -> list:
         """Create GenPollText widgets for available scripts using configuration-driven approach"""
         
-        # Generate widgets for available scripts from configuration
+        # Generate widgets for available scripts from qtile configuration
         widgets = []
-        for config in self.script_configs:
+        for config in self.qtile_config.script_configs:
             if self._script_exists(config['script_path']):
                 widgets.extend([
                     widget.TextBox(config['icon']),
@@ -359,6 +329,6 @@ class BarManager:
 # Import subprocess for widget functions
 
 
-def create_bar_manager(color_manager: "ColorManager") -> BarManager:
+def create_bar_manager(color_manager: "ColorManager", qtile_config) -> BarManager:
     """Create and return a bar manager instance"""
-    return BarManager(color_manager)
+    return BarManager(color_manager, qtile_config)

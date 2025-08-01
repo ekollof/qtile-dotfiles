@@ -21,6 +21,7 @@ from modules.groups import create_group_manager
 from modules.hooks import create_hook_manager
 from modules.keys import create_key_manager
 from modules.screens import get_screen_count, refresh_screens
+from qtile_config import get_config
 
 # System configuration
 hostname = os.uname().nodename
@@ -31,7 +32,8 @@ terminal = "st"
 os.environ["QT_QPA_PLATFORMTHEME"] = "qt5ct"
 
 # Initialize managers
-bar_manager = create_bar_manager(color_manager)
+qtile_config = get_config()
+bar_manager = create_bar_manager(color_manager, qtile_config)
 key_manager = create_key_manager(color_manager)
 group_manager = create_group_manager(color_manager)
 hook_manager = create_hook_manager(color_manager)
@@ -107,7 +109,8 @@ def manually_reconfigure_screens():
         logger.info(f"Detected {new_screen_count} screens")
 
         # Recreate screens
-        bar_manager = create_bar_manager(color_manager)
+        qtile_config = get_config()
+        bar_manager = create_bar_manager(color_manager, qtile_config)
         new_screens = bar_manager.create_screens(new_screen_count)
         qtile.config.screens = new_screens
 

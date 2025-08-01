@@ -23,6 +23,46 @@ class QtileConfig:
         """User's preferred font (change this to your preferred font)"""
         return "BerkeleyMono Nerd Font Mono"
 
+    # ===== SCRIPT WIDGET SETTINGS =====
+
+    @property
+    def script_configs(self) -> list:
+        """Configure custom scripts for GenPollText widgets
+        
+        Users can modify this list to customize their script widgets.
+        Each config should be a dict with keys: script_path, icon, update_interval, fallback, name
+        
+        Examples:
+        - script_path: Path to the script (supports ~ expansion)
+        - icon: Emoji or text to display before the script output
+        - update_interval: How often to run the script (in seconds)
+        - fallback: Text to show if script is missing or fails
+        - name: Descriptive name for logging
+        """
+        return [
+            {
+                'script_path': '~/bin/imap-checker.ksh',
+                'icon': '📭:',
+                'update_interval': 300,
+                'fallback': 'N/A',
+                'name': 'email checker'
+            },
+            {
+                'script_path': '~/bin/kayako.sh',
+                'icon': '🎫:',
+                'update_interval': 60,
+                'fallback': 'N/A',
+                'name': 'ticket checker'
+            },
+            {
+                'script_path': '~/bin/cputemp',
+                'icon': '🌡:',
+                'update_interval': 10,
+                'fallback': 'N/A',
+                'name': 'CPU temperature'
+            }
+        ]
+
     # ===== CORE SETTINGS =====
 
     @property
