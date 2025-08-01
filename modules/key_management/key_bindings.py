@@ -90,7 +90,8 @@ class KeyBindings:
             # Layout controls
             Key([self.mod], "n", lazy.function(self.layout_commands.smart_normalize),
                 desc="Smart normalize layout"),
-            Key([self.mod], "x", lazy.window.toggle_maximize(), desc="Toggle maximize window"),
+            Key([self.mod], "x", lazy.function(self.window_commands.smart_maximize),
+                desc="Smart maximize (hide other windows)"),
             
             # Layout switching
             Key([self.mod], "Tab", lazy.next_layout(), desc="Toggle between layouts"),

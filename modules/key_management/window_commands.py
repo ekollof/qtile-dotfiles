@@ -170,3 +170,75 @@ class WindowCommands:
                     logger.debug("Swapped windows")
         except Exception as e:
             logger.error(f"Error swapping window to main: {e}")
+
+    @staticmethod
+    def smart_maximize(qtile):
+        """
+        Smart maximize that minimizes other windows when maximizing,
+        and restores them when un-maximizing
+        """
+        try:
+            current_window = qtile.current_window
+            if not current_window:
+                logger.debug("No current window to maximize")
+                return
+            
+            # Check if window is currently maximized
+            is_maximized = getattr(current_window, 'maximized', False)
+            current_group = qtile.current_group
+            
+            logger.debug(f"Smart maximize called for window: {current_window.name}")
+            logger.debug(f"Window currently maximized: {is_maximized}")
+            logger.debug(f"Current group: {current_group.name}")
+            logger.debug(f"Windows in group: {[w.name for w in current_group.windows]}")
+            
+            if is_maximized:
+                # Un-maximize: restore the window and bring back other windows
+                logger.info("Un-maximizing window and restoring other windows")
+                current_window.toggle_maximize()
+                
+                # Restore minimized windows in current group
+                restored_count = 0
+                for window in current_group.windows:
+                    if window != current_window and getattr(window, 'minimized', False):
+                        # Check if window was minimized by our smart maximize
+                        if getattr(window, '_smart_maximized_hidden', False):
+                            window.toggle_minimize()
+                            # Clear the flag
+                            setattr(window, '_smart_maximized_hidden', False)
+                            restored_count += 1
+                            logger.debug(f"Restored window: {window.name}")
+                
+                logger.info(f"Restored {restored_count} windows")
+                
+            else:
+                # Maximize: hide other windows and maximize current
+                logger.info("Maximizing window and hiding others")
+                
+                # First, minimize all other windows in the current group
+                hidden_count = 0
+                for window in current_group.windows:
+                    if (window != current_window and 
+                        not getattr(window, 'minimized', False) and
+                        not window.floating):  # Don't minimize floating windows
+                        
+                        # Mark that this window was hidden by smart maximize
+                        setattr(window, '_smart_maximized_hidden', True)
+                        window.toggle_minimize()
+                        hidden_count += 1
+                        logger.debug(f"Minimized window: {window.name}")
+                
+                logger.info(f"Minimized {hidden_count} windows")
+                
+                # Then maximize the current window
+                current_window.toggle_maximize()
+                logger.info(f"Maximized window: {current_window.name}")
+                
+        except Exception as e:
+            logger.error(f"Error in smart maximize: {e}")
+            # Fallback to regular maximize if something goes wrong
+            try:
+                qtile.current_window.toggle_maximize()
+                logger.info("Fallback: Used regular maximize")
+            except Exception as fallback_error:
+                logger.error(f"Fallback maximize also failed: {fallback_error}")
