@@ -41,7 +41,7 @@ class HotkeyDisplay:
     def _get_rofi_theme(self):
         """Get rofi theme configuration for hotkey display"""
         colors = self._get_colors()
-        
+
         return f"""
 configuration {{
     show-icons: false;
@@ -120,7 +120,7 @@ element-text {{
         formatted = formatted.replace("mod1", "Alt")
         formatted = formatted.replace("shift", "Shift")
         formatted = formatted.replace("control", "Ctrl")
-        
+
         # Capitalize single keys
         parts = formatted.split("+")
         if len(parts) > 1:
@@ -128,13 +128,11 @@ element-text {{
             parts[-1] = parts[-1].capitalize()
         else:
             parts[0] = parts[0].capitalize()
-        
+
         return "+".join(parts)
 
     def _get_hotkey_list(self):
         """Generate list of hotkeys with descriptions"""
-        hotkeys = []
-        
         # Categories for organizing hotkeys
         categories = {
             "Window Management": [],
@@ -145,24 +143,24 @@ element-text {{
             "Screen/Display": [],
             "Other": []
         }
-        
+
         # Get keys from key manager
         keys = self.key_manager.get_keys()
-        
+
         for key in keys:
             # Extract modifiers and key
             modifiers = key.modifiers if key.modifiers else []
             key_name = key.key
-            
+
             # Combine modifiers and key
             if modifiers:
                 key_combo = "+".join(modifiers) + "+" + key_name
             else:
                 key_combo = key_name
-            
+
             # Format the key combination
             formatted_combo = self._format_key_combination(key_combo)
-            
+
             # Get description
             description = getattr(key, 'desc', None)
             if not description:
@@ -178,7 +176,8 @@ element-text {{
                         if 'spawn' in cmd_str.lower():
                             # Extract spawn command
                             if hasattr(cmd, 'args') and cmd.args:
-                                app_name = cmd.args[0].split('/')[-1] if '/' in cmd.args[0] else cmd.args[0]
+                                app_name = cmd.args[0].split(
+                                    '/')[-1] if '/' in cmd.args[0] else cmd.args[0]
                                 description = f"Launch {app_name}"
                             else:
                                 description = "Launch application"
@@ -192,13 +191,19 @@ element-text {{
                             description = cmd_str[:50]
                 else:
                     description = "Custom action"
-            
+
             # Categorize the hotkey
             category = "Other"
             desc_lower = description.lower()
-            key_combo_lower = key_combo.lower()
-            
-            if any(word in desc_lower for word in ['window', 'focus', 'move', 'close', 'kill', 'floating']):
+
+            if any(
+                word in desc_lower for word in [
+                    'window',
+                    'focus',
+                    'move',
+                    'close',
+                    'kill',
+                    'floating']):
                 category = "Window Management"
             elif any(word in desc_lower for word in ['layout', 'tile', 'max', 'split']):
                 category = "Layout Control"
@@ -210,14 +215,14 @@ element-text {{
                 category = "Applications"
             elif any(word in desc_lower for word in ['screen', 'monitor', 'display']):
                 category = "Screen/Display"
-            
+
             # Format for display
             hotkey_line = f"{formatted_combo:<25} {description}"
             categories[category].append(hotkey_line)
-        
+
         # Build the final hotkey list with categories
         final_hotkeys = []
-        
+
         for category_name, category_hotkeys in categories.items():
             if category_hotkeys:  # Only show categories that have hotkeys
                 final_hotkeys.append("")  # Empty line
@@ -225,14 +230,14 @@ element-text {{
                 # Sort hotkeys within category
                 category_hotkeys.sort()
                 final_hotkeys.extend(category_hotkeys)
-        
+
         # Add instructions at the top
         instructions = [
             "Press Escape or Enter to close this window",
             "Tip: Most actions use Super (Windows) key as modifier",
             ""
         ]
-        
+
         return instructions + final_hotkeys
 
     def show_hotkeys(self):
@@ -240,18 +245,18 @@ element-text {{
         try:
             # Get hotkey list
             hotkeys = self._get_hotkey_list()
-            
+
             # Create input for rofi
             rofi_input = "\n".join(hotkeys)
-            
+
             # Create temporary theme file
             import tempfile
             import os
-            
+
             with tempfile.NamedTemporaryFile(mode='w', suffix='.rasi', delete=False) as theme_file:
                 theme_file.write(self.rofi_theme)
                 theme_file_path = theme_file.name
-            
+
             try:
                 # Run rofi with hotkey list
                 cmd = [
@@ -264,28 +269,28 @@ element-text {{
                     "-format", "i",
                     "-i"
                 ]
-                
+
                 logger.info("Showing hotkey display")
-                
+
                 # Run rofi
-                process = subprocess.run(
+                subprocess.run(
                     cmd,
                     input=rofi_input,
                     text=True,
                     capture_output=True,
                     timeout=30
                 )
-                
+
                 # Don't need to handle the output since this is just for display
                 logger.debug("Hotkey display closed")
-                
+
             finally:
                 # Clean up temporary theme file
                 try:
                     os.unlink(theme_file_path)
-                except:
+                except BaseException:
                     pass
-                    
+
         except subprocess.TimeoutExpired:
             logger.warning("Hotkey display timed out")
         except FileNotFoundError:
@@ -293,12 +298,12 @@ element-text {{
             # Fallback to simple notification
             try:
                 subprocess.run([
-                    "notify-send", 
-                    "Qtile Hotkeys", 
+                    "notify-send",
+                    "Qtile Hotkeys",
                     "Install 'rofi' to see hotkey display\nPress Super+S to show hotkeys",
                     "-t", "3000"
                 ], check=False)
-            except:
+            except BaseException:
                 pass
         except Exception as e:
             logger.error(f"Error showing hotkeys: {e}")
@@ -308,10 +313,10 @@ element-text {{
         try:
             hotkeys = self._get_hotkey_list()
             dmenu_input = "\n".join(hotkeys)
-            
+
             # Get colors for dmenu
             colors = self._get_colors()
-            
+
             cmd = [
                 "dmenu",
                 "-l", "25",  # Show 25 lines
@@ -322,26 +327,26 @@ element-text {{
                 "-sb", colors['accent'],      # Selected background
                 "-sf", "#ffffff"              # Selected foreground
             ]
-            
-            process = subprocess.run(
+
+            subprocess.run(
                 cmd,
                 input=dmenu_input,
                 text=True,
                 capture_output=True,
                 timeout=30
             )
-            
+
         except FileNotFoundError:
             logger.error("Neither rofi nor dmenu found - cannot show hotkeys")
             # Try with notification as final fallback
             try:
                 subprocess.run([
-                    "notify-send", 
-                    "Qtile Hotkeys", 
+                    "notify-send",
+                    "Qtile Hotkeys",
                     "Super+S: Show hotkeys (install rofi/dmenu)\nSuper+Shift+R: Restart\nSuper+Q: Close window\nSuper+Return: Terminal",
                     "-t", "5000"
                 ], check=False)
-            except:
+            except BaseException:
                 pass
         except Exception as e:
             logger.error(f"Error showing hotkeys with dmenu: {e}")

@@ -4,6 +4,7 @@ Bars and widgets module for qtile
 Handles bar configuration and widget setup
 """
 
+import subprocess
 import os
 import socket
 from libqtile import widget as qtwidget
@@ -162,7 +163,7 @@ class BarManager:
 
 
 # Import subprocess for widget functions
-import subprocess
+
 
 def create_bar_manager(color_manager):
     """Create and return a bar manager instance"""

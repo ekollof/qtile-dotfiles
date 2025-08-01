@@ -46,8 +46,7 @@ class HookManager:
         def enforce_tiling_on_restart():
             """Force all windows to tile after qtile restart (except explicitly floating ones)"""
             from libqtile import qtile
-            import time
-            
+
             def retile_windows():
                 if qtile:
                     try:
@@ -58,24 +57,27 @@ class HookManager:
                                 try:
                                     # Check if this window should be floating based on our rules
                                     should_float = self._should_window_float(window)
-                                    
+
                                     if not should_float and window.floating:
                                         window.floating = False  # Force to tile
                                         retiled_count += 1
                                         try:
                                             wm_class = window.window.get_wm_class()
-                                            app_name = wm_class[1] if wm_class and len(wm_class) >= 2 else "Unknown"
-                                            logger.info(f"Re-tiled window after restart: {app_name}")
-                                        except:
+                                            app_name = wm_class[1] if wm_class and len(
+                                                wm_class) >= 2 else "Unknown"
+                                            logger.info(
+                                                f"Re-tiled window after restart: {app_name}")
+                                        except BaseException:
                                             logger.info("Re-tiled unnamed window after restart")
-                                            
+
                                 except (IndexError, AttributeError, TypeError) as e:
                                     logger.debug(f"Could not check window during retiling: {e}")
                                     continue
-                        logger.info(f"Completed window retiling after startup - retiled {retiled_count} windows")
+                        logger.info(
+                            f"Completed window retiling after startup - retiled {retiled_count} windows")
                     except Exception as e:
                         logger.error(f"Error during window retiling: {e}")
-            
+
             # Schedule retiling with a small delay to ensure all windows are restored
             qtile.call_later(1.0, retile_windows)
 
@@ -87,26 +89,28 @@ class HookManager:
             try:
                 # Determine if this window should float based on our rules
                 should_float = self._should_window_float(window)
-                
+
                 if not should_float:
                     # Force this window to tile
                     window.floating = False
                     try:
                         wm_class = window.window.get_wm_class()
-                        app_name = wm_class[1] if wm_class and len(wm_class) >= 2 else wm_class[0] if wm_class else "Unknown"
+                        app_name = wm_class[1] if wm_class and len(
+                            wm_class) >= 2 else wm_class[0] if wm_class else "Unknown"
                         logger.debug(f"Enforced tiling for: {app_name}")
-                    except:
+                    except BaseException:
                         logger.debug("Enforced tiling for unnamed window")
                 else:
                     # This window should float
                     window.floating = True
                     try:
                         wm_class = window.window.get_wm_class()
-                        app_name = wm_class[1] if wm_class and len(wm_class) >= 2 else wm_class[0] if wm_class else "Unknown"
+                        app_name = wm_class[1] if wm_class and len(
+                            wm_class) >= 2 else wm_class[0] if wm_class else "Unknown"
                         logger.debug(f"Allowed floating for: {app_name}")
-                    except:
+                    except BaseException:
                         logger.debug("Allowed floating for unnamed window")
-                        
+
             except (IndexError, AttributeError, TypeError) as e:
                 logger.debug(f"Could not determine window floating behavior: {e}")
                 pass
@@ -126,7 +130,8 @@ class HookManager:
             try:
                 wm_class = window.window.get_wm_class()
                 if wm_class and len(wm_class) > 0:
-                    if wm_class[0].lower() in [fc.lower() for fc in self.config.force_floating_apps]:
+                    if wm_class[0].lower() in [fc.lower()
+                                               for fc in self.config.force_floating_apps]:
                         window.floating = True
                         logger.debug(f"Set {wm_class[0]} to floating via hook")
             except (IndexError, AttributeError, TypeError) as e:
@@ -164,36 +169,36 @@ class HookManager:
             import time
             from modules.screens import refresh_screens
             from modules.bars import create_bar_manager
-            
+
             # Add minimal delay to let the system settle
             time.sleep(self.config.screen_settings['detection_delay'])
-            
+
             startup_time = getattr(self.color_manager, '_startup_time', time.time())
             current_time = time.time()
-            
+
             # Only handle screen changes after qtile has been running for a while
             if current_time - startup_time > self.config.screen_settings['startup_delay']:
                 logger.info("Screen change detected - checking for monitor changes")
-                
+
                 try:
                     # Check if screen count actually changed
                     if refresh_screens():
                         logger.info("Monitor configuration changed - updating screens")
-                        
+
                         # Get qtile instance
                         from libqtile import qtile
                         if qtile is not None:
                             # Force screen reconfiguration
                             from modules.screens import get_screen_count
                             new_screen_count = get_screen_count()
-                            
+
                             # Recreate screens with new configuration
                             bar_manager = create_bar_manager(self.color_manager)
                             new_screens = bar_manager.create_screens(new_screen_count)
-                            
+
                             # Update qtile's screen configuration
                             qtile.config.screens = new_screens
-                            
+
                             # Restart qtile to apply new screen configuration
                             logger.info(f"Restarting qtile with {new_screen_count} screens")
                             qtile.restart()
@@ -218,10 +223,10 @@ class HookManager:
                 logger.info(f"Running autostart script: {autostart_script}")
                 # Run completely detached - don't wait for completion
                 subprocess.Popen([autostart_script],
-                               stdout=subprocess.DEVNULL,
-                               stderr=subprocess.DEVNULL,
-                               stdin=subprocess.DEVNULL,
-                               start_new_session=True)
+                                 stdout=subprocess.DEVNULL,
+                                 stderr=subprocess.DEVNULL,
+                                 stdin=subprocess.DEVNULL,
+                                 start_new_session=True)
                 logger.info("Autostart script launched successfully")
             except Exception as e:
                 logger.error(f"Failed to launch autostart script: {e}")
@@ -236,7 +241,7 @@ class HookManager:
                 # Check against force floating apps
                 if wm_class[0].lower() in [fc.lower() for fc in self.config.force_floating_apps]:
                     return True
-                
+
                 # Check against floating rules (from qtile_config.py)
                 for rule in self.config.floating_rules:
                     if 'wm_class' in rule:
@@ -244,27 +249,27 @@ class HookManager:
                             return True
                         if len(wm_class) >= 2 and wm_class[1].lower() == rule['wm_class'].lower():
                             return True
-                    
+
                     if 'title' in rule:
                         try:
                             window_title = window.window.get_name() or ""
                             if rule['title'].lower() in window_title.lower():
                                 return True
-                        except:
+                        except BaseException:
                             pass
 
             # Check if it's a transient window
             if window.window.get_wm_transient_for():
                 return True
-                
+
             # Check WM hints for max_width (dialog-like windows)
             hints = window.window.get_wm_normal_hints()
             if hints and hints.get("max_width") and hints.get("max_width") < 1000:
                 # Only consider it floating if max_width is small (dialog-like)
                 return True
-                
+
             return False
-            
+
         except (IndexError, AttributeError, TypeError) as e:
             logger.debug(f"Could not determine if window should float: {e}")
             return False  # Default to tiling if we can't determine
@@ -277,15 +282,16 @@ class HookManager:
                 if hasattr(window, 'window') and hasattr(window, 'floating'):
                     try:
                         should_float = self._should_window_float(window)
-                        
+
                         if not should_float and window.floating:
                             window.floating = False
                             retiled_count += 1
                             try:
                                 wm_class = window.window.get_wm_class()
-                                app_name = wm_class[1] if wm_class and len(wm_class) >= 2 else "Unknown"
+                                app_name = wm_class[1] if wm_class and len(
+                                    wm_class) >= 2 else "Unknown"
                                 logger.info(f"Manually re-tiled: {app_name}")
-                            except:
+                            except BaseException:
                                 logger.info("Manually re-tiled unnamed window")
                     except (IndexError, AttributeError, TypeError) as e:
                         logger.debug(f"Could not check window during manual retiling: {e}")

@@ -81,37 +81,40 @@ wmname = "LG3D"
 hook_manager.setup_hooks()
 
 # Helper functions for custom functionality
-def reload(module):
+
+
+def reload(module: str) -> None:
     """Reload a Python module"""
     import sys
     import importlib
     if module in sys.modules:
-        importlib.reload(sys.modules[module])
+        _ = importlib.reload(sys.modules[module])
+
 
 def remapkeys():
     """Remap keys if needed"""
     pass
+
 
 def manually_reconfigure_screens():
     """Manually reconfigure screens after monitor changes"""
     from libqtile import qtile
     from modules.screens import refresh_screens, get_screen_count
     from modules.bars import create_bar_manager
-    
+
     if qtile is not None:
         logger.info("Manual screen reconfiguration requested")
-        refresh_screens()
+        _ = refresh_screens()
         new_screen_count = get_screen_count()
         logger.info(f"Detected {new_screen_count} screens")
-        
+
         # Recreate screens
         bar_manager = create_bar_manager(color_manager)
         new_screens = bar_manager.create_screens(new_screen_count)
         qtile.config.screens = new_screens
-        
+
         # Restart to apply changes
         qtile.restart()
-
 
 
 # Optional notification setup (disabled by default)

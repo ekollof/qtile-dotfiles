@@ -56,24 +56,24 @@ class KeyManager:
         from modules.screens import refresh_screens, get_screen_count
         from modules.bars import create_bar_manager
         from libqtile.log_utils import logger
-        
+
         logger.info("Manual screen reconfiguration requested")
         refresh_screens()
         new_screen_count = get_screen_count()
         logger.info(f"Detected {new_screen_count} screens")
-        
+
         # Recreate screens
         bar_manager = create_bar_manager(self.color_manager)
         new_screens = bar_manager.create_screens(new_screen_count)
         qtile.config.screens = new_screens
-        
+
         # Restart to apply changes
         qtile.restart()
 
     def smart_grow(self, qtile):
         """Smart grow that adapts to current layout"""
         layout_name = qtile.current_group.layout.name.lower()
-        
+
         try:
             if layout_name in ['monadtall', 'monadwide']:
                 # MonadTall/Wide: grow main window
@@ -95,7 +95,7 @@ class KeyManager:
     def smart_shrink(self, qtile):
         """Smart shrink that adapts to current layout"""
         layout_name = qtile.current_group.layout.name.lower()
-        
+
         try:
             if layout_name in ['monadtall', 'monadwide']:
                 # MonadTall/Wide: shrink main window
@@ -117,7 +117,7 @@ class KeyManager:
     def smart_grow_vertical(self, qtile):
         """Smart vertical grow that adapts to current layout"""
         layout_name = qtile.current_group.layout.name.lower()
-        
+
         try:
             if layout_name in ['monadtall', 'monadwide']:
                 # MonadTall/Wide: grow main window
@@ -138,7 +138,7 @@ class KeyManager:
     def smart_shrink_vertical(self, qtile):
         """Smart vertical shrink that adapts to current layout"""
         layout_name = qtile.current_group.layout.name.lower()
-        
+
         try:
             if layout_name in ['monadtall', 'monadwide']:
                 # MonadTall/Wide: shrink main window
@@ -159,7 +159,7 @@ class KeyManager:
     def smart_normalize(self, qtile):
         """Smart normalize that works with different layouts"""
         layout_name = qtile.current_group.layout.name.lower()
-        
+
         try:
             if layout_name in ['monadtall', 'monadwide', 'monadthreecol']:
                 # Monad layouts: normalize secondary windows
@@ -212,7 +212,7 @@ class KeyManager:
         """Show hotkey display window"""
         from modules.hotkeys import create_hotkey_display
         from libqtile.log_utils import logger
-        
+
         try:
             logger.info("Showing hotkey display")
             hotkey_display = create_hotkey_display(self, self.color_manager)
@@ -287,7 +287,8 @@ class KeyManager:
             Key([self.mod], "comma", lazy.prev_screen()),
             Key([self.mod], "period", lazy.next_screen()),
             # Restore all windows to default size ratios
-            Key([self.mod], "n", lazy.function(self.smart_normalize), desc="Smart normalize layout"),
+            Key([self.mod], "n", lazy.function(self.smart_normalize),
+                desc="Smart normalize layout"),
             Key([self.mod], "x", lazy.layout.maximize(), desc="Maximize window (if supported)"),
             # Switch window focus to other pane(s) of stack
             Key(
@@ -320,26 +321,38 @@ class KeyManager:
             Key([self.mod, "shift"], "r", lazy.restart(), desc="Restart qtile"),
             Key([self.mod, "shift"], "q", lazy.shutdown(), desc="Shutdown qtile"),
             Key([self.mod], "r", lazy.spawncmd(), desc="Spawn a command using a prompt widget"),
-            Key([self.mod], "p", lazy.spawn(self.apps['launcher']), desc="Launch application launcher"),
-            Key([self.mod, "shift"], "p", lazy.spawn(self.apps['password_manager']), desc="Launch password manager"),
-            Key([self.mod, "shift"], "o", lazy.spawn(self.apps['totp_manager']), desc="Launch TOTP manager"),
-            Key([self.mod, "control"], "w", lazy.spawn(self.apps['wallpaper_picker']), desc="Pick wallpaper"),
-            Key([self.mod, "shift"], "c", lazy.spawn(self.apps['clipboard']), desc="Launch clipboard manager"),
-            Key([self.alt, "control"], "l", lazy.spawn(self.apps['lock_session']), desc="Lock session"),
-            Key([self.alt, "control"], "w", lazy.spawn(self.apps['wallpaper_random']), desc="Set random wallpaper"),
+            Key([self.mod], "p", lazy.spawn(self.apps['launcher']),
+                desc="Launch application launcher"),
+            Key([self.mod, "shift"], "p", lazy.spawn(
+                self.apps['password_manager']), desc="Launch password manager"),
+            Key([self.mod, "shift"], "o", lazy.spawn(
+                self.apps['totp_manager']), desc="Launch TOTP manager"),
+            Key([self.mod, "control"], "w", lazy.spawn(
+                self.apps['wallpaper_picker']), desc="Pick wallpaper"),
+            Key([self.mod, "shift"], "c", lazy.spawn(
+                self.apps['clipboard']), desc="Launch clipboard manager"),
+            Key([self.alt, "control"], "l", lazy.spawn(
+                self.apps['lock_session']), desc="Lock session"),
+            Key([self.alt, "control"], "w", lazy.spawn(
+                self.apps['wallpaper_random']), desc="Set random wallpaper"),
             Key([self.mod], "w", lazy.spawn(self.config.browser), desc="Start browser"),
             Key([self.mod], "f", lazy.window.toggle_floating(), desc="Toggle floating"),
             Key([self.mod, "shift"], "f", lazy.window.toggle_fullscreen(), desc="Toggle fullscreen"),
             Key([self.mod], "t", lazy.group.setlayout("tile"), desc="Go to tiling layout"),
             Key([self.mod], "m", lazy.group.setlayout("max"), desc="Go to max layout"),
             Key([self.mod], "b", lazy.group.setlayout("bsp"), desc="Go to BSP layout"),
-            Key([self.mod, "control"], "t", lazy.group.setlayout("monadtall"), desc="Go to MonadTall layout"),
-            Key([self.mod, "control"], "m", lazy.group.setlayout("matrix"), desc="Go to Matrix layout"),
+            Key([self.mod, "control"], "t", lazy.group.setlayout(
+                "monadtall"), desc="Go to MonadTall layout"),
+            Key([self.mod, "control"], "m", lazy.group.setlayout(
+                "matrix"), desc="Go to Matrix layout"),
             Key([self.mod], "grave", lazy.group["scratch"].dropdown_toggle("notepad")),
             Key([self.mod, "shift"], "m", lazy.group["scratch"].dropdown_toggle("ncmpcpp")),
-            Key([self.mod, "control"], "c", lazy.function(self.manual_color_reload), desc="Reload colors"),
-            Key([self.mod, "control"], "s", lazy.function(self.manual_screen_reconfigure), desc="Reconfigure screens"),
-            Key([self.mod, "control"], "f", lazy.function(self.manual_retile_all), desc="Force retile all windows"),
+            Key([self.mod, "control"], "c", lazy.function(
+                self.manual_color_reload), desc="Reload colors"),
+            Key([self.mod, "control"], "s", lazy.function(
+                self.manual_screen_reconfigure), desc="Reconfigure screens"),
+            Key([self.mod, "control"], "f", lazy.function(
+                self.manual_retile_all), desc="Force retile all windows"),
             Key([self.mod], "s", lazy.function(self.show_hotkeys), desc="Show hotkeys"),
             Key([self.mod, "control"], "r", lazy.restart(), desc="Quick restart qtile"),
         ]

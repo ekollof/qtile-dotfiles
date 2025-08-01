@@ -43,24 +43,24 @@ class LayoutAwareKeyManager:
         """Manually reconfigure screens after monitor changes"""
         from modules.screens import refresh_screens, get_screen_count
         from modules.bars import create_bar_manager
-        
+
         logger.info("Manual screen reconfiguration requested")
         refresh_screens()
         new_screen_count = get_screen_count()
         logger.info(f"Detected {new_screen_count} screens")
-        
+
         # Recreate screens
         bar_manager = create_bar_manager(self.color_manager)
         new_screens = bar_manager.create_screens(new_screen_count)
         qtile.config.screens = new_screens
-        
+
         # Restart to apply changes
         qtile.restart()
 
     def show_hotkeys(self, qtile):
         """Show hotkey display window"""
         from modules.hotkeys import create_hotkey_display
-        
+
         try:
             logger.info("Showing hotkey display")
             hotkey_display = create_hotkey_display(self, self.color_manager)
@@ -76,7 +76,7 @@ class LayoutAwareKeyManager:
     def smart_grow(self, qtile):
         """Smart grow that works with different layouts"""
         layout_name = qtile.current_group.layout.name.lower()
-        
+
         if layout_name in ['monadtall', 'monadwide']:
             # MonadTall/Wide: grow main window
             qtile.current_group.layout.grow()
@@ -94,7 +94,7 @@ class LayoutAwareKeyManager:
     def smart_shrink(self, qtile):
         """Smart shrink that works with different layouts"""
         layout_name = qtile.current_group.layout.name.lower()
-        
+
         if layout_name in ['monadtall', 'monadwide']:
             # MonadTall/Wide: shrink main window
             qtile.current_group.layout.shrink()
@@ -108,14 +108,12 @@ class LayoutAwareKeyManager:
             # Matrix: remove column if possible
             try:
                 qtile.current_group.layout.remove()
-            except:
+            except BaseException:
                 pass
         # Max and Floating layouts: no-op
 
     def smart_normalize(self, qtile):
         """Smart normalize that works with different layouts"""
-        layout_name = qtile.current_group.layout.name.lower()
-        
         if hasattr(qtile.current_group.layout, 'normalize'):
             qtile.current_group.layout.normalize()
         elif hasattr(qtile.current_group.layout, 'reset'):
@@ -129,73 +127,86 @@ class LayoutAwareKeyManager:
             Key([self.mod], "k", lazy.layout.down(), desc="Move focus down"),
             Key([self.mod], "h", lazy.layout.left(), desc="Move focus left"),
             Key([self.mod], "l", lazy.layout.right(), desc="Move focus right"),
-            
+
             # === UNIVERSAL WINDOW MOVEMENT ===
             Key([self.mod, "shift"], "j", lazy.layout.shuffle_up(), desc="Move window up"),
             Key([self.mod, "shift"], "k", lazy.layout.shuffle_down(), desc="Move window down"),
             Key([self.mod, "shift"], "h", lazy.layout.shuffle_left(), desc="Move window left"),
             Key([self.mod, "shift"], "l", lazy.layout.shuffle_right(), desc="Move window right"),
-            
+
             # === SMART RESIZING (layout-aware) ===
-            Key([self.mod, "control"], "l", lazy.function(self.smart_grow), desc="Smart grow window"),
-            Key([self.mod, "control"], "h", lazy.function(self.smart_shrink), desc="Smart shrink window"),
+            Key([self.mod, "control"], "l", lazy.function(
+                self.smart_grow), desc="Smart grow window"),
+            Key([self.mod, "control"], "h", lazy.function(
+                self.smart_shrink), desc="Smart shrink window"),
             Key([self.mod], "n", lazy.function(self.smart_normalize), desc="Smart normalize layout"),
-            
+
             # === LAYOUT-SPECIFIC OPERATIONS ===
             # These will only work with compatible layouts
-            Key([self.mod], "x", lazy.layout.maximize(), desc="Maximize window (compatible layouts)"),
+            Key([self.mod], "x", lazy.layout.maximize(),
+                desc="Maximize window (compatible layouts)"),
             Key([self.mod, "shift"], "space", lazy.layout.rotate(), desc="Rotate layout (tile/bsp)"),
             Key([self.mod, "shift"], "Return", lazy.layout.toggle_split(), desc="Toggle split (tile)"),
-            
+
             # === UNIVERSAL LAYOUT NAVIGATION ===
             Key([self.mod], "space", lazy.layout.next(), desc="Switch window focus"),
             Key([self.mod, "shift"], "Tab", lazy.layout.previous(), desc="Switch to previous window"),
-            
+
             # === SCREEN MANAGEMENT ===
             Key([self.mod], "comma", lazy.prev_screen(), desc="Previous screen"),
             Key([self.mod], "period", lazy.next_screen(), desc="Next screen"),
-            Key([self.mod, "shift"], "comma", lazy.function(self.window_to_previous_screen), desc="Move window to previous screen"),
-            Key([self.mod, "shift"], "period", lazy.function(self.window_to_next_screen), desc="Move window to next screen"),
-            
+            Key([self.mod, "shift"], "comma", lazy.function(
+                self.window_to_previous_screen), desc="Move window to previous screen"),
+            Key([self.mod, "shift"], "period", lazy.function(
+                self.window_to_next_screen), desc="Move window to next screen"),
+
             # === LAYOUT SWITCHING ===
             Key([self.mod], "Tab", lazy.next_layout(), desc="Toggle between layouts"),
             Key([self.mod], "t", lazy.group.setlayout("tile"), desc="Set tile layout"),
             Key([self.mod], "m", lazy.group.setlayout("max"), desc="Set max layout"),
             Key([self.mod], "b", lazy.group.setlayout("bsp"), desc="Set BSP layout"),
-            Key([self.mod, "shift"], "t", lazy.group.setlayout("monadtall"), desc="Set MonadTall layout"),
+            Key([self.mod, "shift"], "t", lazy.group.setlayout(
+                "monadtall"), desc="Set MonadTall layout"),
             Key([self.mod, "shift"], "x", lazy.group.setlayout("matrix"), desc="Set Matrix layout"),
-            
+
             # === WINDOW MANAGEMENT ===
             Key([self.mod], "q", lazy.window.kill(), desc="Close focused window"),
             Key([self.mod], "f", lazy.window.toggle_floating(), desc="Toggle floating"),
             Key([self.mod, "shift"], "f", lazy.window.toggle_fullscreen(), desc="Toggle fullscreen"),
-            
+
             # === APPLICATIONS ===
             Key([self.mod], "Return", lazy.spawn(self.terminal), desc="Launch terminal"),
             Key([self.mod], "w", lazy.spawn("brave"), desc="Launch browser"),
             Key([self.mod], "p", lazy.spawn("rofi -show run"), desc="Application launcher"),
-            Key([self.mod, "shift"], "p", lazy.spawn(str(self.homedir) + "/bin/getpass"), desc="Password manager"),
-            Key([self.mod, "shift"], "o", lazy.spawn(str(self.homedir) + "/bin/getpass --totp"), desc="TOTP codes"),
+            Key([self.mod, "shift"], "p", lazy.spawn(
+                str(self.homedir) + "/bin/getpass"), desc="Password manager"),
+            Key([self.mod, "shift"], "o", lazy.spawn(
+                str(self.homedir) + "/bin/getpass --totp"), desc="TOTP codes"),
             Key([self.mod, "shift"], "c", lazy.spawn("clipmenu"), desc="Clipboard manager"),
-            
+
             # === SYSTEM COMMANDS ===
             Key([self.mod, "shift"], "r", lazy.restart(), desc="Restart qtile"),
             Key([self.mod, "shift"], "q", lazy.shutdown(), desc="Shutdown qtile"),
             Key([self.mod], "r", lazy.spawncmd(), desc="Run command prompt"),
             Key([self.alt, "control"], "l", lazy.spawn("loginctl lock-session"), desc="Lock session"),
-            
+
             # === QTILE SPECIFIC ===
-            Key([self.mod, "control"], "c", lazy.function(self.manual_color_reload), desc="Reload colors"),
-            Key([self.mod, "control"], "s", lazy.function(self.manual_screen_reconfigure), desc="Reconfigure screens"),
+            Key([self.mod, "control"], "c", lazy.function(
+                self.manual_color_reload), desc="Reload colors"),
+            Key([self.mod, "control"], "s", lazy.function(
+                self.manual_screen_reconfigure), desc="Reconfigure screens"),
             Key([self.mod], "s", lazy.function(self.show_hotkeys), desc="Show hotkeys"),
             Key([self.mod, "control"], "r", lazy.restart(), desc="Quick restart qtile"),
-            
+
             # === SCRATCHPADS ===
-            Key([self.mod], "grave", lazy.group["scratch"].dropdown_toggle("notepad"), desc="Toggle notepad"),
-            Key([self.mod, "shift"], "grave", lazy.group["scratch"].dropdown_toggle("ncmpcpp"), desc="Toggle music player"),
-            
+            Key([self.mod], "grave", lazy.group["scratch"].dropdown_toggle(
+                "notepad"), desc="Toggle notepad"),
+            Key([self.mod, "shift"], "grave", lazy.group["scratch"].dropdown_toggle(
+                "ncmpcpp"), desc="Toggle music player"),
+
             # === WALLPAPER ===
-            Key([self.mod, "control"], "w", lazy.spawn(str(self.homedir) + "/bin/pickwall.sh"), desc="Pick wallpaper"),
+            Key([self.mod, "control"], "w", lazy.spawn(
+                str(self.homedir) + "/bin/pickwall.sh"), desc="Pick wallpaper"),
             Key([self.alt, "control"], "w", lazy.spawn(self.wallpapercmd), desc="Random wallpaper"),
         ]
 

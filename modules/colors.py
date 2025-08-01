@@ -10,7 +10,6 @@ import time
 import threading
 import shutil
 import hashlib
-from pathlib import Path
 from libqtile.log_utils import logger
 
 
@@ -22,22 +21,22 @@ class ColorManager:
         self.backup_dir = os.path.expanduser("~/.cache/wal/backups")
         self.restart_trigger_file = os.path.expanduser("~/.config/qtile/restart_trigger")
         self.last_good_colors_file = os.path.expanduser("~/.cache/wal/last_good_colors.json")
-        
+
         # Initialize directories
         self._ensure_directories()
-        
+
         # Load colors with validation
         self.colordict = self._load_colors_safely()
         self.last_file_hash = self._get_file_hash(self.colors_file)
-        
+
         # Threading and monitoring
         self.watcher_thread = None
         self.restart_checker_thread = None
         self._shutdown_event = threading.Event()
-        
+
         import time
         self._startup_time = time.time()
-        
+
         # Create initial backup
         self._backup_current_colors()
 
@@ -66,11 +65,11 @@ class ColorManager:
         try:
             if not isinstance(colors, dict):
                 return False
-            
+
             # Check required sections
             if 'special' not in colors or 'colors' not in colors:
                 return False
-            
+
             # Check special colors
             special = colors['special']
             required_special = ['background', 'foreground', 'cursor']
@@ -79,7 +78,7 @@ class ColorManager:
                     return False
                 if not special[key].startswith('#') or len(special[key]) != 7:
                     return False
-            
+
             # Check color palette
             color_palette = colors['colors']
             for i in range(16):
@@ -87,9 +86,10 @@ class ColorManager:
                 if color_key not in color_palette:
                     return False
                 color_val = color_palette[color_key]
-                if not isinstance(color_val, str) or not color_val.startswith('#') or len(color_val) != 7:
+                if not isinstance(color_val, str) or not color_val.startswith(
+                        '#') or len(color_val) != 7:
                     return False
-            
+
             return True
         except Exception as e:
             logger.error(f"Error validating colors: {e}")
@@ -103,13 +103,14 @@ class ColorManager:
                 timestamp = time.strftime("%Y%m%d_%H%M%S")
                 backup_file = os.path.join(self.backup_dir, f"colors_{timestamp}.json")
                 shutil.copy2(self.colors_file, backup_file)
-                
+
                 # Keep only last 10 backups
-                backups = sorted([f for f in os.listdir(self.backup_dir) if f.startswith('colors_')])
+                backups = sorted([f for f in os.listdir(
+                    self.backup_dir) if f.startswith('colors_')])
                 while len(backups) > 10:
                     old_backup = backups.pop(0)
                     os.remove(os.path.join(self.backup_dir, old_backup))
-                
+
                 # Update last good colors file
                 if self._validate_colors(json.load(open(self.colors_file))):
                     shutil.copy2(self.colors_file, self.last_good_colors_file)
@@ -131,7 +132,7 @@ class ColorManager:
                     logger.warning("Invalid colors in wal cache, trying backup")
             except Exception as e:
                 logger.error(f"Error loading colors from wal cache: {e}")
-        
+
         # Try to load last good colors
         if os.path.exists(self.last_good_colors_file):
             try:
@@ -142,11 +143,12 @@ class ColorManager:
                     return colors
             except Exception as e:
                 logger.error(f"Error loading last good colors: {e}")
-        
+
         # Try to load from most recent backup
         try:
             if os.path.exists(self.backup_dir):
-                backups = sorted([f for f in os.listdir(self.backup_dir) if f.startswith('colors_')])
+                backups = sorted([f for f in os.listdir(
+                    self.backup_dir) if f.startswith('colors_')])
                 if backups:
                     latest_backup = os.path.join(self.backup_dir, backups[-1])
                     with open(latest_backup, 'r', encoding="utf-8") as f:
@@ -156,7 +158,7 @@ class ColorManager:
                         return colors
         except Exception as e:
             logger.error(f"Error loading from backup: {e}")
-        
+
         # Fall back to default colors
         logger.warning("Using default colors due to validation failures")
         return self._load_default_colors()
@@ -209,24 +211,24 @@ class ColorManager:
             if current_hash == self.last_file_hash:
                 logger.debug("Colors file hash unchanged, skipping update")
                 return
-            
+
             logger.info("Loading new colors...")
             new_colors = self._load_colors_safely()
-            
+
             # Validate new colors
             if not self._validate_colors(new_colors):
                 logger.error("New colors failed validation, keeping current colors")
                 return
-            
+
             # Update colors if different
             if new_colors != self.colordict:
                 self.colordict = new_colors
                 self.last_file_hash = current_hash
                 logger.info(f"Updated colors: background={new_colors['special']['background']}")
-                
+
                 # Create backup of new colors
                 self._backup_current_colors()
-                
+
                 # Create restart trigger file only if Qtile has been running for a while
                 import time
                 startup_time = getattr(self, '_startup_time', time.time())
@@ -311,7 +313,7 @@ class ColorManager:
                     current_time = time.time()
                     if current_time - self.last_update > 2.0:
                         self.last_update = current_time
-                        
+
                         def delayed_update():
                             try:
                                 time.sleep(1.5)
@@ -320,7 +322,7 @@ class ColorManager:
                             except Exception as e:
                                 self.consecutive_errors += 1
                                 logger.error(f"Error in delayed color update: {e}")
-                        
+
                         threading.Thread(target=delayed_update, daemon=True).start()
 
             def on_moved(self, event):
@@ -330,7 +332,7 @@ class ColorManager:
                     current_time = time.time()
                     if current_time - self.last_update > 2.0:
                         self.last_update = current_time
-                        
+
                         def delayed_update():
                             try:
                                 time.sleep(1.5)
@@ -339,7 +341,7 @@ class ColorManager:
                             except Exception as e:
                                 self.consecutive_errors += 1
                                 logger.error(f"Error in delayed color update: {e}")
-                        
+
                         threading.Thread(target=delayed_update, daemon=True).start()
 
         event_handler = ColorsFileHandler(self)
@@ -354,7 +356,7 @@ class ColorManager:
         """Main file watching loop with robust error handling"""
         consecutive_errors = 0
         max_errors = 10
-        
+
         try:
             # Ensure directories exist
             self._ensure_directories()
@@ -378,12 +380,12 @@ class ColorManager:
                     if observer and observer.is_alive():
                         observer.stop()
                         observer.join(timeout=5)
-            
+
             # Fallback to polling method
             logger.info("Using polling for file monitoring")
             last_modified = 0
             last_hash = None
-            
+
             if os.path.exists(self.colors_file):
                 last_modified = os.path.getmtime(self.colors_file)
                 last_hash = self._get_file_hash(self.colors_file)
@@ -393,11 +395,11 @@ class ColorManager:
                     if os.path.exists(self.colors_file):
                         current_modified = os.path.getmtime(self.colors_file)
                         current_hash = self._get_file_hash(self.colors_file)
-                        
+
                         # Check both modification time and hash for better detection
                         if (current_modified != last_modified or current_hash != last_hash):
                             logger.info("Colors file changed (polling detection)")
-                            
+
                             def delayed_update():
                                 try:
                                     time.sleep(1.5)
@@ -407,22 +409,23 @@ class ColorManager:
                                 except Exception as e:
                                     consecutive_errors += 1
                                     logger.error(f"Error in polling update: {e}")
-                            
+
                             threading.Thread(target=delayed_update, daemon=True).start()
                             last_modified = current_modified
                             last_hash = current_hash
-                    
+
                     consecutive_errors = 0
                     time.sleep(1.0)  # Slightly longer polling interval
-                    
+
                 except Exception as e:
                     consecutive_errors += 1
                     logger.error(f"Polling error: {e}")
                     if consecutive_errors >= max_errors:
-                        logger.error(f"Too many consecutive polling errors ({consecutive_errors}), stopping watcher")
+                        logger.error(
+                            f"Too many consecutive polling errors ({consecutive_errors}), stopping watcher")
                         break
                     time.sleep(min(5.0 * consecutive_errors, 30.0))  # Exponential backoff
-                    
+
         except Exception as e:
             logger.error(f"Watch thread error: {e}")
             import traceback
@@ -432,7 +435,7 @@ class ColorManager:
         """Periodically check for restart trigger with better error handling"""
         consecutive_errors = 0
         max_errors = 10
-        
+
         while not self._shutdown_event.is_set():
             try:
                 self.check_restart_trigger()
@@ -450,13 +453,15 @@ class ColorManager:
         """Gracefully stop all monitoring threads"""
         logger.info("Stopping color monitoring...")
         self._shutdown_event.set()
-        
+
         # Wait for threads to finish
         if self.watcher_thread and self.watcher_thread.is_alive():
             self.watcher_thread.join(timeout=10)
-        if hasattr(self, 'restart_checker_thread') and self.restart_checker_thread and self.restart_checker_thread.is_alive():
+        if hasattr(
+                self,
+                'restart_checker_thread') and self.restart_checker_thread and self.restart_checker_thread.is_alive():
             self.restart_checker_thread.join(timeout=5)
-        
+
         logger.info("Color monitoring stopped")
 
     def start_monitoring(self):
@@ -464,7 +469,7 @@ class ColorManager:
         try:
             # Clear shutdown event
             self._shutdown_event.clear()
-            
+
             # Start color file watcher if not already running
             if self.watcher_thread is None or not self.watcher_thread.is_alive():
                 logger.info("Starting color file watcher...")
@@ -473,12 +478,15 @@ class ColorManager:
                 logger.info("Color file watcher started")
 
             # Start restart trigger checker if not already running
-            if not hasattr(self, 'restart_checker_thread') or self.restart_checker_thread is None or not self.restart_checker_thread.is_alive():
+            if not hasattr(
+                    self,
+                    'restart_checker_thread') or self.restart_checker_thread is None or not self.restart_checker_thread.is_alive():
                 logger.info("Starting restart trigger checker...")
-                self.restart_checker_thread = threading.Thread(target=self.restart_trigger_checker, daemon=True)
+                self.restart_checker_thread = threading.Thread(
+                    target=self.restart_trigger_checker, daemon=True)
                 self.restart_checker_thread.start()
                 logger.info("Restart trigger checker started")
-                
+
         except Exception as e:
             logger.error(f"Error starting color monitoring: {e}")
             import traceback
@@ -494,12 +502,15 @@ class ColorManager:
     def is_monitoring(self):
         """Check if color monitoring is active"""
         watcher_running = self.watcher_thread is not None and self.watcher_thread.is_alive()
-        checker_running = hasattr(self, 'restart_checker_thread') and self.restart_checker_thread is not None and self.restart_checker_thread.is_alive()
+        checker_running = hasattr(
+            self,
+            'restart_checker_thread') and self.restart_checker_thread is not None and self.restart_checker_thread.is_alive()
         return watcher_running and checker_running
 
 
 # Singleton pattern to prevent multiple instances
 _color_manager_instance = None
+
 
 def get_color_manager():
     """Get or create the singleton color manager instance"""
@@ -508,20 +519,25 @@ def get_color_manager():
         _color_manager_instance = ColorManager()
     return _color_manager_instance
 
+
 # Global color manager instance
 color_manager = get_color_manager()
+
 
 def get_colors():
     """Get current color dictionary"""
     return color_manager.get_colors()
 
+
 def manual_color_reload():
     """Manually trigger color reload"""
     color_manager.update_colors()
 
+
 def start_color_monitoring():
     """Start automatic color monitoring"""
     color_manager.start_monitoring()
+
 
 def setup_color_monitoring():
     """Setup color monitoring after qtile startup"""
@@ -534,9 +550,11 @@ def setup_color_monitoring():
     except Exception as e:
         logger.error(f"Error in setup_color_monitoring: {e}")
 
+
 def restart_color_monitoring():
     """Restart color monitoring (for recovery)"""
     color_manager.restart_monitoring()
+
 
 def validate_current_colors():
     """Validate current color configuration"""
@@ -544,6 +562,7 @@ def validate_current_colors():
     is_valid = color_manager._validate_colors(colors)
     logger.info(f"Current colors validation: {'PASSED' if is_valid else 'FAILED'}")
     return is_valid
+
 
 def get_color_file_status():
     """Get status information about color files"""
@@ -555,7 +574,7 @@ def get_color_file_status():
         'current_hash': color_manager._get_file_hash(color_manager.colors_file),
         'validation_passed': color_manager._validate_colors(color_manager.colordict)
     }
-    
+
     if os.path.exists(color_manager.backup_dir):
         backups = [f for f in os.listdir(color_manager.backup_dir) if f.startswith('colors_')]
         status['backup_count'] = len(backups)
@@ -563,8 +582,9 @@ def get_color_file_status():
     else:
         status['backup_count'] = 0
         status['latest_backup'] = None
-    
+
     return status
+
 
 # Load initial colors
 color_manager.colordict = color_manager.load_colors()
