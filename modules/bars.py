@@ -100,33 +100,47 @@ class BarManager:
                     return False
                     
             else:
-                # Unknown system: Try qtile's battery widget itself
-                # If it can initialize without error, assume battery exists
-                try:
-                    from qtile_extras import widget
-                    # Try to create a battery widget - if it fails, no battery
-                    test_widget = widget.Battery()
-                    return True
-                except Exception:
-                    return False
+                # Unknown system: Don't try to use battery widget
+                logger.debug(f"Unknown system {system}, skipping battery widget")
+                return False
                     
         except Exception as e:
             logger.debug(f"Error detecting battery: {e}")
             return False
-            
-            # Fallback: check if /sys/class/power_supply/ contains any battery
-            power_supply_dir = "/sys/class/power_supply/"
-            if os.path.exists(power_supply_dir):
-                for item in os.listdir(power_supply_dir):
-                    type_file = os.path.join(power_supply_dir, item, "type")
-                    if os.path.exists(type_file):
-                        with open(type_file, 'r') as f:
-                            if f.read().strip().lower() == "battery":
-                                return True
-            
+
+    def _has_mpd_support(self) -> bool:
+        """Check if MPD Python module is available"""
+        try:
+            import mpd
+            logger.debug("MPD module available")
+            return True
+        except ImportError:
+            logger.debug("MPD module not available, skipping Mpd2 widget")
             return False
+
+    def _has_battery_widget_support(self) -> bool:
+        """Check if qtile's battery widget supports current platform"""
+        import platform
+        try:
+            # Check if we have a battery AND the platform is supported
+            if not self._has_battery():
+                return False
+                
+            system = platform.system().lower()
+            # qtile's battery widget has known platform issues on some BSD systems
+            if system == "openbsd":
+                # Test if the battery widget can actually initialize
+                try:
+                    from qtile_extras import widget
+                    test_widget = widget.Battery()
+                    return True
+                except Exception as e:
+                    logger.debug(f"Battery widget not supported on {system}: {e}")
+                    return False
+            
+            return True
         except Exception as e:
-            logger.debug(f"Error checking for battery: {e}")
+            logger.debug(f"Error checking battery widget support: {e}")
             return False
 
     def create_bar_config(self, screen_num: int) -> Bar:
@@ -134,6 +148,7 @@ class BarManager:
         colordict = self.color_manager.get_colors()
         logger.info(f"Bar config for screen {screen_num + 1}")
 
+        # Start with core widgets that are always available
         barconfig = [
             # Option 1: Use emoji (current)
             widget.TextBox(
@@ -164,10 +179,19 @@ class BarManager:
                 theme_mode="preferred",
                 theme_path="/usr/share/icons/breeze-dark",
             ),
-            widget.Mpd2(
+        ]
+
+        # Conditionally add MPD2 widget if mpd module is available
+        if self._has_mpd_support():
+            barconfig.append(widget.Mpd2(
                 foreground=colordict["colors"]["color5"],
                 background=colordict["special"]["background"],
-            ),
+            ))
+        else:
+            logger.debug("Skipping Mpd2 widget - mpd module not available")
+
+        # Continue with update checking widgets
+        barconfig.extend([
             widget.CheckUpdates(
                 foreground=colordict["colors"]["color5"],
                 background=colordict["special"]["background"],
@@ -217,19 +241,30 @@ class BarManager:
                     .decode("utf-8")
                 ),
             ),
-            widget.TextBox("🔋:"),
-            widget.Battery(
-                foreground=colordict["colors"]["color5"],
-                background=colordict["special"]["background"],
-                charge_char="⚡",
-                discharge_char="🔋",
-                empty_char="🪫",
-                full_char="🔋",
-                format="{char} {percent:2.0%} {hour:d}:{min:02d}",
-                low_foreground=colordict["colors"]["color1"],  # Red color for low battery
-                low_percentage=0.15,  # 15% threshold for low battery warning
-                update_interval=60,
-            ),
+        ])
+
+        # Conditionally add Battery widget if supported on this platform
+        if self._has_battery_widget_support():
+            barconfig.extend([
+                widget.TextBox("🔋:"),
+                widget.Battery(
+                    foreground=colordict["colors"]["color5"],
+                    background=colordict["special"]["background"],
+                    charge_char="⚡",
+                    discharge_char="🔋",
+                    empty_char="🪫",
+                    full_char="🔋",
+                    format="{char} {percent:2.0%} {hour:d}:{min:02d}",
+                    low_foreground=colordict["colors"]["color1"],  # Red color for low battery
+                    low_percentage=0.15,  # 15% threshold for low battery warning
+                    update_interval=60,
+                ),
+            ])
+        else:
+            logger.debug("Skipping Battery widget - not supported on this platform or no battery detected")
+
+        # Add remaining core widgets
+        barconfig.extend([
             widget.Clock(
                 foreground=colordict["colors"]["color5"],
                 background=colordict["special"]["background"],
@@ -244,7 +279,7 @@ class BarManager:
                 background=colordict["special"]["background"],
                 border=colordict["colors"]["color1"],
             ),
-        ]
+        ])
 
         # Remove systray from non-primary screens
         if screen_num != 0:
