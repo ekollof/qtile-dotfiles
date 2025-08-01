@@ -20,7 +20,7 @@ class ColorManager:
     backup_dir: str
     restart_trigger_file: str
     last_good_colors_file: str
-    colordict: dict
+    colordict: dict[str, dict[str, str] | str]
     last_file_hash: str | None
     watcher_thread: threading.Thread | None
     restart_checker_thread: threading.Thread | None
@@ -71,27 +71,29 @@ class ColorManager:
             logger.error(f"Error getting file hash: {e}")
             return None
 
-    def _validate_colors(self, colors: dict) -> bool:
+    def _validate_colors(self, colors: dict[str, dict[str, str] | str]) -> bool:
         """Validate color dictionary structure"""
         try:
-            if not isinstance(colors, dict):
-                return False
-
             # Check required sections
             if 'special' not in colors or 'colors' not in colors:
                 return False
 
             # Check special colors
             special = colors['special']
+            if not isinstance(special, dict):
+                return False
             required_special = ['background', 'foreground', 'cursor']
             for key in required_special:
-                if key not in special or not isinstance(special[key], str):
+                if key not in special:
                     return False
-                if not special[key].startswith('#') or len(special[key]) != 7:
+                value = special[key]
+                if not isinstance(value, str) or not value.startswith('#') or len(value) != 7:
                     return False
 
             # Check color palette
             color_palette = colors['colors']
+            if not isinstance(color_palette, dict):
+                return False
             for i in range(16):
                 color_key = f'color{i}'
                 if color_key not in color_palette:
@@ -129,16 +131,16 @@ class ColorManager:
         except Exception as e:
             logger.error(f"Error creating color backup: {e}")
 
-    def _load_colors_safely(self):
+    def _load_colors_safely(self) -> dict[str, dict[str, str] | str]:
         """Load colors with validation and fallback"""
         # Try to load current colors file
         if os.path.exists(self.colors_file):
             try:
                 with open(self.colors_file, 'r', encoding="utf-8") as f:
-                    colors = json.load(f)
-                if self._validate_colors(colors):
+                    loaded_colors: dict[str, dict[str, str] | str] = json.load(f)
+                if self._validate_colors(loaded_colors):
                     logger.info("Loaded colors from wal cache")
-                    return colors
+                    return loaded_colors
                 else:
                     logger.warning("Invalid colors in wal cache, trying backup")
             except Exception as e:
@@ -148,10 +150,10 @@ class ColorManager:
         if os.path.exists(self.last_good_colors_file):
             try:
                 with open(self.last_good_colors_file, 'r', encoding="utf-8") as f:
-                    colors = json.load(f)
-                if self._validate_colors(colors):
+                    backup_colors: dict[str, dict[str, str] | str] = json.load(f)
+                if self._validate_colors(backup_colors):
                     logger.info("Loaded colors from last good backup")
-                    return colors
+                    return backup_colors
             except Exception as e:
                 logger.error(f"Error loading last good colors: {e}")
 
@@ -163,10 +165,10 @@ class ColorManager:
                 if backups:
                     latest_backup = os.path.join(self.backup_dir, backups[-1])
                     with open(latest_backup, 'r', encoding="utf-8") as f:
-                        colors = json.load(f)
-                    if self._validate_colors(colors):
+                        archived_colors: dict[str, dict[str, str] | str] = json.load(f)
+                    if self._validate_colors(archived_colors):
                         logger.info(f"Loaded colors from backup: {backups[-1]}")
-                        return colors
+                        return archived_colors
         except Exception as e:
             logger.error(f"Error loading from backup: {e}")
 
@@ -174,7 +176,7 @@ class ColorManager:
         logger.warning("Using default colors due to validation failures")
         return self._load_default_colors()
 
-    def _load_default_colors(self):
+    def _load_default_colors(self) -> dict[str, dict[str, str] | str]:
         """Load default colors if pywal colors don't exist"""
         colors = {
             "wallpaper": "/home/ekollof/Wallpapers/derektaylor/0270.jpg",
@@ -209,7 +211,7 @@ class ColorManager:
         """Load colors from pywal colors.json file with validation"""
         return self._load_colors_safely()
 
-    def get_colors(self):
+    def get_colors(self) -> dict[str, dict[str, str] | str]:
         """Get current color dictionary"""
         return self.colordict
 
@@ -522,7 +524,7 @@ class ColorManager:
             'restart_checker_thread') and self.restart_checker_thread is not None and self.restart_checker_thread.is_alive()
         return watcher_running and checker_running
     
-    def validate_colors_public(self, colors: dict) -> bool:
+    def validate_colors_public(self, colors: dict[str, dict[str, str] | str]) -> bool:
         """Public interface for color validation"""
         return self._validate_colors(colors)
         
@@ -547,7 +549,7 @@ def get_color_manager():
 color_manager = get_color_manager()
 
 
-def get_colors():
+def get_colors() -> dict[str, dict[str, str] | str]:
     """Get current color dictionary"""
     return color_manager.get_colors()
 
@@ -587,7 +589,7 @@ def validate_current_colors():
     return is_valid
 
 
-def get_color_file_status() -> dict:
+def get_color_file_status():
     """Get status information about color files"""
     status = {
         'colors_file_exists': os.path.exists(color_manager.colors_file),
