@@ -21,16 +21,20 @@ class ScreenHooks:
         logger.debug("Setting up screen hooks")
         
         @hook.subscribe.screen_change
-        def handle_screen_change(event):
+        def handle_screen_change(*args, **kwargs):
             """Handle screen configuration changes (monitor hotplug/unplug)"""
+            # Some qtile versions don't pass event parameter
+            event = args[0] if args else None
             self._handle_screen_change_event(event)
 
         @hook.subscribe.current_screen_change
-        def handle_current_screen_change(event):
+        def handle_current_screen_change(*args, **kwargs):
             """Handle changes to the current screen focus"""
+            # Some qtile versions don't pass event parameter
+            event = args[0] if args else None
             self._handle_current_screen_change_event(event)
 
-    def _handle_screen_change_event(self, event):
+    def _handle_screen_change_event(self, event=None):
         """Handle screen configuration changes with proper timing and validation"""
         # Add minimal delay to let the system settle
         time.sleep(self.config.screen_settings['detection_delay'])
@@ -41,6 +45,8 @@ class ScreenHooks:
         # Only handle screen changes after qtile has been running for a while
         if current_time - startup_time > self.config.screen_settings['startup_delay']:
             logger.info("Screen change detected - checking for monitor changes")
+            if event is not None:
+                logger.debug(f"Screen change event data: {event}")
 
             try:
                 # Check if screen count actually changed
@@ -55,12 +61,14 @@ class ScreenHooks:
         else:
             logger.info("Screen change detected but ignored (too soon after startup)")
 
-    def _handle_current_screen_change_event(self, event):
+    def _handle_current_screen_change_event(self, event=None):
         """Handle changes to current screen focus"""
         try:
             if qtile and qtile.current_screen:
                 screen_index = qtile.screens.index(qtile.current_screen)
                 logger.debug(f"Current screen changed to: {screen_index}")
+                if event is not None:
+                    logger.debug(f"Screen change event data: {event}")
         except Exception as e:
             logger.debug(f"Error handling current screen change: {e}")
 
