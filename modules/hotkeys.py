@@ -6,13 +6,15 @@ Similar to AwesomeWM's Super+S functionality
 """
 
 import subprocess
+from typing import final
 from libqtile.log_utils import logger
 
 
+@final
 class HotkeyDisplay:
     """Manages hotkey display functionality"""
 
-    def __init__(self, key_manager, color_manager=None):
+    def __init__(self, key_manager, color_manager=None) -> None:
         self.key_manager = key_manager
         self.color_manager = color_manager
         self.rofi_theme = self._get_rofi_theme()
@@ -113,7 +115,7 @@ element-text {{
 }}
 """
 
-    def _format_key_combination(self, key_combo):
+    def _format_key_combination(self, key_combo: str) -> str:
         """Format key combination for display"""
         # Replace modifier names with more readable versions
         formatted = key_combo.replace("mod4", "Super")
