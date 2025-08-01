@@ -54,11 +54,26 @@ class HookManager:
         @hook.subscribe.client_new
         def set_floating(window):
             """Set specific windows to floating"""
-            floating_classes = ("nm-connection-editor", "pavucontrol", "origin.exe")
+            # Applications that should always float
+            floating_classes = (
+                "nm-connection-editor",  # NetworkManager GUI
+                "pavucontrol",          # PulseAudio volume control  
+                "origin.exe",           # Origin game launcher
+                "steam",                # Steam client (some windows)
+                "blueman-manager",      # Bluetooth manager
+                "arandr",              # Display settings
+                "lxappearance",        # Theme settings
+                "qt5ct",               # Qt5 configuration
+                "kvantummanager",      # Kvantum theme manager
+            )
             try:
-                if window.window.get_wm_class()[0] in floating_classes:
-                    window.floating = True
-            except (IndexError, AttributeError):
+                wm_class = window.window.get_wm_class()
+                if wm_class and len(wm_class) > 0:
+                    if wm_class[0].lower() in [fc.lower() for fc in floating_classes]:
+                        window.floating = True
+                        logger.debug(f"Set {wm_class[0]} to floating via hook")
+            except (IndexError, AttributeError, TypeError) as e:
+                logger.debug(f"Could not check window class for floating: {e}")
                 pass
 
         @hook.subscribe.client_new

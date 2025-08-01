@@ -70,8 +70,10 @@ class GroupManager:
 
         return layout.Floating(
             float_rules=[
-                # Run the utility of `xprop` to see the wm class and name of an X client.
-                *layout.Floating.default_float_rules,
+                # Specific system dialogs and utilities only
+                # NOTE: Removed *layout.Floating.default_float_rules to prevent electron apps from floating
+                
+                # Core system dialogs
                 Match(wm_class="confirm"),
                 Match(wm_class="dialog"),
                 Match(wm_class="download"),
@@ -80,16 +82,45 @@ class GroupManager:
                 Match(wm_class="notification"),
                 Match(wm_class="splash"),
                 Match(wm_class="toolbar"),
+                
+                # PIN entry (consolidated rules)
                 Match(wm_class="pinentry-gtk-2"),
-                Match(wm_class="confirmreset"),  # gitk
-                Match(wm_class="makebranch"),  # gitk
-                Match(wm_class="maketag"),  # gitk
-                Match(title="branchdialog"),  # gitk
-                Match(title="pinentry"),  # gitk
-                Match(wm_class="pinentry"),  # gitk
-                Match(wm_class="ssh-askpass"),  # gitk
-                Match(wm_class="krunner"),  # KDE
-                Match(title="Desktop — Plasma"),  # KDE
+                Match(wm_class="pinentry"),
+                Match(title="pinentry"),
+                
+                # Git tools (gitk)
+                Match(wm_class="confirmreset"),
+                Match(wm_class="makebranch"),
+                Match(wm_class="maketag"),
+                Match(title="branchdialog"),
+                
+                # System authentication
+                Match(wm_class="ssh-askpass"),
+                
+                # Desktop environment
+                Match(wm_class="krunner"),  # KDE application launcher
+                Match(title="Desktop — Plasma"),  # KDE desktop
+                
+                # Common utilities (recommended additions)
+                Match(wm_class="gnome-calculator"),
+                Match(wm_class="kcalc"),
+                Match(wm_class="flameshot"),
+                Match(wm_class="spectacle"),
+                Match(wm_class="org.kde.spectacle"),
+                Match(wm_class="Xfce4-screenshooter"),
+                
+                # Additional specific utilities that should float
+                Match(wm_class="Gpick"),  # Color picker
+                Match(wm_class="Arandr"),  # Display configuration
+                Match(wm_class="Pavucontrol"),  # Audio control
+                Match(wm_class="Nm-connection-editor"),  # Network manager
+                Match(wm_class="Blueman-manager"),  # Bluetooth manager
+                
+                # Small system tools
+                Match(wm_class="Galculator"),
+                Match(wm_class="Gnome-calculator"),
+                
+                # Note: Electron apps (VSCode, Discord, Slack, etc.) will now tile by default
             ],
             border_focus=colordict["special"]["foreground"],
             border_normal=colordict["special"]["background"],
