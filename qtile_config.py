@@ -63,6 +63,16 @@ class QtileConfig:
             }
         ]
 
+    @property
+    def mouse_warp_focus(self) -> bool:
+        """Enable mouse warping when changing window focus
+        
+        When True, the mouse cursor automatically moves to the center of the
+        newly focused window when using Super+hjkl navigation keys.
+        When False, focus changes without moving the mouse cursor.
+        """
+        return True
+
     # ===== CORE SETTINGS =====
 
     @property

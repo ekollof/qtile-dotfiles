@@ -28,7 +28,7 @@ class KeyManager:
 
         # Initialize command modules
         self.layout_commands = LayoutAwareCommands()
-        self.window_commands = WindowCommands()
+        self.window_commands = WindowCommands(self.config)
         self.system_commands = SystemCommands(color_manager)
         
         # Initialize key bindings

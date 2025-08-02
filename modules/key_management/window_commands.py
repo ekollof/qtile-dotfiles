@@ -9,8 +9,8 @@ from libqtile.log_utils import logger
 class WindowCommands:
     """Commands for managing windows across screens and groups"""
     
-    def __init__(self):
-        pass
+    def __init__(self, qtile_config):
+        self.qtile_config = qtile_config
 
     @staticmethod
     def window_to_previous_screen(qtile):
@@ -242,3 +242,83 @@ class WindowCommands:
                 logger.info("Fallback: Used regular maximize")
             except Exception as fallback_error:
                 logger.error(f"Fallback maximize also failed: {fallback_error}")
+
+    def _warp_mouse_to_window(self, qtile):
+        """Helper function to warp mouse to center of current window"""
+        try:
+            # Check if mouse warping is enabled
+            if not self.qtile_config.mouse_warp_focus:
+                return
+                
+            current_window = qtile.current_window
+            if not current_window:
+                return
+            
+            # Get window geometry
+            x = current_window.x
+            y = current_window.y
+            width = current_window.width
+            height = current_window.height
+            
+            # Calculate center position
+            center_x = x + (width // 2)
+            center_y = y + (height // 2)
+            
+            # Warp mouse to center of window
+            qtile.core.warp_pointer(center_x, center_y)
+            logger.debug(f"Warped mouse to window center: ({center_x}, {center_y})")
+            
+        except Exception as e:
+            logger.debug(f"Error warping mouse to window: {e}")
+
+    def focus_left_with_warp(self, qtile):
+        """Move focus left and warp mouse to target window"""
+        try:
+            # Execute the layout's left focus command
+            qtile.current_layout.left()
+            
+            # Warp mouse to the newly focused window (if enabled)
+            self._warp_mouse_to_window(qtile)
+            logger.debug("Focus moved left with mouse warp")
+            
+        except Exception as e:
+            logger.error(f"Error in focus_left_with_warp: {e}")
+
+    def focus_right_with_warp(self, qtile):
+        """Move focus right and warp mouse to target window"""
+        try:
+            # Execute the layout's right focus command
+            qtile.current_layout.right()
+            
+            # Warp mouse to the newly focused window (if enabled)
+            self._warp_mouse_to_window(qtile)
+            logger.debug("Focus moved right with mouse warp")
+            
+        except Exception as e:
+            logger.error(f"Error in focus_right_with_warp: {e}")
+
+    def focus_up_with_warp(self, qtile):
+        """Move focus up and warp mouse to target window"""
+        try:
+            # Execute the layout's up focus command
+            qtile.current_layout.up()
+            
+            # Warp mouse to the newly focused window (if enabled)
+            self._warp_mouse_to_window(qtile)
+            logger.debug("Focus moved up with mouse warp")
+            
+        except Exception as e:
+            logger.error(f"Error in focus_up_with_warp: {e}")
+
+    def focus_down_with_warp(self, qtile):
+        """Move focus down and warp mouse to target window"""
+        try:
+            # Execute the layout's down focus command
+            qtile.current_layout.down()
+            
+            # Warp mouse to the newly focused window (if enabled)
+            self._warp_mouse_to_window(qtile)
+            logger.debug("Focus moved down with mouse warp")
+            
+        except Exception as e:
+            logger.error(f"Error in focus_down_with_warp: {e}")

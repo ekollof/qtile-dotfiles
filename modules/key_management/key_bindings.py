@@ -25,11 +25,15 @@ class KeyBindings:
     def get_movement_keys(self):
         """Get window movement and focus keys"""
         return [
-            # Switch between windows in current stack pane
-            Key([self.mod], "k", lazy.layout.down(), desc="Move focus down in stack pane"),
-            Key([self.mod], "j", lazy.layout.up(), desc="Move focus up in stack pane"),
-            Key([self.mod], "h", lazy.layout.left(), desc="Move focus left in stack pane"),
-            Key([self.mod], "l", lazy.layout.right(), desc="Move focus right in stack pane"),
+            # Switch between windows in current stack pane (with mouse warp)
+            Key([self.mod], "k", lazy.function(self.window_commands.focus_down_with_warp), 
+                desc="Move focus down and warp mouse"),
+            Key([self.mod], "j", lazy.function(self.window_commands.focus_up_with_warp), 
+                desc="Move focus up and warp mouse"),
+            Key([self.mod], "h", lazy.function(self.window_commands.focus_left_with_warp), 
+                desc="Move focus left and warp mouse"),
+            Key([self.mod], "l", lazy.function(self.window_commands.focus_right_with_warp), 
+                desc="Move focus right and warp mouse"),
             
             # Move windows around
             Key(
