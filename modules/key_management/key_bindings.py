@@ -250,9 +250,6 @@ class KeyBindings:
             Key([], "XF86Display", 
                 lazy.function(self.system_commands.display_toggle),
                 desc="Toggle external display"),
-            Key([], "XF86MonBrightnessCycle", 
-                lazy.function(self.system_commands.display_toggle),
-                desc="Cycle display configuration"),
             
             # Keyboard backlight
             Key([], "XF86KbdBrightnessUp", 
@@ -269,6 +266,12 @@ class KeyBindings:
             Key([], "XF86PowerOff", 
                 lazy.spawn("systemctl poweroff"),
                 desc="Power off system"),
+            Key([], "XF86Suspend", 
+                lazy.spawn("systemctl suspend"),
+                desc="Suspend system"),
+            Key([], "XF86Hibernate", 
+                lazy.spawn("systemctl hibernate"),
+                desc="Hibernate system"),
             Key([], "XF86Calculator", 
                 lazy.spawn("qalculate-gtk"),
                 desc="Open calculator"),
@@ -281,6 +284,15 @@ class KeyBindings:
             Key([], "XF86Search", 
                 lazy.spawn("rofi -show drun"),
                 desc="Open application launcher"),
+            Key([], "XF86AudioMicMute", 
+                lazy.spawn("pactl set-source-mute @DEFAULT_SOURCE@ toggle"),
+                desc="Toggle microphone mute"),
+            Key([], "XF86RFKill", 
+                lazy.function(self.system_commands.wifi_toggle),
+                desc="Toggle all wireless"),
+            Key([], "XF86WWAN", 
+                lazy.spawn("nmcli radio wwan toggle"),
+                desc="Toggle mobile broadband"),
             
             # Touchpad toggle (common on laptops)
             Key([], "XF86TouchpadToggle", 
