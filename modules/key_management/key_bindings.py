@@ -205,6 +205,95 @@ class KeyBindings:
             Key([self.mod, "shift"], "m", lazy.group["scratch"].dropdown_toggle("ncmpcpp")),
         ]
 
+    def get_function_keys(self):
+        """Get laptop function key bindings"""
+        return [
+            # Brightness controls
+            Key([], "XF86MonBrightnessUp", 
+                lazy.function(self.system_commands.brightness_up),
+                desc="Increase screen brightness"),
+            Key([], "XF86MonBrightnessDown", 
+                lazy.function(self.system_commands.brightness_down),
+                desc="Decrease screen brightness"),
+            
+            # Volume controls  
+            Key([], "XF86AudioRaiseVolume", 
+                lazy.function(self.system_commands.volume_up),
+                desc="Increase volume"),
+            Key([], "XF86AudioLowerVolume", 
+                lazy.function(self.system_commands.volume_down),
+                desc="Decrease volume"),
+            Key([], "XF86AudioMute", 
+                lazy.function(self.system_commands.volume_mute_toggle),
+                desc="Toggle volume mute"),
+            
+            # Media controls
+            Key([], "XF86AudioPlay", 
+                lazy.function(self.system_commands.media_play_pause),
+                desc="Play/pause media"),
+            Key([], "XF86AudioNext", 
+                lazy.function(self.system_commands.media_next),
+                desc="Next track"),
+            Key([], "XF86AudioPrev", 
+                lazy.function(self.system_commands.media_prev),
+                desc="Previous track"),
+            
+            # Connectivity toggles
+            Key([], "XF86WLAN", 
+                lazy.function(self.system_commands.wifi_toggle),
+                desc="Toggle WiFi"),
+            Key([], "XF86Bluetooth", 
+                lazy.function(self.system_commands.bluetooth_toggle),
+                desc="Toggle Bluetooth"),
+            
+            # Display controls
+            Key([], "XF86Display", 
+                lazy.function(self.system_commands.display_toggle),
+                desc="Toggle external display"),
+            Key([], "XF86MonBrightnessCycle", 
+                lazy.function(self.system_commands.display_toggle),
+                desc="Cycle display configuration"),
+            
+            # Keyboard backlight
+            Key([], "XF86KbdBrightnessUp", 
+                lazy.function(self.system_commands.keyboard_backlight_toggle),
+                desc="Increase keyboard backlight"),
+            Key([], "XF86KbdBrightnessDown", 
+                lazy.function(self.system_commands.keyboard_backlight_toggle),
+                desc="Decrease keyboard backlight"),
+            
+            # Additional common function keys
+            Key([], "XF86Sleep", 
+                lazy.spawn("systemctl suspend"),
+                desc="Suspend system"),
+            Key([], "XF86PowerOff", 
+                lazy.spawn("systemctl poweroff"),
+                desc="Power off system"),
+            Key([], "XF86Calculator", 
+                lazy.spawn("qalculate-gtk"),
+                desc="Open calculator"),
+            Key([], "XF86Mail", 
+                lazy.spawn("thunderbird"),
+                desc="Open email client"),
+            Key([], "XF86HomePage", 
+                lazy.spawn("firefox"),
+                desc="Open web browser"),
+            Key([], "XF86Search", 
+                lazy.spawn("rofi -show drun"),
+                desc="Open application launcher"),
+            
+            # Touchpad toggle (common on laptops)
+            Key([], "XF86TouchpadToggle", 
+                lazy.spawn("xinput --toggle-touchpad"),
+                desc="Toggle touchpad"),
+            Key([], "XF86TouchpadOn", 
+                lazy.spawn("xinput --enable-touchpad"),
+                desc="Enable touchpad"),
+            Key([], "XF86TouchpadOff", 
+                lazy.spawn("xinput --disable-touchpad"),
+                desc="Disable touchpad"),
+        ]
+
     def get_all_keys(self, key_manager=None):
         """Get all keyboard bindings"""
         # Store reference to key manager for hotkey display
@@ -217,6 +306,7 @@ class KeyBindings:
         all_keys.extend(self.get_application_keys())
         all_keys.extend(self.get_system_keys())
         all_keys.extend(self.get_special_keys())
+        all_keys.extend(self.get_function_keys())
         
         return all_keys
 
@@ -231,6 +321,7 @@ class KeyBindings:
             'Applications': self.get_application_keys(),
             'System': self.get_system_keys(),
             'Special': self.get_special_keys(),
+            'Function': self.get_function_keys(),
         }
 
     def get_key_count_by_category(self):
