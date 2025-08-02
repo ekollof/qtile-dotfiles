@@ -271,6 +271,23 @@ class WindowCommands:
         except Exception as e:
             logger.debug(f"Error warping mouse to window: {e}")
 
+    def _focus_first_window_in_stack(self, qtile):
+        """Helper function to ensure focus is on the first window in the current screen's stack"""
+        try:
+            current_group = qtile.current_screen.group
+            if current_group and current_group.windows:
+                # Get the first window in the stack
+                first_window = current_group.windows[0]
+                if first_window:
+                    # Focus the first window
+                    current_group.focus(first_window)
+                    logger.debug(f"Focused first window in stack: {first_window.name}")
+                    return True
+            return False
+        except Exception as e:
+            logger.debug(f"Error focusing first window in stack: {e}")
+            return False
+
     def focus_left_with_warp(self, qtile):
         """Move focus left and warp mouse to target window"""
         try:
@@ -324,27 +341,33 @@ class WindowCommands:
             logger.error(f"Error in focus_down_with_warp: {e}")
 
     def focus_prev_screen_with_warp(self, qtile):
-        """Focus previous screen and warp mouse to focused window"""
+        """Focus previous screen, focus first window in stack, and warp mouse"""
         try:
             # Execute the previous screen focus command
             qtile.cmd_prev_screen()
             
+            # Focus the first window in the stack on the new screen
+            self._focus_first_window_in_stack(qtile)
+            
             # Warp mouse to the newly focused window (if enabled)
             self._warp_mouse_to_window(qtile)
-            logger.debug("Focus moved to previous screen with mouse warp")
+            logger.debug("Focus moved to previous screen, first window focused, mouse warped")
             
         except Exception as e:
             logger.error(f"Error in focus_prev_screen_with_warp: {e}")
 
     def focus_next_screen_with_warp(self, qtile):
-        """Focus next screen and warp mouse to focused window"""
+        """Focus next screen, focus first window in stack, and warp mouse"""
         try:
             # Execute the next screen focus command
             qtile.cmd_next_screen()
             
+            # Focus the first window in the stack on the new screen
+            self._focus_first_window_in_stack(qtile)
+            
             # Warp mouse to the newly focused window (if enabled)
             self._warp_mouse_to_window(qtile)
-            logger.debug("Focus moved to next screen with mouse warp")
+            logger.debug("Focus moved to next screen, first window focused, mouse warped")
             
         except Exception as e:
             logger.error(f"Error in focus_next_screen_with_warp: {e}")
