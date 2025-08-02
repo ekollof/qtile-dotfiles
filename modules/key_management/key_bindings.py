@@ -114,10 +114,10 @@ class KeyBindings:
             # Screen and window movement
             Key([self.mod, "shift"], "comma", lazy.function(self.window_commands.window_to_previous_screen)),
             Key([self.mod, "shift"], "period", lazy.function(self.window_commands.window_to_next_screen)),
-            Key([self.mod], "comma", lazy.function(self.window_commands.focus_prev_screen_with_warp), 
-                desc="Focus previous screen and warp mouse"),
-            Key([self.mod], "period", lazy.function(self.window_commands.focus_next_screen_with_warp), 
+            Key([self.mod], "comma", lazy.function(self.window_commands.focus_next_screen_with_warp), 
                 desc="Focus next screen and warp mouse"),
+            Key([self.mod], "period", lazy.function(self.window_commands.focus_prev_screen_with_warp), 
+                desc="Focus previous screen and warp mouse"),
             
             # Window state toggles
             Key([self.mod], "f", lazy.window.toggle_floating(), desc="Toggle floating"),
