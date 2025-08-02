@@ -322,3 +322,29 @@ class WindowCommands:
             
         except Exception as e:
             logger.error(f"Error in focus_down_with_warp: {e}")
+
+    def focus_prev_screen_with_warp(self, qtile):
+        """Focus previous screen and warp mouse to focused window"""
+        try:
+            # Execute the previous screen focus command
+            qtile.cmd_prev_screen()
+            
+            # Warp mouse to the newly focused window (if enabled)
+            self._warp_mouse_to_window(qtile)
+            logger.debug("Focus moved to previous screen with mouse warp")
+            
+        except Exception as e:
+            logger.error(f"Error in focus_prev_screen_with_warp: {e}")
+
+    def focus_next_screen_with_warp(self, qtile):
+        """Focus next screen and warp mouse to focused window"""
+        try:
+            # Execute the next screen focus command
+            qtile.cmd_next_screen()
+            
+            # Warp mouse to the newly focused window (if enabled)
+            self._warp_mouse_to_window(qtile)
+            logger.debug("Focus moved to next screen with mouse warp")
+            
+        except Exception as e:
+            logger.error(f"Error in focus_next_screen_with_warp: {e}")
