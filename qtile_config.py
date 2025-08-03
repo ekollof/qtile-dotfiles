@@ -1,20 +1,22 @@
 #!/usr/bin/env python3
 """
-Centralized configuration for qtile
-All user-configurable settings in one place
+Centralized configuration for qtile - DPI AWARE VERSION
+All user-configurable settings in one place with automatic DPI scaling
 """
 
 import os
 from modules.font_utils import get_available_font
+from modules.dpi_utils import scale_size, scale_font, get_dpi_manager
 
 
 class QtileConfig:
-    """Centralized qtile configuration"""
+    """Centralized qtile configuration with DPI awareness"""
 
     home: str
     
     def __init__(self):
         self.home = os.path.expanduser("~")
+        self.dpi_manager = get_dpi_manager()
 
     # ===== FONT SETTINGS =====
 
@@ -23,22 +25,18 @@ class QtileConfig:
         """User's preferred font (change this to your preferred font)"""
         return "BerkeleyMono Nerd Font Mono"
 
+    # ===== DPI SETTINGS =====
+    
+    @property
+    def dpi_info(self) -> dict:
+        """Get DPI scaling information"""
+        return self.dpi_manager.get_scaling_info()
+
     # ===== SCRIPT WIDGET SETTINGS =====
 
     @property
     def script_configs(self) -> list:
-        """Configure custom scripts for GenPollText widgets
-        
-        Users can modify this list to customize their script widgets.
-        Each config should be a dict with keys: script_path, icon, update_interval, fallback, name
-        
-        Examples:
-        - script_path: Path to the script (supports ~ expansion)
-        - icon: Emoji or text to display before the script output
-        - update_interval: How often to run the script (in seconds)
-        - fallback: Text to show if script is missing or fails
-        - name: Descriptive name for logging
-        """
+        """Configure custom scripts for GenPollText widgets - DPI aware"""
         return [
             {
                 'script_path': '~/bin/imap-checker.ksh',
@@ -110,21 +108,21 @@ class QtileConfig:
             'lock_session': 'loginctl lock-session',
         }
 
-    # ===== LAYOUT SETTINGS =====
+    # ===== LAYOUT SETTINGS - DPI AWARE =====
 
     @property
     def layout_defaults(self) -> dict[str, int | bool]:
-        """Default settings for all layouts"""
+        """Default settings for all layouts - DPI scaled"""
         return {
-            'margin': 4,  # Gap between windows
-            'border_width': 1,
-            'single_border_width': 1,
-            'single_margin': 4,
+            'margin': scale_size(4),  # DPI-scaled gap between windows
+            'border_width': max(1, scale_size(1)),  # Minimum 1px border
+            'single_border_width': max(1, scale_size(1)),
+            'single_margin': scale_size(4),
         }
 
     @property
     def tile_layout(self) -> dict[str, float | int | bool | None]:
-        """Tile layout specific settings"""
+        """Tile layout specific settings - DPI aware"""
         return {
             'ratio': 0.5,  # 50/50 split by default
             'ratio_increment': 0.1,  # 10% resize increments
@@ -136,22 +134,22 @@ class QtileConfig:
 
     @property
     def monad_tall_layout(self) -> dict[str, float | int | str]:
-        """MonadTall layout specific settings"""
+        """MonadTall layout specific settings - DPI aware"""
         return {
             'ratio': 0.6,  # Main window 60% width
             'min_ratio': 0.25,
             'max_ratio': 0.85,
             'change_ratio': 0.05,  # 5% change increments
-            'change_size': 20,
+            'change_size': scale_size(20),  # DPI-scaled size changes
             'new_client_position': 'after_current',
         }
 
     @property
     def bsp_layout(self) -> dict[str, bool | int | float]:
-        """BSP layout specific settings"""
+        """BSP layout specific settings - DPI aware"""
         return {
             'fair': True,  # Even space distribution
-            'grow_amount': 10,
+            'grow_amount': scale_size(10),  # DPI-scaled grow amount
             'lower_right': True,
             'ratio': 1.6,  # Golden ratio
         }
@@ -322,33 +320,33 @@ class QtileConfig:
         """Path to autostart script"""
         return f"{self.home}/.config/qtile/autostart.sh"
 
-    # ===== BAR/WIDGET SETTINGS =====
+    # ===== BAR/WIDGET SETTINGS - DPI AWARE =====
 
     @property
     def bar_settings(self) -> dict[str, int | float | list[int]]:
-        """Status bar configuration"""
+        """Status bar configuration - DPI scaled"""
         return {
-            'height': 28,
+            'height': scale_size(28),  # DPI-scaled bar height
             'opacity': 0.95,
             'margin': [0, 0, 0, 0],  # top, right, bottom, left
         }
 
     @property
     def widget_defaults(self) -> dict[str, str | int]:
-        """Default widget settings with font fallback"""
+        """Default widget settings with font fallback - DPI aware"""
         return {
             'font': get_available_font(self.preferred_font),
-            'fontsize': 12,
-            'padding': 3,
+            'fontsize': scale_font(12),  # DPI-scaled font size
+            'padding': scale_size(3),    # DPI-scaled padding
         }
 
-    # ===== HOTKEY DISPLAY SETTINGS =====
+    # ===== HOTKEY DISPLAY SETTINGS - DPI AWARE =====
 
     @property
     def hotkey_display(self) -> dict[str, int | float | str]:
-        """Hotkey display configuration with font fallback"""
+        """Hotkey display configuration with font fallback - DPI aware"""
         return {
-            'rofi_width': 1200,
+            'rofi_width': scale_size(1200),  # DPI-scaled width
             'rofi_lines': 25,
             'dmenu_lines': 25,
             'font': get_available_font(self.preferred_font),

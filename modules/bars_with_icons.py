@@ -16,6 +16,7 @@ Usage: Replace your current bars.py with this file or copy the relevant parts.
 import os
 import socket
 import subprocess
+import platform
 from typing import final, Any, TYPE_CHECKING
 from libqtile import widget as qtwidget
 from libqtile.bar import Bar
@@ -24,6 +25,7 @@ from libqtile.lazy import lazy
 from libqtile.log_utils import logger
 from qtile_extras import widget
 from modules.font_utils import get_available_font
+from modules.dpi_utils import scale_size, scale_font
 
 if TYPE_CHECKING:
     from modules.colors import ColorManager
@@ -43,12 +45,12 @@ class BarManager:
         self.icon_method = "svg"  # Options: "svg", "image", "nerd_font", "text"
         self.icon_dir = os.path.join(self.homedir, ".config", "qtile", "icons")
 
-        # Widget defaults
+        # Widget defaults - DPI aware
         self.widget_defaults = dict(
             font=get_available_font(qtile_config.preferred_font),
-            fontsize=15,
-            padding=3,
-            border_with=3,
+            fontsize=scale_font(15),  # DPI-scaled base font size
+            padding=scale_size(3),    # DPI-scaled padding
+            border_with=scale_size(3),
             border_focus=color_manager.get_colors()["special"]["foreground"],
             border_normal=color_manager.get_colors()["special"]["background"],
             foreground=color_manager.get_colors()["special"]["foreground"],
@@ -127,8 +129,8 @@ class BarManager:
                         filename=icon_path,
                         foreground=colordict["colors"]["color5"],
                         background=colordict["special"]["background"],
-                        margin_x=3,
-                        margin_y=2,
+                        margin_x=scale_size(3),
+                        margin_y=scale_size(2),
                     )
                 except Exception as e:
                     logger.warning(f"Failed to load SVG icon {icon_path}: {e}")
@@ -139,8 +141,8 @@ class BarManager:
                             return widget.Image(
                                 filename=png_path,
                                 background=colordict["special"]["background"],
-                                margin_x=3,
-                                margin_y=2,
+                                margin_x=scale_size(3),
+                                margin_y=scale_size(2),
                             )
                         except Exception as e2:
                             logger.warning(f"Failed to load PNG fallback {png_path}: {e2}")
@@ -150,7 +152,7 @@ class BarManager:
                 text=text_fallback or self.icons["text"].get(icon_key, "?"),
                 foreground=icon_color,
                 background=colordict["special"]["background"],
-                fontsize=16,
+                fontsize=scale_font(16),
             )
         
         elif self.icon_method == "image":
@@ -160,8 +162,8 @@ class BarManager:
                     return widget.Image(
                         filename=icon_path,
                         background=colordict["special"]["background"],
-                        margin_x=3,
-                        margin_y=2,
+                        margin_x=scale_size(3),
+                        margin_y=scale_size(2),
                     )
                 except Exception as e:
                     logger.warning(f"Failed to load PNG icon {icon_path}: {e}")
@@ -171,7 +173,7 @@ class BarManager:
                 text=text_fallback or self.icons["text"].get(icon_key, "?"),
                 foreground=icon_color,
                 background=colordict["special"]["background"],
-                fontsize=16,
+                fontsize=scale_font(16),
             )
         
         elif self.icon_method == "nerd_font":
@@ -180,7 +182,7 @@ class BarManager:
                 foreground=icon_color,
                 background=colordict["special"]["background"],
                 font=get_available_font(self.qtile_config.preferred_font),
-                fontsize=16,
+                fontsize=scale_font(16),
             )
         
         else:  # text method
@@ -188,7 +190,7 @@ class BarManager:
                 text=self.icons["text"].get(icon_key, text_fallback),
                 foreground=icon_color,
                 background=colordict["special"]["background"],
-                fontsize=16,
+                fontsize=scale_font(16),
             )
 
     def _has_battery(self) -> bool:
@@ -256,12 +258,11 @@ class BarManager:
             logger.debug("MPD module available")
             return True
         except ImportError:
-            logger.debug("MPD module not available, skipping Mpd2 widget")
+            logger.debug("MPD module not available")
             return False
 
     def _has_battery_widget_support(self) -> bool:
         """Check if qtile's battery widget supports current platform"""
-        import platform
         try:
             # Check if we have a battery AND the platform is supported
             if not self._has_battery():
@@ -471,7 +472,7 @@ class BarManager:
         if screen_num != 0:
             barconfig = barconfig[:-1]
 
-        return Bar(barconfig, 30, margin=5, opacity=0.8)
+        return Bar(barconfig, scale_size(32), margin=scale_size(5), opacity=0.8)
 
     def create_screens(self, screen_count: int):
         """Create screen configurations with bars"""

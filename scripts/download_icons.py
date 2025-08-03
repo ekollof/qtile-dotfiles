@@ -17,10 +17,22 @@ import json
 class IconDownloader:
     """Downloads and processes icons for qtile status bar"""
     
-    def __init__(self, icon_dir):
-        self.icon_dir = Path(icon_dir)
-        self.icon_dir.mkdir(parents=True, exist_ok=True)
-        self.icon_size = 20  # Slightly larger for better quality
+    def __init__(self):
+        self.home_dir = Path.home()
+        self.qtile_dir = self.home_dir / ".config" / "qtile"
+        self.icon_dir = self.qtile_dir / "icons"
+        
+        # Make icon size DPI-aware
+        try:
+            import sys
+            sys.path.insert(0, str(self.qtile_dir))
+            from modules.dpi_utils import scale_size
+            self.icon_size = scale_size(20)  # DPI-scaled icon size
+        except ImportError:
+            self.icon_size = 20  # Fallback for systems without DPI utils
+            
+        # Ensure icon directory exists
+        self.icon_dir.mkdir(exist_ok=True)
         
         # Map of current emoticons to appropriate icon replacements
         self.icon_mapping = {

@@ -18,7 +18,15 @@ class IconQualityImprover:
     
     def __init__(self, icon_dir):
         self.icon_dir = Path(icon_dir)
-        self.icon_size = 20  # Slightly larger for better quality
+        # Make icon size DPI-aware
+        try:
+            import sys
+            import os
+            sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
+            from modules.dpi_utils import scale_size
+            self.icon_size = scale_size(20)  # DPI-scaled icon size
+        except ImportError:
+            self.icon_size = 20  # Fallback for systems without DPI utils
         
     def improve_icon_quality(self, svg_file, png_file):
         """Convert SVG to high-quality transparent PNG"""
