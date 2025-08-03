@@ -211,14 +211,6 @@ class KeyBindings:
         self.key_manager = key_manager
         
         all_keys = []
-
-
-    def get_all_keys(self, key_manager=None):
-        """Get all keyboard bindings"""
-        # Store reference to key manager for hotkey display
-        self.key_manager = key_manager
-        
-        all_keys = []
         all_keys.extend(self.get_movement_keys())
         all_keys.extend(self.get_layout_keys())
         all_keys.extend(self.get_window_keys())
