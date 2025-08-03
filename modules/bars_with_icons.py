@@ -123,6 +123,7 @@ class BarManager:
                     # Try to create SVG image widget
                     return widget.Image(
                         filename=icon_path,
+                        foreground=colordict["colors"]["color5"],
                         background=colordict["special"]["background"],
                         margin_x=3,
                         margin_y=2,
