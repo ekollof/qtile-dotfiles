@@ -5,9 +5,10 @@ Handles bar configuration and widget setup using bitmap icons instead of emotico
 
 This is a modified version that replaces emoticons with bitmap icons.
 You can choose between different icon approaches:
-1. Image widgets (PNG files)
-2. Nerd Font icons (if you have a Nerd Font installed)
-3. Simple text symbols
+1. SVG vector images (recommended)
+2. PNG bitmap images  
+3. Nerd Font icons (uses your configured preferred font)
+4. Simple text symbols
 
 Usage: Replace your current bars.py with this file or copy the relevant parts.
 """
@@ -22,6 +23,7 @@ from libqtile.config import Screen
 from libqtile.lazy import lazy
 from libqtile.log_utils import logger
 from qtile_extras import widget
+from modules.font_utils import get_available_font
 
 if TYPE_CHECKING:
     from modules.colors import ColorManager
@@ -43,7 +45,7 @@ class BarManager:
 
         # Widget defaults
         self.widget_defaults = dict(
-            font="Monospace",
+            font=get_available_font(qtile_config.preferred_font),
             fontsize=15,
             padding=3,
             border_with=3,
@@ -177,7 +179,7 @@ class BarManager:
                 text=self.icons["nerd_font"].get(icon_key, text_fallback),
                 foreground=icon_color,
                 background=colordict["special"]["background"],
-                font="MonoMono Nerd Font",  # Use your preferred Nerd Font
+                font=get_available_font(self.qtile_config.preferred_font),
                 fontsize=16,
             )
         
