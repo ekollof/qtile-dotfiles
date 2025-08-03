@@ -377,11 +377,7 @@ class BarManager:
                 inactive=colordict["colors"]["color1"],
                 border=colordict["colors"]["color1"],
                 this_current_screen_border=colordict["colors"]["color6"],
-                # Show only active groups (groups with windows) and current group
                 hide_unused=True,
-                # Optional: Customize what constitutes "unused"
-                # visible_groups=None,  # Use default behavior
-                mouse_callbacks={"Button1": lazy.spawn("dmenu_run")},
             ),
             widget.Prompt(),
             widget.TaskList(
