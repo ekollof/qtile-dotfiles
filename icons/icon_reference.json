@@ -1,0 +1,61 @@
+{
+  "emoticon_replacements": {
+    "🐍": {
+      "name": "python",
+      "svg_file": "python.svg",
+      "png_file": "python.png"
+    },
+    "🔼": {
+      "name": "arrow-up",
+      "svg_file": "arrow-up.svg",
+      "png_file": "arrow-up.png"
+    },
+    "🔄": {
+      "name": "refresh",
+      "svg_file": "refresh.svg",
+      "png_file": "refresh.png"
+    },
+    "📭": {
+      "name": "mail",
+      "svg_file": "mail.svg",
+      "png_file": "mail.png"
+    },
+    "🎫": {
+      "name": "ticket",
+      "svg_file": "ticket.svg",
+      "png_file": "ticket.png"
+    },
+    "🌡": {
+      "name": "thermometer",
+      "svg_file": "thermometer.svg",
+      "png_file": "thermometer.png"
+    },
+    "🔋": {
+      "name": "battery",
+      "svg_file": "battery.svg",
+      "png_file": "battery.png"
+    },
+    "⚡": {
+      "name": "zap",
+      "svg_file": "zap.svg",
+      "png_file": "zap.png"
+    },
+    "🪫": {
+      "name": "battery-low",
+      "svg_file": "battery-low.svg",
+      "png_file": "battery-low.png"
+    }
+  },
+  "additional_icons": [
+    "clock",
+    "monitor",
+    "cpu",
+    "activity",
+    "wifi",
+    "volume"
+  ],
+  "usage_examples": {
+    "qtile_widget": "widget.TextBox(text=\"\", font=\"monospace\", fontsize=16)",
+    "image_widget": "widget.Image(filename=\"~/.config/qtile/icons/python.png\")"
+  }
+}
