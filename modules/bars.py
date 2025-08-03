@@ -44,7 +44,7 @@ class BarManager:
         # Widget defaults
         self.widget_defaults = dict(
             font="Monospace",
-            fontsize=15,
+            fontsize=16,
             padding=3,
             border_with=3,
             border_focus=color_manager.get_colors()["special"]["foreground"],
