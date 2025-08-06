@@ -6,12 +6,12 @@ Theme management for hotkey display
 from typing import Dict, Any, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from modules.color_management import ColorManager
+    from modules.simple_color_management import ColorManager
 
 
 class ThemeManager:
     """Manages themes for hotkey display applications"""
-    
+
     def __init__(self, color_manager: "ColorManager | None" = None):
         self.color_manager = color_manager
 
@@ -114,7 +114,7 @@ element-text {{
     def get_dmenu_args(self) -> Dict[str, str]:
         """Get dmenu arguments for styling"""
         colors = self.get_colors()
-        
+
         return {
             'nb': colors['background'],   # Normal background
             'nf': colors['foreground'],   # Normal foreground
@@ -138,7 +138,7 @@ element-text {{
     def get_dmenu_command_args(self) -> list[str]:
         """Get dmenu command arguments with styling"""
         colors = self.get_colors()
-        
+
         return [
             "dmenu",
             "-l", "25",  # Show 25 lines

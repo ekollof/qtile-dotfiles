@@ -1,40 +1,23 @@
 #!/usr/bin/env python3
 """
-Color management module for qtile
+Color management module for qtile - SIMPLIFIED VERSION
 Handles pywal/wallust color loading and automatic reloading
-Refactored for better maintainability while preserving backward compatibility
 """
 
-# Import all functionality from the new modular structure
-from .color_management import (
-    # Core classes and instances
-    ColorManager,
-    color_manager,
-    get_color_manager,
-    
-    # Public API functions
-    get_colors,
-    manual_color_reload,
-    start_color_monitoring,
-    setup_color_monitoring,
-    restart_color_monitoring,
-    validate_current_colors,
-    get_color_file_status,
-    get_monitoring_performance_status,
-    optimize_color_monitoring,
-    restart_color_monitoring_optimized
-)
+# Import simplified color management
+from .simple_color_management import *
 
-# Maintain backward compatibility by exposing the same interface
+# Maintain backward compatibility
 __all__ = [
     'ColorManager',
     'color_manager',
     'get_color_manager',
     'get_colors',
-    'manual_color_reload',
     'start_color_monitoring',
     'setup_color_monitoring',
     'restart_color_monitoring',
+    # Compatibility stubs
+    'manual_color_reload',
     'validate_current_colors',
     'get_color_file_status',
     'get_monitoring_performance_status',

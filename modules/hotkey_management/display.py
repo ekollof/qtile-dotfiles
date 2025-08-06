@@ -13,7 +13,7 @@ from .categorizer import HotkeyCategorizer
 from .themes import ThemeManager
 
 if TYPE_CHECKING:
-    from modules.color_management import ColorManager
+    from modules.simple_color_management import ColorManager
 
 
 @final
@@ -23,7 +23,7 @@ class HotkeyDisplay:
     def __init__(self, key_manager, color_manager: "ColorManager | None" = None) -> None:
         self.key_manager = key_manager
         self.color_manager = color_manager
-        
+
         # Initialize components
         self.categorizer = HotkeyCategorizer()
         self.theme_manager = ThemeManager(color_manager)
@@ -32,10 +32,10 @@ class HotkeyDisplay:
         """Generate list of hotkeys with descriptions"""
         # Get keys from key manager
         keys = self.key_manager.get_keys()
-        
+
         # Process and categorize keys
         self.categorizer.process_keys(keys)
-        
+
         # Build formatted list
         return self.categorizer.build_formatted_list(include_instructions=True)
 
@@ -48,7 +48,7 @@ class HotkeyDisplay:
 
             # Create temporary theme file
             rofi_theme = self.theme_manager.get_rofi_theme()
-            
+
             with tempfile.NamedTemporaryFile(mode='w', suffix='.rasi', delete=False) as theme_file:
                 theme_file.write(rofi_theme)
                 theme_file_path = theme_file.name
@@ -56,7 +56,7 @@ class HotkeyDisplay:
             try:
                 # Get rofi command
                 cmd = self.theme_manager.get_rofi_command_args(theme_file_path)
-                
+
                 logger.info("Showing hotkey display")
 
                 # Run rofi
