@@ -77,11 +77,11 @@ if command -v dunst >/dev/null 2>&1; then
 fi
 
 # Set wallpaper
-if [ -f ~/.wallpaper ]; then
-	~/bin/wallpaper.ksh -r &
-else
-	wallpaper=$("realpath ${HOME}/.wallpaper")
+if [ -f "${HOME}/.wallpaper" ]; then
+	wallpaper="$(cat "${HOME}/.wallpaper")"
 	feh --bg-max "${wallpaper}" &
+else
+	~/bin/wallpaper.ksh -r &
 fi
 
 # Start utility programs
