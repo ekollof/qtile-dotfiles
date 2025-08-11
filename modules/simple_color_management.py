@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 """
 Simplified color management for qtile
-Maintains the same API as the complex version but much simpler implementation
+Provides basic color loading and file watching functionality
 """
 
 import json
-import os
+
 import threading
 import time
+from pathlib import Path
 from typing import Dict, Any, Optional
 from libqtile import qtile
 from libqtile.log_utils import logger
@@ -18,6 +19,9 @@ try:
     WATCHDOG_AVAILABLE = True
 except ImportError:
     WATCHDOG_AVAILABLE = False
+    # Create dummy classes for type checking
+    Observer = None  # type: ignore
+    FileSystemEventHandler = None  # type: ignore
     logger.warning("Watchdog not available, using polling fallback")
 
 
@@ -25,7 +29,7 @@ class SimpleColorManager:
     """Simplified color manager - same API, much less complexity"""
 
     def __init__(self, colors_file: str = "~/.cache/wal/colors.json"):
-        self.colors_file = os.path.expanduser(colors_file)
+        self.colors_file = Path(colors_file).expanduser()
         self.colordict = self._load_colors()
         self._observer = None
         self._polling_thread = None
@@ -97,7 +101,11 @@ class SimpleColorManager:
 
     def _start_watchdog(self):
         """Start watchdog file monitoring"""
-        class ColorChangeHandler(FileSystemEventHandler):
+        if not WATCHDOG_AVAILABLE or Observer is None or FileSystemEventHandler is None:
+            logger.warning("Watchdog not available, file monitoring disabled")
+            return
+
+        class ColorChangeHandler(FileSystemEventHandler):  # type: ignore
             def __init__(self, manager):
                 self.manager = manager
 
@@ -108,14 +116,16 @@ class SimpleColorManager:
                     self.manager._handle_color_change()
 
         try:
-            self._observer = Observer()
+            self._observer = Observer()  # type: ignore
             handler = ColorChangeHandler(self)
-            watch_dir = os.path.dirname(self.colors_file)
-            os.makedirs(watch_dir, exist_ok=True)
-            self._observer.schedule(handler, watch_dir, recursive=False)
-            self._observer.start()
-            logger.info(f"Watching {self.colors_file} with watchdog")
+            watch_dir = self.colors_file.parent
+            watch_dir.mkdir(parents=True, exist_ok=True)
+            self._observer.schedule(handler, str(watch_dir), recursive=False)  # type: ignore
+            self._observer.start()  # type: ignore
+            logger.debug(f"Started watching {watch_dir} for color changes")
         except Exception as e:
+            logger.warning(f"Failed to start watchdog monitoring: {e}")
+            self._observer = None
             logger.error(f"Watchdog failed: {e}, falling back to polling")
             self._start_polling()
 
@@ -125,8 +135,8 @@ class SimpleColorManager:
             last_mtime = 0
             while self._watching and not self._shutdown_event.is_set():
                 try:
-                    if os.path.exists(self.colors_file):
-                        mtime = os.path.getmtime(self.colors_file)
+                    if self.colors_file.exists():
+                        mtime = self.colors_file.stat().st_mtime
                         if mtime > last_mtime > 0:
                             time.sleep(0.2)  # Ensure write complete
                             self._handle_color_change()
@@ -146,7 +156,7 @@ class SimpleColorManager:
             # Reload colors first
             self.colordict = self._load_colors()
             # Restart qtile to apply new colors
-            if qtile:
+            if qtile is not None:
                 qtile.restart()
         except Exception as e:
             logger.error(f"Error handling color change: {e}")
@@ -156,9 +166,9 @@ class SimpleColorManager:
         self._watching = False
         self._shutdown_event.set()
 
-        if self._observer:
-            self._observer.stop()
-            self._observer.join()
+        if self._observer and hasattr(self._observer, 'stop'):
+            self._observer.stop()  # type: ignore
+            self._observer.join()  # type: ignore
 
         if self._polling_thread:
             self._polling_thread.join(timeout=2)

@@ -4,7 +4,8 @@ Centralized configuration for qtile - DPI AWARE VERSION
 All user-configurable settings in one place with automatic DPI scaling
 """
 
-import os
+
+from pathlib import Path
 from modules.font_utils import get_available_font
 from modules.dpi_utils import scale_size, scale_font, get_dpi_manager
 
@@ -13,9 +14,9 @@ class QtileConfig:
     """Centralized qtile configuration with DPI awareness"""
 
     home: str
-    
+
     def __init__(self):
-        self.home = os.path.expanduser("~")
+        self.home = str(Path.home())
         self.dpi_manager = get_dpi_manager()
 
     # ===== FONT SETTINGS =====
@@ -26,7 +27,7 @@ class QtileConfig:
         return "BerkeleyMono Nerd Font Mono"
 
     # ===== DPI SETTINGS =====
-    
+
     @property
     def dpi_info(self) -> dict:
         """Get DPI scaling information"""
@@ -64,7 +65,7 @@ class QtileConfig:
     @property
     def mouse_warp_focus(self) -> bool:
         """Enable mouse warping when changing window focus
-        
+
         When True, the mouse cursor automatically moves to the center of the
         newly focused window when using Super+hjkl navigation keys.
         When False, focus changes without moving the mouse cursor.

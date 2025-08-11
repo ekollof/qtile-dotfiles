@@ -4,15 +4,15 @@ Show DPI information and scaling factors for qtile configuration
 """
 
 import sys
-import os
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from modules.dpi_utils import get_dpi_manager
 
 def main():
     dpi_manager = get_dpi_manager()
     info = dpi_manager.get_scaling_info()
-    
+
     print("🖥️  DPI Information for Qtile Configuration")
     print("=" * 50)
     print(f"Current DPI: {info['dpi']:.1f}")

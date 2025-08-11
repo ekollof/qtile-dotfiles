@@ -84,8 +84,8 @@ class GroupManager:
         dropdowns = []
         for scratch_config in self.config.scratchpads:
             dropdowns.append(DropDown(
-                scratch_config['name'],
-                scratch_config['command'],
+                str(scratch_config['name']),
+                str(scratch_config['command']),
                 width=scratch_config['width'],
                 height=scratch_config['height'],
                 x=scratch_config['x'],

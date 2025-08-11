@@ -9,7 +9,7 @@ from libqtile.log_utils import logger
 
 class WindowManager:
     """Handles window state management and floating window logic"""
-    
+
     def __init__(self, config):
         self.config = config
 
@@ -17,35 +17,17 @@ class WindowManager:
         """Determine if a window should be floating based on floating rules"""
         try:
             wm_class = window.window.get_wm_class()
+
             if wm_class and len(wm_class) > 0:
-                # Check against force floating apps
-                if wm_class[0].lower() in [fc.lower() for fc in self.config.force_floating_apps]:
+                if self._check_force_floating_apps(wm_class):
+                    return True
+                if self._check_floating_rules(wm_class, window):
                     return True
 
-                # Check against floating rules (from qtile_config.py)
-                for rule in self.config.floating_rules:
-                    if 'wm_class' in rule:
-                        if wm_class[0].lower() == rule['wm_class'].lower():
-                            return True
-                        if len(wm_class) >= 2 and wm_class[1].lower() == rule['wm_class'].lower():
-                            return True
-
-                    if 'title' in rule:
-                        try:
-                            window_title = window.window.get_name() or ""
-                            if rule['title'].lower() in window_title.lower():
-                                return True
-                        except Exception:
-                            pass
-
-            # Check if it's a transient window
-            if window.window.get_wm_transient_for():
+            if self._check_transient_window(window):
                 return True
 
-            # Check WM hints for max_width (dialog-like windows)
-            hints = window.window.get_wm_normal_hints()
-            if hints and hints.get("max_width") and hints.get("max_width") < 1000:
-                # Only consider it floating if max_width is small (dialog-like)
+            if self._check_wm_hints(window):
                 return True
 
             return False
@@ -53,6 +35,53 @@ class WindowManager:
         except (IndexError, AttributeError, TypeError) as e:
             logger.debug(f"Could not determine if window should float: {e}")
             return False  # Default to tiling if we can't determine
+
+    def _check_force_floating_apps(self, wm_class) -> bool:
+        """Check if window class is in force floating apps list"""
+        return wm_class[0].lower() in [fc.lower() for fc in self.config.force_floating_apps]
+
+    def _check_floating_rules(self, wm_class, window) -> bool:
+        """Check against floating rules from configuration"""
+        for rule in self.config.floating_rules:
+            if self._check_wm_class_rule(wm_class, rule):
+                return True
+            if self._check_title_rule(window, rule):
+                return True
+        return False
+
+    def _check_wm_class_rule(self, wm_class, rule) -> bool:
+        """Check if window class matches floating rule"""
+        if 'wm_class' not in rule:
+            return False
+
+        rule_class = rule['wm_class'].lower()
+        if wm_class[0].lower() == rule_class:
+            return True
+        if len(wm_class) >= 2 and wm_class[1].lower() == rule_class:
+            return True
+        return False
+
+    def _check_title_rule(self, window, rule) -> bool:
+        """Check if window title matches floating rule"""
+        if 'title' not in rule:
+            return False
+
+        try:
+            window_title = window.window.get_name() or ""
+            return rule['title'].lower() in window_title.lower()
+        except Exception:
+            return False
+
+    def _check_transient_window(self, window) -> bool:
+        """Check if window is transient (should float)"""
+        return bool(window.window.get_wm_transient_for())
+
+    def _check_wm_hints(self, window) -> bool:
+        """Check WM hints for dialog-like windows"""
+        hints = window.window.get_wm_normal_hints()
+        if hints and hints.get("max_width") and hints.get("max_width") < 1000:
+            return True
+        return False
 
     def enforce_window_tiling(self, window):
         """Enforce consistent tiling behavior for a window"""
@@ -164,20 +193,20 @@ class WindowManager:
             for window in qtile.windows_map.values():
                 if hasattr(window, 'window') and hasattr(window, 'floating'):
                     stats['total_windows'] += 1
-                    
+
                     if window.floating:
                         stats['floating_windows'] += 1
                     else:
                         stats['tiled_windows'] += 1
-                    
+
                     if window.window.get_wm_transient_for():
                         stats['transient_windows'] += 1
-                    
+
                     # Count by class
                     wm_class = self._get_window_class(window)
                     if wm_class:
                         stats['windows_by_class'][wm_class] = stats['windows_by_class'].get(wm_class, 0) + 1
-                    
+
                     # Count by group
                     if hasattr(window, 'group') and window.group:
                         group_name = window.group.name
@@ -259,7 +288,7 @@ class WindowManager:
                     floating_windows.append(window_info)
         except Exception as e:
             logger.error(f"Error listing floating windows: {e}")
-        
+
         return floating_windows
 
     def get_problematic_windows(self, qtile) -> List[Dict[str, Any]]:
@@ -269,18 +298,18 @@ class WindowManager:
             for window in qtile.windows_map.values():
                 if hasattr(window, 'window') and hasattr(window, 'floating'):
                     issues = []
-                    
+
                     # Check if window should float but is tiled (or vice versa)
                     should_float = self.should_window_float(window)
                     if should_float and not window.floating:
                         issues.append("Should be floating but is tiled")
                     elif not should_float and window.floating:
                         issues.append("Should be tiled but is floating")
-                    
+
                     # Check for missing parent in transient windows
                     if window.window.get_wm_transient_for() and not hasattr(window, 'parent'):
                         issues.append("Transient window without parent")
-                    
+
                     if issues:
                         problematic.append({
                             'name': self._get_window_name(window),
@@ -291,5 +320,5 @@ class WindowManager:
                         })
         except Exception as e:
             logger.error(f"Error getting problematic windows: {e}")
-        
+
         return problematic

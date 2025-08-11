@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+from pathlib import Path
 """
 Icon Downloader for Qtile Status Bar
 Downloads appropriate icons to replace emoticons in qtile configuration
@@ -7,21 +8,18 @@ This script downloads high-quality SVG icons from various sources and converts t
 to bitmap formats suitable for use in qtile status bars.
 """
 
-import os
-import sys
 import subprocess
-import requests
-from pathlib import Path
 import json
+import requests
 
 class IconDownloader:
     """Downloads and processes icons for qtile status bar"""
-    
+
     def __init__(self):
         self.home_dir = Path.home()
         self.qtile_dir = self.home_dir / ".config" / "qtile"
         self.icon_dir = self.qtile_dir / "icons"
-        
+
         # Make icon size DPI-aware
         try:
             import sys
@@ -30,10 +28,10 @@ class IconDownloader:
             self.icon_size = scale_size(20)  # DPI-scaled icon size
         except ImportError:
             self.icon_size = 20  # Fallback for systems without DPI utils
-            
+
         # Ensure icon directory exists
         self.icon_dir.mkdir(exist_ok=True)
-        
+
         # Map of current emoticons to appropriate icon replacements
         self.icon_mapping = {
             '🐍': {
@@ -82,7 +80,7 @@ class IconDownloader:
                 'filename': 'battery-low.svg'
             }
         }
-        
+
         # Additional useful icons for status bar
         self.additional_icons = {
             'clock': {
@@ -116,14 +114,14 @@ class IconDownloader:
         try:
             response = requests.get(url, timeout=30)
             response.raise_for_status()
-            
+
             filepath = self.icon_dir / filename
             with open(filepath, 'wb') as f:
                 f.write(response.content)
-            
+
             print(f"✓ Downloaded {filename}")
             return True
-            
+
         except requests.exceptions.RequestException as e:
             print(f"✗ Failed to download {filename}: {e}")
             return False
@@ -144,7 +142,7 @@ class IconDownloader:
                 '-quality', '100',  # Maximum quality
                 str(png_file)
             ]
-            
+
             result = subprocess.run(cmd, capture_output=True, text=True)
             if result.returncode == 0:
                 print(f"✓ Converted {svg_file.name} to PNG (high quality)")
@@ -163,7 +161,7 @@ class IconDownloader:
                     '-quality', '100',
                     str(png_file)
                 ]
-                
+
                 result_fallback = subprocess.run(cmd_fallback, capture_output=True, text=True)
                 if result_fallback.returncode == 0:
                     print(f"✓ Converted {svg_file.name} to PNG (fallback)")
@@ -171,7 +169,7 @@ class IconDownloader:
                 else:
                     print(f"✗ Failed to convert {svg_file.name}: {result.stderr}")
                     return False
-                
+
         except FileNotFoundError:
             print("✗ ImageMagick not found. Please install ImageMagick to convert SVG to PNG")
             return False
@@ -179,12 +177,12 @@ class IconDownloader:
     def download_all_icons(self):
         """Download all mapped icons"""
         print("Downloading icon replacements for emoticons...")
-        
+
         # Download emoticon replacements
         for emoticon, icon_info in self.icon_mapping.items():
             print(f"Downloading {icon_info['name']} to replace {emoticon}")
             self.download_file(icon_info['url'], icon_info['filename'])
-        
+
         # Download additional useful icons
         print("\nDownloading additional useful icons...")
         for icon_name, icon_info in self.additional_icons.items():
@@ -194,12 +192,12 @@ class IconDownloader:
     def convert_all_to_png(self):
         """Convert all SVG files to PNG"""
         print("\nConverting SVG files to PNG...")
-        
+
         svg_files = list(self.icon_dir.glob("*.svg"))
         if not svg_files:
             print("No SVG files found to convert")
             return
-        
+
         for svg_file in svg_files:
             png_file = svg_file.with_suffix('.png')
             self.convert_svg_to_png(svg_file, png_file)
@@ -214,18 +212,18 @@ class IconDownloader:
                 'image_widget': 'widget.Image(filename="~/.config/qtile/icons/python.png")'
             }
         }
-        
+
         for emoticon, icon_info in self.icon_mapping.items():
             reference['emoticon_replacements'][emoticon] = {
                 'name': icon_info['name'],
                 'svg_file': icon_info['filename'],
                 'png_file': icon_info['filename'].replace('.svg', '.png')
             }
-        
+
         reference_file = self.icon_dir / 'icon_reference.json'
         with open(reference_file, 'w') as f:
             json.dump(reference, f, indent=2, ensure_ascii=False)
-        
+
         print(f"✓ Created icon reference at {reference_file}")
 
     def run(self):
@@ -239,15 +237,8 @@ class IconDownloader:
 
 def main():
     """Main function"""
-    # Determine icon directory
-    if len(sys.argv) > 1:
-        icon_dir = sys.argv[1]
-    else:
-        # Default to qtile config directory
-        home = os.path.expanduser("~")
-        icon_dir = os.path.join(home, ".config", "qtile", "icons")
-    
-    downloader = IconDownloader(icon_dir)
+    # IconDownloader uses its own path detection
+    downloader = IconDownloader()
     downloader.run()
 
 

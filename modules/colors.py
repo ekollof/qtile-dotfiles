@@ -5,7 +5,21 @@ Handles pywal/wallust color loading and automatic reloading
 """
 
 # Import simplified color management
-from .simple_color_management import *
+from .simple_color_management import (
+    ColorManager,
+    color_manager,
+    get_color_manager,
+    get_colors,
+    start_color_monitoring,
+    setup_color_monitoring,
+    restart_color_monitoring,
+    manual_color_reload,
+    validate_current_colors,
+    get_color_file_status,
+    get_monitoring_performance_status,
+    optimize_color_monitoring,
+    restart_color_monitoring_optimized
+)
 
 # Maintain backward compatibility
 __all__ = [

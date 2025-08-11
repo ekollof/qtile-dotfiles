@@ -5,6 +5,7 @@ Startup hooks for qtile - SIMPLIFIED VERSION
 
 import os
 import subprocess
+from pathlib import Path
 from libqtile import hook, qtile
 from libqtile.log_utils import logger
 
@@ -45,10 +46,10 @@ class StartupHooks:
     def run_autostart_script(self):
         """Run the autostart script"""
         try:
-            autostart_script = self.config.autostart_script
-            if os.path.exists(autostart_script) and os.access(autostart_script, os.X_OK):
+            autostart_script = Path(self.config.autostart_script)
+            if autostart_script.exists() and os.access(autostart_script, os.X_OK):
                 logger.info(f"Running autostart script: {autostart_script}")
-                subprocess.Popen([autostart_script],
+                subprocess.Popen([str(autostart_script)],
                                  stdout=subprocess.DEVNULL,
                                  stderr=subprocess.DEVNULL,
                                  stdin=subprocess.DEVNULL,
@@ -76,9 +77,10 @@ class StartupHooks:
         """Validate the autostart script configuration"""
         try:
             script_path = self.config.autostart_script
+            script_path_obj = Path(script_path)
             return {
-                'valid': os.path.exists(script_path) and os.access(script_path, os.X_OK),
-                'exists': os.path.exists(script_path),
+                'valid': script_path_obj.exists() and os.access(script_path, os.X_OK),
+                'exists': script_path_obj.exists(),
                 'executable': os.access(script_path, os.X_OK),
                 'path': script_path,
                 'errors': []

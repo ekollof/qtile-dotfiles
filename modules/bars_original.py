@@ -7,8 +7,9 @@ Handles bar configuration and widget setup
 import os
 import socket
 import subprocess
-from typing import final, Any, TYPE_CHECKING
-from libqtile import widget as qtwidget
+from pathlib import Path
+from typing import final, TYPE_CHECKING, Callable
+
 from libqtile.bar import Bar
 from libqtile.config import Screen
 from libqtile.lazy import lazy
@@ -27,7 +28,7 @@ class BarManager:
         self.color_manager = color_manager
         self.qtile_config = qtile_config
         self.hostname = socket.gethostname()
-        self.homedir = os.getenv("HOME")
+        self.homedir = str(Path.home())
 
         # Widget defaults
         self.widget_defaults = dict(
@@ -54,65 +55,70 @@ class BarManager:
     def _has_battery(self) -> bool:
         """Check if the system has a battery (cross-platform)"""
         import platform
-        import subprocess
-        
+
         try:
             system = platform.system().lower()
-            
+
             if system == "linux":
-                # Linux: Check /sys/class/power_supply/
-                battery_paths = [
-                    "/sys/class/power_supply/BAT0",
-                    "/sys/class/power_supply/BAT1", 
-                    "/sys/class/power_supply/battery"
-                ]
-                
-                for path in battery_paths:
-                    if os.path.exists(path):
-                        # Check if it's actually a battery (not just AC adapter)
-                        type_file = os.path.join(path, "type")
-                        if os.path.exists(type_file):
-                            with open(type_file, 'r') as f:
-                                if f.read().strip().lower() == "battery":
-                                    return True
-                return False
-                
+                return self._check_linux_battery()
             elif system in ["openbsd", "freebsd", "netbsd", "dragonfly"]:
-                # BSD systems: Use apm or acpiconf
-                try:
-                    if system == "openbsd":
-                        # OpenBSD: Use apm command
-                        result = subprocess.run(['apm'], capture_output=True, text=True, timeout=5)
-                        # If apm runs without error and shows battery info, we have a battery
-                        return result.returncode == 0 and 'battery' in result.stdout.lower()
-                    else:
-                        # FreeBSD/NetBSD: Try acpiconf
-                        result = subprocess.run(['acpiconf', '-i', '0'], capture_output=True, text=True, timeout=5)
-                        return result.returncode == 0
-                except (subprocess.TimeoutExpired, FileNotFoundError):
-                    return False
-                    
+                return self._check_bsd_battery()
             elif system == "darwin":
-                # macOS: Use pmset command
-                try:
-                    result = subprocess.run(['pmset', '-g', 'batt'], capture_output=True, text=True, timeout=5)
-                    return result.returncode == 0 and 'InternalBattery' in result.stdout
-                except (subprocess.TimeoutExpired, FileNotFoundError):
-                    return False
-                    
+                return self._check_macos_battery()
             else:
-                # Unknown system: Don't try to use battery widget
                 logger.debug(f"Unknown system {system}, skipping battery widget")
                 return False
-                    
+
         except Exception as e:
             logger.debug(f"Error detecting battery: {e}")
+            return False
+
+    def _check_linux_battery(self) -> bool:
+        """Check for battery on Linux systems"""
+        battery_paths = [
+            "/sys/class/power_supply/BAT0",
+            "/sys/class/power_supply/BAT1",
+            "/sys/class/power_supply/battery"
+        ]
+
+        for path in battery_paths:
+            if Path(path).exists():
+                type_file = Path(path) / "type"
+                if type_file.exists():
+                    with open(type_file, 'r') as f:
+                        if f.read().strip().lower() == "battery":
+                            return True
+        return False
+
+    def _check_bsd_battery(self) -> bool:
+        """Check for battery on BSD systems"""
+        import subprocess
+        try:
+            # Try apm first (common on OpenBSD)
+            result = subprocess.run(['apm'], capture_output=True, text=True, timeout=2)
+            if result.returncode == 0 and 'battery' in result.stdout.lower():
+                return True
+            # Try acpiconf (FreeBSD)
+            result = subprocess.run(['acpiconf', '-i', '0'], capture_output=True, text=True, timeout=2)
+            return result.returncode == 0
+        except (subprocess.TimeoutExpired, FileNotFoundError):
+            return False
+
+    def _check_macos_battery(self) -> bool:
+        """Check for battery on macOS"""
+        import subprocess
+        try:
+            result = subprocess.run(['pmset', '-g', 'batt'], capture_output=True, text=True, timeout=2)
+            return result.returncode == 0 and 'InternalBattery' in result.stdout
+        except (subprocess.TimeoutExpired, FileNotFoundError):
             return False
 
     def _has_mpd_support(self) -> bool:
         """Check if MPD Python module is available"""
         try:
             import mpd
+            # Use the module to ensure it's properly loaded
+            _ = mpd.MPDClient
             logger.debug("MPD module available")
             return True
         except ImportError:
@@ -126,19 +132,18 @@ class BarManager:
             # Check if we have a battery AND the platform is supported
             if not self._has_battery():
                 return False
-                
+
             system = platform.system().lower()
             # qtile's battery widget has known platform issues on some BSD systems
             if system == "openbsd":
                 # Test if the battery widget can actually initialize
                 try:
-                    from qtile_extras import widget
-                    test_widget = widget.Battery()
+                    widget.Battery()
                     return True
                 except Exception as e:
                     logger.debug(f"Battery widget not supported on {system}: {e}")
                     return False
-            
+
             return True
         except Exception as e:
             logger.debug(f"Error checking battery widget support: {e}")
@@ -146,24 +151,26 @@ class BarManager:
 
     def _script_exists(self, script_path: str) -> bool:
         """Check if a script exists and is executable"""
-        expanded_path = os.path.expanduser(script_path)
-        return os.path.isfile(expanded_path) and os.access(expanded_path, os.X_OK)
+        expanded_path = Path(script_path).expanduser()
+        return expanded_path.is_file() and os.access(expanded_path, os.X_OK)
 
-    def _safe_script_call(self, script_path: str, fallback_text: str = "N/A") -> callable:
+    def _safe_script_call(self, script_path: str, fallback_text: str = "N/A") -> Callable[[], str]:
         """Create a safe wrapper for script calls that handles missing scripts gracefully"""
-        expanded_path = os.path.expanduser(script_path)
-        
+        expanded_path = Path(script_path).expanduser()
+
         def wrapper():
             try:
-                if not os.path.isfile(expanded_path):
+                if not expanded_path.is_file():
                     return fallback_text
-                
-                result = subprocess.check_output(
-                    expanded_path, 
-                    stderr=subprocess.DEVNULL,
-                    timeout=10
+
+                result = subprocess.run(
+                    str(expanded_path),
+                    capture_output=True,
+                    text=True,
+                    timeout=10,
+                    check=True
                 )
-                return result.strip().decode("utf-8")
+                return result.stdout.strip()
             except subprocess.TimeoutExpired:
                 logger.debug(f"Script {script_path} timed out")
                 return "timeout"
@@ -176,12 +183,12 @@ class BarManager:
             except Exception as e:
                 logger.debug(f"Error running script {script_path}: {e}")
                 return "error"
-        
+
         return wrapper
 
     def _get_script_widgets(self, colordict: dict) -> list:
         """Create GenPollText widgets for available scripts using configuration-driven approach"""
-        
+
         # Generate widgets for available scripts from qtile configuration
         widgets = []
         for config in self.qtile_config.script_configs:
@@ -198,7 +205,7 @@ class BarManager:
                 logger.debug(f"Added {config['name']} widget")
             else:
                 logger.debug(f"{config['name']} script not found: {config['script_path']}")
-        
+
         return widgets
 
     def create_bar_config(self, screen_num: int) -> Bar:

@@ -3,12 +3,47 @@
 System-level commands for qtile
 """
 
+import subprocess
 from libqtile.log_utils import logger
+
+
+def run_system_command(
+    commands: list[list[str]],
+    operation: str,
+    timeout: int = 5
+) -> bool:
+    """Run system commands with unified error handling
+
+    Args:
+        commands: List of command arrays to try in order
+        operation: Description of the operation for logging
+        timeout: Command timeout in seconds
+
+    Returns:
+        True if any command succeeded, False if all failed
+    """
+    for cmd in commands:
+        try:
+            subprocess.run(
+                cmd,
+                check=True,
+                capture_output=True,
+                timeout=timeout,
+                text=True
+            )
+            logger.debug(f"{operation} successful: {' '.join(cmd)}")
+            return True
+        except (subprocess.CalledProcessError, FileNotFoundError, subprocess.TimeoutExpired) as e:
+            logger.debug(f"Command failed: {' '.join(cmd)} - {e}")
+            continue
+
+    logger.warning(f"All {operation} commands failed")
+    return False
 
 
 class SystemCommands:
     """Commands for system-level operations and qtile management"""
-    
+
     def __init__(self, color_manager):
         self.color_manager = color_manager
 
@@ -37,13 +72,15 @@ class SystemCommands:
             logger.info("Manual screen reconfiguration requested")
             from modules.screens import refresh_screens, get_screen_count
             from modules.bars import create_bar_manager
-            
+
             refresh_screens()
             new_screen_count = get_screen_count()
             logger.info(f"Detected {new_screen_count} screens")
 
             # Recreate screens
-            bar_manager = create_bar_manager(self.color_manager)
+            from qtile_config import get_config
+            qtile_config = get_config()
+            bar_manager = create_bar_manager(self.color_manager, qtile_config)
             new_screens = bar_manager.create_screens(new_screen_count)
             qtile.config.screens = new_screens
 
@@ -134,7 +171,7 @@ class SystemCommands:
                     for i, screen in enumerate(qtile.screens)
                 ]
             }
-            
+
             import json
             debug_output = json.dumps(state, indent=2)
             logger.info(f"Qtile state dump:\n{debug_output}")
@@ -147,7 +184,7 @@ class SystemCommands:
         """Emergency reset - try to recover from problematic state"""
         try:
             logger.warning("Emergency reset initiated")
-            
+
             # Try to normalize all layouts
             for group in qtile.groups:
                 try:
@@ -157,13 +194,13 @@ class SystemCommands:
                         group.layout.reset()
                 except Exception:
                     pass
-            
+
             # Force retile if available
             try:
                 self.manual_retile_all(qtile)
             except Exception:
                 pass
-            
+
             # Switch to a safe layout (tile or max)
             try:
                 qtile.current_group.setlayout('tile')
@@ -172,9 +209,9 @@ class SystemCommands:
                     qtile.current_group.setlayout('max')
                 except Exception:
                     pass
-            
+
             logger.info("Emergency reset completed")
-            
+
         except Exception as e:
             logger.error(f"Emergency reset failed: {e}")
 
@@ -209,315 +246,128 @@ class SystemCommands:
     @staticmethod
     def brightness_up(qtile):
         """Increase screen brightness"""
-        try:
-            import subprocess
-            
-            # Try different brightness control methods (OpenBSD compatible)
-            brightness_commands = [
-                ['xbacklight', '-inc', '10'],           # xbacklight (most common)
-                ['brightnessctl', 'set', '+10%'],       # brightnessctl
-                ['light', '-A', '10'],                  # light utility
-                ['doas', 'xbacklight', '-inc', '10']    # OpenBSD with doas
-            ]
-            
-            for cmd in brightness_commands:
-                try:
-                    subprocess.run(cmd, check=True, capture_output=True)
-                    logger.debug(f"Brightness increased using: {' '.join(cmd)}")
-                    return
-                except (subprocess.CalledProcessError, FileNotFoundError):
-                    continue
-            
-            logger.warning("No brightness control utility found")
-            
-        except Exception as e:
-            logger.error(f"Error increasing brightness: {e}")
+        brightness_commands = [
+            ['xbacklight', '-inc', '10'],           # xbacklight (most common)
+            ['brightnessctl', 'set', '+10%'],       # brightnessctl
+            ['light', '-A', '10'],                  # light utility
+            ['doas', 'xbacklight', '-inc', '10']    # OpenBSD with doas
+        ]
+        run_system_command(brightness_commands, "brightness increase")
 
-    @staticmethod 
+    @staticmethod
     def brightness_down(qtile):
         """Decrease screen brightness"""
-        try:
-            import subprocess
-            
-            brightness_commands = [
-                ['xbacklight', '-dec', '10'],
-                ['brightnessctl', 'set', '10%-'],
-                ['light', '-U', '10'],
-                ['doas', 'xbacklight', '-dec', '10']
-            ]
-            
-            for cmd in brightness_commands:
-                try:
-                    subprocess.run(cmd, check=True, capture_output=True)
-                    logger.debug(f"Brightness decreased using: {' '.join(cmd)}")
-                    return
-                except (subprocess.CalledProcessError, FileNotFoundError):
-                    continue
-            
-            logger.warning("No brightness control utility found")
-            
-        except Exception as e:
-            logger.error(f"Error decreasing brightness: {e}")
+        brightness_commands = [
+            ['xbacklight', '-dec', '10'],
+            ['brightnessctl', 'set', '10%-'],
+            ['light', '-U', '10'],
+            ['doas', 'xbacklight', '-dec', '10']
+        ]
+        run_system_command(brightness_commands, "brightness decrease")
 
     @staticmethod
     def volume_up(qtile):
         """Increase system volume"""
-        try:
-            import subprocess
-            
-            volume_commands = [
-                ['pactl', 'set-sink-volume', '@DEFAULT_SINK@', '+5%'],   # PulseAudio
-                ['amixer', 'sset', 'Master', '5%+'],                     # ALSA
-                ['mixerctl', 'outputs.master=+0.05'],                    # OpenBSD sndio
-                ['doas', 'mixerctl', 'outputs.master=+0.05']             # OpenBSD with doas
-            ]
-            
-            for cmd in volume_commands:
-                try:
-                    subprocess.run(cmd, check=True, capture_output=True)
-                    logger.debug(f"Volume increased using: {' '.join(cmd)}")
-                    return
-                except (subprocess.CalledProcessError, FileNotFoundError):
-                    continue
-            
-            logger.warning("No volume control utility found")
-            
-        except Exception as e:
-            logger.error(f"Error increasing volume: {e}")
+        volume_commands = [
+            ['pactl', 'set-sink-volume', '@DEFAULT_SINK@', '+5%'],   # PulseAudio
+            ['amixer', 'sset', 'Master', '5%+'],                     # ALSA
+            ['mixerctl', 'outputs.master=+0.05'],                    # OpenBSD sndio
+            ['doas', 'mixerctl', 'outputs.master=+0.05']             # OpenBSD with doas
+        ]
+        run_system_command(volume_commands, "volume increase")
 
     @staticmethod
     def volume_down(qtile):
         """Decrease system volume"""
-        try:
-            import subprocess
-            
-            volume_commands = [
-                ['pactl', 'set-sink-volume', '@DEFAULT_SINK@', '-5%'],
-                ['amixer', 'sset', 'Master', '5%-'],
-                ['mixerctl', 'outputs.master=-0.05'],
-                ['doas', 'mixerctl', 'outputs.master=-0.05']
-            ]
-            
-            for cmd in volume_commands:
-                try:
-                    subprocess.run(cmd, check=True, capture_output=True)
-                    logger.debug(f"Volume decreased using: {' '.join(cmd)}")
-                    return
-                except (subprocess.CalledProcessError, FileNotFoundError):
-                    continue
-            
-            logger.warning("No volume control utility found")
-            
-        except Exception as e:
-            logger.error(f"Error decreasing volume: {e}")
+        volume_commands = [
+            ['pactl', 'set-sink-volume', '@DEFAULT_SINK@', '-5%'],
+            ['amixer', 'sset', 'Master', '5%-'],
+            ['mixerctl', 'outputs.master=-0.05'],
+            ['doas', 'mixerctl', 'outputs.master=-0.05']
+        ]
+        run_system_command(volume_commands, "volume decrease")
 
     @staticmethod
     def volume_mute_toggle(qtile):
         """Toggle volume mute"""
-        try:
-            import subprocess
-            
-            mute_commands = [
-                ['pactl', 'set-sink-mute', '@DEFAULT_SINK@', 'toggle'],
-                ['amixer', 'sset', 'Master', 'toggle'],
-                ['mixerctl', 'outputs.master.mute=toggle'],
-                ['doas', 'mixerctl', 'outputs.master.mute=toggle']
-            ]
-            
-            for cmd in mute_commands:
-                try:
-                    subprocess.run(cmd, check=True, capture_output=True)
-                    logger.debug(f"Volume mute toggled using: {' '.join(cmd)}")
-                    return
-                except (subprocess.CalledProcessError, FileNotFoundError):
-                    continue
-            
-            logger.warning("No volume mute control utility found")
-            
-        except Exception as e:
-            logger.error(f"Error toggling volume mute: {e}")
+        mute_commands = [
+            ['pactl', 'set-sink-mute', '@DEFAULT_SINK@', 'toggle'],
+            ['amixer', 'sset', 'Master', 'toggle'],
+            ['mixerctl', 'outputs.master.mute=toggle'],
+            ['doas', 'mixerctl', 'outputs.master.mute=toggle']
+        ]
+        run_system_command(mute_commands, "volume mute toggle")
 
     @staticmethod
     def media_play_pause(qtile):
         """Toggle media play/pause"""
-        try:
-            import subprocess
-            
-            media_commands = [
-                ['playerctl', 'play-pause'],                    # Most media players
-                ['mpc', 'toggle'],                              # MPD
-                ['cmus-remote', '-u'],                          # cmus
-                ['dbus-send', '--print-reply', '--dest=org.mpris.MediaPlayer2.spotify', 
-                 '/org/mpris/MediaPlayer2', 'org.mpris.MediaPlayer2.Player.PlayPause']  # Spotify via dbus
-            ]
-            
-            for cmd in media_commands:
-                try:
-                    subprocess.run(cmd, check=True, capture_output=True)
-                    logger.debug(f"Media play/pause toggled using: {' '.join(cmd)}")
-                    return
-                except (subprocess.CalledProcessError, FileNotFoundError):
-                    continue
-            
-            logger.warning("No media control utility found")
-            
-        except Exception as e:
-            logger.error(f"Error toggling media play/pause: {e}")
+        media_commands = [
+            ['playerctl', 'play-pause'],                    # Most media players
+            ['mpc', 'toggle'],                              # MPD
+            ['cmus-remote', '-u'],                          # cmus
+            ['dbus-send', '--print-reply', '--dest=org.mpris.MediaPlayer2.spotify',
+             '/org/mpris/MediaPlayer2', 'org.mpris.MediaPlayer2.Player.PlayPause']  # Spotify via dbus
+        ]
+        run_system_command(media_commands, "media play/pause toggle")
 
     @staticmethod
     def media_next(qtile):
         """Skip to next media track"""
-        try:
-            import subprocess
-            
-            next_commands = [
-                ['playerctl', 'next'],
-                ['mpc', 'next'],
-                ['cmus-remote', '-n']
-            ]
-            
-            for cmd in next_commands:
-                try:
-                    subprocess.run(cmd, check=True, capture_output=True)
-                    logger.debug(f"Media next using: {' '.join(cmd)}")
-                    return
-                except (subprocess.CalledProcessError, FileNotFoundError):
-                    continue
-            
-            logger.warning("No media next control utility found")
-            
-        except Exception as e:
-            logger.error(f"Error skipping to next track: {e}")
+        next_commands = [
+            ['playerctl', 'next'],
+            ['mpc', 'next'],
+            ['cmus-remote', '-n']
+        ]
+        run_system_command(next_commands, "media next")
 
     @staticmethod
     def media_prev(qtile):
         """Skip to previous media track"""
-        try:
-            import subprocess
-            
-            prev_commands = [
-                ['playerctl', 'previous'],
-                ['mpc', 'prev'],
-                ['cmus-remote', '-r']
-            ]
-            
-            for cmd in prev_commands:
-                try:
-                    subprocess.run(cmd, check=True, capture_output=True)
-                    logger.debug(f"Media previous using: {' '.join(cmd)}")
-                    return
-                except (subprocess.CalledProcessError, FileNotFoundError):
-                    continue
-            
-            logger.warning("No media previous control utility found")
-            
-        except Exception as e:
-            logger.error(f"Error skipping to previous track: {e}")
+        prev_commands = [
+            ['playerctl', 'previous'],
+            ['mpc', 'prev'],
+            ['cmus-remote', '-r']
+        ]
+        run_system_command(prev_commands, "media previous")
 
     @staticmethod
     def wifi_toggle(qtile):
         """Toggle WiFi on/off"""
-        try:
-            import subprocess
-            
-            wifi_commands = [
-                ['nmcli', 'radio', 'wifi'],                     # Check current state
-                ['rfkill', 'list', 'wifi'],                     # Alternative check
-                ['ifconfig', 'iwn0'],                           # OpenBSD check (iwn0 common Intel wifi)
-            ]
-            
-            # First check if wifi is on or off, then toggle
-            # This is a simplified version - you might want to enhance this
-            toggle_commands = [
-                ['nmcli', 'radio', 'wifi', 'off'],              # NetworkManager
-                ['rfkill', 'block', 'wifi'],                    # rfkill
-                ['doas', 'ifconfig', 'iwn0', 'down'],           # OpenBSD
-            ]
-            
-            for cmd in toggle_commands:
-                try:
-                    subprocess.run(cmd, check=True, capture_output=True)
-                    logger.debug(f"WiFi toggled using: {' '.join(cmd)}")
-                    return
-                except (subprocess.CalledProcessError, FileNotFoundError):
-                    continue
-            
-            logger.warning("No WiFi control utility found")
-            
-        except Exception as e:
-            logger.error(f"Error toggling WiFi: {e}")
+        # First check if wifi is on or off, then toggle
+        # This is a simplified version - you might want to enhance this
+        toggle_commands = [
+            ['nmcli', 'radio', 'wifi', 'off'],              # NetworkManager
+            ['rfkill', 'block', 'wifi'],                    # rfkill
+            ['doas', 'ifconfig', 'iwn0', 'down'],           # OpenBSD
+        ]
+        run_system_command(toggle_commands, "WiFi toggle")
 
     @staticmethod
     def bluetooth_toggle(qtile):
         """Toggle Bluetooth on/off"""
-        try:
-            import subprocess
-            
-            bt_commands = [
-                ['bluetoothctl', 'power', 'off'],               # bluetoothctl
-                ['rfkill', 'block', 'bluetooth'],               # rfkill
-                ['doas', 'rcctl', 'stop', 'bluetooth'],         # OpenBSD
-            ]
-            
-            for cmd in bt_commands:
-                try:
-                    subprocess.run(cmd, check=True, capture_output=True)
-                    logger.debug(f"Bluetooth toggled using: {' '.join(cmd)}")
-                    return
-                except (subprocess.CalledProcessError, FileNotFoundError):
-                    continue
-            
-            logger.warning("No Bluetooth control utility found")
-            
-        except Exception as e:
-            logger.error(f"Error toggling Bluetooth: {e}")
+        bt_commands = [
+            ['bluetoothctl', 'power', 'off'],               # bluetoothctl
+            ['rfkill', 'block', 'bluetooth'],               # rfkill
+            ['doas', 'rcctl', 'stop', 'bluetooth'],         # OpenBSD
+        ]
+        run_system_command(bt_commands, "Bluetooth toggle")
 
     @staticmethod
     def keyboard_backlight_toggle(qtile):
         """Toggle keyboard backlight"""
-        try:
-            import subprocess
-            
-            kb_light_commands = [
-                ['brightnessctl', '--device=kbd_backlight', 'set', '+33%'],
-                ['light', '-s', 'sysfs/leds/kbd_backlight', '-A', '33'],
-                ['xset', 'led', '3']                             # Fallback
-            ]
-            
-            for cmd in kb_light_commands:
-                try:
-                    subprocess.run(cmd, check=True, capture_output=True)
-                    logger.debug(f"Keyboard backlight toggled using: {' '.join(cmd)}")
-                    return
-                except (subprocess.CalledProcessError, FileNotFoundError):
-                    continue
-            
-            logger.warning("No keyboard backlight control utility found")
-            
-        except Exception as e:
-            logger.error(f"Error toggling keyboard backlight: {e}")
+        kb_light_commands = [
+            ['brightnessctl', '--device=kbd_backlight', 'set', '+33%'],
+            ['light', '-s', 'sysfs/leds/kbd_backlight', '-A', '33'],
+            ['xset', 'led', '3']                             # Fallback
+        ]
+        run_system_command(kb_light_commands, "keyboard backlight toggle")
 
     @staticmethod
     def display_toggle(qtile):
         """Toggle external display"""
-        try:
-            import subprocess
-            
-            # This is a basic implementation - you might want to customize
-            display_commands = [
-                ['xrandr', '--auto'],                           # Auto-detect displays
-                ['autorandr', '--change'],                      # If using autorandr
-            ]
-            
-            for cmd in display_commands:
-                try:
-                    subprocess.run(cmd, check=True, capture_output=True)
-                    logger.debug(f"Display toggled using: {' '.join(cmd)}")
-                    return
-                except (subprocess.CalledProcessError, FileNotFoundError):
-                    continue
-            
-            logger.warning("No display control utility found")
-            
-        except Exception as e:
-            logger.error(f"Error toggling display: {e}")
+        # This is a basic implementation - you might want to customize
+        display_commands = [
+            ['xrandr', '--auto'],                           # Auto-detect displays
+            ['autorandr', '--change'],                      # If using autorandr
+        ]
+        run_system_command(display_commands, "display toggle")

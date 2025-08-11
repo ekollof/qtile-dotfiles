@@ -6,11 +6,12 @@ Features: Automatic color reloading, Wayland compatibility, multi-screen support
 """
 
 import importlib
-import libqtile.notify
+
 import os
 import sys
+from pathlib import Path
 from libqtile import qtile
-from libqtile.config import Click, Drag, Key
+from libqtile.config import Click, Drag
 from libqtile.lazy import lazy
 from libqtile.log_utils import logger
 
@@ -25,7 +26,7 @@ from qtile_config import get_config
 
 # System configuration
 hostname = os.uname().nodename
-homedir = os.getenv("HOME")
+homedir = str(Path.home())
 terminal = "st"
 
 # Fix QT apps
@@ -74,14 +75,14 @@ dgroups_key_binder = None
 dgroups_app_rules = []
 main = None  # WARNING: this is deprecated and will be removed soon
 follow_mouse_focus = True
-bring_front_click = False
-cursor_warp = False
+bring_front_click = "focus_and_warp"
+cursor_warp = True
 auto_fullscreen = True
-focus_on_window_activation = "smart"
+focus_on_window_activation = "focus"
 reconfigure_screens_setting = True
 
 # Java app compatibility
-wmname = "LG3D"
+wmname = "qtile"
 
 # Setup hooks and monitoring
 hook_manager.setup_hooks()
@@ -116,5 +117,3 @@ def manually_reconfigure_screens():
 
         # Restart to apply changes
         qtile.restart()
-
-        

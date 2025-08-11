@@ -4,7 +4,7 @@ Main key manager class - orchestrates all key management functionality
 """
 
 import os
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 from libqtile.config import Key
 from qtile_config import get_config
 
@@ -30,7 +30,7 @@ class KeyManager:
         self.layout_commands = LayoutAwareCommands()
         self.window_commands = WindowCommands(self.config)
         self.system_commands = SystemCommands(color_manager)
-        
+
         # Initialize key bindings
         self.key_bindings = KeyBindings(
             self.config,
@@ -51,7 +51,7 @@ class KeyManager:
         """Get statistics about key bindings"""
         categories = self.get_keys_by_category()
         total_keys = sum(len(keys) for keys in categories.values())
-        
+
         return {
             'total_keys': total_keys,
             'categories': len(categories),
@@ -69,11 +69,11 @@ class KeyManager:
             'alt_only': 0,
             'other': 0
         }
-        
+
         all_keys = self.get_keys()
         for key in all_keys:
             modifiers = set(key.modifiers) if key.modifiers else set()
-            
+
             if modifiers == {self.mod}:
                 modifier_counts['mod_only'] += 1
             elif modifiers == {self.mod, 'shift'}:
@@ -86,7 +86,7 @@ class KeyManager:
                 modifier_counts['alt_only'] += 1
             else:
                 modifier_counts['other'] += 1
-        
+
         return modifier_counts
 
     def find_key_conflicts(self) -> List[Dict[str, Any]]:
@@ -94,7 +94,7 @@ class KeyManager:
         conflicts = []
         all_keys = self.get_keys()
         key_combinations = {}
-        
+
         for key in all_keys:
             combo = (tuple(sorted(key.modifiers)) if key.modifiers else (), key.key)
             if combo in key_combinations:
@@ -108,14 +108,14 @@ class KeyManager:
                 })
             else:
                 key_combinations[combo] = key
-        
+
         return conflicts
 
-    def get_available_keys(self, modifier_combo: tuple = None) -> List[str]:
+    def get_available_keys(self, modifier_combo: Optional[tuple] = None) -> List[str]:
         """Get list of available (unused) keys for a given modifier combination"""
         if modifier_combo is None:
             modifier_combo = (self.mod,)
-        
+
         # Common keys to check
         all_possible_keys = [
             'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
@@ -127,7 +127,7 @@ class KeyManager:
             'comma', 'period', 'slash', 'backslash', 'semicolon', 'apostrophe',
             'bracketleft', 'bracketright', 'grave', 'minus', 'equal'
         ]
-        
+
         # Get used keys for this modifier combination
         used_keys = set()
         all_keys = self.get_keys()
@@ -135,7 +135,7 @@ class KeyManager:
             key_modifiers = tuple(sorted(key.modifiers)) if key.modifiers else ()
             if key_modifiers == modifier_combo:
                 used_keys.add(key.key)
-        
+
         # Return available keys
         available = [key for key in all_possible_keys if key not in used_keys]
         return sorted(available)
@@ -149,43 +149,44 @@ class KeyManager:
             'statistics': self.get_key_statistics(),
             'conflicts': self.find_key_conflicts(),
         }
-        
+
         # Check for conflicts
         if validation_results['conflicts']:
             validation_results['valid'] = False
             validation_results['errors'].append(
                 f"Found {len(validation_results['conflicts'])} key binding conflicts"
             )
-        
+
         # Check for reasonable number of bindings
         total_keys = validation_results['statistics']['total_keys']
         if total_keys < 10:
             validation_results['warnings'].append("Very few key bindings defined")
         elif total_keys > 100:
             validation_results['warnings'].append("Large number of key bindings may be hard to remember")
-        
+
         # Check modifier distribution
         modifier_usage = validation_results['statistics']['modifier_usage']
         if modifier_usage['mod_only'] > 26:  # More than alphabet
             validation_results['warnings'].append("Too many single modifier bindings")
-        
+
         return validation_results
 
     def export_key_reference(self, format='text') -> str:
         """Export key bindings as reference documentation"""
-        if format == 'text':
-            return self._export_text_reference()
-        elif format == 'markdown':
-            return self._export_markdown_reference()
-        elif format == 'html':
-            return self._export_html_reference()
-        else:
-            raise ValueError(f"Unsupported format: {format}")
+        match format:
+            case 'text':
+                return self._export_text_reference()
+            case 'markdown':
+                return self._export_markdown_reference()
+            case 'html':
+                return self._export_html_reference()
+            case _:
+                raise ValueError(f"Unsupported format: {format}")
 
     def _export_text_reference(self) -> str:
         """Export as plain text reference"""
         lines = ["Qtile Key Bindings Reference", "=" * 30, ""]
-        
+
         categories = self.get_keys_by_category()
         for category, keys in categories.items():
             lines.append(f"{category}:")
@@ -196,48 +197,48 @@ class KeyManager:
                 desc = getattr(key, 'desc', 'No description')
                 lines.append(f"  {combo:<20} {desc}")
             lines.append("")
-        
+
         return "\n".join(lines)
 
     def _export_markdown_reference(self) -> str:
         """Export as markdown reference"""
         lines = ["# Qtile Key Bindings Reference", ""]
-        
+
         categories = self.get_keys_by_category()
         for category, keys in categories.items():
             lines.append(f"## {category}")
             lines.append("")
             lines.append("| Key Combination | Description |")
             lines.append("|-----------------|-------------|")
-            
+
             for key in keys:
                 modifiers = "+".join(key.modifiers) if key.modifiers else ""
                 combo = f"{modifiers}+{key.key}" if modifiers else key.key
                 desc = getattr(key, 'desc', 'No description')
                 lines.append(f"| `{combo}` | {desc} |")
             lines.append("")
-        
+
         return "\n".join(lines)
 
     def _export_html_reference(self) -> str:
         """Export as HTML reference"""
         html = ["<html><head><title>Qtile Key Bindings</title></head><body>"]
         html.append("<h1>Qtile Key Bindings Reference</h1>")
-        
+
         categories = self.get_keys_by_category()
         for category, keys in categories.items():
             html.append(f"<h2>{category}</h2>")
             html.append("<table border='1'>")
             html.append("<tr><th>Key Combination</th><th>Description</th></tr>")
-            
+
             for key in keys:
                 modifiers = "+".join(key.modifiers) if key.modifiers else ""
                 combo = f"{modifiers}+{key.key}" if modifiers else key.key
                 desc = getattr(key, 'desc', 'No description')
                 html.append(f"<tr><td><code>{combo}</code></td><td>{desc}</td></tr>")
-            
+
             html.append("</table><br>")
-        
+
         html.append("</body></html>")
         return "\n".join(html)
 
