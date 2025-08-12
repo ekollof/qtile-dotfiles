@@ -54,6 +54,13 @@ class BarManagerFactory:
             logger.warning(f"SVG support dependencies missing: {e}")
             return False
 
+    def is_svg_available(self) -> bool:
+        """
+        @brief Check if SVG support is available
+        @return True if SVG dependencies are available
+        """
+        return self._svg_available
+
     def create_bar_manager(
         self, color_manager: Any, qtile_config: Any
     ) -> EnhancedBarManager:
@@ -153,8 +160,8 @@ def get_bar_manager_status(
     info.update(
         {
             "factory_initialized": True,
-            "svg_dependencies_ok": factory._svg_available,
-            "ready": factory._svg_available,
+            "svg_dependencies_ok": factory.is_svg_available(),
+            "ready": factory.is_svg_available(),
         }
     )
 

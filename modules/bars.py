@@ -31,7 +31,7 @@ class EnhancedBarManager:
     icon updates based on system state for qtile bars.
     """
 
-    def __init__(self, color_manager, qtile_config) -> None:
+    def __init__(self, color_manager: Any, qtile_config: Any) -> None:
         """
         @brief Initialize enhanced bar manager
         @param color_manager: Color management instance
@@ -56,6 +56,9 @@ class EnhancedBarManager:
         # Create directories
         self.dynamic_icon_dir.mkdir(parents=True, exist_ok=True)
         self.themed_icon_dir.mkdir(parents=True, exist_ok=True)
+        
+        # Initialize themed icons cache
+        self.themed_icons: dict[str, str] = {}
 
         # Widget defaults with DPI awareness
         self.widget_defaults = self._get_widget_defaults()
@@ -187,7 +190,7 @@ class EnhancedBarManager:
             logger.warning(f"Failed to generate themed icon cache: {e}")
             self.themed_icons = {}
 
-    def create_dynamic_icon(self, icon_type: str, **kwargs) -> str:
+    def create_dynamic_icon(self, icon_type: str, **kwargs: Any) -> str:
         """
         @brief Create icon dynamically based on system state
         @param icon_type: Type of icon (battery, wifi, volume, etc.)
@@ -300,7 +303,7 @@ class EnhancedBarManager:
         icon_key: str,
         text_fallback: str = "",
         color: str | None = None,
-        **dynamic_kwargs,
+        **dynamic_kwargs: Any,
     ) -> Any:
         """
         @brief Create an icon widget based on the selected method with dynamic support
