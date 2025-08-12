@@ -1,95 +1,93 @@
 #!/usr/bin/env python3
 """
-Unified bar manager factory for qtile
-Provides dynamic selection between standard and enhanced SVG bar managers
+Simplified bar manager factory - SVG Enhanced Bar Manager only
 
-@brief Factory module for creating appropriate bar manager based on configuration
-@author qtile configuration system
+This module provides the enhanced SVG bar manager as the default and only
+bar manager option, with dynamic icon generation and theme-aware styling.
 """
 
-from typing import Any, Union
+from typing import Any
 from libqtile.log_utils import logger
 
-# Import bar managers
-from modules.bars import BarManager as StandardBarManager, create_bar_manager as create_standard_bar_manager
-from modules.bars_svg import EnhancedBarManager, create_enhanced_bar_manager
+# Import the enhanced SVG bar manager
+from modules.bars import EnhancedBarManager, create_enhanced_bar_manager
 
 
 class BarManagerFactory:
     """
-    @brief Factory class for creating appropriate bar manager instances
+    @brief Simplified factory for creating enhanced SVG bar manager instances
 
-    Selects between standard and enhanced SVG bar managers based on
-    configuration settings and system capabilities.
+    Provides the enhanced SVG bar manager with dynamic icon generation,
+    theme-aware coloring, and real-time system state updates.
     """
 
     def __init__(self) -> None:
         """
-        @brief Initialize bar manager factory
+        @brief Initialize bar manager factory with SVG support
         """
         self._svg_available = self._check_svg_support()
 
     def _check_svg_support(self) -> bool:
         """
-        @brief Check if SVG utilities are available and working
+        @brief Check if SVG support dependencies are available
         @return True if SVG support is available
         """
         try:
-            from modules.svg_utils import get_svg_utils
-            # Try to create SVG utilities to ensure they work
-            manipulator, generator = get_svg_utils()
-            return manipulator is not None and generator is not None
-        except Exception as e:
-            logger.warning(f"SVG utilities not available: {e}")
+            # Test essential SVG dependencies
+            from modules.svg_utils import SVGBuilder, IconGenerator
+            from modules.dpi_utils import scale_size
+            return True
+        except ImportError as e:
+            logger.warning(f"SVG support dependencies missing: {e}")
             return False
 
-    def create_bar_manager(self, color_manager: Any, qtile_config: Any) -> Union[StandardBarManager, EnhancedBarManager]:
+    def create_bar_manager(self, color_manager: Any, qtile_config: Any) -> EnhancedBarManager:
         """
-        @brief Create appropriate bar manager based on configuration
+        @brief Create enhanced SVG bar manager instance
         @param color_manager: Color management instance
         @param qtile_config: Qtile configuration instance
-        @return Configured bar manager instance
+        @return Enhanced SVG bar manager instance
+        @throws Exception if SVG support is not available
         """
-        # Check if enhanced SVG bar manager is requested and available
-        if hasattr(qtile_config, 'use_svg_bar_manager') and qtile_config.use_svg_bar_manager:
-            if self._svg_available:
-                try:
-                    logger.info("Creating enhanced SVG bar manager")
-                    manager = create_enhanced_bar_manager(color_manager, qtile_config)
+        if not self._svg_available:
+            raise RuntimeError(
+                "SVG support not available. Please install required dependencies: "
+                "xml.etree.ElementTree, pathlib, and ensure all SVG utility modules are present."
+            )
 
-                    # Set icon method if specified in config
-                    if hasattr(qtile_config, 'svg_icon_method'):
-                        manager.icon_method = qtile_config.svg_icon_method
+        try:
+            logger.info("Creating enhanced SVG bar manager")
+            manager = create_enhanced_bar_manager(color_manager, qtile_config)
 
-                    return manager
-                except Exception as e:
-                    logger.error(f"Failed to create enhanced SVG bar manager: {e}")
-                    logger.info("Falling back to standard bar manager")
-            else:
-                logger.warning("SVG support not available, falling back to standard bar manager")
+            # Set icon method if specified in config
+            if hasattr(qtile_config, 'icon_method'):
+                manager.icon_method = qtile_config.icon_method
+                logger.debug(f"Set icon method to: {qtile_config.icon_method}")
 
-        # Fall back to standard bar manager
-        logger.info("Creating standard bar manager")
-        return create_standard_bar_manager(color_manager, qtile_config)
+            return manager
+
+        except Exception as e:
+            logger.error(f"Failed to create enhanced SVG bar manager: {e}")
+            raise RuntimeError(f"Could not initialize enhanced bar manager: {e}")
 
     def get_bar_manager_info(self, qtile_config: Any) -> dict[str, Any]:
         """
-        @brief Get information about available bar managers
+        @brief Get information about the bar manager
         @param qtile_config: Qtile configuration instance
         @return Dictionary with bar manager information
         """
-        info = {
+        return {
+            "type": "enhanced_svg",
             "svg_support_available": self._svg_available,
-            "enhanced_requested": getattr(qtile_config, 'use_svg_bar_manager', False),
-            "will_use_enhanced": False,
-            "icon_method": "standard",
+            "icon_method": getattr(qtile_config, 'icon_method', 'svg_dynamic'),
+            "features": [
+                "dynamic_icon_generation",
+                "theme_aware_coloring",
+                "real_time_updates",
+                "high_dpi_support",
+                "platform_compatibility"
+            ]
         }
-
-        if info["enhanced_requested"] and info["svg_support_available"]:
-            info["will_use_enhanced"] = True
-            info["icon_method"] = getattr(qtile_config, 'svg_icon_method', 'svg_dynamic')
-
-        return info
 
 
 # Global factory instance
@@ -107,12 +105,13 @@ def get_bar_factory() -> BarManagerFactory:
     return _bar_factory
 
 
-def create_bar_manager(color_manager: Any, qtile_config: Any) -> Union[StandardBarManager, EnhancedBarManager]:
+def create_bar_manager(color_manager: Any, qtile_config: Any) -> EnhancedBarManager:
     """
-    @brief Unified factory function for creating bar managers
+    @brief Unified factory function for creating the enhanced SVG bar manager
     @param color_manager: Color management instance
     @param qtile_config: Qtile configuration instance
-    @return Configured bar manager instance (standard or enhanced)
+    @return Enhanced SVG bar manager instance
+    @throws Exception if SVG support is not available
     """
     factory = get_bar_factory()
     return factory.create_bar_manager(color_manager, qtile_config)
@@ -120,78 +119,52 @@ def create_bar_manager(color_manager: Any, qtile_config: Any) -> Union[StandardB
 
 def get_bar_manager_status(qtile_config: Any) -> dict[str, Any]:
     """
-    @brief Get status information about bar manager selection
+    @brief Get bar manager status and capabilities
     @param qtile_config: Qtile configuration instance
-    @return Dictionary with bar manager status information
+    @return Dictionary with status information
     """
     factory = get_bar_factory()
-    return factory.get_bar_manager_info(qtile_config)
+    info = factory.get_bar_manager_info(qtile_config)
+
+    # Add runtime status
+    info.update({
+        "factory_initialized": True,
+        "svg_dependencies_ok": factory._svg_available,
+        "ready": factory._svg_available
+    })
+
+    return info
 
 
-def force_svg_bar_manager(color_manager: Any, qtile_config: Any) -> EnhancedBarManager:
+def update_bar_manager_icons(bar_manager: EnhancedBarManager) -> None:
     """
-    @brief Force creation of enhanced SVG bar manager
-    @param color_manager: Color management instance
-    @param qtile_config: Qtile configuration instance
-    @return Enhanced bar manager instance
-    @throws Exception if SVG support is not available
+    @brief Update bar manager icons for theme changes
+    @param bar_manager: Enhanced bar manager instance to update
     """
-    factory = get_bar_factory()
-
-    if not factory._svg_available:
-        raise RuntimeError("SVG support is not available")
-
-    logger.info("Force creating enhanced SVG bar manager")
-    manager = create_enhanced_bar_manager(color_manager, qtile_config)
-
-    # Set icon method if specified in config
-    if hasattr(qtile_config, 'svg_icon_method'):
-        manager.icon_method = qtile_config.svg_icon_method
-
-    return manager
+    try:
+        bar_manager.update_dynamic_icons()
+        logger.info("Updated dynamic icons for enhanced bar manager")
+    except Exception as e:
+        logger.warning(f"Failed to update dynamic icons: {e}")
 
 
-def force_standard_bar_manager(color_manager: Any, qtile_config: Any) -> StandardBarManager:
-    """
-    @brief Force creation of standard bar manager
-    @param color_manager: Color management instance
-    @param qtile_config: Qtile configuration instance
-    @return Standard bar manager instance
-    """
-    logger.info("Force creating standard bar manager")
-    return create_standard_bar_manager(color_manager, qtile_config)
-
-
-def update_bar_manager_icons(bar_manager: Union[StandardBarManager, EnhancedBarManager]) -> None:
-    """
-    @brief Update bar manager icons (for enhanced managers)
-    @param bar_manager: Bar manager instance to update
-    """
-    if isinstance(bar_manager, EnhancedBarManager):
-        try:
-            bar_manager.update_dynamic_icons()
-            logger.info("Updated dynamic icons for enhanced bar manager")
-        except Exception as e:
-            logger.warning(f"Failed to update dynamic icons: {e}")
-    else:
-        logger.debug("Icon update not applicable for standard bar manager")
-
-
-def get_icon_system_status(bar_manager: Union[StandardBarManager, EnhancedBarManager]) -> dict[str, Any]:
+def get_icon_system_status(bar_manager: EnhancedBarManager) -> dict[str, Any]:
     """
     @brief Get icon system status information
-    @param bar_manager: Bar manager instance
+    @param bar_manager: Enhanced bar manager instance
     @return Dictionary with icon system status
     """
-    if isinstance(bar_manager, EnhancedBarManager):
-        try:
-            return bar_manager.get_icon_status()
-        except Exception as e:
-            logger.warning(f"Failed to get icon status: {e}")
-            return {"error": str(e)}
-    else:
+    try:
+        return bar_manager.get_icon_status()
+    except Exception as e:
+        logger.warning(f"Failed to get icon status: {e}")
         return {
-            "type": "standard",
-            "icon_method": getattr(bar_manager, 'icon_method', 'unknown'),
-            "svg_support": False,
+            "error": str(e),
+            "type": "enhanced_svg",
+            "status": "error"
         }
+
+
+# Compatibility aliases for any existing code
+EnhancedBarFactory = BarManagerFactory
+get_enhanced_bar_manager = create_bar_manager

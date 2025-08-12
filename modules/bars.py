@@ -1,63 +1,112 @@
 #!/usr/bin/env python3
 """
-Bars and widgets module for qtile - BITMAP ICONS VERSION
-Handles bar configuration and widget setup using bitmap icons instead of emoticons
+Enhanced bar manager with dynamic SVG icon generation
+Integrates SVG utilities for theme-aware, scalable icon generation
 
-This is a modified version that replaces emoticons with bitmap icons.
-You can choose between different icon approaches:
-1. Image widgets (PNG files)
-2. Nerd Font icons (if you have a Nerd Font installed)
-3. Simple text symbols
-
-Usage: Replace your current bars.py with this file or copy the relevant parts.
+@brief Enhanced bar manager with dynamic SVG capabilities for qtile
+@author qtile configuration system
 """
 
 import os
+import platform
 import socket
 import subprocess
+import traceback
 from pathlib import Path
-from typing import final, TYPE_CHECKING, Callable
+from typing import Dict, List, Any
 
-from libqtile.bar import Bar
-from libqtile.config import Screen
-
-from libqtile.log_utils import logger
+from libqtile import bar
 from qtile_extras import widget
+from libqtile.log_utils import logger
 
-if TYPE_CHECKING:
-    from modules.colors import ColorManager
+from modules.dpi_utils import scale_size, scale_font
+from modules.svg_utils import create_themed_icon_cache, get_svg_utils
 
 
-@final
-class BarManager:
-    """Manages qtile bar configuration and widget creation with bitmap icons"""
+class EnhancedBarManager:
+    """
+    @brief Enhanced bar manager with dynamic SVG icon capabilities
 
-    def __init__(self, color_manager: "ColorManager", qtile_config) -> None:
+    Provides dynamic icon generation, theme integration, and real-time
+    icon updates based on system state for qtile bars.
+    """
+
+    def __init__(self, color_manager, qtile_config) -> None:
+        """
+        @brief Initialize enhanced bar manager
+        @param color_manager: Color management instance
+        @param qtile_config: Qtile configuration instance
+        """
         self.color_manager = color_manager
         self.qtile_config = qtile_config
         self.hostname = socket.gethostname()
         self.homedir = str(Path.home())
 
-        # Icon configuration - choose your preferred method
-        self.icon_method = "svg"  # Options: "svg", "image", "nerd_font", "text"
+        # Icon configuration with SVG as primary method
+        self.icon_method = "svg_dynamic"  # Options: "svg_dynamic", "svg_static", "svg", "image", "nerd_font", "text"
         self.icon_dir = Path(self.homedir) / ".config" / "qtile" / "icons"
+        self.dynamic_icon_dir = self.icon_dir / "dynamic"
+        self.themed_icon_dir = self.icon_dir / "themed"
 
-        # Widget defaults
-        self.widget_defaults = dict(
-            font="Monospace",
-            fontsize=16,
-            padding=3,
-            border_with=3,
-            border_focus=color_manager.get_colors()["special"]["foreground"],
-            border_normal=color_manager.get_colors()["special"]["background"],
-            foreground=color_manager.get_colors()["special"]["foreground"],
-            background=color_manager.get_colors()["special"]["background"],
-        )
+        # Initialize SVG utilities
+        self.svg_manipulator, self.icon_generator = get_svg_utils(color_manager)
 
+        # Create directories
+        self.dynamic_icon_dir.mkdir(parents=True, exist_ok=True)
+        self.themed_icon_dir.mkdir(parents=True, exist_ok=True)
+
+        # Widget defaults with DPI awareness
+        self.widget_defaults = self._get_widget_defaults()
         self.extension_defaults = self.widget_defaults.copy()
 
         # Icon mappings for different methods
-        self.icons = {
+        self.icons = self._initialize_icon_mappings()
+
+        # Generate themed icon cache
+        self._update_themed_icon_cache()
+
+        # System state cache for dynamic icons
+        self._system_state_cache = {}
+
+    def _get_widget_defaults(self) -> Dict[str, Any]:
+        """
+        @brief Get DPI-aware widget defaults
+        @return Dictionary of widget default settings
+        """
+        from modules.font_utils import get_available_font
+
+        return {
+            'font': get_available_font(self.qtile_config.preferred_font),
+            'fontsize': scale_font(12),
+            'padding': scale_size(3),
+        }
+
+    def _get_widget_defaults_without_background(self) -> Dict[str, Any]:
+        """
+        @brief Get widget defaults without background for custom styling
+        @return Dictionary of widget default settings excluding background
+        """
+        defaults = self.widget_defaults.copy()
+        defaults.pop('background', None)
+        return defaults
+
+    def _get_widget_defaults_excluding(self, *exclude_params: str) -> Dict[str, Any]:
+        """
+        @brief Get widget defaults excluding specified parameters
+        @param exclude_params: Parameter names to exclude from defaults
+        @return Dictionary of widget default settings without conflicts
+        """
+        defaults = self.widget_defaults.copy()
+        for param in exclude_params:
+            defaults.pop(param, None)
+        return defaults
+
+    def _initialize_icon_mappings(self) -> Dict[str, Dict[str, str]]:
+        """
+        @brief Initialize icon mappings for different methods
+        @return Dictionary of icon mappings by method
+        """
+        return {
             "svg": {
                 "python": str(self.icon_dir / "python.svg"),
                 "updates": str(self.icon_dir / "arrow-up.svg"),
@@ -68,6 +117,11 @@ class BarManager:
                 "battery": str(self.icon_dir / "battery.svg"),
                 "zap": str(self.icon_dir / "zap.svg"),
                 "battery_low": str(self.icon_dir / "battery-low.svg"),
+                "wifi": str(self.icon_dir / "wifi.svg"),
+                "volume": str(self.icon_dir / "volume.svg"),
+                "cpu": str(self.icon_dir / "cpu.svg"),
+                "memory": str(self.icon_dir / "memory.svg"),
+                "network": str(self.icon_dir / "network.svg"),
             },
             "image": {
                 "python": str(self.icon_dir / "python.png"),
@@ -81,7 +135,7 @@ class BarManager:
                 "battery_low": str(self.icon_dir / "battery-low.png"),
             },
             "nerd_font": {
-                "python": "\ue73c",  # Python icon from Nerd Fonts
+                "python": "\ue73c",  # Python icon
                 "updates": "\uf0aa",  # Arrow up
                 "refresh": "\uf2f1",  # Refresh
                 "mail": "\uf0e0",     # Mail
@@ -90,102 +144,286 @@ class BarManager:
                 "battery": "\uf240",  # Battery
                 "zap": "\uf0e7",      # Lightning
                 "battery_low": "\uf244",  # Battery low
+                "wifi": "\uf1eb",     # WiFi
+                "volume": "\uf028",   # Volume
+                "cpu": "\uf2db",      # Microchip
+                "memory": "\uf538",   # Memory
+                "network": "\uf0ac",  # Globe
             },
             "text": {
-                "python": "Py",
-                "updates": "↑",
-                "refresh": "⟲",
-                "mail": "✉",
-                "ticket": "🎟",
-                "thermometer": "T°",
-                "battery": "⚡",
+                "python": "🐍",
+                "updates": "⬆",
+                "refresh": "🔄",
+                "mail": "📧",
+                "ticket": "🎫",
+                "thermometer": "🌡",
+                "battery": "🔋",
                 "zap": "⚡",
-                "battery_low": "⚠",
-            }
+                "battery_low": "🪫",
+                "wifi": "📶",
+                "volume": "🔊",
+                "cpu": "💻",
+                "memory": "🧠",
+                "network": "🌐",
+            },
         }
 
-    def get_widget_defaults(self):
-        """Get widget defaults"""
-        return self.widget_defaults
+    def _update_themed_icon_cache(self) -> None:
+        """
+        @brief Generate/update themed icon cache based on current colors
+        """
+        try:
+            self.themed_icons = create_themed_icon_cache(
+                self.color_manager,
+                self.themed_icon_dir,
+                scale_size(24)  # DPI-aware icon size
+            )
+            logger.debug(f"Generated {len(self.themed_icons)} themed icons")
+        except Exception as e:
+            logger.warning(f"Failed to generate themed icon cache: {e}")
+            self.themed_icons = {}
 
-    def get_extension_defaults(self):
-        """Get extension defaults"""
-        return self.extension_defaults
+    def create_dynamic_icon(self, icon_type: str, **kwargs) -> str:
+        """
+        @brief Create icon dynamically based on system state
+        @param icon_type: Type of icon (battery, wifi, volume, etc.)
+        @param kwargs: Icon-specific parameters
+        @return Path to generated SVG file
+        """
+        try:
+            match icon_type:
+                case "battery":
+                    level = kwargs.get("level", 100)
+                    charging = kwargs.get("charging", False)
+                    svg_content = self.icon_generator.battery_icon(level, charging)
 
-    def _create_icon_widget(self, icon_key, text_fallback="", color=None):
-        """Create an icon widget based on the selected method with error handling"""
+                case "wifi":
+                    strength = kwargs.get("strength", 3)
+                    connected = kwargs.get("connected", True)
+                    svg_content = self.icon_generator.wifi_icon(strength, connected)
+
+                case "volume":
+                    level = kwargs.get("level", 100)
+                    muted = kwargs.get("muted", False)
+                    svg_content = self.icon_generator.volume_icon(level, muted)
+
+                case "cpu":
+                    usage = kwargs.get("usage", 0.0)
+                    svg_content = self.icon_generator.cpu_icon(usage)
+
+                case "memory":
+                    usage = kwargs.get("usage", 0.0)
+                    svg_content = self.icon_generator.memory_icon(usage)
+
+                case "network":
+                    rx_active = kwargs.get("rx_active", False)
+                    tx_active = kwargs.get("tx_active", False)
+                    svg_content = self.icon_generator.network_icon(rx_active, tx_active)
+
+                case "python":
+                    svg_content = self.icon_generator.python_icon()
+
+                case "mail":
+                    svg_content = self.icon_generator.mail_icon()
+
+                case "ticket":
+                    svg_content = self.icon_generator.ticket_icon()
+
+                case "thermometer":
+                    svg_content = self.icon_generator.thermometer_icon()
+
+                case "updates":
+                    svg_content = self.icon_generator.updates_icon()
+
+                case "refresh":
+                    svg_content = self.icon_generator.refresh_icon()
+
+                case _:
+                    # Return static themed icon if available
+                    return self.themed_icons.get(icon_type, "")
+
+            # Save dynamic icon
+            filename = f"{icon_type}_dynamic.svg"
+            file_path = self.dynamic_icon_dir / filename
+            file_path.write_text(svg_content, encoding='utf-8')
+
+            return str(file_path)
+
+        except Exception as e:
+            logger.warning(f"Failed to create dynamic icon {icon_type}: {e}")
+            return self.themed_icons.get(icon_type, "")
+
+    def recolor_existing_icon(self, icon_path: str, color_overrides: Dict[str, str] | None = None) -> str:
+        """
+        @brief Recolor an existing SVG icon with current theme
+        @param icon_path: Path to existing SVG file
+        @param color_overrides: Optional color overrides
+        @return Path to recolored icon
+        """
+        try:
+            svg_icon = self.svg_manipulator.load_svg(icon_path)
+            if not svg_icon:
+                return icon_path
+
+            # Apply theme colors
+            themed_icon = self.svg_manipulator.theme_colorize(svg_icon, color_overrides or {})
+
+            # Save themed version
+            original_path = Path(icon_path)
+            themed_path = self.themed_icon_dir / f"themed_{original_path.name}"
+
+            if self.svg_manipulator.save_svg(themed_icon, themed_path):
+                return str(themed_path)
+            else:
+                return icon_path
+
+        except Exception as e:
+            logger.warning(f"Failed to recolor icon {icon_path}: {e}")
+            return icon_path
+
+    def _create_icon_widget(self, icon_key: str, text_fallback: str = "", color: str | None = None, **dynamic_kwargs) -> Any:
+        """
+        @brief Create an icon widget based on the selected method with dynamic support
+        @param icon_key: Icon identifier key
+        @param text_fallback: Fallback text if icon fails to load
+        @param color: Optional color override
+        @param dynamic_kwargs: Parameters for dynamic icon generation
+        @return Configured widget
+        """
         colordict = self.color_manager.get_colors()
-        icon_color = color or colordict["colors"]["color5"]
+        colors = colordict.get("colors", {})
+        special = colordict.get("special", {})
+        icon_color = color or colors.get("color5", "#ffffff")
+        bg_color = special.get("background", "#000000")
 
         match self.icon_method:
-            case "svg":
-                icon_path = self.icons["svg"].get(icon_key)
+            case "svg_dynamic":
+                # Use dynamic SVG generation
+                icon_path = self.create_dynamic_icon(icon_key, **dynamic_kwargs)
                 if icon_path and Path(icon_path).exists():
                     try:
-                        # Try to create SVG image widget
                         return widget.Image(
                             filename=icon_path,
-                            background=colordict["special"]["background"]
+                            background=bg_color,
+                            margin=scale_size(2)
                         )
                     except Exception as e:
-                        logger.warning(f"Failed to load SVG icon {icon_path}: {e}")
-                        # Try PNG fallback
-                        png_path = icon_path.replace('.svg', '.png')
-                        if Path(png_path).exists():
-                            try:
-                                return widget.Image(
-                                    filename=png_path,
-                                    background=colordict["special"]["background"]
-                                )
-                            except Exception as e2:
-                                logger.warning(f"Failed to load PNG fallback {png_path}: {e2}")
+                        logger.warning(f"Failed to load dynamic SVG icon {icon_path}: {e}")
 
-                # Final fallback to text
-                return widget.TextBox(
-                    text=text_fallback or self.icons["text"].get(icon_key, "?"),
-                    foreground=icon_color,
-                    background=colordict["special"]["background"],
-                    fontsize=16,
-                )
+                # Fall back to themed static icon
+                themed_path = self.themed_icons.get(icon_key)
+                if themed_path and Path(themed_path).exists():
+                    try:
+                        return widget.Image(
+                            filename=themed_path,
+                            background=bg_color,
+                            margin=scale_size(2)
+                        )
+                    except Exception as e:
+                        logger.warning(f"Failed to load themed icon {themed_path}: {e}")
+
+            case "svg_static":
+                # Use static themed icons
+                themed_path = self.themed_icons.get(icon_key)
+                if themed_path and Path(themed_path).exists():
+                    try:
+                        return widget.Image(
+                            filename=themed_path,
+                            background=bg_color,
+                            margin=scale_size(2)
+                        )
+                    except Exception as e:
+                        logger.warning(f"Failed to load themed icon {themed_path}: {e}")
+
+            case "svg":
+                # Use original SVG files with recoloring
+                icon_path = self.icons["svg"].get(icon_key)
+                if icon_path and Path(icon_path).exists():
+                    themed_path = self.recolor_existing_icon(icon_path)
+                    try:
+                        return widget.Image(
+                            filename=themed_path,
+                            background=bg_color,
+                            margin=scale_size(2)
+                        )
+                    except Exception as e:
+                        logger.warning(f"Failed to load SVG icon {themed_path}: {e}")
 
             case "image":
+                # Use PNG images
                 icon_path = self.icons["image"].get(icon_key)
                 if icon_path and Path(icon_path).exists():
                     try:
                         return widget.Image(
                             filename=icon_path,
-                            background=colordict["special"]["background"]
+                            background=bg_color,
+                            margin=scale_size(2)
                         )
                     except Exception as e:
                         logger.warning(f"Failed to load PNG icon {icon_path}: {e}")
 
-                # Fallback to text if image doesn't exist or fails to load
-                return widget.TextBox(
-                    text=text_fallback or self.icons["text"].get(icon_key, "?"),
-                    foreground=icon_color,
-                    background=colordict["special"]["background"],
-                    fontsize=16,
-                )
-
             case "nerd_font":
+                # Use Nerd Font icons
+                from modules.font_utils import get_available_font
                 return widget.TextBox(
                     text=self.icons["nerd_font"].get(icon_key, text_fallback),
                     foreground=icon_color,
-                    background=colordict["special"]["background"],
-                    font="MonoMono Nerd Font",  # Use your preferred Nerd Font
-                    fontsize=16,
+                    background=bg_color,
+                    font=get_available_font(self.qtile_config.preferred_font),
+                    fontsize=scale_font(16),
+                    padding=scale_size(3),
                 )
 
-            case _:  # text method
+            case _:  # "text" or fallback
+                # Use text/emoji icons
                 return widget.TextBox(
                     text=self.icons["text"].get(icon_key, text_fallback),
                     foreground=icon_color,
-                    background=colordict["special"]["background"],
-                    fontsize=16,
+                    background=bg_color,
+                    fontsize=scale_font(16),
+                    padding=scale_size(3),
                 )
 
+        # Final fallback to text
+        return widget.TextBox(
+            text=text_fallback or "?",
+            foreground=icon_color,
+            background=bg_color,
+            fontsize=scale_font(16),
+            padding=scale_size(3),
+        )
+
+    def _check_battery_support(self) -> bool:
+        """
+        @brief Check if battery widget is supported on current platform
+        @return True if battery is supported
+        """
+        try:
+            system = platform.system().lower()
+            logger.debug(f"Checking battery support for platform: {system}")
+
+            match system:
+                case "linux":
+                    result = self._check_linux_battery()
+                    logger.debug(f"Linux battery check result: {result}")
+                    return result
+                case "openbsd" | "freebsd" | "netbsd" | "dragonfly":
+                    result = self._check_bsd_battery(system)
+                    logger.debug(f"BSD ({system}) battery check result: {result}")
+                    return result
+                case _:
+                    logger.debug(f"Unsupported platform for battery widget: {system}")
+                    return False
+
+        except Exception as e:
+            logger.warning(f"Exception during battery support check: {e}")
+            return False
+
     def _check_linux_battery(self) -> bool:
-        """Check for battery on Linux systems"""
+        """
+        @brief Check for battery on Linux systems
+        @return True if battery detected
+        """
         battery_paths = [
             "/sys/class/power_supply/BAT0",
             "/sys/class/power_supply/BAT1",
@@ -196,136 +434,139 @@ class BarManager:
             if Path(path).exists():
                 type_file = Path(path) / "type"
                 if type_file.exists():
-                    with open(type_file, 'r') as f:
-                        if f.read().strip().lower() == "battery":
-                            return True
+                    try:
+                        battery_type = type_file.read_text().strip().lower()
+                        if battery_type == "battery":
+                            # Test actual widget compatibility
+                            return self._test_battery_widget_compatibility()
+                    except Exception:
+                        continue
         return False
 
     def _check_bsd_battery(self, system: str) -> bool:
-        """Check for battery on BSD systems"""
-        import subprocess
+        """
+        @brief Check for battery on BSD systems
+        @param system: BSD system type
+        @return True if battery detected
+        """
         try:
             if system == "openbsd":
+                logger.debug("Checking OpenBSD battery with 'apm' command")
                 result = subprocess.run(['apm'], capture_output=True, text=True, timeout=5)
-                return result.returncode == 0 and 'battery' in result.stdout.lower()
-            else:
-                result = subprocess.run(['acpiconf', '-i', '0'], capture_output=True, text=True, timeout=5)
-                return result.returncode == 0
-        except (subprocess.TimeoutExpired, FileNotFoundError):
-            return False
+                logger.debug(f"apm command result: returncode={result.returncode}, stdout='{result.stdout.strip()}'")
 
-    def _check_darwin_battery(self) -> bool:
-        """Check for battery on macOS"""
-        import subprocess
-        try:
-            result = subprocess.run(['pmset', '-g', 'batt'], capture_output=True, text=True, timeout=5)
-            return result.returncode == 0 and 'InternalBattery' in result.stdout
-        except (subprocess.TimeoutExpired, FileNotFoundError):
-            return False
-
-    def _has_battery(self) -> bool:
-        """Check if the system has a battery (cross-platform)"""
-        import platform
-
-        try:
-            system = platform.system().lower()
-
-            match system:
-                case "linux":
-                    return self._check_linux_battery()
-                case "openbsd" | "freebsd" | "netbsd" | "dragonfly":
-                    return self._check_bsd_battery(system)
-                case "darwin":
-                    return self._check_darwin_battery()
-                case _:
-                    logger.debug(f"Unknown system {system}, skipping battery widget")
+                if result.returncode != 0:
+                    logger.debug("apm command failed, no battery detected")
                     return False
 
-        except Exception as e:
-            logger.debug(f"Error detecting battery: {e}")
-            return False
+                output_lower = result.stdout.lower()
+                has_battery = 'battery' in output_lower
 
-    def _has_mpd_support(self) -> bool:
-        """Check if MPD Python module is available"""
-        try:
+                # Additional checks for OpenBSD - apm might show "no battery" or similar
+                if 'no battery' in output_lower or 'not present' in output_lower:
+                    logger.debug("apm output indicates no battery present")
+                    return False
 
-            logger.debug("MPD module available")
-            return True
-        except ImportError:
-            logger.debug("MPD module not available, skipping Mpd2 widget")
-            return False
+                logger.debug(f"OpenBSD battery detection result: {has_battery}")
 
-    def _has_battery_widget_support(self) -> bool:
-        """Check if qtile's battery widget supports current platform"""
-        import platform
-        try:
-            # Check if we have a battery AND the platform is supported
-            if not self._has_battery():
+                # If apm suggests battery exists, test actual widget compatibility
+                if has_battery:
+                    return self._test_battery_widget_compatibility()
+                return False
+            else:
+                logger.debug(f"Checking {system} battery with 'acpiconf' command")
+                result = subprocess.run(['acpiconf', '-i', '0'], capture_output=True, text=True, timeout=5)
+                logger.debug(f"acpiconf command result: returncode={result.returncode}")
+                has_battery = result.returncode == 0
+                logger.debug(f"{system} battery detection result: {has_battery}")
+
+                # Test actual widget compatibility if acpiconf suggests battery exists
+                if has_battery:
+                    return self._test_battery_widget_compatibility()
                 return False
 
-            system = platform.system().lower()
-            # qtile's battery widget has known platform issues on some BSD systems
-            if system == "openbsd":
-                # Test if the battery widget can actually initialize
-                try:
-                    from qtile_extras import widget
-                    widget.Battery()
-                    return True
-                except Exception as e:
-                    logger.debug(f"Battery widget not supported on {system}: {e}")
-                    return False
-
-            return True
+        except subprocess.TimeoutExpired:
+            logger.debug(f"Battery check command timed out on {system}")
+            return False
+        except FileNotFoundError:
+            logger.debug(f"Battery check command not found on {system}")
+            return False
         except Exception as e:
-            logger.debug(f"Error checking battery widget support: {e}")
+            logger.debug(f"Exception during {system} battery check: {e}")
+            return False
+
+    def _test_battery_widget_compatibility(self) -> bool:
+        """
+        @brief Test if qtile Battery widget can actually be created on this platform
+        @return True if Battery widget is compatible
+        """
+        try:
+            logger.debug("Testing Battery widget compatibility by attempting creation")
+            # Try to create a minimal battery widget to test compatibility
+            _ = widget.Battery(format='{percent:2.0%}')
+            logger.debug("Battery widget compatibility test passed")
+            return True
+        except RuntimeError as e:
+            if "Unknown platform" in str(e):
+                logger.debug(f"Battery widget not compatible: {e}")
+                return False
+            else:
+                logger.warning(f"Unexpected error during battery widget test: {e}")
+                return False
+        except Exception as e:
+            logger.debug(f"Battery widget compatibility test failed: {e}")
             return False
 
     def _script_available(self, script_path: str) -> bool:
-        """Check if script exists and is executable"""
-        expanded_path = Path(script_path).expanduser()
-        return expanded_path.is_file() and os.access(expanded_path, os.X_OK)
+        """
+        @brief Check if a script is available and executable
+        @param script_path: Path to script
+        @return True if script is available
+        """
+        expanded_path = os.path.expanduser(script_path)
+        path_obj = Path(expanded_path)
+        return path_obj.exists() and os.access(expanded_path, os.X_OK)
 
-    def _safe_script_call(self, script_path: str, fallback_text: str = "N/A") -> Callable[[], str]:
-        """Create a safe wrapper for script calls that handles missing scripts gracefully"""
-        expanded_path = Path(script_path).expanduser()
-
-        def wrapper():
+    def _safe_script_call(self, script_path: str, fallback: str = "N/A"):
+        """
+        @brief Create a safe script call function with error handling
+        @param script_path: Path to script
+        @param fallback: Fallback value on error
+        @return Callable function for script execution
+        """
+        def call_script():
             try:
-                if not expanded_path.is_file():
-                    return fallback_text
-
                 result = subprocess.run(
-                    str(expanded_path),
+                    [os.path.expanduser(script_path)],
                     capture_output=True,
                     text=True,
-                    timeout=10,
-                    check=True
+                    timeout=10
                 )
-                return result.stdout.strip()
-            except subprocess.TimeoutExpired:
-                logger.debug(f"Script {script_path} timed out")
-                return "timeout"
-            except subprocess.CalledProcessError as e:
-                logger.debug(f"Script {script_path} failed with exit code {e.returncode}")
-                return "error"
-            except FileNotFoundError:
-                logger.debug(f"Script {script_path} not found")
-                return fallback_text
-            except Exception as e:
-                logger.debug(f"Error running script {script_path}: {e}")
-                return "error"
+                if result.returncode == 0:
+                    return result.stdout.strip()
+                else:
+                    return fallback
+            except Exception:
+                return fallback
+        return call_script
 
-        return wrapper
+    def _get_script_widgets(self, colordict: Dict[str, Any]) -> List[Any]:
+        """
+        @brief Create GenPollText widgets for available scripts with dynamic icons
+        @param colordict: Color dictionary from color manager
+        @return List of configured widgets
+        """
+        from modules.font_utils import get_available_font
 
-    def _get_script_widgets(self, colordict: dict) -> list:
-        """Create GenPollText widgets for available scripts using bitmap icons"""
-
-        # Map script types to icon keys
         script_icon_mapping = {
             'imap-checker': 'mail',
             'kayako': 'ticket',
             'cputemp': 'thermometer'
         }
+
+        # Extract colors once at the beginning
+        colors = colordict.get("colors", {})
+        special = colordict.get("special", {})
 
         widgets = []
         for config in self.qtile_config.script_configs:
@@ -338,153 +579,315 @@ class BarManager:
                         break
 
                 if icon_key:
-                    # Add icon widget
+                    # Add dynamic icon widget
                     widgets.append(self._create_icon_widget(icon_key))
                 else:
                     # Fallback to original icon text
-                    widgets.append(widget.TextBox(config['icon']))
+                    widgets.append(widget.TextBox(
+                        text=config['icon'],
+                        foreground=colors.get("color5", "#ffffff"),
+                        background=special.get("background", "#000000"),
+                        font=get_available_font(self.qtile_config.preferred_font),
+                        fontsize=scale_font(12),
+                        padding=scale_size(3),
+                    ))
 
-                # Add the data widget
+                # Add script output widget
                 widgets.append(widget.GenPollText(
-                    foreground=colordict["colors"]["color5"],
-                    background=colordict["special"]["background"],
+                    foreground=colors.get("color5", "#ffffff"),
+                    background=special.get("background", "#000000"),
+                    font=get_available_font(self.qtile_config.preferred_font),
+                    fontsize=scale_font(12),
+                    padding=scale_size(3),
                     update_interval=config['update_interval'],
                     func=self._safe_script_call(config['script_path'], config['fallback']),
                 ))
-                logger.debug(f"Added {config['name']} widget with bitmap icon")
+                logger.debug(f"Added {config['name']} widget with dynamic icon")
             else:
                 logger.debug(f"{config['name']} script not found: {config['script_path']}")
 
         return widgets
 
-    def create_bar_config(self, screen_num: int) -> Bar:
-        """Create bar configuration for a specific screen with bitmap icons"""
+    def create_bar_config(self, screen_num: int) -> bar.Bar:
+        """
+        @brief Create bar configuration for a specific screen with dynamic SVG icons
+        @param screen_num: Screen number (0-based)
+        @return Configured bar instance
+        """
         colordict = self.color_manager.get_colors()
-        logger.info(f"Bar config for screen {screen_num + 1} using {self.icon_method} icons")
+        colors = colordict.get("colors", {})
+        special = colordict.get("special", {})
+        logger.info(f"Creating bar config for screen {screen_num + 1} using {self.icon_method} icons")
 
-        # Start with core widgets that are always available
+        # Start with core widgets
         barconfig = [
-            # Python logo (replaces 🐍)
+            # Python logo with dynamic coloring
             self._create_icon_widget("python"),
 
             widget.GroupBox(
-                background=colordict["special"]["background"],
-                foreground=colordict["colors"]["color5"],
-                active=colordict["colors"]["color7"],
-                inactive=colordict["colors"]["color1"],
-                border=colordict["colors"]["color1"],
-                this_current_screen_border=colordict["colors"]["color6"],
+                **self._get_widget_defaults_excluding('background', 'padding'),
+                background=special.get("background", "#000000"),
+                foreground=colors.get("color5", "#ffffff"),
+                active=colors.get("color7", "#ffffff"),
+                inactive=colors.get("color1", "#808080"),
+                border=colors.get("color1", "#808080"),
+                this_current_screen_border=colors.get("color6", "#00ff00"),
+                other_current_screen_border=colors.get("color4", "#0000ff"),
+                this_screen_border=colors.get("color4", "#0000ff"),
+                other_screen_border=colors.get("color0", "#000000"),
+                highlight_color=colors.get("color6", "#00ff00"),
+                highlight_method="line",
+                borderwidth=scale_size(2),
+                margin_y=scale_size(3),
+                margin_x=0,
+                padding_y=scale_size(5),
+                padding_x=scale_size(3),
+                disable_drag=True,
                 hide_unused=True,
             ),
-            widget.Prompt(),
+
             widget.TaskList(
-                border=colordict["colors"]["color1"],
-                foreground=colordict["special"]["foreground"],
-                background=colordict["special"]["background"],
+                border=colors.get("color1", "#808080"),
+                foreground=special.get("foreground", "#ffffff"),
                 theme_mode="preferred",
                 theme_path="/usr/share/icons/breeze-dark",
             ),
+
+            widget.Spacer(),
         ]
 
-        # Conditionally add MPD2 widget if mpd module is available
-        if self._has_mpd_support():
-            barconfig.append(widget.Mpd2(
-                foreground=colordict["colors"]["color5"],
-                background=colordict["special"]["background"],
-            ))
-        else:
-            logger.debug("Skipping Mpd2 widget - mpd module not available")
+        # Add script widgets if available
+        script_widgets = self._get_script_widgets(colordict)
+        barconfig.extend(script_widgets)
 
-        # Continue with update checking widgets (with bitmap icons)
+        # System monitoring widgets with dynamic icons
         barconfig.extend([
-            # Package updates (replaces 🔼)
+            # Package updates
             self._create_icon_widget("updates"),
             widget.CheckUpdates(
-                foreground=colordict["colors"]["color5"],
-                background=colordict["special"]["background"],
+                **self._get_widget_defaults_excluding('background'),
+                foreground=colors.get("color5", "#ffffff"),
+                background=special.get("background", "#000000"),
                 update_interval=3600,
                 display_format="{updates}",
                 distro="Arch_checkupdates",
                 no_update_string="0",
+                colour_have_updates=colors.get("color3", "#ffff00"),
+                colour_no_updates=colors.get("color5", "#ffffff"),
             ),
-            # AUR updates (replaces 🔄)
+
+            # AUR updates
             self._create_icon_widget("refresh"),
             widget.CheckUpdates(
-                foreground=colordict["colors"]["color5"],
-                background=colordict["special"]["background"],
+                **self._get_widget_defaults_excluding('background'),
+                foreground=colors.get("color5", "#ffffff"),
+                background=special.get("background", "#000000"),
                 update_interval=3600,
                 display_format="{updates}",
                 distro="Arch_yay",
                 no_update_string="0",
+                colour_have_updates=colors.get("color3", "#ffff00"),
+                colour_no_updates=colors.get("color5", "#ffffff"),
+            ),
+
+            # CPU usage with dynamic icon
+            self._create_icon_widget("cpu"),
+            widget.CPU(
+                **self._get_widget_defaults_excluding('background'),
+                foreground=colors.get("color5", "#ffffff"),
+                background=special.get("background", "#000000"),
+                format='{load_percent:3.0f}%',
+                update_interval=5,
+            ),
+
+            # Memory usage with dynamic icon
+            self._create_icon_widget("memory"),
+            widget.Memory(
+                **self._get_widget_defaults_excluding('background'),
+                foreground=colors.get("color5", "#ffffff"),
+                background=special.get("background", "#000000"),
+                format='{MemPercent:3.0f}%',
+                update_interval=5,
+            ),
+
+            # Network activity with dynamic icon
+            self._create_icon_widget("network"),
+            widget.Net(
+                **self._get_widget_defaults_excluding('background'),
+                foreground=colors.get("color5", "#ffffff"),
+                background=special.get("background", "#000000"),
+                format='{down:>3.0f}{down_suffix:<2} ↓↑ {up:>3.0f}{up_suffix:<2}',
+                update_interval=5,
+            ),
+
+            # Volume with dynamic icon
+            self._create_icon_widget("volume"),
+            widget.Volume(
+                **self._get_widget_defaults_excluding('background'),
+                foreground=colors.get("color5", "#ffffff"),
+                background=special.get("background", "#000000"),
+                fmt='{}',
+                update_interval=1,
             ),
         ])
 
-        # Add script-based widgets (with bitmap icons)
-        script_widgets = self._get_script_widgets(colordict)
-        barconfig.extend(script_widgets)
+        # Add battery widget if supported
+        battery_supported = self._check_battery_support()
+        logger.info(f"Battery widget support check: {battery_supported}")
 
-        # Conditionally add Battery widget if supported on this platform
-        if self._has_battery_widget_support():
-            barconfig.extend([
-                self._create_icon_widget("battery"),
-                widget.Battery(
-                    foreground=colordict["colors"]["color5"],
-                    background=colordict["special"]["background"],
-                    charge_char="",  # Remove emoji, icon widget handles this
-                    discharge_char="",
-                    empty_char="",
-                    full_char="",
-                    format="{percent:2.0%} {hour:d}:{min:02d}",
-                    low_foreground=colordict["colors"]["color1"],  # Red color for low battery
-                    low_percentage=0.15,  # 15% threshold for low battery warning
-                    update_interval=60,
-                ),
-            ])
+        if battery_supported:
+            try:
+                barconfig.extend([
+                    self._create_icon_widget("battery"),
+                    widget.Battery(
+                        **self._get_widget_defaults_excluding('background'),
+                        foreground=colors.get("color5", "#ffffff"),
+                        background=special.get("background", "#000000"),
+                        format='{percent:2.0%}',
+                        update_interval=30,
+                        low_percentage=0.20,
+                        low_foreground=colors.get("color1", "#ff0000"),
+                        charge_char='↑',
+                        discharge_char='↓',
+                        full_char='=',
+                        unknown_char='?',
+                    ),
+                ])
+                logger.info("Successfully added Battery widget with dynamic icon")
+            except RuntimeError as e:
+                if "Unknown platform" in str(e):
+                    logger.warning(f"Battery widget not supported on this platform: {e}")
+                    logger.info("Skipping Battery widget due to platform incompatibility")
+                else:
+                    logger.error(f"Runtime error creating Battery widget: {e}")
+                    logger.info("Continuing without Battery widget")
+            except Exception as e:
+                logger.error(f"Failed to create Battery widget despite support check passing: {e}")
+                logger.info("Continuing without Battery widget")
         else:
-            logger.debug("Skipping Battery widget - not supported on this platform or no battery detected")
+            logger.info("Skipping Battery widget - not supported on this platform")
 
-        # Add remaining core widgets
+        # Clock and system tray
         barconfig.extend([
             widget.Clock(
-                foreground=colordict["colors"]["color5"],
-                background=colordict["special"]["background"],
-                format="%Y-%m-%d %a %H:%M:%S",
-            ),
-            widget.CurrentLayout(
-                foreground=colordict["colors"]["color5"],
-                background=colordict["special"]["background"],
-            ),
-            widget.Systray(
-                foreground=colordict["colors"]["color5"],
-                background=colordict["special"]["background"],
-                border=colordict["colors"]["color1"],
+                **self._get_widget_defaults_excluding('background'),
+                foreground=colors.get("color5", "#ffffff"),
+                background=special.get("background", "#000000"),
+                format='%Y-%m-%d %H:%M:%S',
+                update_interval=1,
             ),
         ])
 
-        # Remove systray from non-primary screens
-        if screen_num != 0:
-            barconfig = barconfig[:-1]
+        # Add systray only to primary screen
+        if screen_num == 0:
+            barconfig.append(widget.Systray(
+                background=special.get("background", "#000000"),
+                icon_size=scale_size(20),
+                padding=scale_size(5),
+            ))
 
-        return Bar(barconfig, 30, margin=5, opacity=0.8)
+        # Add current layout widget
+        barconfig.extend([
+            widget.CurrentLayout(
+                **self._get_widget_defaults_excluding('background'),
+                background=special.get("background", "#000000"),
+            ),
+        ])
 
-    def create_screens(self, screen_count: int):
-        """Create screen configurations with bars"""
+        # Create bar with DPI-aware height
+        return bar.Bar(
+            barconfig,
+            size=self.qtile_config.bar_settings["height"],
+            background=special.get("background", "#000000"),
+            opacity=self.qtile_config.bar_settings["opacity"],
+            margin=self.qtile_config.bar_settings["margin"],
+        )
+
+    def update_dynamic_icons(self) -> None:
+        """
+        @brief Update dynamic icons based on current system state
+
+        This method should be called when colors change or system state updates
+        to regenerate themed icons.
+        """
+        try:
+            # Regenerate themed icon cache
+            self._update_themed_icon_cache()
+
+            # Clear dynamic icon cache to force regeneration
+            if self.dynamic_icon_dir.exists():
+                for icon_file in self.dynamic_icon_dir.glob("*.svg"):
+                    try:
+                        icon_file.unlink()
+                    except Exception:
+                        pass
+
+            logger.info("Dynamic icons updated for new color scheme")
+
+        except Exception as e:
+            logger.warning(f"Failed to update dynamic icons: {e}")
+
+    def get_icon_status(self) -> Dict[str, Any]:
+        """
+        @brief Get status information about icon system
+        @return Dictionary with icon system status
+        """
+        return {
+            "method": self.icon_method,
+            "themed_icons_count": len(self.themed_icons),
+            "icon_dirs": {
+                "base": str(self.icon_dir),
+                "dynamic": str(self.dynamic_icon_dir),
+                "themed": str(self.themed_icon_dir),
+            },
+            "svg_utils_available": self.svg_manipulator is not None and self.icon_generator is not None,
+        }
+
+    def get_widget_defaults(self) -> Dict[str, Any]:
+        """
+        @brief Get widget defaults for compatibility
+        @return Dictionary of widget default settings
+        """
+        return self.widget_defaults
+
+    def get_extension_defaults(self) -> Dict[str, Any]:
+        """
+        @brief Get extension defaults for compatibility
+        @return Dictionary of extension default settings
+        """
+        return self.extension_defaults
+
+    def create_screens(self, screen_count: int) -> List[Any]:
+        """
+        @brief Create screen configurations with bars
+        @param screen_count: Number of screens to create
+        @return List of screen configurations
+        """
+        from libqtile.config import Screen
+
         screens = []
         for i in range(screen_count):
-            screens.append(
-                Screen(top=self.create_bar_config(i))
-            )
+            try:
+                bar_config = self.create_bar_config(i)
+                screen = Screen(top=bar_config)
+                screens.append(screen)
+                logger.debug(f"Created screen {i + 1} with enhanced SVG bar")
+            except Exception as e:
+                logger.error(f"Failed to create screen {i + 1}: {e}")
+                logger.error(f"Full traceback for screen {i + 1}:")
+                logger.error(traceback.format_exc())
+                logger.info(f"Creating fallback screen {i + 1} without bar")
+                # Create fallback screen without bar
+                screens.append(Screen())
+
         return screens
 
-    def set_icon_method(self, method: str):
-        """Change the icon method"""
-        if method in ["svg", "image", "nerd_font", "text"]:
-            self.icon_method = method
-            logger.info(f"Icon method changed to: {method}")
-        else:
-            logger.warning(f"Invalid icon method: {method}")
 
-
-def create_bar_manager(color_manager: "ColorManager", qtile_config) -> BarManager:
-    """Create and return a bar manager instance"""
-    return BarManager(color_manager, qtile_config)
+def create_enhanced_bar_manager(color_manager, qtile_config) -> EnhancedBarManager:
+    """
+    @brief Factory function to create enhanced bar manager
+    @param color_manager: Color management instance
+    @param qtile_config: Qtile configuration instance
+    @return Configured EnhancedBarManager instance
+    """
+    return EnhancedBarManager(color_manager, qtile_config)

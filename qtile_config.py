@@ -338,28 +338,15 @@ class QtileConfig:
             'auto_restart_on_change': True,  # Restart qtile when screens change
         }
 
-    # ===== SVG ICON SETTINGS =====
+    # ===== ICON SETTINGS =====
 
     @property
-    def use_svg_bar_manager(self) -> bool:
+    def icon_method(self) -> str:
         """
-        @brief Enable enhanced SVG bar manager with dynamic icon generation
+        @brief Icon rendering method for the bar manager
 
-        When True, uses the enhanced bar manager with dynamic SVG icon generation,
-        theme-aware coloring, and real-time icon updates based on system state.
-        When False, uses the standard bar manager with static icons.
-
-        @return Boolean indicating whether to use SVG bar manager
-        """
-        return True
-
-    @property
-    def svg_icon_method(self) -> str:
-        """
-        @brief SVG icon rendering method
-
-        Controls how SVG icons are rendered in the enhanced bar manager:
-        - "svg_dynamic": Generate icons dynamically based on system state
+        Controls how icons are rendered in the bar manager:
+        - "svg_dynamic": Generate icons dynamically based on system state (default)
         - "svg_static": Use pre-generated themed static icons
         - "svg": Use existing SVG files with theme recoloring
         - "image": Fall back to PNG images
