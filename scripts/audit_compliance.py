@@ -150,18 +150,21 @@ class ComplianceAuditor:
         @param tree: Parsed AST tree
         """
         # Check module docstring
-        module_docstring = ast.get_docstring(tree)
-        if not module_docstring:
-            self._add_issue("documentation", file_path, 1,
-                          "Module missing docstring")
-        elif not self._is_doxygen_format(module_docstring):
-            self._add_issue("documentation", file_path, 1,
-                          "Module docstring not in doxygen format (@brief, etc.)")
+        if isinstance(tree, ast.Module):
+            module_docstring = ast.get_docstring(tree)
+            if not module_docstring:
+                self._add_issue("documentation", file_path, 1,
+                              "Module missing docstring")
+            elif not self._is_doxygen_format(module_docstring):
+                self._add_issue("documentation", file_path, 1,
+                              "Module docstring not in doxygen format (@brief, etc.)")
 
         # Check functions and classes
         for node in ast.walk(tree):
-            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            if isinstance(node, ast.FunctionDef):
                 self._check_function_docs(file_path, node)
+            elif isinstance(node, ast.AsyncFunctionDef):
+                self._check_async_function_docs(file_path, node)
             elif isinstance(node, ast.ClassDef):
                 self._check_class_docs(file_path, node)
 
@@ -289,6 +292,22 @@ class ComplianceAuditor:
                 self._add_issue("documentation", file_path, node.lineno,
                               f"Function '{node.name}' docstring not in doxygen format")
 
+    def _check_async_function_docs(self, file_path: Path, node: ast.AsyncFunctionDef) -> None:
+        """
+        @brief Check async function documentation compliance
+        @param file_path: Path to the file
+        @param node: Async function AST node
+        """
+        docstring = ast.get_docstring(node)
+        if not docstring:
+            if not node.name.startswith('_'):  # Public functions need docs
+                self._add_issue("documentation", file_path, node.lineno,
+                              f"Public async function '{node.name}' missing docstring")
+        else:
+            if not self._is_doxygen_format(docstring):
+                self._add_issue("documentation", file_path, node.lineno,
+                              f"Async function '{node.name}' docstring not in doxygen format")
+
     def _check_class_docs(self, file_path: Path, node: ast.ClassDef) -> None:
         """
         @brief Check class documentation compliance
@@ -344,7 +363,7 @@ class ComplianceAuditor:
         @brief Generate audit summary report
         @return Dictionary containing complete audit results
         """
-        print(f"\n📊 Audit Summary")
+        print("\n📊 Audit Summary")
         print("=" * 16)
         print(f"Files checked: {self.stats['files_checked']}")
         print(f"Total issues: {self.stats['total_issues']}")

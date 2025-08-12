@@ -17,7 +17,7 @@ class FontManager:
         self.system = platform.system().lower()
         self._font_cache = {}
 
-    def get_available_font(self, preferred_font: str | None = None, fallback_fonts: list[str | None] = None) -> str:
+    def get_available_font(self, preferred_font: str | None = None, fallback_fonts: list[str] | None = None) -> str:
         """
         @brief Get the best available font with user preference and smart fallbacks
         @param preferred_font User's preferred font (e.g., "BerkeleyMono Nerd Font Mono")
@@ -106,7 +106,7 @@ class FontManager:
                 return font_name.lower() == matched_family.lower()
         except (subprocess.TimeoutExpired, FileNotFoundError) as e:
             logger.debug(f"fc-match failed for {font_name}: {e}")
-            
+
         # Backup method: try fc-list as fallback
         try:
             result = subprocess.run(
@@ -214,7 +214,7 @@ class FontManager:
 # Global font manager instance
 _font_manager = FontManager()
 
-def get_available_font(preferred_font: str | None = None, fallback_fonts: list[str | None] = None) -> str:
+def get_available_font(preferred_font: str | None = None, fallback_fonts: list[str] | None = None) -> str:
     """
     @brief Convenience function to get an available font
     @param preferred_font User's preferred font

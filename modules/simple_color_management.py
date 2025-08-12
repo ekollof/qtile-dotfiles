@@ -53,7 +53,7 @@ class SimpleColorManager:
             logger.warning(f"Could not load colors from {self.colors_file}: {e}")
             return self._get_fallback_colors()
 
-    def _get_fallback_colors(self) -> dict[str, str]:
+    def _get_fallback_colors(self) -> dict[str, dict[str, str]]:
         """
         @brief Provide fallback colors when pywal file isn't available
         @return Dictionary with default color scheme containing 'special' and 'colors' keys

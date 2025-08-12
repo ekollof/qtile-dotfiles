@@ -7,7 +7,7 @@ from .formatter import KeyFormatter
 
 class HotkeyCategorizer:
     """Handles categorization and organization of hotkeys"""
-    
+
     def __init__(self):
         self.categories = {
             "Window Management": [],
@@ -61,7 +61,7 @@ class HotkeyCategorizer:
         else:
             return "Other"
 
-    def add_key_to_category(self, key, category: str = None):
+    def add_key_to_category(self, key, category: str | None = None):
         """Add a key to the appropriate category"""
         if category is None:
             category = self.categorize_key(key)
@@ -69,27 +69,27 @@ class HotkeyCategorizer:
         # Extract key combination and description
         key_combo = KeyFormatter.extract_key_combination(key)
         description = KeyFormatter.infer_description(key)
-        
+
         # Format the hotkey line
         hotkey_line = KeyFormatter.format_hotkey_line(key_combo, description)
-        
+
         # Add to category
         if category in self.categories:
             self.categories[category].append(hotkey_line)
         else:
             self.categories["Other"].append(hotkey_line)
 
-    def process_keys(self, keys: List) -> dict[str, list[str]]:
+    def process_keys(self, keys: list) -> dict[str, list[str]]:
         """Process a list of keys and categorize them"""
         self.clear_categories()
-        
+
         for key in keys:
             self.add_key_to_category(key)
-        
+
         # Sort hotkeys within each category
         for category_hotkeys in self.categories.values():
             category_hotkeys.sort()
-        
+
         return self.categories
 
     def build_formatted_list(self, include_instructions: bool = True) -> list[str]:
@@ -112,8 +112,8 @@ class HotkeyCategorizer:
     def get_category_summary(self) -> dict[str, int]:
         """Get a summary of hotkeys per category"""
         return {
-            category: len(hotkeys) 
-            for category, hotkeys in self.categories.items() 
+            category: len(hotkeys)
+            for category, hotkeys in self.categories.items()
             if hotkeys
         }
 
@@ -121,10 +121,10 @@ class HotkeyCategorizer:
         """Search for hotkeys containing the search term"""
         search_term = search_term.lower()
         results = []
-        
+
         for category_name, category_hotkeys in self.categories.items():
             for hotkey in category_hotkeys:
                 if search_term in hotkey.lower():
                     results.append(f"[{category_name}] {hotkey}")
-        
+
         return results

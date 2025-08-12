@@ -71,7 +71,7 @@ class SystemCommands:
         try:
             logger.info("Manual screen reconfiguration requested")
             from modules.screens import refresh_screens, get_screen_count
-            from modules.bars import create_bar_manager
+            from modules.bar_factory import create_bar_manager
 
             refresh_screens()
             new_screen_count = get_screen_count()
