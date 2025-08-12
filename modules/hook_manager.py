@@ -34,7 +34,9 @@ class HookManager:
 
         # Initialize component modules
         self.window_manager = WindowManager(self.config)
-        self.startup_hooks = StartupHooks(self.config, color_manager, self.window_manager)
+        self.startup_hooks = StartupHooks(
+            self.config, color_manager, self.window_manager
+        )
         self.client_hooks = ClientHooks(self.config, self.window_manager)
         self.screen_hooks = ScreenHooks(self.config, color_manager)
 
@@ -51,7 +53,8 @@ class HookManager:
 
     def force_retile_all_windows(self, qtile: Any) -> int:
         """
-        @brief Manual command to force all windows to tile (useful for testing/debugging)
+        @brief Manual command to force all windows to tile
+        (useful for testing/debugging)
         @param qtile Qtile instance
         @return Number of windows retiled
         """

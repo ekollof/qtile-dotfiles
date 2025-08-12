@@ -9,6 +9,7 @@ including window focusing, floating rules, and client state management.
 
 from libqtile import hook
 from libqtile.log_utils import logger
+from typing import Any
 
 
 class ClientHooks:
