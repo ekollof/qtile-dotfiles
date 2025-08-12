@@ -7,8 +7,7 @@ Provides cross-platform compatibility between Linux and BSD systems
 import platform
 import shutil
 import subprocess
-from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List
 
 
 class PlatformInfo:
@@ -26,7 +25,7 @@ class PlatformInfo:
         self._system = platform.system().lower()
         self._release = platform.release()
         self._machine = platform.machine()
-        self._cached_commands: Dict[str, Optional[str]] = {}
+        self._cached_commands: Dict[str, str | None] = {}
 
     @property
     def system(self) -> str:
@@ -92,7 +91,7 @@ class PlatformInfo:
         """
         return self._machine
 
-    def find_command(self, command: str) -> Optional[str]:
+    def find_command(self, command: str) -> str | None:
         """
         @brief Find the full path of a command if it exists
         @param command: Command name to search for
@@ -113,7 +112,9 @@ class PlatformInfo:
         """
         return self.find_command(command) is not None
 
-    def get_preferred_application(self, app_type: str, preferences: List[str]) -> Optional[str]:
+    def get_preferred_application(
+        self, app_type: str, preferences: List[str]
+    ) -> str | None:
         """
         @brief Get the preferred application from a list of candidates
         @param app_type: Type of application (for logging purposes)
@@ -147,7 +148,7 @@ class PlatformConfig:
     and other configuration values based on the detected operating system.
     """
 
-    def __init__(self, platform_info: Optional[PlatformInfo] = None) -> None:
+    def __init__(self, platform_info: PlatformInfo | None = None) -> None:
         """
         @brief Initialize platform configuration manager
         @param platform_info: Optional PlatformInfo instance, creates new if None
@@ -160,60 +161,91 @@ class PlatformConfig:
         """
         @brief Load platform-specific configuration overrides
 
-        Defines application preferences and configuration overrides
-        for different operating systems.
+        Orchestrates loading of all platform-specific configurations
+        by calling focused configuration methods.
         """
-        # Terminal emulator preferences by platform
-        terminal_preferences = {
-            "linux": ["st", "alacritty", "kitty", "xterm"],
-            "openbsd": ["st", "urxvt", "xterm"],
-            "freebsd": ["st", "alacritty", "xterm"],
-            "netbsd": ["st", "urxvt", "xterm"],
+        self._application_preferences = self._get_application_preferences()
+        self._config_overrides = self._get_command_overrides()
+
+    def _get_terminal_preferences(self) -> Dict[str, List[str]]:
+        """
+        @brief Get terminal emulator preferences by platform
+        @return Dictionary mapping platforms to terminal preference lists
+        """
+        return {
+            "linux": ["st", "alacritty", "kitty", "gnome-terminal", "xterm"],
+            "openbsd": ["xterm", "st", "urxvt", "gnome-terminal"],
+            "freebsd": ["st", "alacritty", "xterm", "gnome-terminal"],
+            "netbsd": ["xterm", "st", "urxvt"],
         }
 
-        # Browser preferences by platform
-        browser_preferences = {
+    def _get_browser_preferences(self) -> Dict[str, List[str]]:
+        """
+        @brief Get browser preferences by platform
+        @return Dictionary mapping platforms to browser preference lists
+        """
+        return {
             "linux": ["brave", "firefox", "chromium", "google-chrome"],
-            "openbsd": ["chrome", "iridium"],
+            "openbsd": ["firefox", "chromium", "iridium"],
             "freebsd": ["firefox", "chromium", "brave"],
             "netbsd": ["firefox", "seamonkey"],
         }
 
-        # File manager preferences
-        file_manager_preferences = {
+    def _get_file_manager_preferences(self) -> Dict[str, List[str]]:
+        """
+        @brief Get file manager preferences by platform
+        @return Dictionary mapping platforms to file manager preference lists
+        """
+        return {
             "linux": ["thunar", "pcmanfm", "nautilus", "dolphin"],
             "openbsd": ["pcmanfm", "thunar", "xfe"],
             "freebsd": ["pcmanfm", "thunar", "nautilus"],
             "netbsd": ["pcmanfm", "xfe"],
         }
 
-        # Application launcher preferences
-        launcher_preferences = {
+    def _get_launcher_preferences(self) -> Dict[str, List[str]]:
+        """
+        @brief Get application launcher preferences by platform
+        @return Dictionary mapping platforms to launcher preference lists
+        """
+        return {
             "linux": ["rofi", "dmenu", "albert", "ulauncher"],
-            "openbsd": ["rofi", "dmenu"],
+            "openbsd": ["dmenu", "rofi"],
             "freebsd": ["rofi", "dmenu"],
             "netbsd": ["dmenu"],
         }
 
-        # Media player preferences
-        media_player_preferences = {
+    def _get_media_player_preferences(self) -> Dict[str, List[str]]:
+        """
+        @brief Get media player preferences by platform
+        @return Dictionary mapping platforms to media player preference lists
+        """
+        return {
             "linux": ["mpv", "vlc", "mplayer"],
             "openbsd": ["mpv", "mplayer", "vlc"],
             "freebsd": ["mpv", "vlc", "mplayer"],
             "netbsd": ["mplayer", "mpv"],
         }
 
-        # Store all preferences
-        self._application_preferences = {
-            "terminal": terminal_preferences,
-            "browser": browser_preferences,
-            "file_manager": file_manager_preferences,
-            "launcher": launcher_preferences,
-            "media_player": media_player_preferences,
+    def _get_application_preferences(self) -> Dict[str, Dict[str, List[str]]]:
+        """
+        @brief Aggregate all application preferences by type and platform
+        @return Dictionary mapping application types to platform preferences
+        """
+        return {
+            "terminal": self._get_terminal_preferences(),
+            "browser": self._get_browser_preferences(),
+            "file_manager": self._get_file_manager_preferences(),
+            "launcher": self._get_launcher_preferences(),
+            "media_player": self._get_media_player_preferences(),
         }
 
-        # Platform-specific command overrides
-        self._config_overrides = {
+    def _get_command_overrides(self) -> Dict[str, Dict[str, str]]:
+        """
+        @brief Get platform-specific command overrides
+        @return Dictionary mapping platforms to command overrides
+        """
+        return {
             "linux": {
                 "lock_session": "loginctl lock-session",
                 "clipboard_manager": "clipmenu",
@@ -223,7 +255,7 @@ class PlatformConfig:
             },
             "openbsd": {
                 "lock_session": "xlock",
-                "clipboard_manager": "clipmenu",
+                "clipboard_manager": "xclip",
                 "screenshot": "xwd | xwdtopnm | pnmtopng",
                 "audio_mixer": "mixerctl",
                 "network_manager": "wiconfig",
@@ -244,7 +276,7 @@ class PlatformConfig:
             },
         }
 
-    def get_application(self, app_type: str, fallback: Optional[str] = None) -> str:
+    def get_application(self, app_type: str, fallback: str | None = None) -> str:
         """
         @brief Get the best available application for the current platform
         @param app_type: Type of application to find
@@ -254,10 +286,20 @@ class PlatformConfig:
         system = self.platform.system
 
         if app_type in self._application_preferences:
-            preferences = self._application_preferences[app_type].get(
-                system,
-                self._application_preferences[app_type].get("linux", [])
-            )
+            # Use match statement for cleaner platform-specific logic
+            match system:
+                case "openbsd" | "freebsd" | "netbsd" | "dragonfly":
+                    preferences = self._application_preferences[app_type].get(
+                        system,
+                        self._application_preferences[app_type].get("openbsd", [])
+                    )
+                case "linux":
+                    preferences = self._application_preferences[app_type]["linux"]
+                case _:
+                    preferences = self._application_preferences[app_type].get(
+                        system,
+                        self._application_preferences[app_type].get("linux", [])
+                    )
 
             app = self.platform.get_preferred_application(app_type, preferences)
             if app:
@@ -266,7 +308,7 @@ class PlatformConfig:
         # If no preferred app found, return fallback or default
         return fallback or "xterm"
 
-    def get_command(self, command_type: str, fallback: Optional[str] = None) -> str:
+    def get_command(self, command_type: str, fallback: str | None = None) -> str:
         """
         @brief Get platform-specific command override
         @param command_type: Type of command to get
@@ -275,13 +317,24 @@ class PlatformConfig:
         """
         system = self.platform.system
 
-        if system in self._config_overrides:
-            command = self._config_overrides[system].get(command_type)
-            if command:
-                # Verify the base command exists
-                base_cmd = command.split()[0]
-                if self.platform.has_command(base_cmd):
-                    return command
+        # Use match statement for platform-specific command selection
+        match system:
+            case "linux":
+                command = self._config_overrides.get("linux", {}).get(command_type)
+            case "openbsd":
+                command = self._config_overrides.get("openbsd", {}).get(command_type)
+            case "freebsd":
+                command = self._config_overrides.get("freebsd", {}).get(command_type)
+            case "netbsd":
+                command = self._config_overrides.get("netbsd", {}).get(command_type)
+            case _:
+                command = self._config_overrides.get(system, {}).get(command_type)
+
+        if command:
+            # Verify the base command exists
+            base_cmd = command.split()[0]
+            if self.platform.has_command(base_cmd):
+                return command
 
         # Return fallback or try Linux defaults
         if fallback:
@@ -310,8 +363,8 @@ class PlatformConfig:
 
 
 # Global platform detection instances
-_platform_info: Optional[PlatformInfo] = None
-_platform_config: Optional[PlatformConfig] = None
+_platform_info: PlatformInfo | None = None
+_platform_config: PlatformConfig | None = None
 
 
 def get_platform_info() -> PlatformInfo:
@@ -336,7 +389,7 @@ def get_platform_config() -> PlatformConfig:
     return _platform_config
 
 
-def detect_desktop_environment() -> Optional[str]:
+def detect_desktop_environment() -> str | None:
     """
     @brief Detect the current desktop environment
     @return Desktop environment name or None if not detected
