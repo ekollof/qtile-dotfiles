@@ -399,16 +399,23 @@ class EnhancedBarManager:
         """
         try:
             system = platform.system().lower()
+            logger.debug(f"Checking battery support for platform: {system}")
 
             match system:
                 case "linux":
-                    return self._check_linux_battery()
+                    result = self._check_linux_battery()
+                    logger.debug(f"Linux battery check result: {result}")
+                    return result
                 case "openbsd" | "freebsd" | "netbsd" | "dragonfly":
-                    return self._check_bsd_battery(system)
+                    result = self._check_bsd_battery(system)
+                    logger.debug(f"BSD ({system}) battery check result: {result}")
+                    return result
                 case _:
+                    logger.debug(f"Unsupported platform for battery widget: {system}")
                     return False
 
-        except Exception:
+        except Exception as e:
+            logger.warning(f"Exception during battery support check: {e}")
             return False
 
     def _check_linux_battery(self) -> bool:
@@ -429,7 +436,8 @@ class EnhancedBarManager:
                     try:
                         battery_type = type_file.read_text().strip().lower()
                         if battery_type == "battery":
-                            return True
+                            # Test actual widget compatibility
+                            return self._test_battery_widget_compatibility()
                     except Exception:
                         continue
         return False
@@ -442,12 +450,70 @@ class EnhancedBarManager:
         """
         try:
             if system == "openbsd":
+                logger.debug("Checking OpenBSD battery with 'apm' command")
                 result = subprocess.run(['apm'], capture_output=True, text=True, timeout=5)
-                return result.returncode == 0 and 'battery' in result.stdout.lower()
+                logger.debug(f"apm command result: returncode={result.returncode}, stdout='{result.stdout.strip()}'")
+
+                if result.returncode != 0:
+                    logger.debug("apm command failed, no battery detected")
+                    return False
+
+                output_lower = result.stdout.lower()
+                has_battery = 'battery' in output_lower
+
+                # Additional checks for OpenBSD - apm might show "no battery" or similar
+                if 'no battery' in output_lower or 'not present' in output_lower:
+                    logger.debug("apm output indicates no battery present")
+                    return False
+
+                logger.debug(f"OpenBSD battery detection result: {has_battery}")
+
+                # If apm suggests battery exists, test actual widget compatibility
+                if has_battery:
+                    return self._test_battery_widget_compatibility()
+                return False
             else:
+                logger.debug(f"Checking {system} battery with 'acpiconf' command")
                 result = subprocess.run(['acpiconf', '-i', '0'], capture_output=True, text=True, timeout=5)
-                return result.returncode == 0
-        except (subprocess.TimeoutExpired, FileNotFoundError):
+                logger.debug(f"acpiconf command result: returncode={result.returncode}")
+                has_battery = result.returncode == 0
+                logger.debug(f"{system} battery detection result: {has_battery}")
+
+                # Test actual widget compatibility if acpiconf suggests battery exists
+                if has_battery:
+                    return self._test_battery_widget_compatibility()
+                return False
+
+        except subprocess.TimeoutExpired:
+            logger.debug(f"Battery check command timed out on {system}")
+            return False
+        except FileNotFoundError:
+            logger.debug(f"Battery check command not found on {system}")
+            return False
+        except Exception as e:
+            logger.debug(f"Exception during {system} battery check: {e}")
+            return False
+
+    def _test_battery_widget_compatibility(self) -> bool:
+        """
+        @brief Test if qtile Battery widget can actually be created on this platform
+        @return True if Battery widget is compatible
+        """
+        try:
+            logger.debug("Testing Battery widget compatibility by attempting creation")
+            # Try to create a minimal battery widget to test compatibility
+            _ = widget.Battery(format='{percent:2.0%}')
+            logger.debug("Battery widget compatibility test passed")
+            return True
+        except RuntimeError as e:
+            if "Unknown platform" in str(e):
+                logger.debug(f"Battery widget not compatible: {e}")
+                return False
+            else:
+                logger.warning(f"Unexpected error during battery widget test: {e}")
+                return False
+        except Exception as e:
+            logger.debug(f"Battery widget compatibility test failed: {e}")
             return False
 
     def _script_available(self, script_path: str) -> bool:
@@ -672,26 +738,40 @@ class EnhancedBarManager:
         ])
 
         # Add battery widget if supported
-        if self._check_battery_support():
-            barconfig.extend([
-                self._create_icon_widget("battery"),
-                widget.Battery(
-                    **self._get_widget_defaults_excluding('background'),
-                    foreground=colors.get("color5", "#ffffff"),
-                    background=special.get("background", "#000000"),
-                    format='{percent:2.0%}',
-                    update_interval=30,
-                    low_percentage=0.20,
-                    low_foreground=colors.get("color1", "#ff0000"),
-                    charge_char='↑',
-                    discharge_char='↓',
-                    full_char='=',
-                    unknown_char='?',
-                ),
-            ])
-            logger.debug("Added Battery widget with dynamic icon")
+        battery_supported = self._check_battery_support()
+        logger.info(f"Battery widget support check: {battery_supported}")
+
+        if battery_supported:
+            try:
+                barconfig.extend([
+                    self._create_icon_widget("battery"),
+                    widget.Battery(
+                        **self._get_widget_defaults_excluding('background'),
+                        foreground=colors.get("color5", "#ffffff"),
+                        background=special.get("background", "#000000"),
+                        format='{percent:2.0%}',
+                        update_interval=30,
+                        low_percentage=0.20,
+                        low_foreground=colors.get("color1", "#ff0000"),
+                        charge_char='↑',
+                        discharge_char='↓',
+                        full_char='=',
+                        unknown_char='?',
+                    ),
+                ])
+                logger.info("Successfully added Battery widget with dynamic icon")
+            except RuntimeError as e:
+                if "Unknown platform" in str(e):
+                    logger.warning(f"Battery widget not supported on this platform: {e}")
+                    logger.info("Skipping Battery widget due to platform incompatibility")
+                else:
+                    logger.error(f"Runtime error creating Battery widget: {e}")
+                    logger.info("Continuing without Battery widget")
+            except Exception as e:
+                logger.error(f"Failed to create Battery widget despite support check passing: {e}")
+                logger.info("Continuing without Battery widget")
         else:
-            logger.debug("Skipping Battery widget - not supported on this platform")
+            logger.info("Skipping Battery widget - not supported on this platform")
 
         # Clock and system tray
         barconfig.extend([
