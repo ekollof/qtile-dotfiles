@@ -335,6 +335,6 @@ class KeyManager:
         return "\n".join(html)
 
 
-def create_key_manager(color_manager):
+def create_key_manager(color_manager: Any) -> "KeyManager":
     """Create and return a key manager instance"""
     return KeyManager(color_manager)

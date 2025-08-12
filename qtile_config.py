@@ -57,7 +57,7 @@ class QtileConfig:
     # ===== DPI SETTINGS =====
 
     @property
-    def dpi_info(self) -> dict:
+    def dpi_info(self) -> dict[str, Any]:
         """
         @brief Get DPI scaling information from the DPI manager
         @return Dictionary containing DPI scaling details and recommendations
@@ -67,7 +67,7 @@ class QtileConfig:
     # ===== SCRIPT WIDGET SETTINGS =====
 
     @property
-    def script_configs(self) -> list:
+    def script_configs(self) -> list[dict[str, Any]]:
         """
         @brief Configure custom scripts for GenPollText widgets with DPI awareness
 

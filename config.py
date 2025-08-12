@@ -19,9 +19,8 @@ import importlib
 import os
 import sys
 from pathlib import Path
-from typing import Any
 
-from libqtile import qtile
+from libqtile import qtile  # type: ignore
 from libqtile.config import Click, Drag
 from libqtile.lazy import lazy
 from libqtile.log_utils import logger
