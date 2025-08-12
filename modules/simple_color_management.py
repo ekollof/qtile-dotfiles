@@ -85,7 +85,7 @@ class SimpleColorManager:
         }
 
     # Main API methods - maintain compatibility
-    def load_colors(self) -> Dict[str, Any]:
+    def load_colors(self) -> dict[str, Any]:
         """
         @brief Load colors from file - maintains original API compatibility
         @return Dictionary containing loaded color configuration

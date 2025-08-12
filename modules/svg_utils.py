@@ -10,10 +10,9 @@ Provides tools to create, modify, scale, and color SVG icons programmatically
 import re
 import xml.etree.ElementTree as ET
 from pathlib import Path
-from typing import Dict, List, Tuple
+
 from dataclasses import dataclass
 from modules.dpi_utils import scale_size
-
 
 @dataclass
 class SVGIcon:
@@ -31,7 +30,6 @@ class SVGIcon:
     stroke_width: float = 1.0
     viewbox: str | None = None
 
-
 class SVGBuilder:
     """
     @brief SVG builder for creating icons programmatically
@@ -48,8 +46,8 @@ class SVGBuilder:
         """
         self.width = width
         self.height = height
-        self.elements: List[str] = []
-        self.defs: List[str] = []
+        self.elements: list[str] = []
+        self.defs: list[str] = []
 
     def add_circle(self, cx: float, cy: float, r: float,
                    fill: str = "#ffffff", stroke: str = "none",
@@ -133,7 +131,7 @@ class SVGBuilder:
         self.elements.append(text_elem)
         return self
 
-    def add_polygon(self, points: List[Tuple[float, float]],
+    def add_polygon(self, points: list[tuple[float, float]],
                     fill: str = "#ffffff", stroke: str = "none",
                     stroke_width: float = 0) -> "SVGBuilder":
         """
@@ -152,7 +150,7 @@ class SVGBuilder:
         self.elements.append(polygon)
         return self
 
-    def add_gradient(self, gradient_id: str, stops: List[Tuple[str, str]]) -> "SVGBuilder":
+    def add_gradient(self, gradient_id: str, stops: list[tuple[str, str]]) -> "SVGBuilder":
         """
         @brief Add linear gradient definition
         @param gradient_id: Unique ID for the gradient
@@ -189,7 +187,6 @@ class SVGBuilder:
         svg.append('</svg>')
 
         return '\n'.join(svg)
-
 
 class SVGManipulator:
     """
@@ -248,7 +245,7 @@ class SVGManipulator:
         except ValueError:
             return 24  # Default fallback
 
-    def recolor_svg(self, svg_icon: SVGIcon, color_map: Dict[str, str]) -> SVGIcon:
+    def recolor_svg(self, svg_icon: SVGIcon, color_map: dict[str, str]) -> SVGIcon:
         """
         @brief Recolor SVG by replacing color values
         @param svg_icon: SVGIcon to modify
@@ -320,7 +317,7 @@ class SVGManipulator:
             viewbox=svg_icon.viewbox
         )
 
-    def theme_colorize(self, svg_icon: SVGIcon, theme_colors: Dict[str, str] | None = None) -> SVGIcon:
+    def theme_colorize(self, svg_icon: SVGIcon, theme_colors: dict[str, str] | None = None) -> SVGIcon:
         """
         @brief Apply theme colors to SVG
         @param svg_icon: SVGIcon to colorize
@@ -370,7 +367,6 @@ class SVGManipulator:
         except Exception:
             return False
 
-
 class IconGenerator:
     """
     @brief Generator for common qtile icons
@@ -389,7 +385,7 @@ class IconGenerator:
         self.size = scale_size(size)  # DPI-aware sizing
         self.colors = self._get_colors()
 
-    def _get_colors(self) -> Dict[str, str]:
+    def _get_colors(self) -> dict[str, str]:
         """
         @brief Get color palette for icons
         @return Dictionary of colors
@@ -760,8 +756,7 @@ class IconGenerator:
 
         return builder.build()
 
-
-def create_themed_icon_cache(color_manager, icon_dir: Path, size: int = 24) -> Dict[str, str]:
+def create_themed_icon_cache(color_manager, icon_dir: Path, size: int = 24) -> dict[str, str]:
     """
     @brief Create cache of themed icons for qtile widgets
     @param color_manager: Color manager for theme colors
@@ -821,8 +816,7 @@ def create_themed_icon_cache(color_manager, icon_dir: Path, size: int = 24) -> D
 
     return icon_paths
 
-
-def get_svg_utils(color_manager=None) -> Tuple[SVGManipulator, IconGenerator]:
+def get_svg_utils(color_manager=None) -> tuple[SVGManipulator, IconGenerator]:
     """
     @brief Get SVG utility instances configured with color manager
     @param color_manager: Optional color manager for theming

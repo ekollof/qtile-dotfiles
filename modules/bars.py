@@ -253,7 +253,7 @@ class EnhancedBarManager:
             logger.warning(f"Failed to create dynamic icon {icon_type}: {e}")
             return self.themed_icons.get(icon_type, "")
 
-    def recolor_existing_icon(self, icon_path: str, color_overrides: Dict[str, str] | None = None) -> str:
+    def recolor_existing_icon(self, icon_path: str, color_overrides: dict[str, str] | None = None) -> str:
         """
         @brief Recolor an existing SVG icon with current theme
         @param icon_path: Path to existing SVG file
@@ -827,7 +827,7 @@ class EnhancedBarManager:
         except Exception as e:
             logger.warning(f"Failed to update dynamic icons: {e}")
 
-    def get_icon_status(self) -> Dict[str, Any]:
+    def get_icon_status(self) -> dict[str, Any]:
         """
         @brief Get status information about icon system
         @return Dictionary with icon system status
@@ -843,14 +843,14 @@ class EnhancedBarManager:
             "svg_utils_available": self.svg_manipulator is not None and self.icon_generator is not None,
         }
 
-    def get_widget_defaults(self) -> Dict[str, Any]:
+    def get_widget_defaults(self) -> dict[str, Any]:
         """
         @brief Get widget defaults for compatibility
         @return Dictionary of widget default settings
         """
         return self.widget_defaults
 
-    def get_extension_defaults(self) -> Dict[str, Any]:
+    def get_extension_defaults(self) -> dict[str, Any]:
         """
         @brief Get extension defaults for compatibility
         @return Dictionary of extension default settings

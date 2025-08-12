@@ -3,9 +3,6 @@
 Key formatting utilities for hotkey display
 """
 
-from typing import List
-
-
 class KeyFormatter:
     """Handles formatting of key combinations and descriptions"""
     
@@ -92,7 +89,7 @@ class KeyFormatter:
         return f"{formatted_combo:<{width}} {description}"
 
     @staticmethod
-    def create_instructions() -> List[str]:
+    def create_instructions() -> list[str]:
         """Create instruction lines for the hotkey display"""
         return [
             "Press Escape or Enter to close this window",

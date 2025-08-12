@@ -4,7 +4,7 @@ Main key manager class - orchestrates all key management functionality
 """
 
 import os
-from typing import List, Dict, Any, Optional
+from typing import Any
 from libqtile.config import Key
 from qtile_config import get_config
 
@@ -12,7 +12,6 @@ from .layout_aware import LayoutAwareCommands
 from .window_commands import WindowCommands
 from .system_commands import SystemCommands
 from .key_bindings import KeyBindings
-
 
 class KeyManager:
     """Manages keyboard bindings and shortcuts"""
@@ -39,15 +38,15 @@ class KeyManager:
             self.system_commands
         )
 
-    def get_keys(self) -> List[Key]:
+    def get_keys(self) -> list[Key]:
         """Get all keyboard bindings"""
         return self.key_bindings.get_all_keys(key_manager=self)
 
-    def get_keys_by_category(self) -> Dict[str, List[Key]]:
+    def get_keys_by_category(self) -> dict[str, list[Key]]:
         """Get keys organized by category"""
         return self.key_bindings.get_keys_by_category(key_manager=self)
 
-    def get_key_statistics(self) -> Dict[str, Any]:
+    def get_key_statistics(self) -> dict[str, Any]:
         """Get statistics about key bindings"""
         categories = self.get_keys_by_category()
         total_keys = sum(len(keys) for keys in categories.values())
@@ -59,7 +58,7 @@ class KeyManager:
             'modifier_usage': self._analyze_modifier_usage(),
         }
 
-    def _analyze_modifier_usage(self) -> Dict[str, int]:
+    def _analyze_modifier_usage(self) -> dict[str, int]:
         """Analyze usage of different modifier keys"""
         modifier_counts = {
             'mod_only': 0,
@@ -89,7 +88,7 @@ class KeyManager:
 
         return modifier_counts
 
-    def find_key_conflicts(self) -> List[Dict[str, Any]]:
+    def find_key_conflicts(self) -> list[dict[str, Any]]:
         """Find potential key binding conflicts"""
         conflicts = []
         all_keys = self.get_keys()
@@ -111,7 +110,7 @@ class KeyManager:
 
         return conflicts
 
-    def get_available_keys(self, modifier_combo: Optional[tuple] = None) -> List[str]:
+    def get_available_keys(self, modifier_combo: tuple | None = None) -> list[str]:
         """Get list of available (unused) keys for a given modifier combination"""
         if modifier_combo is None:
             modifier_combo = (self.mod,)
@@ -140,7 +139,7 @@ class KeyManager:
         available = [key for key in all_possible_keys if key not in used_keys]
         return sorted(available)
 
-    def validate_configuration(self) -> Dict[str, Any]:
+    def validate_configuration(self) -> dict[str, Any]:
         """Validate the key configuration"""
         validation_results = {
             'valid': True,
@@ -241,7 +240,6 @@ class KeyManager:
 
         html.append("</body></html>")
         return "\n".join(html)
-
 
 def create_key_manager(color_manager):
     """Create and return a key manager instance"""

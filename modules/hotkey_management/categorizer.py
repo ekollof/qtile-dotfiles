@@ -3,9 +3,7 @@
 Hotkey categorization functionality
 """
 
-from typing import Dict, List
 from .formatter import KeyFormatter
-
 
 class HotkeyCategorizer:
     """Handles categorization and organization of hotkeys"""
@@ -81,7 +79,7 @@ class HotkeyCategorizer:
         else:
             self.categories["Other"].append(hotkey_line)
 
-    def process_keys(self, keys: List) -> Dict[str, List[str]]:
+    def process_keys(self, keys: List) -> dict[str, list[str]]:
         """Process a list of keys and categorize them"""
         self.clear_categories()
         
@@ -94,7 +92,7 @@ class HotkeyCategorizer:
         
         return self.categories
 
-    def build_formatted_list(self, include_instructions: bool = True) -> List[str]:
+    def build_formatted_list(self, include_instructions: bool = True) -> list[str]:
         """Build the final formatted hotkey list with categories"""
         final_hotkeys = []
 
@@ -111,7 +109,7 @@ class HotkeyCategorizer:
 
         return final_hotkeys
 
-    def get_category_summary(self) -> Dict[str, int]:
+    def get_category_summary(self) -> dict[str, int]:
         """Get a summary of hotkeys per category"""
         return {
             category: len(hotkeys) 
@@ -119,7 +117,7 @@ class HotkeyCategorizer:
             if hotkeys
         }
 
-    def search_hotkeys(self, search_term: str) -> List[str]:
+    def search_hotkeys(self, search_term: str) -> list[str]:
         """Search for hotkeys containing the search term"""
         search_term = search_term.lower()
         results = []

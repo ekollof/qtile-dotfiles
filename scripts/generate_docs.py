@@ -16,10 +16,9 @@ generates fresh documentation.
 import subprocess
 import shutil
 from pathlib import Path
-from typing import Optional
+
 import sys
 import os
-
 
 class DoxygenDocGenerator:
     """
@@ -631,7 +630,6 @@ DOT_CLEANUP            = YES
         self.print_summary()
         return True
 
-
 def main():
     """
     @brief Main function to run the documentation generator
@@ -640,7 +638,6 @@ def main():
     generator = DoxygenDocGenerator()
     success = generator.run()
     return 0 if success else 1
-
 
 if __name__ == "__main__":
     sys.exit(main())

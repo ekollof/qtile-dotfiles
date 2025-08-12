@@ -3,11 +3,10 @@
 Theme management for hotkey display
 """
 
-from typing import Dict, Any, TYPE_CHECKING
+from typing import Any, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from modules.simple_color_management import ColorManager
-
 
 class ThemeManager:
     """Manages themes for hotkey display applications"""
@@ -15,7 +14,7 @@ class ThemeManager:
     def __init__(self, color_manager: "ColorManager | None" = None):
         self.color_manager = color_manager
 
-    def get_colors(self) -> Dict[str, str]:
+    def get_colors(self) -> dict[str, str]:
         """Get current colors from color manager or fallback"""
         if self.color_manager:
             colors = self.color_manager.get_colors()
@@ -111,7 +110,7 @@ element-text {{
 }}
 """
 
-    def get_dmenu_args(self) -> Dict[str, str]:
+    def get_dmenu_args(self) -> dict[str, str]:
         """Get dmenu arguments for styling"""
         colors = self.get_colors()
 

@@ -7,8 +7,7 @@ Provides cross-platform compatibility between Linux and BSD systems
 import platform
 import shutil
 import subprocess
-from typing import Any, Dict, List
-
+from typing import Any
 
 class PlatformInfo:
     """
@@ -25,7 +24,7 @@ class PlatformInfo:
         self._system = platform.system().lower()
         self._release = platform.release()
         self._machine = platform.machine()
-        self._cached_commands: Dict[str, str | None] = {}
+        self._cached_commands: dict[str, str | None] = {}
 
     @property
     def system(self) -> str:
@@ -113,7 +112,7 @@ class PlatformInfo:
         return self.find_command(command) is not None
 
     def get_preferred_application(
-        self, app_type: str, preferences: List[str]
+        self, app_type: str, preferences: list[str]
     ) -> str | None:
         """
         @brief Get the preferred application from a list of candidates
@@ -126,7 +125,7 @@ class PlatformInfo:
                 return app
         return None
 
-    def get_system_info(self) -> Dict[str, str]:
+    def get_system_info(self) -> dict[str, str]:
         """
         @brief Get comprehensive system information
         @return Dictionary containing system details
@@ -138,7 +137,6 @@ class PlatformInfo:
             "python_version": platform.python_version(),
             "hostname": platform.node(),
         }
-
 
 class PlatformConfig:
     """
@@ -154,7 +152,7 @@ class PlatformConfig:
         @param platform_info: Optional PlatformInfo instance, creates new if None
         """
         self.platform = platform_info or PlatformInfo()
-        self._config_overrides: Dict[str, Dict[str, Any]] = {}
+        self._config_overrides: dict[str, Dict[str, Any]] = {}
         self._load_platform_configs()
 
     def _load_platform_configs(self) -> None:
@@ -167,7 +165,7 @@ class PlatformConfig:
         self._application_preferences = self._get_application_preferences()
         self._config_overrides = self._get_command_overrides()
 
-    def _get_terminal_preferences(self) -> Dict[str, List[str]]:
+    def _get_terminal_preferences(self) -> dict[str, list[str]]:
         """
         @brief Get terminal emulator preferences by platform
         @return Dictionary mapping platforms to terminal preference lists
@@ -179,7 +177,7 @@ class PlatformConfig:
             "netbsd": ["st", "urxvt", "xterm"],
         }
 
-    def _get_browser_preferences(self) -> Dict[str, List[str]]:
+    def _get_browser_preferences(self) -> dict[str, list[str]]:
         """
         @brief Get browser preferences by platform
         @return Dictionary mapping platforms to browser preference lists
@@ -191,7 +189,7 @@ class PlatformConfig:
             "netbsd": ["chromium"],
         }
 
-    def _get_file_manager_preferences(self) -> Dict[str, List[str]]:
+    def _get_file_manager_preferences(self) -> dict[str, list[str]]:
         """
         @brief Get file manager preferences by platform
         @return Dictionary mapping platforms to file manager preference lists
@@ -203,7 +201,7 @@ class PlatformConfig:
             "netbsd": ["pcmanfm", "xfe"],
         }
 
-    def _get_launcher_preferences(self) -> Dict[str, List[str]]:
+    def _get_launcher_preferences(self) -> dict[str, list[str]]:
         """
         @brief Get application launcher preferences by platform
         @return Dictionary mapping platforms to launcher preference lists
@@ -215,7 +213,7 @@ class PlatformConfig:
             "netbsd": ["dmenu"],
         }
 
-    def _get_media_player_preferences(self) -> Dict[str, List[str]]:
+    def _get_media_player_preferences(self) -> dict[str, list[str]]:
         """
         @brief Get media player preferences by platform
         @return Dictionary mapping platforms to media player preference lists
@@ -227,7 +225,7 @@ class PlatformConfig:
             "netbsd": ["mplayer", "mpv"],
         }
 
-    def _get_application_preferences(self) -> Dict[str, Dict[str, List[str]]]:
+    def _get_application_preferences(self) -> dict[str, Dict[str, list[str]]]:
         """
         @brief Aggregate all application preferences by type and platform
         @return Dictionary mapping application types to platform preferences
@@ -240,7 +238,7 @@ class PlatformConfig:
             "media_player": self._get_media_player_preferences(),
         }
 
-    def _get_command_overrides(self) -> Dict[str, Dict[str, str]]:
+    def _get_command_overrides(self) -> dict[str, Dict[str, str]]:
         """
         @brief Get platform-specific command overrides
         @return Dictionary mapping platforms to command overrides
@@ -343,7 +341,7 @@ class PlatformConfig:
         linux_defaults = self._config_overrides.get("linux", {})
         return linux_defaults.get(command_type, "")
 
-    def get_config_overrides(self) -> Dict[str, Any]:
+    def get_config_overrides(self) -> dict[str, Any]:
         """
         @brief Get all configuration overrides for the current platform
         @return Dictionary of configuration overrides
@@ -361,11 +359,9 @@ class PlatformConfig:
             self._config_overrides[system] = {}
         self._config_overrides[system][key] = value
 
-
 # Global platform detection instances
 _platform_info: PlatformInfo | None = None
 _platform_config: PlatformConfig | None = None
-
 
 def get_platform_info() -> PlatformInfo:
     """
@@ -377,7 +373,6 @@ def get_platform_info() -> PlatformInfo:
         _platform_info = PlatformInfo()
     return _platform_info
 
-
 def get_platform_config() -> PlatformConfig:
     """
     @brief Get the global platform configuration instance
@@ -387,7 +382,6 @@ def get_platform_config() -> PlatformConfig:
     if _platform_config is None:
         _platform_config = PlatformConfig(get_platform_info())
     return _platform_config
-
 
 def detect_desktop_environment() -> str | None:
     """

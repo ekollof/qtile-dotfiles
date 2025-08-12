@@ -3,7 +3,7 @@
 Main hook manager class - orchestrates all hook management functionality
 """
 
-from typing import Dict, Any
+from typing import Any
 from libqtile.log_utils import logger
 from qtile_config import get_config
 
@@ -11,7 +11,6 @@ from .startup_hooks import StartupHooks
 from .client_hooks import ClientHooks
 from .screen_hooks import ScreenHooks
 from .window_manager import WindowManager
-
 
 class HookManager:
     """Manages qtile hooks and events"""
@@ -38,7 +37,7 @@ class HookManager:
         """Manual command to force all windows to tile (useful for testing/debugging)"""
         return self.window_manager.force_retile_all_windows(qtile)
 
-    def get_hook_status(self) -> Dict[str, Any]:
+    def get_hook_status(self) -> dict[str, Any]:
         """Get comprehensive status of all hook components"""
         status = {
             'startup': self.startup_hooks.get_startup_status(),
@@ -48,7 +47,7 @@ class HookManager:
         }
         return status
 
-    def get_window_manager_status(self) -> Dict[str, Any]:
+    def get_window_manager_status(self) -> dict[str, Any]:
         """Get window manager status and statistics"""
         try:
             from libqtile import qtile
@@ -65,7 +64,7 @@ class HookManager:
             logger.error(f"Error getting window manager status: {e}")
             return {'error': str(e)}
 
-    def validate_configuration(self) -> Dict[str, Any]:
+    def validate_configuration(self) -> dict[str, Any]:
         """Validate the entire hook configuration"""
         validation = {
             'valid': True,
@@ -92,7 +91,7 @@ class HookManager:
 
         return validation
 
-    def get_comprehensive_diagnostics(self) -> Dict[str, Any]:
+    def get_comprehensive_diagnostics(self) -> dict[str, Any]:
         """Get comprehensive diagnostics for troubleshooting"""
         try:
             from libqtile import qtile
@@ -153,7 +152,7 @@ class HookManager:
         # 3. Re-setting up hooks
         pass
 
-    def get_performance_metrics(self) -> Dict[str, Any]:
+    def get_performance_metrics(self) -> dict[str, Any]:
         """Get performance metrics for hook operations"""
         # This could track timing and frequency of hook operations
         return {
@@ -171,7 +170,6 @@ class HookManager:
     def _should_window_float(self, window):
         """Determine if window should float (backward compatibility)"""
         return self.window_manager.should_window_float(window)
-
 
 def create_hook_manager(color_manager):
     """Create and return a hook manager instance"""

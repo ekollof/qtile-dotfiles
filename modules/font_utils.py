@@ -7,9 +7,8 @@ Handles font detection, fallbacks, and cross-platform font management
 import subprocess
 import platform
 from pathlib import Path
-from typing import List, Optional
-from libqtile.log_utils import logger
 
+from libqtile.log_utils import logger
 
 class FontManager:
     """Manages font detection and fallback for qtile widgets"""
@@ -18,7 +17,7 @@ class FontManager:
         self.system = platform.system().lower()
         self._font_cache = {}
 
-    def get_available_font(self, preferred_font: Optional[str] = None, fallback_fonts: Optional[List[str]] = None) -> str:
+    def get_available_font(self, preferred_font: str | None = None, fallback_fonts: list[str | None] = None) -> str:
         """
         @brief Get the best available font with user preference and smart fallbacks
         @param preferred_font User's preferred font (e.g., "BerkeleyMono Nerd Font Mono")
@@ -190,7 +189,7 @@ class FontManager:
         common_macos_fonts = ["monaco", "menlo", "courier", "courier new"]
         return font_name.lower() in common_macos_fonts
 
-    def get_font_info(self, preferred_font: Optional[str] = None) -> dict:
+    def get_font_info(self, preferred_font: str | None = None) -> dict:
         """
         @brief Get information about font selection for debugging
         @param preferred_font The preferred font to analyze
@@ -212,12 +211,10 @@ class FontManager:
         """
         self._font_cache.clear()
 
-
 # Global font manager instance
 _font_manager = FontManager()
 
-
-def get_available_font(preferred_font: Optional[str] = None, fallback_fonts: Optional[List[str]] = None) -> str:
+def get_available_font(preferred_font: str | None = None, fallback_fonts: list[str | None] = None) -> str:
     """
     @brief Convenience function to get an available font
     @param preferred_font User's preferred font
@@ -226,8 +223,7 @@ def get_available_font(preferred_font: Optional[str] = None, fallback_fonts: Opt
     """
     return _font_manager.get_available_font(preferred_font, fallback_fonts)
 
-
-def get_font_info(preferred_font: Optional[str] = None) -> dict:
+def get_font_info(preferred_font: str | None = None) -> dict:
     """
     @brief Get font selection information for debugging
     @param preferred_font The preferred font to analyze

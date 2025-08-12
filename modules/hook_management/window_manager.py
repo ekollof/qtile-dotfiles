@@ -3,9 +3,8 @@
 Window management utilities and floating window logic
 """
 
-from typing import List, Dict, Any, Optional
+from typing import Any
 from libqtile.log_utils import logger
-
 
 class WindowManager:
     """Handles window state management and floating window logic"""
@@ -178,7 +177,7 @@ class WindowManager:
         except Exception as e:
             logger.debug(f"Error setting parent for transient window: {e}")
 
-    def get_window_statistics(self, qtile) -> Dict[str, Any]:
+    def get_window_statistics(self, qtile) -> dict[str, Any]:
         """Get statistics about current windows"""
         try:
             stats = {
@@ -217,7 +216,7 @@ class WindowManager:
             logger.error(f"Error getting window statistics: {e}")
             return {}
 
-    def validate_floating_rules(self) -> Dict[str, Any]:
+    def validate_floating_rules(self) -> dict[str, Any]:
         """Validate the floating rules configuration"""
         validation = {
             'valid': True,
@@ -263,7 +262,7 @@ class WindowManager:
         except Exception:
             return "Unknown"
 
-    def _get_window_class(self, window) -> Optional[str]:
+    def _get_window_class(self, window) -> str | None:
         """Get the WM class of a window"""
         try:
             wm_class = window.window.get_wm_class()
@@ -273,7 +272,7 @@ class WindowManager:
         except Exception:
             return None
 
-    def list_floating_windows(self, qtile) -> List[Dict[str, Any]]:
+    def list_floating_windows(self, qtile) -> list[dict[str, Any]]:
         """Get list of currently floating windows with details"""
         floating_windows = []
         try:
@@ -291,7 +290,7 @@ class WindowManager:
 
         return floating_windows
 
-    def get_problematic_windows(self, qtile) -> List[Dict[str, Any]]:
+    def get_problematic_windows(self, qtile) -> list[dict[str, Any]]:
         """Get list of windows that might be causing issues"""
         problematic = []
         try:
