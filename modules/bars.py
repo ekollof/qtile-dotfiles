@@ -1010,8 +1010,7 @@ class EnhancedBarManager:
                 "dynamic": str(self.dynamic_icon_dir),
                 "themed": str(self.themed_icon_dir),
             },
-            "svg_utils_available": self.svg_manipulator is not None
-            and self.icon_generator is not None,
+            "svg_utils_available": hasattr(self.svg_manipulator, 'load_svg') and callable(getattr(self.svg_manipulator, 'load_svg', None)),
         }
 
     def get_widget_defaults(self) -> dict[str, Any]:
