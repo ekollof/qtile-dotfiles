@@ -20,14 +20,10 @@ class FontManager:
 
     def get_available_font(self, preferred_font: Optional[str] = None, fallback_fonts: Optional[List[str]] = None) -> str:
         """
-        Get the best available font with user preference and smart fallbacks.
-
-        Args:
-            preferred_font: User's preferred font (e.g., "BerkeleyMono Nerd Font Mono")
-            fallback_fonts: List of fallback fonts to try if preferred font is not available
-
-        Returns:
-            The first available font name
+        @brief Get the best available font with user preference and smart fallbacks
+        @param preferred_font User's preferred font (e.g., "BerkeleyMono Nerd Font Mono")
+        @param fallback_fonts List of fallback fonts to try if preferred font is not available
+        @return The first available font name from preference list or system fallback
         """
         # Default fallback fonts (common monospace fonts across platforms)
         if fallback_fonts is None:
@@ -70,7 +66,11 @@ class FontManager:
         return final_fallback
 
     def _is_font_available(self, font_name: str) -> bool:
-        """Check if a font is available on the system"""
+        """
+        @brief Check if a font is available on the system
+        @param font_name The name of the font to check for availability
+        @return True if font is available, False otherwise
+        """
         try:
             match self.system:
                 case "linux":
@@ -87,9 +87,14 @@ class FontManager:
             return False
 
     def _check_font_linux(self, font_name: str) -> bool:
-        """Check font availability on Linux using fontconfig"""
+        """
+        @brief Check font availability on Linux using fontconfig
+        @param font_name The font name to verify
+        @return True if font exists and is accessible on Linux systems
+        @throws subprocess.TimeoutExpired if fontconfig commands timeout
+        """
         try:
-            # Use fc-match to check if font resolves to itself
+            # Use fc-match to check if font resolves to itself (preferred method)
             result = subprocess.run(
                 ['fc-match', '--format=%{family}', font_name],
                 capture_output=True,
@@ -100,25 +105,31 @@ class FontManager:
                 matched_family = result.stdout.strip()
                 # If fc-match returns the same font name, it's available
                 return font_name.lower() == matched_family.lower()
-            return False
-        except (subprocess.TimeoutExpired, FileNotFoundError):
-            # fc-match not available, try fc-list as backup
-            try:
-                result = subprocess.run(
-                    ['fc-list', ':', 'family'],
-                    capture_output=True,
-                    text=True,
-                    timeout=5
-                )
-                if result.returncode == 0:
-                    return font_name.lower() in result.stdout.lower()
-                return False
-            except (subprocess.TimeoutExpired, FileNotFoundError):
-                # No fontconfig tools available
-                return font_name.lower() in ["monospace", "mono"]
+        except (subprocess.TimeoutExpired, FileNotFoundError) as e:
+            logger.debug(f"fc-match failed for {font_name}: {e}")
+            
+        # Backup method: try fc-list as fallback
+        try:
+            result = subprocess.run(
+                ['fc-list', ':', 'family'],
+                capture_output=True,
+                text=True,
+                timeout=5
+            )
+            if result.returncode == 0:
+                return font_name.lower() in result.stdout.lower()
+        except (subprocess.TimeoutExpired, FileNotFoundError) as e:
+            logger.debug(f"fc-list failed for {font_name}: {e}")
+
+        # Final fallback: assume basic fonts are available
+        return font_name.lower() in ["monospace", "mono"]
 
     def _check_font_bsd(self, font_name: str) -> bool:
-        """Check font availability on BSD systems"""
+        """
+        @brief Check font availability on BSD systems
+        @param font_name The font name to verify
+        @return True if font exists on BSD systems (OpenBSD, FreeBSD, NetBSD, DragonFly)
+        """
         try:
             # Try fc-match if available (on systems with fontconfig)
             result = subprocess.run(
@@ -156,7 +167,12 @@ class FontManager:
         return font_name.lower() in ["monospace", "mono", "fixed"]
 
     def _check_font_macos(self, font_name: str) -> bool:
-        """Check font availability on macOS"""
+        """
+        @brief Check font availability on macOS
+        @param font_name The font name to verify
+        @return True if font exists on macOS systems
+        @throws subprocess.TimeoutExpired if system_profiler command times out
+        """
         try:
             # Use system_profiler to check available fonts
             result = subprocess.run(
@@ -175,7 +191,11 @@ class FontManager:
         return font_name.lower() in common_macos_fonts
 
     def get_font_info(self, preferred_font: Optional[str] = None) -> dict:
-        """Get information about font selection for debugging"""
+        """
+        @brief Get information about font selection for debugging
+        @param preferred_font The preferred font to analyze
+        @return Dictionary containing font selection details and system information
+        """
         selected_font = self.get_available_font(preferred_font)
         return {
             'preferred_font': preferred_font,
@@ -187,7 +207,9 @@ class FontManager:
         }
 
     def clear_cache(self):
-        """Clear the font cache (useful for testing)"""
+        """
+        @brief Clear the font cache (useful for testing)
+        """
         self._font_cache.clear()
 
 
@@ -197,18 +219,18 @@ _font_manager = FontManager()
 
 def get_available_font(preferred_font: Optional[str] = None, fallback_fonts: Optional[List[str]] = None) -> str:
     """
-    Convenience function to get an available font.
-
-    Args:
-        preferred_font: User's preferred font
-        fallback_fonts: List of fallback fonts
-
-    Returns:
-        The first available font name
+    @brief Convenience function to get an available font
+    @param preferred_font User's preferred font
+    @param fallback_fonts List of fallback fonts
+    @return The first available font name
     """
     return _font_manager.get_available_font(preferred_font, fallback_fonts)
 
 
 def get_font_info(preferred_font: Optional[str] = None) -> dict:
-    """Get font selection information for debugging"""
+    """
+    @brief Get font selection information for debugging
+    @param preferred_font The preferred font to analyze
+    @return Dictionary containing font selection details
+    """
     return _font_manager.get_font_info(preferred_font)

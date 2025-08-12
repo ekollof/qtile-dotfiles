@@ -23,21 +23,30 @@ class QtileConfig:
 
     @property
     def preferred_font(self) -> str:
-        """User's preferred font (change this to your preferred font)"""
+        """
+        @brief User's preferred font - change this to your preferred font
+        @return Font name string for use in qtile widgets
+        """
         return "BerkeleyMono Nerd Font Mono"
 
     # ===== DPI SETTINGS =====
 
     @property
     def dpi_info(self) -> dict:
-        """Get DPI scaling information"""
+        """
+        @brief Get DPI scaling information from the DPI manager
+        @return Dictionary containing DPI scaling details and recommendations
+        """
         return self.dpi_manager.get_scaling_info()
 
     # ===== SCRIPT WIDGET SETTINGS =====
 
     @property
     def script_configs(self) -> list:
-        """Configure custom scripts for GenPollText widgets - DPI aware"""
+        """
+        @brief Configure custom scripts for GenPollText widgets with DPI awareness
+        @return List of dictionaries containing script configuration parameters
+        """
         return [
             {
                 'script_path': '~/bin/imap-checker.ksh',
@@ -64,11 +73,14 @@ class QtileConfig:
 
     @property
     def mouse_warp_focus(self) -> bool:
-        """Enable mouse warping when changing window focus
-
+        """
+        @brief Enable mouse warping when changing window focus
+        
         When True, the mouse cursor automatically moves to the center of the
         newly focused window when using Super+hjkl navigation keys.
         When False, focus changes without moving the mouse cursor.
+        
+        @return Boolean indicating whether mouse warping is enabled
         """
         return True
 
@@ -360,5 +372,8 @@ config = QtileConfig()
 
 
 def get_config() -> QtileConfig:
-    """Get the global configuration instance"""
+    """
+    @brief Get the global configuration instance
+    @return Singleton QtileConfig instance with all user settings
+    """
     return config

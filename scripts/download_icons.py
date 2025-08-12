@@ -110,7 +110,13 @@ class IconDownloader:
         }
 
     def download_file(self, url, filename):
-        """Download a file from URL"""
+        """
+        @brief Download a file from URL with error handling
+        @param url The URL to download from
+        @param filename The local filename to save to
+        @return True if download successful, False otherwise
+        @throws requests.exceptions.RequestException if download fails
+        """
         try:
             response = requests.get(url, timeout=30)
             response.raise_for_status()
@@ -127,70 +133,106 @@ class IconDownloader:
             return False
 
     def convert_svg_to_png(self, svg_file, png_file):
-        """Convert SVG to PNG using ImageMagick with high quality settings"""
+        """
+        @brief Convert SVG to PNG using ImageMagick with high quality settings
+        @param svg_file Path to source SVG file
+        @param png_file Path to target PNG file
+        @return True if conversion successful, False otherwise
+        @throws FileNotFoundError if ImageMagick is not installed
+        """
         try:
-            # Use ImageMagick with improved settings for crisp, transparent icons
-            cmd = [
-                'magick',  # Use modern ImageMagick command
-                str(svg_file),
-                '-background', 'transparent',
-                '-density', '300',  # High DPI for crisp rendering
-                '-resize', f'{self.icon_size}x{self.icon_size}',
-                '-strip',  # Remove metadata
-                '-alpha', 'remove',  # Clean alpha channel
-                '-alpha', 'on',     # Re-enable clean alpha
-                '-quality', '100',  # Maximum quality
-                str(png_file)
-            ]
-
-            result = subprocess.run(cmd, capture_output=True, text=True)
-            if result.returncode == 0:
-                print(f"✓ Converted {svg_file.name} to PNG (high quality)")
+            # Try modern ImageMagick command first
+            if self._try_magick_convert(svg_file, png_file):
                 return True
-            else:
-                # Fallback to older convert command
-                cmd_fallback = [
-                    'convert',
-                    str(svg_file),
-                    '-background', 'transparent',
-                    '-density', '300',
-                    '-resize', f'{self.icon_size}x{self.icon_size}',
-                    '-strip',
-                    '-alpha', 'remove',
-                    '-alpha', 'on',
-                    '-quality', '100',
-                    str(png_file)
-                ]
-
-                result_fallback = subprocess.run(cmd_fallback, capture_output=True, text=True)
-                if result_fallback.returncode == 0:
-                    print(f"✓ Converted {svg_file.name} to PNG (fallback)")
-                    return True
-                else:
-                    print(f"✗ Failed to convert {svg_file.name}: {result.stderr}")
-                    return False
-
+            # Fallback to older convert command
+            return self._try_legacy_convert(svg_file, png_file)
         except FileNotFoundError:
             print("✗ ImageMagick not found. Please install ImageMagick to convert SVG to PNG")
             return False
 
-    def download_all_icons(self):
-        """Download all mapped icons"""
-        print("Downloading icon replacements for emoticons...")
+    def _try_magick_convert(self, svg_file, png_file) -> bool:
+        """
+        @brief Try conversion with modern 'magick' command
+        @param svg_file Path to source SVG file
+        @param png_file Path to target PNG file
+        @return True if successful, False otherwise
+        """
+        cmd = [
+            'magick',  # Use modern ImageMagick command
+            str(svg_file),
+            '-background', 'transparent',
+            '-density', '300',  # High DPI for crisp rendering
+            '-resize', f'{self.icon_size}x{self.icon_size}',
+            '-strip',  # Remove metadata
+            '-alpha', 'remove',  # Clean alpha channel
+            '-alpha', 'on',     # Re-enable clean alpha
+            '-quality', '100',  # Maximum quality
+            str(png_file)
+        ]
 
-        # Download emoticon replacements
+        result = subprocess.run(cmd, capture_output=True, text=True)
+        if result.returncode == 0:
+            print(f"✓ Converted {svg_file.name} to PNG (high quality)")
+            return True
+        return False
+
+    def _try_legacy_convert(self, svg_file, png_file) -> bool:
+        """
+        @brief Try conversion with legacy 'convert' command as fallback
+        @param svg_file Path to source SVG file
+        @param png_file Path to target PNG file
+        @return True if successful, False otherwise
+        """
+        cmd_fallback = [
+            'convert',
+            str(svg_file),
+            '-background', 'transparent',
+            '-density', '300',
+            '-resize', f'{self.icon_size}x{self.icon_size}',
+            '-strip',
+            '-alpha', 'remove',
+            '-alpha', 'on',
+            '-quality', '100',
+            str(png_file)
+        ]
+
+        result_fallback = subprocess.run(cmd_fallback, capture_output=True, text=True)
+        if result_fallback.returncode == 0:
+            print(f"✓ Converted {svg_file.name} to PNG (fallback)")
+            return True
+        else:
+            print(f"✗ Failed to convert {svg_file.name}: {result_fallback.stderr}")
+            return False
+
+    def download_all_icons(self):
+        """
+        @brief Download all mapped icons from remote sources
+        """
+        self._download_emoticon_replacements()
+        self._download_additional_icons()
+
+    def _download_emoticon_replacements(self):
+        """
+        @brief Download icon replacements for emoticons
+        """
+        print("Downloading icon replacements for emoticons...")
         for emoticon, icon_info in self.icon_mapping.items():
             print(f"Downloading {icon_info['name']} to replace {emoticon}")
             self.download_file(icon_info['url'], icon_info['filename'])
 
-        # Download additional useful icons
+    def _download_additional_icons(self):
+        """
+        @brief Download additional useful icons for status bar
+        """
         print("\nDownloading additional useful icons...")
         for icon_name, icon_info in self.additional_icons.items():
             print(f"Downloading {icon_name}")
             self.download_file(icon_info['url'], icon_info['filename'])
 
     def convert_all_to_png(self):
-        """Convert all SVG files to PNG"""
+        """
+        @brief Convert all SVG files to PNG format
+        """
         print("\nConverting SVG files to PNG...")
 
         svg_files = list(self.icon_dir.glob("*.svg"))
@@ -203,7 +245,22 @@ class IconDownloader:
             self.convert_svg_to_png(svg_file, png_file)
 
     def create_icon_reference(self):
-        """Create a reference file showing the mapping"""
+        """
+        @brief Create a reference file showing the mapping between emoticons and icons
+        """
+        reference = self._build_reference_dict()
+        reference_file = self.icon_dir / 'icon_reference.json'
+        
+        with open(reference_file, 'w') as f:
+            json.dump(reference, f, indent=2, ensure_ascii=False)
+
+        print(f"✓ Created icon reference at {reference_file}")
+
+    def _build_reference_dict(self) -> dict:
+        """
+        @brief Build the reference dictionary structure
+        @return Dictionary containing emoticon mappings and usage examples
+        """
         reference = {
             'emoticon_replacements': {},
             'additional_icons': list(self.additional_icons.keys()),
@@ -220,23 +277,35 @@ class IconDownloader:
                 'png_file': icon_info['filename'].replace('.svg', '.png')
             }
 
-        reference_file = self.icon_dir / 'icon_reference.json'
-        with open(reference_file, 'w') as f:
-            json.dump(reference, f, indent=2, ensure_ascii=False)
-
-        print(f"✓ Created icon reference at {reference_file}")
+        return reference
 
     def run(self):
-        """Run the complete download and conversion process"""
+        """
+        @brief Run the complete download and conversion process
+        """
         print(f"Icon directory: {self.icon_dir}")
+        self._setup_process()
+        self._report_completion()
+
+    def _setup_process(self):
+        """
+        @brief Execute the main setup steps
+        """
         self.download_all_icons()
         self.convert_all_to_png()
         self.create_icon_reference()
+
+    def _report_completion(self):
+        """
+        @brief Report successful completion of the icon setup
+        """
         print(f"\n✓ Icon setup complete! Check {self.icon_dir} for your new icons.")
 
 
 def main():
-    """Main function"""
+    """
+    @brief Main function to execute icon downloader
+    """
     # IconDownloader uses its own path detection
     downloader = IconDownloader()
     downloader.run()

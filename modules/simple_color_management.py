@@ -37,7 +37,12 @@ class SimpleColorManager:
         self._shutdown_event = threading.Event()
 
     def _load_colors(self) -> Dict[str, Any]:
-        """Load colors from pywal file with fallback"""
+        """
+        @brief Load colors from pywal file with fallback
+        @return Dictionary containing color configuration with 'special' and 'colors' keys
+        @throws FileNotFoundError when color file doesn't exist
+        @throws json.JSONDecodeError when color file is corrupted
+        """
         try:
             with open(self.colors_file, 'r') as f:
                 colors = json.load(f)
@@ -48,7 +53,10 @@ class SimpleColorManager:
             return self._get_fallback_colors()
 
     def _get_fallback_colors(self) -> Dict[str, Any]:
-        """Fallback colors when pywal file isn't available"""
+        """
+        @brief Provide fallback colors when pywal file isn't available
+        @return Dictionary with default color scheme containing 'special' and 'colors' keys
+        """
         return {
             "special": {
                 "background": "#1e1e1e",
@@ -77,15 +85,24 @@ class SimpleColorManager:
 
     # Main API methods - maintain compatibility
     def load_colors(self) -> Dict[str, Any]:
-        """Load colors - maintains original API"""
+        """
+        @brief Load colors from file - maintains original API compatibility
+        @return Dictionary containing loaded color configuration
+        """
         return self._load_colors()
 
     def get_colors(self) -> Dict[str, Any]:
-        """Get current colors - maintains original API"""
+        """
+        @brief Get current colors from cache - maintains original API compatibility
+        @return Dictionary containing current color configuration
+        """
         return self.colordict
 
     def start_monitoring(self):
-        """Start color file monitoring"""
+        """
+        @brief Start color file monitoring using watchdog or polling fallback
+        @throws Exception if monitoring setup fails completely
+        """
         if self._watching:
             return
 
@@ -100,7 +117,10 @@ class SimpleColorManager:
         logger.info("Started color monitoring")
 
     def _start_watchdog(self):
-        """Start watchdog file monitoring"""
+        """
+        @brief Start watchdog-based file monitoring for color changes
+        @throws Exception if watchdog setup fails
+        """
         if not WATCHDOG_AVAILABLE or Observer is None or FileSystemEventHandler is None:
             logger.warning("Watchdog not available, file monitoring disabled")
             return
@@ -130,7 +150,9 @@ class SimpleColorManager:
             self._start_polling()
 
     def _start_polling(self):
-        """Start polling-based monitoring"""
+        """
+        @brief Start polling-based monitoring as fallback when watchdog unavailable
+        """
         def poll():
             last_mtime = 0
             while self._watching and not self._shutdown_event.is_set():
@@ -150,19 +172,31 @@ class SimpleColorManager:
         logger.info(f"Watching {self.colors_file} with polling")
 
     def _handle_color_change(self):
-        """Handle color file changes"""
+        """
+        @brief Handle color file changes by reloading colors and restarting qtile
+        @throws Exception if color reload or qtile restart fails
+        """
         logger.info("Colors file changed, restarting qtile...")
         try:
-            # Reload colors first
+            # Reload colors first to validate the new file
             self.colordict = self._load_colors()
+            logger.debug("Colors reloaded successfully")
+            
             # Restart qtile to apply new colors
             if qtile is not None:
                 qtile.restart()
+            else:
+                logger.warning("qtile instance not available, cannot restart")
+        except json.JSONDecodeError as e:
+            logger.error(f"Invalid JSON in color file, ignoring change: {e}")
         except Exception as e:
             logger.error(f"Error handling color change: {e}")
+            # Don't restart qtile if we can't load colors properly
 
     def stop_monitoring(self):
-        """Stop monitoring"""
+        """
+        @brief Stop all monitoring threads and observers
+        """
         self._watching = False
         self._shutdown_event.set()
 

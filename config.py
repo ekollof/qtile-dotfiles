@@ -91,18 +91,26 @@ hook_manager.setup_hooks()
 
 
 def reload(module: str) -> None:
-    """Reload a Python module"""
+    """
+    @brief Reload a Python module dynamically
+    @param module The module name to reload
+    """
     if module in sys.modules:
         _ = importlib.reload(sys.modules[module])
 
 
 def remapkeys():
-    """Remap keys if needed"""
+    """
+    @brief Remap keys if needed (placeholder for custom key remapping)
+    """
     pass
 
 
 def manually_reconfigure_screens():
-    """Manually reconfigure screens after monitor changes"""
+    """
+    @brief Manually reconfigure screens after monitor changes
+    @throws Exception if screen reconfiguration fails
+    """
     if qtile is not None:
         logger.info("Manual screen reconfiguration requested")
         _ = refresh_screens()

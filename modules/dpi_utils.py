@@ -19,22 +19,44 @@ class DPIManager:
         self.detect_dpi()
 
     def detect_dpi(self) -> float:
-        """Detect current display DPI using multiple methods"""
+        """
+        @brief Detect current display DPI using multiple fallback methods
+        @return Detected DPI value, or fallback value if detection fails
+        """
         if self._dpi is not None:
             return self._dpi
 
         # Try methods in order of preference
-        dpi = (self._try_xdpyinfo() or
-               self._try_xrandr() or
-               self._try_xresources() or
-               self._try_environment() or
-               self._use_fallback())
-
-        self._dpi = dpi
+        self._dpi = self._detect_with_fallbacks()
         return self._dpi
 
+    def _detect_with_fallbacks(self) -> float:
+        """
+        @brief Try multiple DPI detection methods with fallbacks
+        @return DPI value from first successful method or fallback
+        """
+        detection_methods = [
+            self._try_xdpyinfo,
+            self._try_xrandr,
+            self._try_xresources,
+            self._try_environment,
+            self._use_fallback
+        ]
+        
+        for method in detection_methods:
+            dpi = method()
+            if dpi is not None:
+                return dpi
+                
+        # This should never happen since _use_fallback always returns a value
+        return 96.0
+
     def _try_xdpyinfo(self) -> float | None:
-        """Try to get DPI from xdpyinfo"""
+        """
+        @brief Try to get DPI from xdpyinfo command
+        @return DPI value if successful, None otherwise
+        @throws subprocess.TimeoutExpired if command times out
+        """
         try:
             result = subprocess.run(['xdpyinfo'], capture_output=True, text=True, timeout=2)
             if result.returncode == 0:
@@ -50,7 +72,11 @@ class DPIManager:
         return None
 
     def _try_xrandr(self) -> float | None:
-        """Try to get DPI from xrandr physical dimensions"""
+        """
+        @brief Try to get DPI from xrandr physical dimensions
+        @return Calculated DPI based on screen resolution and physical size, None if unavailable
+        @throws subprocess.TimeoutExpired if xrandr command times out
+        """
         try:
             result = subprocess.run(['xrandr', '--query'], capture_output=True, text=True, timeout=2)
             if result.returncode == 0:
@@ -65,23 +91,30 @@ class DPIManager:
         return None
 
     def _parse_xrandr_line(self, line: str) -> float | None:
-        """Parse xrandr output line to extract DPI"""
+        """
+        @brief Parse xrandr output line to extract DPI from resolution and dimensions
+        @param line Single line of xrandr output containing monitor information
+        @return Calculated DPI value, None if parsing fails
+        """
         parts = line.split()
         resolution_part = None
         mm_part = None
 
+        # Find resolution part (e.g., "1920x1080+0+0" -> "1920x1080")
         for i, part in enumerate(parts):
             if 'x' in part and part.replace('x', '').replace('+', '').replace('-', '').isdigit():
                 resolution_part = part.split('+')[0]  # Get resolution before position
+            # Find physical dimensions (e.g., "597mm x 336mm")
             if part.endswith('mm'):
                 mm_part = parts[i-2:i+1]  # Get "597mm x 336mm"
                 break
 
         if resolution_part and mm_part and len(mm_part) >= 3:
             try:
+                # Extract pixel width and physical width in millimeters
                 width_px = int(resolution_part.split('x')[0])
                 width_mm = float(mm_part[0].replace('mm', ''))
-                # Calculate DPI: pixels / (mm / 25.4)
+                # Calculate DPI: pixels per inch = pixels / (mm / 25.4 mm/inch)
                 return round(width_px / (width_mm / 25.4))
             except (ValueError, IndexError):
                 pass
@@ -135,22 +168,34 @@ class DPIManager:
         return self._scale_factor
 
     def scale(self, base_size: int | float) -> int:
-        """Scale a size value based on current DPI"""
+        """
+        @brief Scale a size value based on current DPI
+        @param base_size The base size to scale (at 96 DPI)
+        @return Scaled size rounded to nearest integer, minimum 1
+        """
         return max(1, round(base_size * self.scale_factor))
 
     def scale_font(self, base_font_size: int | float) -> int:
-        """Scale font size with better rounding for readability"""
+        """
+        @brief Scale font size with better rounding for readability
+        @param base_font_size The base font size to scale
+        @return Scaled font size with intelligent rounding for readability
+        """
         scaled = base_font_size * self.scale_factor
-        # Round to nearest reasonable font size
+        
+        # Apply intelligent rounding based on size ranges for better readability
         if scaled < 8:
-            return 8
+            return 8  # Minimum readable font size
         elif scaled < 12:
-            return int(scaled)
+            return int(scaled)  # Small fonts: truncate for crispness
         else:
-            return round(scaled)
+            return round(scaled)  # Larger fonts: round normally
 
     def get_scaling_info(self) -> dict[str, str | float | int]:
-        """Get comprehensive scaling information"""
+        """
+        @brief Get comprehensive scaling information for debugging and configuration
+        @return Dictionary containing DPI, scale factor, category, and recommended sizes
+        """
         return {
             'dpi': self.dpi,
             'scale_factor': self.scale_factor,
@@ -186,24 +231,41 @@ class DPIManager:
 _dpi_manager = None
 
 def get_dpi_manager() -> DPIManager:
-    """Get the global DPI manager instance"""
+    """
+    @brief Get the global DPI manager instance
+    @return Singleton DPIManager instance
+    """
     global _dpi_manager
     if _dpi_manager is None:
         _dpi_manager = DPIManager()
     return _dpi_manager
 
 def scale_size(size: int | float) -> int:
-    """Convenience function to scale a size"""
+    """
+    @brief Convenience function to scale a size
+    @param size The base size to scale at 96 DPI
+    @return DPI-scaled size as integer
+    """
     return get_dpi_manager().scale(size)
 
 def scale_font(font_size: int | float) -> int:
-    """Convenience function to scale a font size"""
+    """
+    @brief Convenience function to scale a font size
+    @param font_size The base font size to scale
+    @return DPI-scaled font size with intelligent rounding
+    """
     return get_dpi_manager().scale_font(font_size)
 
 def get_dpi() -> float:
-    """Convenience function to get current DPI"""
+    """
+    @brief Convenience function to get current DPI
+    @return Current system DPI value
+    """
     return get_dpi_manager().dpi
 
 def get_scale_factor() -> float:
-    """Convenience function to get scale factor"""
+    """
+    @brief Convenience function to get scale factor relative to 96 DPI
+    @return Scale factor (1.0 = 96 DPI, 2.0 = 192 DPI, etc.)
+    """
     return get_dpi_manager().scale_factor
