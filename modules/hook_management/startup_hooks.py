@@ -36,7 +36,32 @@ class StartupHooks:
         def setup_color_watching():
             """Additional setup after qtile is fully loaded"""
             logger.info("Qtile startup completed - starting simplified color monitoring")
-            self.color_manager.start_monitoring()
+            try:
+                # Check if already monitoring
+                if self.color_manager.is_monitoring():
+                    logger.info("Color monitoring already active")
+                    return
+
+                # Attempt to start monitoring
+                logger.info("Starting color file monitoring...")
+                self.color_manager.start_monitoring()
+
+                # Verify it started successfully
+                if self.color_manager.is_monitoring():
+                    logger.info("✅ Color monitoring started successfully")
+                    logger.info(f"Watching: {self.color_manager.colors_file}")
+                else:
+                    logger.warning("❌ Color monitoring failed to start")
+                    # Try force start as fallback
+                    logger.info("Attempting force start...")
+                    if hasattr(self.color_manager, 'force_start_monitoring'):
+                        result = self.color_manager.force_start_monitoring()
+                        logger.info(f"Force start result: {result}")
+
+            except Exception as e:
+                logger.error(f"Failed to start color monitoring: {e}")
+                logger.error("Color changes won't trigger automatic qtile restart")
+                logger.error("Use Super + Ctrl + C for manual color reload")
 
         @hook.subscribe.startup_complete
         def enforce_tiling_on_restart():

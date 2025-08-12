@@ -140,7 +140,7 @@ class SimpleColorManager:
                 self.manager = manager
 
             def on_modified(self, event):
-                if not event.is_directory and event.src_path == self.manager.colors_file:
+                if not event.is_directory and event.src_path == str(self.manager.colors_file):
                     # Small delay to ensure file write is complete
                     time.sleep(0.2)
                     self.manager._handle_color_change()
@@ -186,11 +186,33 @@ class SimpleColorManager:
         @brief Handle color file changes by reloading colors and restarting qtile
         @throws Exception if color reload or qtile restart fails
         """
-        logger.info("Colors file changed, restarting qtile...")
+        logger.info("Colors file changed, processing update...")
         try:
+            # Validate file exists and is readable
+            if not self.colors_file.exists():
+                logger.warning("Colors file disappeared, ignoring change")
+                return
+
+            # Check file size to avoid processing empty/truncated files
+            file_size = self.colors_file.stat().st_size
+            if file_size < 10:  # JSON file should be larger than 10 bytes
+                logger.warning(f"Colors file too small ({file_size} bytes), possibly incomplete write")
+                return
+
             # Reload colors first to validate the new file
+            old_colors = self.colordict.copy()
             self.colordict = self._load_colors()
             logger.debug("Colors reloaded successfully")
+
+            # Check if colors actually changed to avoid unnecessary restarts
+            if old_colors == self.colordict:
+                logger.debug("Colors unchanged, skipping restart")
+                return
+
+            # Log the color change for debugging
+            old_bg = old_colors.get('special', {}).get('background', 'unknown')
+            new_bg = self.colordict.get('special', {}).get('background', 'unknown')
+            logger.info(f"Background color changed: {old_bg} → {new_bg}")
 
             # Update SVG icons if enhanced bar manager is available
             try:
@@ -205,12 +227,23 @@ class SimpleColorManager:
                 logger.debug(f"Could not update SVG icons: {e}")
 
             # Restart qtile to apply new colors
-            if qtile is not None:
-                qtile.restart()
+            if qtile is not None and hasattr(qtile, 'restart'):
+                try:
+                    logger.info("Restarting qtile to apply new colors...")
+                    qtile.restart()
+                except AttributeError:
+                    logger.warning("qtile.restart() not available (running outside qtile?)")
+                except Exception as e:
+                    logger.error(f"Failed to restart qtile: {e}")
             else:
-                logger.warning("qtile instance not available, cannot restart")
+                logger.warning("qtile instance not available or restart method missing")
+
         except json.JSONDecodeError as e:
             logger.error(f"Invalid JSON in color file, ignoring change: {e}")
+        except FileNotFoundError:
+            logger.warning("Colors file not found during change handling")
+        except PermissionError:
+            logger.error("Permission denied reading colors file")
         except Exception as e:
             logger.error(f"Error handling color change: {e}")
             # Don't restart qtile if we can't load colors properly

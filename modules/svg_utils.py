@@ -10,7 +10,7 @@ Provides tools to create, modify, scale, and color SVG icons programmatically
 import re
 import xml.etree.ElementTree as ET
 from pathlib import Path
-from typing import Dict, List, Tuple, Any
+from typing import Dict, List, Tuple
 from dataclasses import dataclass
 from modules.dpi_utils import scale_size
 
@@ -488,9 +488,6 @@ class IconGenerator:
                 color = self.colors["muted"]
 
             # Create arc using path
-            start_angle = 225  # Bottom-left
-            end_angle = 315    # Bottom-right
-
             x1 = center_x + radius * 0.707  # cos(45°)
             y1 = center_y + radius * 0.707  # sin(45°)
             x2 = center_x - radius * 0.707
