@@ -173,10 +173,10 @@ class PlatformConfig:
         @return Dictionary mapping platforms to terminal preference lists
         """
         return {
-            "linux": ["st", "alacritty", "kitty", "gnome-terminal", "xterm"],
-            "openbsd": ["xterm", "st", "urxvt", "gnome-terminal"],
-            "freebsd": ["st", "alacritty", "xterm", "gnome-terminal"],
-            "netbsd": ["xterm", "st", "urxvt"],
+            "linux": ["st", "alacritty", "kitty", "xterm"],
+            "openbsd": ["st", "urxvt", "xterm"],
+            "freebsd": ["st", "alacritty", "xterm"],
+            "netbsd": ["st", "urxvt", "xterm"],
         }
 
     def _get_browser_preferences(self) -> Dict[str, List[str]]:
@@ -258,7 +258,7 @@ class PlatformConfig:
                 "clipboard_manager": "xclip",
                 "screenshot": "xwd | xwdtopnm | pnmtopng",
                 "audio_mixer": "mixerctl",
-                "network_manager": "wiconfig",
+                "network_manager": "ifconfig",
             },
             "freebsd": {
                 "lock_session": "xlock",

@@ -108,7 +108,7 @@ class QtileConfig:
     @property
     def browser(self) -> str:
         """Default web browser - platform aware"""
-        return self.platform_config.get_application("browser", "firefox")
+        return self.platform_config.get_application("browser", "brave")
 
     # ===== APPLICATION COMMANDS =====
 
