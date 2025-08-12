@@ -12,6 +12,7 @@ Handles font detection, fallbacks, and cross-platform font management.
 import platform
 import subprocess
 from pathlib import Path
+from typing import Any
 
 from libqtile.log_utils import logger
 
@@ -213,7 +214,7 @@ class FontManager:
         common_macos_fonts = ["monaco", "menlo", "courier", "courier new"]
         return font_name.lower() in common_macos_fonts
 
-    def get_font_info(self, preferred_font: str | None = None) -> dict:
+    def get_font_info(self, preferred_font: str | None = None) -> dict[str, Any]:
         """
         @brief Get information about font selection for debugging
         @param preferred_font The preferred font to analyze
@@ -254,7 +255,7 @@ def get_available_font(
     return _font_manager.get_available_font(preferred_font, fallback_fonts)
 
 
-def get_font_info(preferred_font: str | None = None) -> dict:
+def get_font_info(preferred_font: str | None = None) -> dict[str, Any]:
     """
     @brief Get font selection information for debugging
     @param preferred_font The preferred font to analyze

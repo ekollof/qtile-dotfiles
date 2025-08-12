@@ -11,8 +11,16 @@ import re
 import xml.etree.ElementTree as ET
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Any
 
 from modules.dpi_utils import scale_size
+
+# Import logger at module level to avoid binding issues  
+try:
+    from libqtile.log_utils import logger
+except ImportError:
+    import logging
+    logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -235,7 +243,7 @@ class SVGManipulator:
     dynamic coloring and scaling capabilities.
     """
 
-    def __init__(self, color_manager=None) -> None:
+    def __init__(self, color_manager: Any = None) -> None:
         """
         @brief Initialize SVG manipulator
         @param color_manager: Optional color manager for theme integration
@@ -420,7 +428,7 @@ class IconGenerator:
     styling and theme integration.
     """
 
-    def __init__(self, color_manager=None, size: int = 24) -> None:
+    def __init__(self, color_manager: Any = None, size: int = 24) -> None:
         """
         @brief Initialize icon generator
         @param color_manager: Optional color manager for theming
@@ -439,7 +447,6 @@ class IconGenerator:
             try:
                 qtile_colors = self.color_manager.get_colors()
                 # Debug: log what colors we're getting
-                from libqtile.log_utils import logger
                 logger.debug(f"SVG IconGenerator got colors: {qtile_colors}")
                 
                 if qtile_colors and "special" in qtile_colors and "colors" in qtile_colors:
@@ -916,7 +923,7 @@ class IconGenerator:
 
 
 def create_themed_icon_cache(
-    color_manager, icon_dir: Path, size: int = 24
+    color_manager: Any, icon_dir: Path, size: int = 24
 ) -> dict[str, str]:
     """
     @brief Create cache of themed icons for qtile widgets
@@ -980,7 +987,7 @@ def create_themed_icon_cache(
     return icon_paths
 
 
-def get_svg_utils(color_manager=None) -> tuple[SVGManipulator, IconGenerator]:
+def get_svg_utils(color_manager: Any = None) -> tuple[SVGManipulator, IconGenerator]:
     """
     @brief Get SVG utility instances configured with color manager
     @param color_manager: Optional color manager for theming

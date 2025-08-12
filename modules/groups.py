@@ -89,7 +89,7 @@ class GroupManager:
     def get_groups(self):
         """Get all workspace groups"""
         groups = []
-        for name, kwargs in self.config.groups:
+        for name, _kwargs in self.config.groups:  # kwargs not currently used
             groups.append(Group(name))
 
         # Add scratchpad
@@ -112,10 +112,10 @@ class GroupManager:
 
     def get_group_keys(self):
         """Get group-related keyboard bindings"""
-        groups, group_names = self.get_groups()
+        _groups, group_names = self.get_groups()  # groups not used, just group_names
         keys = []
 
-        for i, (name, kwargs) in enumerate(group_names, 1):
+        for i, (name, _kwargs) in enumerate(group_names, 1):  # kwargs not used
             # Switch to another group
             keys.append(Key([self.mod], str(i), lazy.group[name].toscreen()))
             # Send current window to another group
