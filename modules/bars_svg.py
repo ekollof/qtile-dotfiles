@@ -15,7 +15,8 @@ import traceback
 from pathlib import Path
 from typing import Dict, List, Any
 
-from libqtile import bar, widget
+from libqtile import bar
+from qtile_extras import widget
 from libqtile.log_utils import logger
 
 from modules.dpi_utils import scale_size, scale_font
@@ -646,25 +647,10 @@ class EnhancedBarManager:
             ),
 
             widget.TaskList(
-                **self._get_widget_defaults_excluding('background', 'padding', 'fontsize'),
-                # Focused window appearance
-                border=colors.get("color6", "#00ff00"),
+                border=colors.get("color1", "#808080"),
                 foreground=special.get("foreground", "#ffffff"),
-                background=colors.get("color2", "#333333"),
-                # Unfocused window appearance
-                unfocused_border=colors.get("color0", "#000000"),
-                unfocused_foreground=colors.get("color8", "#808080"),
-                unfocused_background=special.get("background", "#000000"),
-                # Visual enhancements
-                highlight_method="border",
-                icon_size=scale_size(16),
-                max_title_width=scale_size(250),
-                padding_x=scale_size(8),
-                padding_y=scale_size(4),
-                margin_x=scale_size(2),
-                margin_y=scale_size(2),
-                borderwidth=scale_size(2),
-                fontsize=scale_size(11),
+                theme_mode="preferred",
+                theme_path="/usr/share/icons/breeze-dark",
             ),
 
             widget.Spacer(),
