@@ -14,9 +14,9 @@ from libqtile.log_utils import logger
 class ScreenManager:
     """Manages screen detection and configuration"""
 
-    def __init__(self):
-        self.display_override = 0  # Set to 0 for auto-detection
-        self.num_screens = 1
+    def __init__(self) -> None:
+        self.display_override: int = 0  # Set to 0 for auto-detection
+        self.num_screens: int = 1
         self.detect_screens()
 
     def detect_screens(self):
@@ -55,11 +55,11 @@ class ScreenManager:
             return True
         return False
 
-    def get_screen_count(self):
-        """Get the number of detected screens"""
+    def get_screen_count(self) -> int:
+        """Get detected screen count"""
         return self.num_screens
 
-    def set_override(self, count):
+    def set_override(self, count: int) -> None:
         """Set manual screen count override"""
         self.display_override = count
         self.detect_screens()
@@ -161,11 +161,11 @@ def refresh_screens():
     return screen_manager.refresh_screens()
 
 
-def get_screen_count():
+def get_screen_count() -> int:
     """Get the number of screens"""
     return screen_manager.get_screen_count()
 
 
-def set_screen_override(count):
+def set_screen_override(count: int) -> None:
     """Set manual screen count override"""
     screen_manager.set_override(count)

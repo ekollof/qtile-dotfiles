@@ -19,6 +19,7 @@ import importlib
 import os
 import sys
 from pathlib import Path
+from typing import Any
 
 from libqtile import qtile
 from libqtile.config import Click, Drag
