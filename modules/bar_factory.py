@@ -41,6 +41,8 @@ class BarManagerFactory:
             # Test essential SVG dependencies
             from modules.svg_utils import SVGBuilder, IconGenerator
             from modules.dpi_utils import scale_size
+            # Verify imports are usable
+            assert callable(SVGBuilder) and callable(IconGenerator) and callable(scale_size)
             return True
         except ImportError as e:
             logger.warning(f"SVG support dependencies missing: {e}")

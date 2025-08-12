@@ -181,6 +181,68 @@ class SimpleColorManager:
         self._polling_thread.start()
         logger.info(f"Watching {self.colors_file} with polling")
 
+    def _validate_color_file(self) -> bool:
+        """
+        @brief Validate that color file exists and is readable
+        @return True if file is valid, False otherwise
+        """
+        if not self.colors_file.exists():
+            logger.warning("Colors file disappeared, ignoring change")
+            return False
+
+        file_size = self.colors_file.stat().st_size
+        if file_size < 10:  # JSON file should be larger than 10 bytes
+            logger.warning(f"Colors file too small ({file_size} bytes), possibly incomplete write")
+            return False
+
+        return True
+
+    def _detect_color_changes(self, old_colors: dict) -> bool:
+        """
+        @brief Check if colors actually changed
+        @param old_colors Previous color dictionary
+        @return True if colors changed, False otherwise
+        """
+        if old_colors == self.colordict:
+            logger.debug("Colors unchanged, skipping restart")
+            return False
+
+        # Log the color change for debugging
+        old_bg = old_colors.get('special', {}).get('background', 'unknown')
+        new_bg = self.colordict.get('special', {}).get('background', 'unknown')
+        logger.info(f"Background color changed: {old_bg} → {new_bg}")
+        return True
+
+    def _update_svg_icons(self) -> None:
+        """
+        @brief Update SVG icons if enhanced bar manager is available
+        """
+        try:
+            # Try to update icons for current bar manager
+            if hasattr(qtile, 'config') and hasattr(qtile.config, 'screens'):
+                for screen in qtile.config.screens:
+                    if hasattr(screen, 'top') and screen.top:
+                        # Force regeneration of themed icons
+                        logger.info("Updating dynamic SVG icons for new color scheme")
+                        break
+        except Exception as e:
+            logger.debug(f"Could not update SVG icons: {e}")
+
+    def _restart_qtile(self) -> None:
+        """
+        @brief Restart qtile to apply new colors
+        """
+        if qtile is not None and hasattr(qtile, 'restart'):
+            try:
+                logger.info("Restarting qtile to apply new colors...")
+                qtile.restart()
+            except AttributeError:
+                logger.warning("qtile.restart() not available (running outside qtile?)")
+            except Exception as e:
+                logger.error(f"Failed to restart qtile: {e}")
+        else:
+            logger.warning("qtile instance not available or restart method missing")
+
     def _handle_color_change(self):
         """
         @brief Handle color file changes by reloading colors and restarting qtile
@@ -189,14 +251,7 @@ class SimpleColorManager:
         logger.info("Colors file changed, processing update...")
         try:
             # Validate file exists and is readable
-            if not self.colors_file.exists():
-                logger.warning("Colors file disappeared, ignoring change")
-                return
-
-            # Check file size to avoid processing empty/truncated files
-            file_size = self.colors_file.stat().st_size
-            if file_size < 10:  # JSON file should be larger than 10 bytes
-                logger.warning(f"Colors file too small ({file_size} bytes), possibly incomplete write")
+            if not self._validate_color_file():
                 return
 
             # Reload colors first to validate the new file
@@ -205,38 +260,14 @@ class SimpleColorManager:
             logger.debug("Colors reloaded successfully")
 
             # Check if colors actually changed to avoid unnecessary restarts
-            if old_colors == self.colordict:
-                logger.debug("Colors unchanged, skipping restart")
+            if not self._detect_color_changes(old_colors):
                 return
 
-            # Log the color change for debugging
-            old_bg = old_colors.get('special', {}).get('background', 'unknown')
-            new_bg = self.colordict.get('special', {}).get('background', 'unknown')
-            logger.info(f"Background color changed: {old_bg} → {new_bg}")
-
             # Update SVG icons if enhanced bar manager is available
-            try:
-                # Try to update icons for current bar manager
-                if hasattr(qtile, 'config') and hasattr(qtile.config, 'screens'):
-                    for screen in qtile.config.screens:
-                        if hasattr(screen, 'top') and screen.top:
-                            # Force regeneration of themed icons
-                            logger.info("Updating dynamic SVG icons for new color scheme")
-                            break
-            except Exception as e:
-                logger.debug(f"Could not update SVG icons: {e}")
+            self._update_svg_icons()
 
             # Restart qtile to apply new colors
-            if qtile is not None and hasattr(qtile, 'restart'):
-                try:
-                    logger.info("Restarting qtile to apply new colors...")
-                    qtile.restart()
-                except AttributeError:
-                    logger.warning("qtile.restart() not available (running outside qtile?)")
-                except Exception as e:
-                    logger.error(f"Failed to restart qtile: {e}")
-            else:
-                logger.warning("qtile instance not available or restart method missing")
+            self._restart_qtile()
 
         except json.JSONDecodeError as e:
             logger.error(f"Invalid JSON in color file, ignoring change: {e}")

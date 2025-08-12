@@ -209,7 +209,7 @@ class QtileConfig:
         }
 
     @property
-    def monad_tall_layout(self) -> dict[str, int | float]:
+    def monad_tall_layout(self) -> dict[str, int | float | str]:
         """
         @brief MonadTall layout specific settings - DPI scaled
         @return Dictionary with ratio, min_ratio, and max_ratio for MonadTall
