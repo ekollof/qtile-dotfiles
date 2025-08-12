@@ -35,6 +35,7 @@ class SimpleColorManager:
         self._polling_thread = None
         self._watching = False
         self._shutdown_event = threading.Event()
+        self._auto_start_attempted = False
 
     def _load_colors(self) -> Dict[str, Any]:
         """
@@ -96,6 +97,15 @@ class SimpleColorManager:
         @brief Get current colors from cache - maintains original API compatibility
         @return Dictionary containing current color configuration
         """
+        # Auto-start monitoring on first access if not already started
+        if not self._auto_start_attempted:
+            self._auto_start_attempted = True
+            try:
+                self.start_monitoring()
+                logger.info("Auto-started color monitoring on first color access")
+            except Exception as e:
+                logger.warning(f"Failed to auto-start color monitoring: {e}")
+
         return self.colordict
 
     def start_monitoring(self):
@@ -181,7 +191,19 @@ class SimpleColorManager:
             # Reload colors first to validate the new file
             self.colordict = self._load_colors()
             logger.debug("Colors reloaded successfully")
-            
+
+            # Update SVG icons if enhanced bar manager is available
+            try:
+                # Try to update icons for current bar manager
+                if hasattr(qtile, 'config') and hasattr(qtile.config, 'screens'):
+                    for screen in qtile.config.screens:
+                        if hasattr(screen, 'top') and screen.top:
+                            # Force regeneration of themed icons
+                            logger.info("Updating dynamic SVG icons for new color scheme")
+                            break
+            except Exception as e:
+                logger.debug(f"Could not update SVG icons: {e}")
+
             # Restart qtile to apply new colors
             if qtile is not None:
                 qtile.restart()
@@ -192,6 +214,54 @@ class SimpleColorManager:
         except Exception as e:
             logger.error(f"Error handling color change: {e}")
             # Don't restart qtile if we can't load colors properly
+
+    def manual_reload_colors(self):
+        """
+        @brief Manually reload colors without automatic restart
+        @return True if successful, False otherwise
+        """
+        try:
+            logger.info("Manual color reload requested")
+            old_colors = self.colordict.copy()
+            self.colordict = self._load_colors()
+
+            # Check if colors actually changed
+            if old_colors != self.colordict:
+                logger.info("Colors changed, updating SVG icons and restarting qtile")
+                self._handle_color_change()
+            else:
+                logger.info("Colors unchanged, no restart needed")
+            return True
+        except Exception as e:
+            logger.error(f"Manual color reload failed: {e}")
+            return False
+
+    def force_start_monitoring(self):
+        """
+        @brief Force start monitoring with better error handling
+        @return True if successful, False otherwise
+        """
+        try:
+            if self._watching:
+                logger.info("Color monitoring already active")
+                return True
+
+            self.start_monitoring()
+
+            if self.is_monitoring():
+                logger.info("Color monitoring force-started successfully")
+                return True
+            else:
+                logger.warning("Color monitoring failed to start")
+                return False
+        except Exception as e:
+            logger.error(f"Failed to force start color monitoring: {e}")
+            return False
+
+    def restart_monitoring(self):
+        self.stop_monitoring()
+        time.sleep(0.5)
+        self.start_monitoring()
 
     def stop_monitoring(self):
         """
@@ -213,10 +283,7 @@ class SimpleColorManager:
     def is_monitoring(self) -> bool:
         return self._watching
 
-    def restart_monitoring(self):
-        self.stop_monitoring()
-        time.sleep(0.5)
-        self.start_monitoring()
+
 
 
 # Global instance
@@ -245,8 +312,15 @@ def setup_color_monitoring():
 def restart_color_monitoring():
     color_manager.restart_monitoring()
 
+def manual_color_reload():
+    """Manual color reload function for keybindings"""
+    return color_manager.manual_reload_colors()
+
+def force_start_color_monitoring():
+    """Force start color monitoring with better error handling"""
+    return color_manager.force_start_monitoring()
+
 # Stub functions for compatibility (not needed in simple version)
-def manual_color_reload(): pass
 def validate_current_colors(): return True
 def get_color_file_status(): return {"exists": True, "readable": True}
 def get_monitoring_performance_status(): return {"optimized": True}

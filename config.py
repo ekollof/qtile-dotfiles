@@ -39,6 +39,13 @@ key_manager = create_key_manager(color_manager)
 group_manager = create_group_manager(color_manager)
 hook_manager = create_hook_manager(color_manager)
 
+# Start color monitoring for automatic wallpaper/theme changes
+try:
+    color_manager.force_start_monitoring()
+    logger.info("Color monitoring started - qtile will restart when wallpaper changes")
+except Exception as e:
+    logger.warning(f"Failed to start color monitoring: {e}")
+
 # Get configuration components
 keys = key_manager.get_keys()
 keys.extend(group_manager.get_group_keys())

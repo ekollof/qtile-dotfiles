@@ -51,7 +51,7 @@ class SystemCommands:
         """Manually reload colors"""
         try:
             logger.info("Manual color reload requested")
-            self.color_manager.update_colors()
+            self.color_manager.manual_reload_colors()
             logger.info("Color reload completed")
         except Exception as e:
             logger.error(f"Error reloading colors: {e}")
