@@ -77,8 +77,16 @@ class EnhancedBarManager:
             'font': get_available_font(self.qtile_config.preferred_font),
             'fontsize': scale_font(12),
             'padding': scale_size(3),
-            'background': None,
         }
+
+    def _get_widget_defaults_without_background(self) -> Dict[str, Any]:
+        """
+        @brief Get widget defaults without background for custom styling
+        @return Dictionary of widget default settings excluding background
+        """
+        defaults = self.widget_defaults.copy()
+        defaults.pop('background', None)
+        return defaults
 
     def _initialize_icon_mappings(self) -> Dict[str, Dict[str, str]]:
         """
@@ -515,7 +523,7 @@ class EnhancedBarManager:
             self._create_icon_widget("python"),
 
             widget.GroupBox(
-                **self.widget_defaults,
+                **self._get_widget_defaults_without_background(),
                 background=special.get("background", "#000000"),
                 foreground=colors.get("color5", "#ffffff"),
                 active=colors.get("color7", "#ffffff"),
@@ -536,7 +544,7 @@ class EnhancedBarManager:
             ),
 
             widget.TaskList(
-                **self.widget_defaults,
+                **self._get_widget_defaults_without_background(),
                 border=colors.get("color1", "#808080"),
                 foreground=colors.get("color5", "#ffffff"),
                 background=special.get("background", "#000000"),
@@ -562,7 +570,7 @@ class EnhancedBarManager:
             # Package updates
             self._create_icon_widget("updates"),
             widget.CheckUpdates(
-                **self.widget_defaults,
+                **self._get_widget_defaults_without_background(),
                 foreground=colors.get("color5", "#ffffff"),
                 background=special.get("background", "#000000"),
                 update_interval=3600,
@@ -576,7 +584,7 @@ class EnhancedBarManager:
             # AUR updates
             self._create_icon_widget("refresh"),
             widget.CheckUpdates(
-                **self.widget_defaults,
+                **self._get_widget_defaults_without_background(),
                 foreground=colors.get("color5", "#ffffff"),
                 background=special.get("background", "#000000"),
                 update_interval=3600,
@@ -590,7 +598,7 @@ class EnhancedBarManager:
             # CPU usage with dynamic icon
             self._create_icon_widget("cpu"),
             widget.CPU(
-                **self.widget_defaults,
+                **self._get_widget_defaults_without_background(),
                 foreground=colors.get("color5", "#ffffff"),
                 background=special.get("background", "#000000"),
                 format='{load_percent}%',
@@ -600,7 +608,7 @@ class EnhancedBarManager:
             # Memory usage with dynamic icon
             self._create_icon_widget("memory"),
             widget.Memory(
-                **self.widget_defaults,
+                **self._get_widget_defaults_without_background(),
                 foreground=colors.get("color5", "#ffffff"),
                 background=special.get("background", "#000000"),
                 format='{MemPercent}%',
@@ -610,7 +618,7 @@ class EnhancedBarManager:
             # Network activity with dynamic icon
             self._create_icon_widget("network"),
             widget.Net(
-                **self.widget_defaults,
+                **self._get_widget_defaults_without_background(),
                 foreground=colors.get("color5", "#ffffff"),
                 background=special.get("background", "#000000"),
                 format='{down} ↓↑ {up}',
@@ -620,7 +628,7 @@ class EnhancedBarManager:
             # Volume with dynamic icon
             self._create_icon_widget("volume"),
             widget.Volume(
-                **self.widget_defaults,
+                **self._get_widget_defaults_without_background(),
                 foreground=colors.get("color5", "#ffffff"),
                 background=special.get("background", "#000000"),
                 fmt='{}',
@@ -633,7 +641,7 @@ class EnhancedBarManager:
             barconfig.extend([
                 self._create_icon_widget("battery"),
                 widget.Battery(
-                    **self.widget_defaults,
+                    **self._get_widget_defaults_without_background(),
                     foreground=colors.get("color5", "#ffffff"),
                     background=special.get("background", "#000000"),
                     format='{percent:2.0%}',
@@ -653,7 +661,7 @@ class EnhancedBarManager:
         # Clock and system tray
         barconfig.extend([
             widget.Clock(
-                **self.widget_defaults,
+                **self._get_widget_defaults_without_background(),
                 foreground=colors.get("color5", "#ffffff"),
                 background=special.get("background", "#000000"),
                 format='%Y-%m-%d %H:%M:%S',
@@ -667,7 +675,7 @@ class EnhancedBarManager:
             ),
 
             widget.CurrentLayoutIcon(
-                **self.widget_defaults,
+                **self._get_widget_defaults_without_background(),
                 background=special.get("background", "#000000"),
                 scale=0.7,
                 padding=scale_size(3),
