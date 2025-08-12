@@ -633,6 +633,96 @@ class IconGenerator:
 
         return builder.build()
 
+    def python_icon(self) -> str:
+        """
+        @brief Generate Python logo icon
+        @return SVG string
+        """
+        builder = SVGBuilder(self.size, self.size)
+
+        # Python logo inspired design
+        # Upper snake body (blue)
+        builder.add_path("M12,4 Q8,4 8,8 L8,12 L16,12 L16,8 Q16,4 12,4 Z",
+                        fill=self.colors["accent"])
+
+        # Lower snake body (yellow/gold)
+        builder.add_path("M12,20 Q16,20 16,16 L16,12 L8,12 L8,16 Q8,20 12,20 Z",
+                        fill=self.colors["warning"])
+
+        # Eyes
+        builder.add_circle(10, 7, 1, fill=self.colors["foreground"])
+        builder.add_circle(14, 17, 1, fill=self.colors["foreground"])
+
+        return builder.build()
+
+    def mail_icon(self) -> str:
+        """
+        @brief Generate mail/envelope icon
+        @return SVG string
+        """
+        builder = SVGBuilder(self.size, self.size)
+
+        # Envelope body
+        builder.add_rect(4, 8, 16, 10, fill="none",
+                        stroke=self.colors["foreground"], stroke_width=1.5, rx=1)
+
+        # Envelope flap
+        builder.add_path("M4,8 L12,14 L20,8", fill="none",
+                        stroke=self.colors["foreground"], stroke_width=1.5)
+
+        # Mail indicator dot
+        builder.add_circle(18, 10, 2, fill=self.colors["accent"])
+
+        return builder.build()
+
+    def ticket_icon(self) -> str:
+        """
+        @brief Generate ticket/support icon
+        @return SVG string
+        """
+        builder = SVGBuilder(self.size, self.size)
+
+        # Ticket body
+        builder.add_rect(6, 8, 12, 8, fill=self.colors["accent"],
+                        stroke=self.colors["foreground"], stroke_width=1)
+
+        # Perforated edges
+        for i in range(3):
+            y = 9 + i * 2
+            builder.add_circle(6, y, 0.5, fill=self.colors["background"])
+            builder.add_circle(18, y, 0.5, fill=self.colors["background"])
+
+        # Ticket number lines
+        builder.add_rect(8, 10, 6, 0.5, fill=self.colors["foreground"])
+        builder.add_rect(8, 12, 4, 0.5, fill=self.colors["foreground"])
+        builder.add_rect(8, 14, 5, 0.5, fill=self.colors["foreground"])
+
+        return builder.build()
+
+    def thermometer_icon(self) -> str:
+        """
+        @brief Generate thermometer/temperature icon
+        @return SVG string
+        """
+        builder = SVGBuilder(self.size, self.size)
+
+        # Thermometer bulb
+        builder.add_circle(12, 18, 3, fill=self.colors["error"])
+
+        # Thermometer tube
+        builder.add_rect(11, 6, 2, 12, fill=self.colors["foreground"],
+                        stroke=self.colors["foreground"], stroke_width=0.5, rx=1)
+
+        # Temperature scale marks
+        for i in range(4):
+            y = 8 + i * 2
+            builder.add_rect(13.5, y, 1.5, 0.5, fill=self.colors["foreground"])
+
+        # Mercury/temperature indicator
+        builder.add_rect(11.2, 15, 1.6, 3, fill=self.colors["error"], rx=0.8)
+
+        return builder.build()
+
 
 def create_themed_icon_cache(color_manager, icon_dir: Path, size: int = 24) -> Dict[str, str]:
     """
@@ -673,6 +763,10 @@ def create_themed_icon_cache(color_manager, icon_dir: Path, size: int = 24) -> D
         "network_rx": generator.network_icon(rx_active=True),
         "network_tx": generator.network_icon(tx_active=True),
         "network_active": generator.network_icon(rx_active=True, tx_active=True),
+        "python": generator.python_icon(),
+        "mail": generator.mail_icon(),
+        "ticket": generator.ticket_icon(),
+        "thermometer": generator.thermometer_icon(),
     }
 
     # Save icons and return paths

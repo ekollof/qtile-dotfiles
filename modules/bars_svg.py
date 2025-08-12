@@ -219,6 +219,18 @@ class EnhancedBarManager:
                     tx_active = kwargs.get("tx_active", False)
                     svg_content = self.icon_generator.network_icon(rx_active, tx_active)
 
+                case "python":
+                    svg_content = self.icon_generator.python_icon()
+
+                case "mail":
+                    svg_content = self.icon_generator.mail_icon()
+
+                case "ticket":
+                    svg_content = self.icon_generator.ticket_icon()
+
+                case "thermometer":
+                    svg_content = self.icon_generator.thermometer_icon()
+
                 case _:
                     # Return static themed icon if available
                     return self.themed_icons.get(icon_type, "")
