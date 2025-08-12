@@ -11,6 +11,7 @@ import os
 import platform
 import socket
 import subprocess
+import traceback
 from pathlib import Path
 from typing import Dict, List, Any
 
@@ -86,6 +87,17 @@ class EnhancedBarManager:
         """
         defaults = self.widget_defaults.copy()
         defaults.pop('background', None)
+        return defaults
+
+    def _get_widget_defaults_excluding(self, *exclude_params: str) -> Dict[str, Any]:
+        """
+        @brief Get widget defaults excluding specified parameters
+        @param exclude_params: Parameter names to exclude from defaults
+        @return Dictionary of widget default settings without conflicts
+        """
+        defaults = self.widget_defaults.copy()
+        for param in exclude_params:
+            defaults.pop(param, None)
         return defaults
 
     def _initialize_icon_mappings(self) -> Dict[str, Dict[str, str]]:
@@ -523,7 +535,7 @@ class EnhancedBarManager:
             self._create_icon_widget("python"),
 
             widget.GroupBox(
-                **self._get_widget_defaults_without_background(),
+                **self._get_widget_defaults_excluding('background', 'foreground', 'padding'),
                 background=special.get("background", "#000000"),
                 foreground=colors.get("color5", "#ffffff"),
                 active=colors.get("color7", "#ffffff"),
@@ -544,7 +556,7 @@ class EnhancedBarManager:
             ),
 
             widget.TaskList(
-                **self._get_widget_defaults_without_background(),
+                **self._get_widget_defaults_excluding('background', 'foreground', 'padding'),
                 border=colors.get("color1", "#808080"),
                 foreground=colors.get("color5", "#ffffff"),
                 background=special.get("background", "#000000"),
@@ -570,7 +582,7 @@ class EnhancedBarManager:
             # Package updates
             self._create_icon_widget("updates"),
             widget.CheckUpdates(
-                **self._get_widget_defaults_without_background(),
+                **self._get_widget_defaults_excluding('background', 'foreground'),
                 foreground=colors.get("color5", "#ffffff"),
                 background=special.get("background", "#000000"),
                 update_interval=3600,
@@ -584,7 +596,7 @@ class EnhancedBarManager:
             # AUR updates
             self._create_icon_widget("refresh"),
             widget.CheckUpdates(
-                **self._get_widget_defaults_without_background(),
+                **self._get_widget_defaults_excluding('background', 'foreground'),
                 foreground=colors.get("color5", "#ffffff"),
                 background=special.get("background", "#000000"),
                 update_interval=3600,
@@ -598,7 +610,7 @@ class EnhancedBarManager:
             # CPU usage with dynamic icon
             self._create_icon_widget("cpu"),
             widget.CPU(
-                **self._get_widget_defaults_without_background(),
+                **self._get_widget_defaults_excluding('background', 'foreground'),
                 foreground=colors.get("color5", "#ffffff"),
                 background=special.get("background", "#000000"),
                 format='{load_percent}%',
@@ -608,7 +620,7 @@ class EnhancedBarManager:
             # Memory usage with dynamic icon
             self._create_icon_widget("memory"),
             widget.Memory(
-                **self._get_widget_defaults_without_background(),
+                **self._get_widget_defaults_excluding('background', 'foreground'),
                 foreground=colors.get("color5", "#ffffff"),
                 background=special.get("background", "#000000"),
                 format='{MemPercent}%',
@@ -618,7 +630,7 @@ class EnhancedBarManager:
             # Network activity with dynamic icon
             self._create_icon_widget("network"),
             widget.Net(
-                **self._get_widget_defaults_without_background(),
+                **self._get_widget_defaults_excluding('background', 'foreground'),
                 foreground=colors.get("color5", "#ffffff"),
                 background=special.get("background", "#000000"),
                 format='{down} ↓↑ {up}',
@@ -628,7 +640,7 @@ class EnhancedBarManager:
             # Volume with dynamic icon
             self._create_icon_widget("volume"),
             widget.Volume(
-                **self._get_widget_defaults_without_background(),
+                **self._get_widget_defaults_excluding('background', 'foreground'),
                 foreground=colors.get("color5", "#ffffff"),
                 background=special.get("background", "#000000"),
                 fmt='{}',
@@ -641,7 +653,7 @@ class EnhancedBarManager:
             barconfig.extend([
                 self._create_icon_widget("battery"),
                 widget.Battery(
-                    **self._get_widget_defaults_without_background(),
+                    **self._get_widget_defaults_excluding('background', 'foreground'),
                     foreground=colors.get("color5", "#ffffff"),
                     background=special.get("background", "#000000"),
                     format='{percent:2.0%}',
@@ -661,7 +673,7 @@ class EnhancedBarManager:
         # Clock and system tray
         barconfig.extend([
             widget.Clock(
-                **self._get_widget_defaults_without_background(),
+                **self._get_widget_defaults_excluding('background', 'foreground'),
                 foreground=colors.get("color5", "#ffffff"),
                 background=special.get("background", "#000000"),
                 format='%Y-%m-%d %H:%M:%S',
@@ -674,11 +686,9 @@ class EnhancedBarManager:
                 padding=scale_size(5),
             ),
 
-            widget.CurrentLayoutIcon(
-                **self._get_widget_defaults_without_background(),
+            widget.CurrentLayout(
+                **self._get_widget_defaults_excluding('background'),
                 background=special.get("background", "#000000"),
-                scale=0.7,
-                padding=scale_size(3),
             ),
         ])
 
@@ -762,6 +772,9 @@ class EnhancedBarManager:
                 logger.debug(f"Created screen {i + 1} with enhanced SVG bar")
             except Exception as e:
                 logger.error(f"Failed to create screen {i + 1}: {e}")
+                logger.error(f"Full traceback for screen {i + 1}:")
+                logger.error(traceback.format_exc())
+                logger.info(f"Creating fallback screen {i + 1} without bar")
                 # Create fallback screen without bar
                 screens.append(Screen())
 
