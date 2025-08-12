@@ -28,7 +28,7 @@ class HookManager:
     control and validation for qtile's event handling system.
     """
 
-    def __init__(self, color_manager):
+    def __init__(self, color_manager: Any) -> None:
         self.color_manager = color_manager
         self.config = get_config()
 
@@ -49,7 +49,7 @@ class HookManager:
         self.screen_hooks.setup_screen_hooks()
         logger.info("All qtile hooks configured successfully")
 
-    def force_retile_all_windows(self, qtile) -> int:
+    def force_retile_all_windows(self, qtile: Any) -> int:
         """
         @brief Manual command to force all windows to tile (useful for testing/debugging)
         @param qtile Qtile instance
@@ -168,7 +168,7 @@ class HookManager:
             logger.error(f"Error during emergency reset: {e}")
             return {'error': str(e), 'success': False}
 
-    def reload_configuration(self):
+    def reload_configuration(self) -> None:
         """Reload hook configuration (placeholder for future implementation)"""
         # This could be used to reload configuration without restarting qtile
         logger.info("Hook configuration reload requested")
@@ -189,15 +189,15 @@ class HookManager:
         }
 
     # Backward compatibility methods
-    def autostart(self):
+    def autostart(self) -> Any:
         """Run autostart script (backward compatibility)"""
         return self.startup_hooks.run_autostart_script()
 
-    def _should_window_float(self, window):
+    def _should_window_float(self, window: Any) -> bool:
         """Determine if window should float (backward compatibility)"""
         return self.window_manager.should_window_float(window)
 
-def create_hook_manager(color_manager) -> HookManager:
+def create_hook_manager(color_manager: Any) -> HookManager:
     """
     @brief Create and return a hook manager instance
     @param color_manager Color manager instance for hook configuration

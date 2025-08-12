@@ -1,11 +1,15 @@
 var classmodules_1_1simple__color__management_1_1SimpleColorManager =
 [
     [ "__init__", "classmodules_1_1simple__color__management_1_1SimpleColorManager.html#a0db35660663da96f7d79fb5de3e25a2b", null ],
+    [ "_detect_color_changes", "classmodules_1_1simple__color__management_1_1SimpleColorManager.html#a8cdf36896d3ffed9740b3d6a69721be5", null ],
     [ "_get_fallback_colors", "classmodules_1_1simple__color__management_1_1SimpleColorManager.html#ab1f6e1118596087876af31815291985f", null ],
     [ "_handle_color_change", "classmodules_1_1simple__color__management_1_1SimpleColorManager.html#ae87962866cd52255fdcd493e90335bf0", null ],
     [ "_load_colors", "classmodules_1_1simple__color__management_1_1SimpleColorManager.html#a7b82a1c4ed732827ab7ab44fb44eb787", null ],
+    [ "_restart_qtile", "classmodules_1_1simple__color__management_1_1SimpleColorManager.html#a7e3a4666416da5f0a0081fb459c21dc6", null ],
     [ "_start_polling", "classmodules_1_1simple__color__management_1_1SimpleColorManager.html#a2b0e9291b7bc7b1bc115f5fd4d3a2f3d", null ],
     [ "_start_watchdog", "classmodules_1_1simple__color__management_1_1SimpleColorManager.html#a50eafa982ecca9a662d0a4c4e0efe6d8", null ],
+    [ "_update_svg_icons", "classmodules_1_1simple__color__management_1_1SimpleColorManager.html#a5b496dd8aa84daadc79962770083b310", null ],
+    [ "_validate_color_file", "classmodules_1_1simple__color__management_1_1SimpleColorManager.html#a05d66ee9ee4aab6c8ba8e463d3802abd", null ],
     [ "force_start_monitoring", "classmodules_1_1simple__color__management_1_1SimpleColorManager.html#a3b304fe6e2753c5bbf5fd4e0fc89947b", null ],
     [ "get_colors", "classmodules_1_1simple__color__management_1_1SimpleColorManager.html#a93e755af17a7613aeea6ecb894f1975c", null ],
     [ "is_monitoring", "classmodules_1_1simple__color__management_1_1SimpleColorManager.html#aeb013d4e18b0c942a24da20a516fd636", null ],

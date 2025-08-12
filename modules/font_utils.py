@@ -76,7 +76,8 @@ class FontManager:
         # Ultimate fallback
         final_fallback = "monospace"
         logger.warning(
-            f"No fonts available from preferences, using final fallback: {final_fallback}"
+            f"No fonts available from preferences, "
+            f"using final fallback: {final_fallback}"
         )
         self._font_cache[cache_key] = final_fallback
         return final_fallback
@@ -97,7 +98,8 @@ class FontManager:
                     return self._check_font_macos(font_name)
                 case _:
                     # Unknown system: assume basic fonts are available
-                    return font_name.lower() in ["monospace", "mono", "sans-serif", "serif"]
+                    basic_fonts = ["monospace", "mono", "sans-serif", "serif"]
+                    return font_name.lower() in basic_fonts
         except Exception as e:
             logger.debug(f"Error checking font {font_name}: {e}")
             return False

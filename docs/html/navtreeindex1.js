@@ -1,5 +1,13 @@
 var NAVTREEINDEX1 =
 {
+"classqtile__config_1_1QtileConfig.html#ab7c2162956672979d3c67acbb0bc5e84":[0,0,3,0,7],
+"classqtile__config_1_1QtileConfig.html#ab7c2162956672979d3c67acbb0bc5e84":[1,0,2,0,7],
+"classqtile__config_1_1QtileConfig.html#ac9c547a42b18d33e67f67e95567f6a88":[0,0,3,0,53],
+"classqtile__config_1_1QtileConfig.html#ac9c547a42b18d33e67f67e95567f6a88":[1,0,2,0,53],
+"classqtile__config_1_1QtileConfig.html#ad059fa0c60e67891ae32d448bd248ba9":[0,0,3,0,18],
+"classqtile__config_1_1QtileConfig.html#ad059fa0c60e67891ae32d448bd248ba9":[1,0,2,0,18],
+"classqtile__config_1_1QtileConfig.html#ad0dd0e640b2dc36b36b1ecc77b897f8a":[0,0,3,0,10],
+"classqtile__config_1_1QtileConfig.html#ad0dd0e640b2dc36b36b1ecc77b897f8a":[1,0,2,0,10],
 "classqtile__config_1_1QtileConfig.html#ad33a592954f13f2ad4c606d05991fa81":[0,0,3,0,0],
 "classqtile__config_1_1QtileConfig.html#ad33a592954f13f2ad4c606d05991fa81":[1,0,2,0,0],
 "classqtile__config_1_1QtileConfig.html#ad405063535cf23f43a336b7aed485641":[0,0,3,0,15],
@@ -72,7 +80,7 @@ var NAVTREEINDEX1 =
 "namespaceconfig.html#afb81f624c375fa7a96f7c9e543ff8a28":[0,0,0,25],
 "namespaceconfig.html#affc50bc841ecf947e9a3d0583a50560d":[0,0,0,27],
 "namespacegenerate__docs.html":[0,0,1],
-"namespacegenerate__docs.html#a7fe0214d2eee488ef3cd66bd71bbab7c":[0,0,1,1],
+"namespacegenerate__docs.html#abdcc6aa1e5be8088b43b0adafdbb03e5":[0,0,1,1],
 "namespacemembers.html":[0,1,0],
 "namespacemembers_func.html":[0,1,1],
 "namespacemembers_vars.html":[0,1,2],

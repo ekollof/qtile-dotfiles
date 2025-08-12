@@ -424,10 +424,13 @@ class EnhancedBarManager:
         @brief Check for battery on Linux systems
         @return True if battery detected
         """
+        # Battery detection paths for different Unix-like systems
         battery_paths = [
-            "/sys/class/power_supply/BAT0",
-            "/sys/class/power_supply/BAT1",
-            "/sys/class/power_supply/battery"
+            "/sys/class/power_supply/BAT0",      # Linux standard
+            "/sys/class/power_supply/BAT1",      # Linux secondary battery
+            "/sys/class/power_supply/battery",   # Linux generic
+            "/dev/acpi/battery",                 # FreeBSD
+            "/dev/apm",                          # OpenBSD APM
         ]
 
         for path in battery_paths:
@@ -495,6 +498,27 @@ class EnhancedBarManager:
             logger.debug(f"Exception during {system} battery check: {e}")
             return False
 
+    def _get_icon_theme_path(self) -> str:
+        """
+        @brief Get appropriate icon theme path for the current system
+        @return Path to suitable icon theme directory
+        """
+        # Common icon theme locations across Unix-like systems
+        theme_paths = [
+            "/usr/share/icons/breeze-dark",      # KDE Plasma (Linux)
+            "/usr/share/icons/Adwaita",          # GNOME default
+            "/usr/local/share/icons/breeze-dark", # FreeBSD/OpenBSD KDE
+            "/opt/local/share/icons/breeze-dark", # macOS with MacPorts
+            "/usr/share/pixmaps",                 # Fallback
+        ]
+        
+        for path in theme_paths:
+            if Path(path).exists():
+                return path
+        
+        # Ultimate fallback - no theme path
+        return ""
+
     def _test_battery_widget_compatibility(self) -> bool:
         """
         @brief Test if qtile Battery widget can actually be created on this platform
@@ -523,9 +547,8 @@ class EnhancedBarManager:
         @param script_path: Path to script
         @return True if script is available
         """
-        expanded_path = os.path.expanduser(script_path)
-        path_obj = Path(expanded_path)
-        return path_obj.exists() and os.access(expanded_path, os.X_OK)
+        path_obj = Path(script_path).expanduser()
+        return path_obj.exists() and path_obj.is_file() and os.access(path_obj, os.X_OK)
 
     def _safe_script_call(self, script_path: str, fallback: str = "N/A"):
         """
@@ -536,8 +559,9 @@ class EnhancedBarManager:
         """
         def call_script():
             try:
+                script_path_obj = Path(script_path).expanduser()
                 result = subprocess.run(
-                    [os.path.expanduser(script_path)],
+                    [str(script_path_obj)],
                     capture_output=True,
                     text=True,
                     timeout=10
@@ -650,7 +674,8 @@ class EnhancedBarManager:
                 border=colors.get("color1", "#808080"),
                 foreground=special.get("foreground", "#ffffff"),
                 theme_mode="preferred",
-                theme_path="/usr/share/icons/breeze-dark",
+                # Fallback icon theme paths for different systems
+                theme_path=self._get_icon_theme_path(),
             ),
 
             widget.Spacer(),
@@ -864,6 +889,10 @@ class EnhancedBarManager:
         @return List of screen configurations
         """
         from libqtile.config import Screen
+
+        # Ensure screen_count is a valid integer
+        if screen_count is None or screen_count <= 0:
+            screen_count = 1
 
         screens = []
         for i in range(screen_count):
