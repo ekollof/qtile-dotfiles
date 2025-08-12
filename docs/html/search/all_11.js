@@ -15,5 +15,6 @@ var searchData=
   ['start_5fcolor_5fmonitoring_12',['start_color_monitoring',['../namespacemodules_1_1simple__color__management.html#adcb32688c57f7adecfe26433b5bcdc51',1,'modules::simple_color_management']]],
   ['start_5fmonitoring_13',['start_monitoring',['../classmodules_1_1simple__color__management_1_1SimpleColorManager.html#a6be80b71ce29277524d2559f38ffda91',1,'modules::simple_color_management::SimpleColorManager']]],
   ['stop_5fmonitoring_14',['stop_monitoring',['../classmodules_1_1simple__color__management_1_1SimpleColorManager.html#a2c78f98ec17707ec5693ed7aa1310ab5',1,'modules::simple_color_management::SimpleColorManager']]],
-  ['system_15',['system',['../classmodules_1_1font__utils_1_1FontManager.html#a8de709c711d6601fdfc64a31162d6b4b',1,'modules::font_utils::FontManager']]]
+  ['svg_5ficon_5fsize_15',['svg_icon_size',['../classqtile__config_1_1QtileConfig.html#a767e05ecd7d32978a791f775a62127e5',1,'qtile_config.QtileConfig.svg_icon_size'],['../classqtile__config_1_1QtileConfig.html#ae3e6e8fbbfe6a04bab04ad6d4745ecc5',1,'qtile_config.QtileConfig.svg_icon_size(self)']]],
+  ['system_16',['system',['../classmodules_1_1font__utils_1_1FontManager.html#a8de709c711d6601fdfc64a31162d6b4b',1,'modules::font_utils::FontManager']]]
 ];

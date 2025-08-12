@@ -6,14 +6,11 @@ Refactored for better maintainability while preserving backward compatibility
 """
 
 # Import all functionality from the new modular structure
-from .hook_management import (
-    HookManager,
-    create_hook_manager,
-    StartupHooks,
-    ClientHooks,
-    ScreenHooks,
-    WindowManager
-)
+from .hook_manager import HookManager, create_hook_manager
+from .startup_hooks import StartupHooks
+from .client_hooks import ClientHooks
+from .screen_hooks import ScreenHooks
+from .window_manager import WindowManager
 
 # Maintain backward compatibility by exposing the same interface
 __all__ = [

@@ -5,7 +5,7 @@ Key formatting utilities for hotkey display
 
 class KeyFormatter:
     """Handles formatting of key combinations and descriptions"""
-    
+
     @staticmethod
     def format_key_combination(key_combo: str) -> str:
         """Format key combination for display"""
@@ -51,36 +51,38 @@ class KeyFormatter:
         # Try to infer from commands
         if hasattr(key, 'commands') and key.commands:
             cmd = key.commands[0]
-            
+
             if hasattr(cmd, '__name__'):
                 return cmd.__name__.replace('_', ' ').title()
             elif hasattr(cmd, 'name'):
                 return cmd.name.replace('_', ' ').title()
             else:
                 return KeyFormatter._parse_command_string(cmd)
-        
+
         return "Custom action"
 
     @staticmethod
     def _parse_command_string(cmd) -> str:
         """Parse command string to extract meaningful description"""
         cmd_str = str(cmd).lower()
-        
-        if 'spawn' in cmd_str:
-            # Extract spawn command
-            if hasattr(cmd, 'args') and cmd.args:
-                app_name = cmd.args[0].split('/')[-1] if '/' in cmd.args[0] else cmd.args[0]
-                return f"Launch {app_name}"
-            else:
-                return "Launch application"
-        elif 'layout' in cmd_str:
-            return "Change layout"
-        elif 'group' in cmd_str:
-            return "Switch group"
-        elif 'window' in cmd_str:
-            return "Window action"
-        else:
-            return str(cmd)[:50]  # Truncate long descriptions
+
+        # Use match statement for cleaner pattern matching
+        match True:
+            case _ if 'spawn' in cmd_str:
+                # Extract spawn command
+                if hasattr(cmd, 'args') and cmd.args:
+                    app_name = cmd.args[0].split('/')[-1] if '/' in cmd.args[0] else cmd.args[0]
+                    return f"Launch {app_name}"
+                else:
+                    return "Launch application"
+            case _ if 'layout' in cmd_str:
+                return "Change layout"
+            case _ if 'group' in cmd_str:
+                return "Switch group"
+            case _ if 'window' in cmd_str:
+                return "Window action"
+            case _:
+                return str(cmd)[:50]  # Truncate long descriptions
 
     @staticmethod
     def format_hotkey_line(key_combo: str, description: str, width: int = 25) -> str:

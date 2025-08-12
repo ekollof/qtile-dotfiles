@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """
-Qtile Configuration Modules Package
+@brief Qtile Configuration Modules Package
+@file __init__.py
 
 This package contains modular components for qtile configuration:
 - colors: Color management and automatic reloading
@@ -10,8 +11,9 @@ This package contains modular components for qtile configuration:
 - groups: Workspace groups and layouts
 - hooks: Event handling and hooks
 
-Author: Andrath
-Features: Automatic color reloading, Wayland compatibility, multi-screen support
+@author Andrath
+@note Features: Automatic color reloading, Wayland compatibility, multi-screen support
+@note This module follows Python 3.10+ standards and project guidelines
 """
 
 __version__ = "1.0.0"

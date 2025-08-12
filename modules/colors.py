@@ -1,7 +1,13 @@
 #!/usr/bin/env python3
 """
-Color management module for qtile - SIMPLIFIED VERSION
-Handles pywal/wallust color loading and automatic reloading
+@brief Color management module for qtile - SIMPLIFIED VERSION
+@file colors.py
+
+Handles pywal/wallust color loading and automatic reloading.
+This module provides a simplified interface to the color management system.
+
+@author Qtile configuration system
+@note This module follows Python 3.10+ standards and project guidelines
 """
 
 # Import simplified color management

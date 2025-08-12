@@ -1,15 +1,25 @@
 #!/usr/bin/env python3
 """
-External script to trigger Qtile screen reconfiguration
+@brief External script to trigger Qtile screen reconfiguration
+@file reconfigure_screens.py
+
 Usage: python3 /home/ekollof/.config/qtile/reconfigure_screens.py
+
+@author Qtile configuration system
+@note This script follows Python 3.10+ standards and project guidelines
 """
 
 import subprocess
 import sys
 
 
-def reconfigure_screens():
-    """Trigger Qtile screen reconfiguration"""
+def reconfigure_screens() -> bool:
+    """
+    @brief Trigger Qtile screen reconfiguration
+    @return True if reconfiguration successful, False otherwise
+    @throws subprocess.TimeoutExpired if qtile doesn't respond in time
+    @throws FileNotFoundError if qtile command not found
+    """
     try:
         # Use qtile's built-in reconfigure_screens command
         cmd = [
@@ -26,18 +36,25 @@ def reconfigure_screens():
             try:
                 import sys
                 sys.path.insert(0, '/home/ekollof/.config/qtile')
-                from modules.screens import refresh_screens, get_screen_count
+                from modules.screens import (
+                    refresh_screens, get_screen_count
+                )
 
                 changed = refresh_screens()
                 new_count = get_screen_count()
                 print(f"Updated screen count: {new_count}")
                 if changed:
-                    print("Screen configuration changed - qtile should restart automatically")
+                    print(
+                        "Screen configuration changed - "
+                        "qtile should restart automatically"
+                    )
                 else:
                     print("No screen count change detected")
 
             except Exception as e:
-                print(f"Warning: Could not update local screen detection: {e}")
+                print(
+                    f"Warning: Could not update local screen detection: {e}"
+                )
 
         else:
             print(f"Error triggering reconfiguration: {result.stderr}")
@@ -47,7 +64,9 @@ def reconfigure_screens():
         print("Timeout waiting for Qtile response")
         return False
     except FileNotFoundError:
-        print("qtile command not found. Make sure Qtile is installed and in PATH")
+        print(
+            "qtile command not found. Make sure Qtile is installed and in PATH"
+        )
         return False
     except Exception as e:
         print(f"Unexpected error: {e}")

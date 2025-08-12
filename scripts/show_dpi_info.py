@@ -1,6 +1,13 @@
 #!/usr/bin/env python3
 """
-Show DPI information and scaling factors for qtile configuration
+@brief Show DPI information and scaling factors for qtile configuration
+@file show_dpi_info.py
+
+Displays current DPI detection results, scaling factors, and provides
+testing utilities for qtile's DPI-aware configuration system.
+
+@author Qtile configuration system
+@note This script follows Python 3.10+ standards and project guidelines
 """
 
 import sys
@@ -9,7 +16,11 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from modules.dpi_utils import get_dpi_manager
 
-def main():
+def main() -> None:
+    """
+    @brief Display comprehensive DPI information and scaling factors
+    @throws ImportError if DPI utilities cannot be loaded
+    """
     dpi_manager = get_dpi_manager()
     info = dpi_manager.get_scaling_info()
 

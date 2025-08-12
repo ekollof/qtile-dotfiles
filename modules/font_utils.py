@@ -1,7 +1,12 @@
 #!/usr/bin/env python3
 """
-Font utilities for qtile
-Handles font detection, fallbacks, and cross-platform font management
+@brief Font utilities for qtile
+@file font_utils.py
+
+Handles font detection, fallbacks, and cross-platform font management.
+
+@author Qtile configuration system
+@note This module follows Python 3.10+ standards and project guidelines
 """
 
 import subprocess
@@ -11,17 +16,27 @@ from pathlib import Path
 from libqtile.log_utils import logger
 
 class FontManager:
-    """Manages font detection and fallback for qtile widgets"""
+    """
+    @brief Manages font detection and fallback for qtile widgets
+
+    Provides cross-platform font detection, caching, and intelligent fallback
+    selection for qtile configuration. Handles font availability checking
+    and maintains a cache for performance optimization.
+    """
 
     def __init__(self):
         self.system = platform.system().lower()
         self._font_cache = {}
 
-    def get_available_font(self, preferred_font: str | None = None, fallback_fonts: list[str] | None = None) -> str:
+    def get_available_font(
+        self,
+        preferred_font: str | None = None,
+        fallback_fonts: list[str] | None = None
+    ) -> str:
         """
         @brief Get the best available font with user preference and smart fallbacks
-        @param preferred_font User's preferred font (e.g., "BerkeleyMono Nerd Font Mono")
-        @param fallback_fonts List of fallback fonts to try if preferred font is not available
+        @param preferred_font User's preferred font (e.g., "BerkeleyMono Nerd Font")
+        @param fallback_fonts List of fallback fonts to try if preferred unavailable
         @return The first available font name from preference list or system fallback
         """
         # Default fallback fonts (common monospace fonts across platforms)
@@ -60,7 +75,9 @@ class FontManager:
 
         # Ultimate fallback
         final_fallback = "monospace"
-        logger.warning(f"No fonts available from preferences, using final fallback: {final_fallback}")
+        logger.warning(
+            f"No fonts available from preferences, using final fallback: {final_fallback}"
+        )
         self._font_cache[cache_key] = final_fallback
         return final_fallback
 
@@ -205,7 +222,7 @@ class FontManager:
             'cache_size': len(self._font_cache)
         }
 
-    def clear_cache(self):
+    def clear_cache(self) -> None:
         """
         @brief Clear the font cache (useful for testing)
         """
@@ -214,7 +231,10 @@ class FontManager:
 # Global font manager instance
 _font_manager = FontManager()
 
-def get_available_font(preferred_font: str | None = None, fallback_fonts: list[str] | None = None) -> str:
+def get_available_font(
+    preferred_font: str | None = None,
+    fallback_fonts: list[str] | None = None
+) -> str:
     """
     @brief Convenience function to get an available font
     @param preferred_font User's preferred font

@@ -1,8 +1,8 @@
 var config_8py =
 [
-    [ "config.manually_reconfigure_screens", "namespaceconfig.html#a8aad105d188f925d0bbb471068fa3026", null ],
+    [ "config.manually_reconfigure_screens", "namespaceconfig.html#a32e88a9154315874ac774e88a077d616", null ],
     [ "config.reload", "namespaceconfig.html#abc2bea9bae102c6c91d48c5e24ac05c3", null ],
-    [ "config.remapkeys", "namespaceconfig.html#acbaaae08bf55257ffa57f3b61da22b75", null ],
+    [ "config.remapkeys", "namespaceconfig.html#a98f0ad659a63ade8209707915076eb38", null ],
     [ "config._", "namespaceconfig.html#a6f983e01e32d55216db96ff45a0d1392", null ],
     [ "config.auto_fullscreen", "namespaceconfig.html#a49dcb82f85e41becb0e9622e489f09eb", null ],
     [ "config.bar_manager", "namespaceconfig.html#a04450f4a792189f3fcb323b5d116d00e", null ],

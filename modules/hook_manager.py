@@ -1,6 +1,13 @@
 #!/usr/bin/env python3
 """
-Main hook manager class - orchestrates all hook management functionality
+@brief Main hook manager class - orchestrates all hook management functionality
+@file hook_manager.py
+
+Orchestrates all hook management functionality for qtile configuration.
+Provides centralized management of startup, client, and screen hooks.
+
+@author Qtile configuration system
+@note This module follows Python 3.10+ standards and project guidelines
 """
 
 from typing import Any
@@ -13,7 +20,13 @@ from .screen_hooks import ScreenHooks
 from .window_manager import WindowManager
 
 class HookManager:
-    """Manages qtile hooks and events"""
+    """
+    @brief Manages qtile hooks and events
+
+    Orchestrates all hook management functionality including startup hooks,
+    client hooks, screen hooks, and window management. Provides centralized
+    control and validation for qtile's event handling system.
+    """
 
     def __init__(self, color_manager):
         self.color_manager = color_manager
@@ -25,8 +38,11 @@ class HookManager:
         self.client_hooks = ClientHooks(self.config, self.window_manager)
         self.screen_hooks = ScreenHooks(self.config, color_manager)
 
-    def setup_hooks(self):
-        """Setup all qtile hooks"""
+    def setup_hooks(self) -> None:
+        """
+        @brief Setup all qtile hooks
+        @throws Exception if hook setup fails
+        """
         logger.info("Setting up qtile hooks")
         self.startup_hooks.setup_startup_hooks()
         self.client_hooks.setup_client_hooks()
@@ -34,11 +50,18 @@ class HookManager:
         logger.info("All qtile hooks configured successfully")
 
     def force_retile_all_windows(self, qtile) -> int:
-        """Manual command to force all windows to tile (useful for testing/debugging)"""
+        """
+        @brief Manual command to force all windows to tile (useful for testing/debugging)
+        @param qtile Qtile instance
+        @return Number of windows retiled
+        """
         return self.window_manager.force_retile_all_windows(qtile)
 
     def get_hook_status(self) -> dict[str, Any]:
-        """Get comprehensive status of all hook components"""
+        """
+        @brief Get comprehensive status of all hook components
+        @return Dictionary containing status of startup, client, screen, and window manager hooks
+        """
         status = {
             'startup': self.startup_hooks.get_startup_status(),
             'client': self.client_hooks.get_client_statistics(),
@@ -48,7 +71,10 @@ class HookManager:
         return status
 
     def get_window_manager_status(self) -> dict[str, Any]:
-        """Get window manager status and statistics"""
+        """
+        @brief Get window manager status and statistics
+        @return Dictionary containing window manager status and statistics
+        """
         try:
             from libqtile import qtile
             if qtile:
@@ -82,10 +108,10 @@ class HookManager:
 
         for component_name, component_validation in components.items():
             validation['component_validations'][component_name] = component_validation
-            
+
             if not component_validation.get('valid', True):
                 validation['valid'] = False
-            
+
             validation['warnings'].extend(component_validation.get('warnings', []))
             validation['errors'].extend(component_validation.get('errors', []))
 
@@ -95,7 +121,7 @@ class HookManager:
         """Get comprehensive diagnostics for troubleshooting"""
         try:
             from libqtile import qtile
-            
+
             diagnostics = {
                 'hook_status': self.get_hook_status(),
                 'configuration_validation': self.validate_configuration(),
@@ -115,22 +141,22 @@ class HookManager:
             logger.error(f"Error generating diagnostics: {e}")
             return {'error': str(e)}
 
-    def emergency_reset(self):
+    def emergency_reset(self) -> dict[str, Any]:
         """Emergency reset of window states"""
         try:
             from libqtile import qtile
             if qtile:
                 logger.warning("Performing emergency hook manager reset")
-                
+
                 # Force retile all windows
                 retiled = self.force_retile_all_windows(qtile)
                 logger.info(f"Emergency reset: retiled {retiled} windows")
-                
+
                 # Reset any problematic window states
                 problematic = self.window_manager.get_problematic_windows(qtile)
                 for window_info in problematic:
                     logger.info(f"Found problematic window: {window_info['name']} - {window_info['issues']}")
-                
+
                 return {
                     'retiled_windows': retiled,
                     'problematic_windows': len(problematic),
@@ -171,6 +197,10 @@ class HookManager:
         """Determine if window should float (backward compatibility)"""
         return self.window_manager.should_window_float(window)
 
-def create_hook_manager(color_manager):
-    """Create and return a hook manager instance"""
+def create_hook_manager(color_manager) -> HookManager:
+    """
+    @brief Create and return a hook manager instance
+    @param color_manager Color manager instance for hook configuration
+    @return Configured HookManager instance
+    """
     return HookManager(color_manager)

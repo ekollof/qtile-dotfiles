@@ -4,12 +4,7 @@
 @file generate_docs.py
 
 This script generates HTML documentation from the qtile configuration codebase
-using doxygen. It creates a Doxyfile configuINPUT                  = . \\
-                         ./modules \\
-                         ./modules/hook_management \\
-                         ./modules/hotkey_management \\
-                         ./modules/key_management \\
-                         ./scriptson, removes old docs, and 
+using doxygen. It creates a Doxyfile configuration, removes old docs, and
 generates fresh documentation.
 """
 
@@ -33,7 +28,7 @@ class DoxygenDocGenerator:
         self.docs_dir = self.project_root / "docs"
         self.html_dir = self.docs_dir / "html"
         self.doxyfile_path = self.project_root / "Doxyfile"
-        
+
         # Project information
         self.project_name = "Qtile Configuration"
         self.project_version = "1.0.0"
@@ -46,7 +41,7 @@ class DoxygenDocGenerator:
         """
         # Check doxygen
         try:
-            result = subprocess.run(['doxygen', '--version'], 
+            result = subprocess.run(['doxygen', '--version'],
                                   capture_output=True, text=True, timeout=10)
             if result.returncode == 0:
                 print(f"✓ Doxygen found: {result.stdout.strip()}")
@@ -60,14 +55,14 @@ class DoxygenDocGenerator:
 
         # Check doxypypy
         try:
-            result = subprocess.run(['doxypypy', '--version'], 
+            result = subprocess.run(['doxypypy', '--version'],
                                   capture_output=True, text=True, timeout=10)
             if result.returncode == 0:
                 print(f"✓ Doxypypy found: {result.stdout.strip()}")
                 return True
             else:
                 # Try alternative check
-                result = subprocess.run(['doxypypy', '--help'], 
+                result = subprocess.run(['doxypypy', '--help'],
                                       capture_output=True, text=True, timeout=10)
                 if result.returncode == 0:
                     print("✓ Doxypypy found (help available)")
@@ -96,25 +91,25 @@ def convert_docstring_to_doxygen(docstring):
     """Convert Python docstring to doxygen format"""
     if not docstring:
         return ""
-    
+
     lines = docstring.strip().split('\\n')
     result = []
-    
+
     # Handle different docstring formats
     if lines[0].strip().startswith('@brief'):
         # Already in doxygen format
         return '\\n'.join(['//! ' + line for line in lines])
-    
+
     # Convert to doxygen format
     result.append('//! @brief ' + lines[0])
-    
+
     for line in lines[1:]:
         line = line.strip()
         if line.startswith('@'):
             result.append('//! ' + line)
         elif line:
             result.append('//! ' + line)
-    
+
     return '\\n'.join(result)
 
 def process_python_file(content):
@@ -123,10 +118,10 @@ def process_python_file(content):
         tree = ast.parse(content)
     except:
         return content
-    
+
     lines = content.split('\\n')
     result = []
-    
+
     for node in ast.walk(tree):
         if isinstance(node, (ast.FunctionDef, ast.ClassDef, ast.AsyncFunctionDef)):
             if node.body and isinstance(node.body[0], ast.Expr) and isinstance(node.body[0].value, ast.Constant):
@@ -139,7 +134,7 @@ def process_python_file(content):
                         if i >= node.lineno - 1 and 'def ' in line or 'class ' in line:
                             lines.insert(i, doxy_comment)
                             break
-    
+
     return '\\n'.join(lines)
 
 if __name__ == '__main__':
@@ -147,7 +142,7 @@ if __name__ == '__main__':
     processed = process_python_file(content)
     print(processed)
 '''
-        
+
         filter_path = self.project_root / "python_filter.py"
         try:
             with open(filter_path, 'w') as f:
@@ -175,7 +170,7 @@ DOXYFILE_ENCODING      = UTF-8
 PROJECT_NAME           = "{self.project_name}"
 PROJECT_NUMBER         = {self.project_version}
 PROJECT_BRIEF          = "{self.project_brief}"
-PROJECT_LOGO           = 
+PROJECT_LOGO           =
 OUTPUT_DIRECTORY       = docs
 CREATE_SUBDIRS         = NO
 ALLOW_UNICODE_NAMES    = YES
@@ -218,7 +213,7 @@ GENERATE_TODOLIST      = YES
 GENERATE_TESTLIST      = YES
 GENERATE_BUGLIST       = YES
 GENERATE_DEPRECATEDLIST= YES
-ENABLED_SECTIONS       = 
+ENABLED_SECTIONS       =
 MAX_INITIALIZER_LINES  = 30
 SHOW_USED_FILES        = YES
 SHOW_FILES             = YES
@@ -234,7 +229,7 @@ WARN_IF_DOC_ERROR      = YES
 WARN_NO_PARAMDOC       = NO
 WARN_AS_ERROR          = NO
 WARN_FORMAT            = "$file:$line: $text"
-WARN_LOGFILE           = 
+WARN_LOGFILE           =
 
 #---------------------------------------------------------------------------
 # Configuration options related to the input files - Python Optimized
@@ -263,7 +258,7 @@ EXCLUDE_PATTERNS       = */build/* \\
                          */__pycache__/* \\
                          */.git/* \\
                          */.*
-EXCLUDE_SYMBOLS        = 
+EXCLUDE_SYMBOLS        =
 EXAMPLE_PATH           = examples
 EXAMPLE_PATTERNS       = *.py
 EXAMPLE_RECURSIVE      = YES
@@ -271,7 +266,7 @@ IMAGE_PATH             = icons
 
 # Python-specific filters
 FILTER_PATTERNS        = "*.py=/bin/doxypypy -a -c"
-INPUT_FILTER           = 
+INPUT_FILTER           =
 FILTER_SOURCE_FILES    = YES
 FILTER_SOURCE_PATTERNS = *.py
 
@@ -302,14 +297,14 @@ SOURCE_TOOLTIPS        = YES
 USE_HTAGS              = NO
 VERBATIM_HEADERS       = YES
 CLANG_ASSISTED_PARSING = NO
-CLANG_OPTIONS          = 
+CLANG_OPTIONS          =
 
 #---------------------------------------------------------------------------
 # Configuration options related to the alphabetical class index
 #---------------------------------------------------------------------------
 ALPHABETICAL_INDEX     = YES
 COLS_IN_ALPHA_INDEX    = 5
-IGNORE_PREFIX          = 
+IGNORE_PREFIX          =
 
 #---------------------------------------------------------------------------
 # Configuration options related to the HTML output
@@ -317,11 +312,11 @@ IGNORE_PREFIX          =
 GENERATE_HTML          = YES
 HTML_OUTPUT            = html
 HTML_FILE_EXTENSION    = .html
-HTML_HEADER            = 
-HTML_FOOTER            = 
-HTML_STYLESHEET        = 
-HTML_EXTRA_STYLESHEET  = 
-HTML_EXTRA_FILES       = 
+HTML_HEADER            =
+HTML_FOOTER            =
+HTML_STYLESHEET        =
+HTML_EXTRA_STYLESHEET  =
+HTML_EXTRA_FILES       =
 HTML_COLORSTYLE_HUE    = 220
 HTML_COLORSTYLE_SAT    = 100
 HTML_COLORSTYLE_GAMMA  = 80
@@ -344,8 +339,8 @@ SEARCHENGINE           = YES
 SERVER_BASED_SEARCH    = NO
 EXTERNAL_SEARCH        = NO
 SEARCHDATA_FILE        = searchdata.xml
-EXTERNAL_SEARCH_ID     = 
-EXTRA_SEARCH_MAPPINGS  = 
+EXTERNAL_SEARCH_ID     =
+EXTRA_SEARCH_MAPPINGS  =
 
 #---------------------------------------------------------------------------
 # Configuration options related to the LaTeX output
@@ -389,17 +384,17 @@ ENABLE_PREPROCESSING   = YES
 MACRO_EXPANSION        = NO
 EXPAND_ONLY_PREDEF     = NO
 SEARCH_INCLUDES        = YES
-INCLUDE_PATH           = 
-INCLUDE_FILE_PATTERNS  = 
-PREDEFINED             = 
-EXPAND_AS_DEFINED      = 
+INCLUDE_PATH           =
+INCLUDE_FILE_PATTERNS  =
+PREDEFINED             =
+EXPAND_AS_DEFINED      =
 SKIP_FUNCTION_MACROS   = YES
 
 #---------------------------------------------------------------------------
 # Configuration options related to external references
 #---------------------------------------------------------------------------
-TAGFILES               = 
-GENERATE_TAGFILE       = 
+TAGFILES               =
+GENERATE_TAGFILE       =
 ALLEXTERNALS           = NO
 EXTERNAL_GROUPS        = YES
 EXTERNAL_PAGES         = YES
@@ -409,14 +404,14 @@ PERL_PATH              = /usr/bin/perl
 # Configuration options related to the dot tool
 #---------------------------------------------------------------------------
 CLASS_DIAGRAMS         = YES
-MSCGEN_PATH            = 
-DIA_PATH               = 
+MSCGEN_PATH            =
+DIA_PATH               =
 HIDE_UNDOC_RELATIONS   = YES
 HAVE_DOT               = NO
 DOT_NUM_THREADS        = 0
 DOT_FONTNAME           = Helvetica
 DOT_FONTSIZE           = 10
-DOT_FONTPATH           = 
+DOT_FONTPATH           =
 CLASS_GRAPH            = YES
 COLLABORATION_GRAPH    = YES
 GROUP_GRAPHS           = YES
@@ -431,13 +426,13 @@ GRAPHICAL_HIERARCHY    = YES
 DIRECTORY_GRAPH        = YES
 DOT_IMAGE_FORMAT       = png
 INTERACTIVE_SVG        = NO
-DOT_PATH               = 
-DOTFILE_DIRS           = 
-MSCFILE_DIRS           = 
-DIAFILE_DIRS           = 
-PLANTUML_JAR_PATH      = 
-PLANTUML_CFG_FILE      = 
-PLANTUML_INCLUDE_PATH  = 
+DOT_PATH               =
+DOTFILE_DIRS           =
+MSCFILE_DIRS           =
+DIAFILE_DIRS           =
+PLANTUML_JAR_PATH      =
+PLANTUML_CFG_FILE      =
+PLANTUML_INCLUDE_PATH  =
 DOT_GRAPH_MAX_NODES    = 50
 MAX_DOT_GRAPH_DEPTH    = 0
 DOT_TRANSPARENT        = NO
@@ -448,20 +443,20 @@ DOT_CLEANUP            = YES
 
             with open(self.doxyfile_path, 'w') as f:
                 f.write(doxyfile_content)
-            
+
             print(f"✓ Created Doxyfile at {self.doxyfile_path}")
             return True
-            
+
         except IOError as e:
             print(f"✗ Failed to create Doxyfile: {e}")
             return False
 
-    def remove_old_docs(self):
+    def remove_old_docs(self) -> None:
         """
         @brief Remove old documentation files from the docs directory
         """
         print("Removing old documentation...")
-        
+
         # Remove old markdown docs but keep the directory structure
         if self.docs_dir.exists():
             for item in self.docs_dir.iterdir():
@@ -471,7 +466,7 @@ DOT_CLEANUP            = YES
                 elif item.is_dir() and item.name == 'html':
                     shutil.rmtree(item)
                     print(f"  Removed: {item.name}/ (directory)")
-        
+
         print("✓ Old documentation cleaned up")
 
     def generate_docs(self) -> bool:
@@ -482,23 +477,23 @@ DOT_CLEANUP            = YES
         """
         # Store original directory before any operations
         original_cwd = os.getcwd()
-        
+
         try:
             print("Generating doxygen documentation...")
-            
+
             # Ensure we're in the project root directory for doxygen execution
             print(f"Current directory: {original_cwd}")
             print(f"Changing to project root: {self.project_root}")
             os.chdir(self.project_root)
-            
+
             # Verify we're in the right directory
             current_dir = os.getcwd()
             print(f"Working directory for doxygen: {current_dir}")
-            
+
             # Run doxygen
-            result = subprocess.run(['doxygen', 'Doxyfile'], 
+            result = subprocess.run(['doxygen', 'Doxyfile'],
                                   capture_output=True, text=True, timeout=120)
-            
+
             if result.returncode == 0:
                 print("✓ Doxygen documentation generated successfully")
                 if result.stdout:
@@ -509,7 +504,7 @@ DOT_CLEANUP            = YES
                 if result.stderr:
                     print(f"Error output: {result.stderr}")
                 return False
-                
+
         except subprocess.TimeoutExpired:
             print("✗ Doxygen execution timed out")
             return False
@@ -520,7 +515,7 @@ DOT_CLEANUP            = YES
             # Always restore original working directory
             os.chdir(original_cwd)
 
-    def create_index_redirect(self):
+    def create_index_redirect(self) -> None:
         """
         @brief Create an index.html redirect to the main documentation
         """
@@ -544,7 +539,7 @@ DOT_CLEANUP            = YES
 </body>
 </html>
 """
-        
+
         index_path = self.docs_dir / "index.html"
         try:
             with open(index_path, 'w') as f:
@@ -553,14 +548,14 @@ DOT_CLEANUP            = YES
         except IOError as e:
             print(f"✗ Failed to create index redirect: {e}")
 
-    def cleanup_doxyfile(self):
+    def cleanup_doxyfile(self) -> None:
         """
         @brief Remove the generated Doxyfile and filter after documentation generation
         """
         if self.doxyfile_path.exists():
             self.doxyfile_path.unlink()
             print("✓ Cleaned up temporary Doxyfile")
-        
+
         filter_path = self.project_root / "python_filter.py"
         if filter_path.exists():
             filter_path.unlink()
@@ -573,7 +568,7 @@ DOT_CLEANUP            = YES
         print("\n" + "="*60)
         print("📚 DOCUMENTATION GENERATION COMPLETE")
         print("="*60)
-        
+
         if self.html_dir.exists():
             html_files = list(self.html_dir.glob("*.html"))
             print(f"✓ Generated {len(html_files)} HTML files")
@@ -594,14 +589,14 @@ DOT_CLEANUP            = YES
         print(f"Project: {self.project_name}")
         print(f"Root: {self.project_root}")
         print("-" * 50)
-        
+
         # Check if dependencies are available
         if not self.check_dependencies():
             return False
-        
+
         # Create docs directory if it doesn't exist
         self.docs_dir.mkdir(exist_ok=True)
-        
+
         # Debug: List files that should be processed
         print("\n🔍 DEBUG: Files that should be processed:")
         for pattern in ["modules/*.py", "modules/**/*.py", "scripts/*.py", "*.py"]:
@@ -610,7 +605,7 @@ DOT_CLEANUP            = YES
             for f in files[:5]:  # Show first 5
                 print(f"  Found: {f}")
         print()
-        
+
         # Execute generation steps
         steps = [
             ("Creating Python filter", self.create_python_filter),
@@ -620,17 +615,17 @@ DOT_CLEANUP            = YES
             ("Creating index redirect", lambda: (self.create_index_redirect(), True)[1]),
             ("Cleaning up", lambda: (self.cleanup_doxyfile(), True)[1]),
         ]
-        
+
         for step_name, step_func in steps:
             print(f"\n{step_name}...")
             if not step_func():
                 print(f"✗ Failed at: {step_name}")
                 return False
-        
+
         self.print_summary()
         return True
 
-def main():
+def main() -> int:
     """
     @brief Main function to run the documentation generator
     @return Exit code (0 for success, 1 for failure)

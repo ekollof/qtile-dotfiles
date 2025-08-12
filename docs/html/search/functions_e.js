@@ -10,5 +10,6 @@ var searchData=
   ['setup_5fcolor_5fmonitoring_7',['setup_color_monitoring',['../namespacemodules_1_1simple__color__management.html#aa1ccdc035e7ed50eb6205a2ec6eec35c',1,'modules::simple_color_management']]],
   ['start_5fcolor_5fmonitoring_8',['start_color_monitoring',['../namespacemodules_1_1simple__color__management.html#adcb32688c57f7adecfe26433b5bcdc51',1,'modules::simple_color_management']]],
   ['start_5fmonitoring_9',['start_monitoring',['../classmodules_1_1simple__color__management_1_1SimpleColorManager.html#a6be80b71ce29277524d2559f38ffda91',1,'modules::simple_color_management::SimpleColorManager']]],
-  ['stop_5fmonitoring_10',['stop_monitoring',['../classmodules_1_1simple__color__management_1_1SimpleColorManager.html#a2c78f98ec17707ec5693ed7aa1310ab5',1,'modules::simple_color_management::SimpleColorManager']]]
+  ['stop_5fmonitoring_10',['stop_monitoring',['../classmodules_1_1simple__color__management_1_1SimpleColorManager.html#a2c78f98ec17707ec5693ed7aa1310ab5',1,'modules::simple_color_management::SimpleColorManager']]],
+  ['svg_5ficon_5fsize_11',['svg_icon_size',['../classqtile__config_1_1QtileConfig.html#ae3e6e8fbbfe6a04bab04ad6d4745ecc5',1,'qtile_config::QtileConfig']]]
 ];

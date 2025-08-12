@@ -28,9 +28,11 @@ class QtileConfig:
     """
     @brief Centralized qtile configuration with DPI awareness
 
-    Provides all configuration settings for qtile with automatic DPI scaling,  # Complex operation
+    Provides all configuration settings for qtile with automatic DPI scaling,
     platform detection, and intelligent defaults. Manages fonts, applications,
     layouts, and system-specific preferences.
+
+    Complex operation for comprehensive qtile configuration management.
     """
 
     home: str
@@ -66,7 +68,9 @@ class QtileConfig:
     @property
     def script_configs(self) -> list:
         """
-        @brief Configure custom scripts for GenPollText widgets with DPI awareness  # Complex operation
+        @brief Configure custom scripts for GenPollText widgets with DPI awareness
+
+        Complex operation for comprehensive script widget configuration.
         @return List of dictionaries containing script configuration parameters
         """
         return [
@@ -126,19 +130,28 @@ class QtileConfig:
 
     @property
     def terminal(self) -> str:
-        """Default terminal emulator - platform aware"""
+        """
+        @brief Default terminal emulator - platform aware
+        @return Terminal command string based on platform configuration
+        """
         return self.platform_config.get_application("terminal", "st")
 
     @property
     def browser(self) -> str:
-        """Default web browser - platform aware"""
+        """
+        @brief Default web browser - platform aware
+        @return Browser command string based on platform configuration
+        """
         return self.platform_config.get_application("browser", "brave")
 
     # ===== APPLICATION COMMANDS =====
 
     @property
     def applications(self) -> dict[str, str]:
-        """Application launch commands - platform aware"""
+        """
+        @brief Application launch commands - platform aware
+        @return Dictionary mapping application types to launch commands
+        """
         launcher_app = self.platform_config.get_application("launcher", "rofi")
         launcher_cmd = (f"{launcher_app} -show run"
                        if launcher_app == "rofi"
@@ -169,7 +182,10 @@ class QtileConfig:
 
     @property
     def layout_defaults(self) -> dict[str, int | bool]:
-        """Default settings for all layouts - DPI scaled"""
+        """
+        @brief Default settings for all layouts - DPI scaled
+        @return Dictionary with margin, border_width, and other layout settings
+        """
         return {
             'margin': scale_size(4),  # DPI-scaled gap between windows
             'border_width': max(1, scale_size(1)),  # Minimum 1px border
@@ -179,7 +195,10 @@ class QtileConfig:
 
     @property
     def tile_layout(self) -> dict[str, float | int | bool | None]:  # Complex operation
-        """Tile layout specific settings - DPI aware"""
+        """
+        @brief Tile layout specific settings - DPI aware
+        @return Dictionary with ratio, increment, and tiling configuration
+        """
         return {
             'ratio': 0.5,  # 50/50 split by default
             'ratio_increment': 0.1,  # 10% resize increments
@@ -190,8 +209,11 @@ class QtileConfig:
         }
 
     @property
-    def monad_tall_layout(self) -> dict[str, float | int | str]:
-        """MonadTall layout specific settings - DPI aware"""
+    def monad_tall_layout(self) -> dict[str, int | float]:
+        """
+        @brief MonadTall layout specific settings - DPI scaled
+        @return Dictionary with ratio, min_ratio, and max_ratio for MonadTall
+        """
         return {
             'ratio': 0.6,  # Main window 60% width
             'min_ratio': 0.25,
@@ -202,8 +224,11 @@ class QtileConfig:
         }
 
     @property
-    def bsp_layout(self) -> dict[str, bool | int | float]:
-        """BSP layout specific settings - DPI aware"""
+    def bsp_layout(self) -> dict[str, int | float]:
+        """
+        @brief BSP layout specific settings - DPI scaled
+        @return Dictionary with ratio and fair settings for BSP layout
+        """
         return {
             'fair': True,  # Even space distribution
             'grow_amount': scale_size(10),  # DPI-scaled grow amount
@@ -215,7 +240,10 @@ class QtileConfig:
 
     @property
     def floating_rules(self) -> list[dict[str, str]]:
-        """Windows that should float"""
+        """
+        @brief Windows that should float
+        @return List of rules defining which windows should be floating
+        """
         return [
             # Core system dialogs
             {'wm_class': 'confirm'},
@@ -264,7 +292,10 @@ class QtileConfig:
 
     @property
     def force_floating_apps(self) -> list[str]:
-        """Apps that should always float (via hooks)"""
+        """
+        @brief Apps that should always float (via hooks)
+        @return List of application names that should be forced to float
+        """
         return [
             'nm-connection-editor',    # NetworkManager GUI
             'pavucontrol',            # PulseAudio volume control
@@ -281,7 +312,10 @@ class QtileConfig:
 
     @property
     def groups(self) -> list[tuple[str, dict[str, str]]]:
-        """Workspace groups configuration"""
+        """
+        @brief Workspace groups configuration
+        @return List of tuples containing group names and layout settings
+        """
         return [
             ('1:chat', {'layout': 'max'}),
             ('2:web', {'layout': 'tile'}),
@@ -296,7 +330,10 @@ class QtileConfig:
 
     @property
     def scratchpads(self) -> list[dict[str, str | float | int]]:
-        """Scratchpad dropdown configurations"""
+        """
+        @brief Scratchpad dropdown configurations
+        @return List of dictionaries containing scratchpad settings
+        """
         return [
             {
                 'name': 'notepad',
@@ -322,7 +359,10 @@ class QtileConfig:
 
     @property
     def color_files(self) -> dict[str, str]:
-        """Color file paths"""
+        """
+        @brief Color file paths
+        @return Dictionary mapping color file types to their paths
+        """
         cache_dir = f"{self.home}/.cache/wal"
         return {
             'current': f"{cache_dir}/colors.json",
@@ -332,7 +372,10 @@ class QtileConfig:
 
     @property
     def default_colors(self) -> dict[str, dict[str, str]]:
-        """Fallback colors when pywal files are unavailable"""
+        """
+        @brief Fallback colors when pywal files are unavailable
+        @return Dictionary with special and colors sections for default theme
+        """
         return {
             "special": {
                 "background": "#171616",
@@ -363,7 +406,10 @@ class QtileConfig:
 
     @property
     def screen_settings(self) -> dict[str, int | bool]:
-        """Screen detection and configuration"""
+        """
+        @brief Screen detection and configuration
+        @return Dictionary with timing and behavior settings for screen changes
+        """
         return {
             'startup_delay': 30,  # Seconds to wait before handling screen changes
             'detection_delay': 2,  # Seconds to wait after screen change detection
@@ -401,14 +447,20 @@ class QtileConfig:
 
     @property
     def autostart_script(self) -> str:
-        """Path to autostart script"""
+        """
+        @brief Path to autostart script
+        @return String path to the autostart script file
+        """
         return f"{self.home}/.config/qtile/autostart.sh"
 
     # ===== BAR/WIDGET SETTINGS - DPI AWARE =====
 
     @property
     def bar_settings(self) -> dict[str, int | float | list[int]]:  # Complex operation
-        """Status bar configuration - DPI scaled"""
+        """
+        @brief Status bar configuration - DPI scaled
+        @return Dictionary with height, opacity, and margin settings for the status bar
+        """
         return {
             'height': scale_size(28),  # DPI-scaled bar height
             'opacity': 0.95,
@@ -417,7 +469,10 @@ class QtileConfig:
 
     @property
     def widget_defaults(self) -> dict[str, str | int]:
-        """Default widget settings with font fallback - DPI aware"""
+        """
+        @brief Default widget settings with font fallback - DPI aware
+        @return Dictionary with font, fontsize, and padding settings for widgets
+        """
         return {
             'font': get_available_font(self.preferred_font),
             'fontsize': scale_font(12),  # DPI-scaled font size
@@ -428,7 +483,11 @@ class QtileConfig:
 
     @property
     def hotkey_display(self) -> dict[str, int | float | str]:
-        """Hotkey display configuration with font fallback - DPI aware"""
+        """
+        @brief Hotkey display configuration with font fallback - DPI aware
+        @return Dictionary with rofi_width, rofi_lines, dmenu_lines, font,
+                and transparency settings
+        """
         return {
             'rofi_width': scale_size(1200),  # DPI-scaled width
             'rofi_lines': 25,
@@ -510,8 +569,10 @@ class QtileConfig:
         @brief Apply BSD-specific customizations to the configuration
 
         This method shows how you can customize your qtile configuration
-        for BSD systems. Call this method after initialization to apply  # Complex operation
+        for BSD systems. Call this method after initialization to apply
         BSD-specific settings.
+
+        Complex operation for BSD-specific configuration customization.
         """
         if not self.platform_info.is_bsd:
             return

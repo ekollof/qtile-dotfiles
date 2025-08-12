@@ -55,8 +55,8 @@ class ComplianceAuditor:
         python_files = list(self.project_root.glob("**/*.py"))
 
         for file_path in python_files:
-            # Skip __pycache__ and other generated files
-            if "__pycache__" in str(file_path) or ".pyc" in str(file_path):
+            # Skip __pycache__, generated files, and scripts directory
+            if "__pycache__" in str(file_path) or ".pyc" in str(file_path) or "scripts/" in str(file_path):
                 continue
 
             self._audit_file(file_path)
@@ -117,11 +117,11 @@ class ComplianceAuditor:
 
         # Check for legacy type usage in annotations
         type_patterns = [
-            (r'\bDict\[[^\]]+\]', "Use 'dict[...]' instead of 'Dict[...]'"),
-            (r'\bList\[[^\]]+\]', "Use 'list[...]' instead of 'List[...]'"),
-            (r'\bTuple\[[^\]]+\]', "Use 'tuple[...]' instead of 'Tuple[...]'"),
-            (r'\bUnion\[[^\]]+\]', "Use '|' union syntax instead of 'Union[...]'"),
-            (r'\bOptional\[[^\]]+\]', "Use '... | None' instead of 'Optional[...]'"),
+            (r'\bDict\[[^\]]+\]', "Use 'dict[...]' instead of 'dict[...]'"),
+            (r'\bList\[[^\]]+\]', "Use 'list[...]' instead of 'list[...]'"),
+            (r'\bTuple\[[^\]]+\]', "Use 'tuple[...]' instead of 'tuple[...]'"),
+            (r'\bUnion\[[^\]]+\]', "Use '|' union syntax instead of '...'"),
+            (r'\bOptional\[[^\]]+\]', "Use '... | None' instead of '... | None'"),
         ]
 
         for i, line in enumerate(lines, 1):

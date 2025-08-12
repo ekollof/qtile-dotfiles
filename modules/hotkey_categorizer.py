@@ -3,7 +3,7 @@
 Hotkey categorization functionality
 """
 
-from .formatter import KeyFormatter
+from .hotkey_formatter import KeyFormatter
 
 class HotkeyCategorizer:
     """Handles categorization and organization of hotkeys"""
@@ -33,33 +33,30 @@ class HotkeyCategorizer:
         if key_name.isdigit():
             return "Group/Workspace"
 
-        # Categorize based on description content
-        if any(word in description for word in [
-            'window', 'focus', 'move', 'close', 'kill', 'floating'
-        ]):
-            return "Window Management"
-        elif any(word in description for word in [
-            'layout', 'tile', 'max', 'split'
-        ]):
-            return "Layout Control"
-        elif any(word in description for word in [
-            'group', 'workspace'
-        ]):
-            return "Group/Workspace"
-        elif any(word in description for word in [
-            'restart', 'quit', 'shutdown', 'reload', 'screen', 'color'
-        ]):
-            return "System"
-        elif any(word in description for word in [
-            'launch', 'spawn', 'browser', 'terminal'
-        ]):
-            return "Applications"
-        elif any(word in description for word in [
-            'screen', 'monitor', 'display'
-        ]):
-            return "Screen/Display"
-        else:
-            return "Other"
+        # Define keyword categories
+        window_words = ['window', 'focus', 'move', 'close', 'kill', 'floating']
+        layout_words = ['layout', 'tile', 'max', 'split']
+        group_words = ['group', 'workspace']
+        system_words = ['restart', 'quit', 'shutdown', 'reload', 'screen', 'color']
+        app_words = ['launch', 'spawn', 'browser', 'terminal']
+        display_words = ['screen', 'monitor', 'display']
+
+        # Categorize based on description content using match statements
+        match True:
+            case _ if any(word in description for word in window_words):
+                return "Window Management"
+            case _ if any(word in description for word in layout_words):
+                return "Layout Control"
+            case _ if any(word in description for word in group_words):
+                return "Group/Workspace"
+            case _ if any(word in description for word in system_words):
+                return "System"
+            case _ if any(word in description for word in app_words):
+                return "Applications"
+            case _ if any(word in description for word in display_words):
+                return "Screen/Display"
+            case _:
+                return "Other"
 
     def add_key_to_category(self, key, category: str | None = None):
         """Add a key to the appropriate category"""

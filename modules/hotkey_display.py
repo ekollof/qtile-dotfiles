@@ -9,8 +9,8 @@ import tempfile
 from typing import final, TYPE_CHECKING
 from libqtile.log_utils import logger
 
-from .categorizer import HotkeyCategorizer
-from .themes import ThemeManager
+from .hotkey_categorizer import HotkeyCategorizer
+from .hotkey_themes import ThemeManager
 
 if TYPE_CHECKING:
     from modules.simple_color_management import ColorManager

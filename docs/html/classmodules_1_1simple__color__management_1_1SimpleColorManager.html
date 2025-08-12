@@ -99,11 +99,15 @@ $(function(){initNavTree('classmodules_1_1simple__color__management_1_1SimpleCol
 <tr class="heading"><td colspan="2"><h2 id="header-pub-methods" class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:a0db35660663da96f7d79fb5de3e25a2b" id="r_a0db35660663da96f7d79fb5de3e25a2b"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a0db35660663da96f7d79fb5de3e25a2b">__init__</a> (self, str <a class="el" href="#a5edaffd2ffa413ff1704d141b1d28a28">colors_file</a>=&quot;~/.cache/wal/colors.json&quot;)</td></tr>
-<tr class="memitem:a6ff657baf4fa5f6698da8b3c783e9d54" id="r_a6ff657baf4fa5f6698da8b3c783e9d54"><td class="memItemLeft" align="right" valign="top">Dict[str, Any]&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a6ff657baf4fa5f6698da8b3c783e9d54">get_colors</a> (self)</td></tr>
-<tr class="memdesc:a6ff657baf4fa5f6698da8b3c783e9d54"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get current colors from cache - maintains original API compatibility.  <br /></td></tr>
+<tr class="memitem:a3b304fe6e2753c5bbf5fd4e0fc89947b" id="r_a3b304fe6e2753c5bbf5fd4e0fc89947b"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3b304fe6e2753c5bbf5fd4e0fc89947b">force_start_monitoring</a> (self)</td></tr>
+<tr class="memdesc:a3b304fe6e2753c5bbf5fd4e0fc89947b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Force start monitoring with better error handling.  <br /></td></tr>
+<tr class="memitem:a93e755af17a7613aeea6ecb894f1975c" id="r_a93e755af17a7613aeea6ecb894f1975c"><td class="memItemLeft" align="right" valign="top">dict[str, Any]&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a93e755af17a7613aeea6ecb894f1975c">get_colors</a> (self)</td></tr>
+<tr class="memdesc:a93e755af17a7613aeea6ecb894f1975c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get current colors from cache - maintains original API compatibility.  <br /></td></tr>
 <tr class="memitem:aeb013d4e18b0c942a24da20a516fd636" id="r_aeb013d4e18b0c942a24da20a516fd636"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aeb013d4e18b0c942a24da20a516fd636">is_monitoring</a> (self)</td></tr>
-<tr class="memitem:abbd8f24cbff2cccc851771637ae06ec4" id="r_abbd8f24cbff2cccc851771637ae06ec4"><td class="memItemLeft" align="right" valign="top">Dict[str, Any]&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#abbd8f24cbff2cccc851771637ae06ec4">load_colors</a> (self)</td></tr>
-<tr class="memdesc:abbd8f24cbff2cccc851771637ae06ec4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Load colors from file - maintains original API compatibility.  <br /></td></tr>
+<tr class="memitem:afcc978f898ca7a0458f45bd91eec07a4" id="r_afcc978f898ca7a0458f45bd91eec07a4"><td class="memItemLeft" align="right" valign="top">dict[str, Any]&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#afcc978f898ca7a0458f45bd91eec07a4">load_colors</a> (self)</td></tr>
+<tr class="memdesc:afcc978f898ca7a0458f45bd91eec07a4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Load colors from file - maintains original API compatibility.  <br /></td></tr>
+<tr class="memitem:adfd8ff0eebc2eec7e0be6ad49f025a99" id="r_adfd8ff0eebc2eec7e0be6ad49f025a99"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#adfd8ff0eebc2eec7e0be6ad49f025a99">manual_reload_colors</a> (self)</td></tr>
+<tr class="memdesc:adfd8ff0eebc2eec7e0be6ad49f025a99"><td class="mdescLeft">&#160;</td><td class="mdescRight">Manually reload colors without automatic restart.  <br /></td></tr>
 <tr class="memitem:af7da02a395cb36c575382b0f86a2cad9" id="r_af7da02a395cb36c575382b0f86a2cad9"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af7da02a395cb36c575382b0f86a2cad9">restart_monitoring</a> (self)</td></tr>
 <tr class="memitem:a6be80b71ce29277524d2559f38ffda91" id="r_a6be80b71ce29277524d2559f38ffda91"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a6be80b71ce29277524d2559f38ffda91">start_monitoring</a> (self)</td></tr>
 <tr class="memdesc:a6be80b71ce29277524d2559f38ffda91"><td class="mdescLeft">&#160;</td><td class="mdescRight">Start color file monitoring using watchdog or polling fallback.  <br /></td></tr>
@@ -112,18 +116,18 @@ Public Member Functions</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pub-attribs" class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
-<tr class="memitem:a41a4c7890eed1590a8896fdb06d4a034" id="r_a41a4c7890eed1590a8896fdb06d4a034"><td class="memItemLeft" align="right" valign="top">Dict[str, Any]&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a41a4c7890eed1590a8896fdb06d4a034">colordict</a> = self._load_colors()</td></tr>
+<tr class="memitem:a74029105535e0eae2fe6448cbb5a6317" id="r_a74029105535e0eae2fe6448cbb5a6317"><td class="memItemLeft" align="right" valign="top">dict[str, Any]&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a74029105535e0eae2fe6448cbb5a6317">colordict</a> = self._load_colors()</td></tr>
 <tr class="memitem:a5edaffd2ffa413ff1704d141b1d28a28" id="r_a5edaffd2ffa413ff1704d141b1d28a28"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5edaffd2ffa413ff1704d141b1d28a28">colors_file</a> = Path(colors_file).expanduser()</td></tr>
 <tr class="memitem:a3ebb54a1980db6e939196143ef55b276" id="r_a3ebb54a1980db6e939196143ef55b276"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3ebb54a1980db6e939196143ef55b276">manager</a> = manager</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pro-methods" class="groupheader"><a id="pro-methods" name="pro-methods"></a>
 Protected Member Functions</h2></td></tr>
-<tr class="memitem:a8bdfe96f6bacd2c817741ceb793a4c22" id="r_a8bdfe96f6bacd2c817741ceb793a4c22"><td class="memItemLeft" align="right" valign="top">Dict[str, Any]&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8bdfe96f6bacd2c817741ceb793a4c22">_get_fallback_colors</a> (self)</td></tr>
-<tr class="memdesc:a8bdfe96f6bacd2c817741ceb793a4c22"><td class="mdescLeft">&#160;</td><td class="mdescRight">Provide fallback colors when pywal file isn't available.  <br /></td></tr>
+<tr class="memitem:ab1f6e1118596087876af31815291985f" id="r_ab1f6e1118596087876af31815291985f"><td class="memItemLeft" align="right" valign="top">dict[str, dict[str, str]]&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab1f6e1118596087876af31815291985f">_get_fallback_colors</a> (self)</td></tr>
+<tr class="memdesc:ab1f6e1118596087876af31815291985f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Provide fallback colors when pywal file isn't available.  <br /></td></tr>
 <tr class="memitem:ae87962866cd52255fdcd493e90335bf0" id="r_ae87962866cd52255fdcd493e90335bf0"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae87962866cd52255fdcd493e90335bf0">_handle_color_change</a> (self)</td></tr>
 <tr class="memdesc:ae87962866cd52255fdcd493e90335bf0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Handle color file changes by reloading colors and restarting qtile.  <br /></td></tr>
-<tr class="memitem:aee8faff8eb4e7add0effb0910db909ae" id="r_aee8faff8eb4e7add0effb0910db909ae"><td class="memItemLeft" align="right" valign="top">Dict[str, Any]&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aee8faff8eb4e7add0effb0910db909ae">_load_colors</a> (self)</td></tr>
-<tr class="memdesc:aee8faff8eb4e7add0effb0910db909ae"><td class="mdescLeft">&#160;</td><td class="mdescRight">Load colors from pywal file with fallback.  <br /></td></tr>
+<tr class="memitem:a7b82a1c4ed732827ab7ab44fb44eb787" id="r_a7b82a1c4ed732827ab7ab44fb44eb787"><td class="memItemLeft" align="right" valign="top">dict[str, Any]&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7b82a1c4ed732827ab7ab44fb44eb787">_load_colors</a> (self)</td></tr>
+<tr class="memdesc:a7b82a1c4ed732827ab7ab44fb44eb787"><td class="mdescLeft">&#160;</td><td class="mdescRight">Load colors from pywal file with fallback.  <br /></td></tr>
 <tr class="memitem:a2b0e9291b7bc7b1bc115f5fd4d3a2f3d" id="r_a2b0e9291b7bc7b1bc115f5fd4d3a2f3d"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2b0e9291b7bc7b1bc115f5fd4d3a2f3d">_start_polling</a> (self)</td></tr>
 <tr class="memdesc:a2b0e9291b7bc7b1bc115f5fd4d3a2f3d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Start polling-based monitoring as fallback when watchdog unavailable.  <br /></td></tr>
 <tr class="memitem:a50eafa982ecca9a662d0a4c4e0efe6d8" id="r_a50eafa982ecca9a662d0a4c4e0efe6d8"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a50eafa982ecca9a662d0a4c4e0efe6d8">_start_watchdog</a> (self)</td></tr>
@@ -131,6 +135,7 @@ Protected Member Functions</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pro-attribs" class="groupheader"><a id="pro-attribs" name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
+<tr class="memitem:a10e9f255b32c991e8469cb733ff724ef" id="r_a10e9f255b32c991e8469cb733ff724ef"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a10e9f255b32c991e8469cb733ff724ef">_auto_start_attempted</a> = False</td></tr>
 <tr class="memitem:ad66f7da40af3929539e8b492ecc11b03" id="r_ad66f7da40af3929539e8b492ecc11b03"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad66f7da40af3929539e8b492ecc11b03">_observer</a> = None</td></tr>
 <tr class="memitem:ad2191e2959c98cf9ec2d836a3bff9254" id="r_ad2191e2959c98cf9ec2d836a3bff9254"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad2191e2959c98cf9ec2d836a3bff9254">_polling_thread</a> = None</td></tr>
 <tr class="memitem:a8dd91459a67bf08a6d2098e8ef3bd7de" id="r_a8dd91459a67bf08a6d2098e8ef3bd7de"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8dd91459a67bf08a6d2098e8ef3bd7de">_shutdown_event</a> = threading.Event()</td></tr>
@@ -138,7 +143,7 @@ Protected Attributes</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pro-static-attribs" class="groupheader"><a id="pro-static-attribs" name="pro-static-attribs"></a>
 Static Protected Attributes</h2></td></tr>
-<tr class="memitem:a6e26c7bc1923223eb399c001a181ba0b" id="r_a6e26c7bc1923223eb399c001a181ba0b"><td class="memItemLeft" align="right" valign="top">Optional&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a6e26c7bc1923223eb399c001a181ba0b">_color_manager_instance</a> = None</td></tr>
+<tr class="memitem:a479551299525f68f536a14950d2ece04" id="r_a479551299525f68f536a14950d2ece04"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classmodules_1_1simple__color__management_1_1SimpleColorManager.html">SimpleColorManager</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a479551299525f68f536a14950d2ece04">_color_manager_instance</a> = None</td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Simplified color manager - same API, much less complexity. </p>
@@ -169,8 +174,8 @@ Static Protected Attributes</h2></td></tr>
 </div>
 </div>
 <a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Member Function Documentation</h2>
-<a id="a8bdfe96f6bacd2c817741ceb793a4c22" name="a8bdfe96f6bacd2c817741ceb793a4c22"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a8bdfe96f6bacd2c817741ceb793a4c22">&#9670;&#160;</a></span>_get_fallback_colors()</h2>
+<a id="ab1f6e1118596087876af31815291985f" name="ab1f6e1118596087876af31815291985f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab1f6e1118596087876af31815291985f">&#9670;&#160;</a></span>_get_fallback_colors()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -179,7 +184,7 @@ Static Protected Attributes</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"> Dict[str, Any] modules.simple_color_management.SimpleColorManager._get_fallback_colors </td>
+          <td class="memname"> dict[str, dict[str, str]] modules.simple_color_management.SimpleColorManager._get_fallback_colors </td>
           <td>(</td>
           <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>self</em></span></td><td>)</td>
           <td></td>
@@ -195,7 +200,7 @@ Static Protected Attributes</h2></td></tr>
 <p>Provide fallback colors when pywal file isn't available. </p>
 <dl class="section return"><dt>Returns</dt><dd>Dictionary with default color scheme containing 'special' and 'colors' keys </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="simple__color__management_8py_source.html#l00063">63</a> of file <a class="el" href="simple__color__management_8py_source.html">simple_color_management.py</a>.</p>
+<p class="definition">Definition at line <a class="el" href="simple__color__management_8py_source.html#l00064">64</a> of file <a class="el" href="simple__color__management_8py_source.html">simple_color_management.py</a>.</p>
 
 </div>
 </div>
@@ -230,12 +235,12 @@ Static Protected Attributes</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="simple__color__management_8py_source.html#l00188">188</a> of file <a class="el" href="simple__color__management_8py_source.html">simple_color_management.py</a>.</p>
+<p class="definition">Definition at line <a class="el" href="simple__color__management_8py_source.html#l00198">198</a> of file <a class="el" href="simple__color__management_8py_source.html">simple_color_management.py</a>.</p>
 
 </div>
 </div>
-<a id="aee8faff8eb4e7add0effb0910db909ae" name="aee8faff8eb4e7add0effb0910db909ae"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aee8faff8eb4e7add0effb0910db909ae">&#9670;&#160;</a></span>_load_colors()</h2>
+<a id="a7b82a1c4ed732827ab7ab44fb44eb787" name="a7b82a1c4ed732827ab7ab44fb44eb787"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7b82a1c4ed732827ab7ab44fb44eb787">&#9670;&#160;</a></span>_load_colors()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -244,7 +249,7 @@ Static Protected Attributes</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"> Dict[str, Any] modules.simple_color_management.SimpleColorManager._load_colors </td>
+          <td class="memname"> dict[str, Any] modules.simple_color_management.SimpleColorManager._load_colors </td>
           <td>(</td>
           <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>self</em></span></td><td>)</td>
           <td></td>
@@ -267,7 +272,7 @@ Static Protected Attributes</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="simple__color__management_8py_source.html#l00047">47</a> of file <a class="el" href="simple__color__management_8py_source.html">simple_color_management.py</a>.</p>
+<p class="definition">Definition at line <a class="el" href="simple__color__management_8py_source.html#l00048">48</a> of file <a class="el" href="simple__color__management_8py_source.html">simple_color_management.py</a>.</p>
 
 </div>
 </div>
@@ -296,7 +301,7 @@ Static Protected Attributes</h2></td></tr>
 
 <p>Start polling-based monitoring as fallback when watchdog unavailable. </p>
 
-<p class="definition">Definition at line <a class="el" href="simple__color__management_8py_source.html#l00163">163</a> of file <a class="el" href="simple__color__management_8py_source.html">simple_color_management.py</a>.</p>
+<p class="definition">Definition at line <a class="el" href="simple__color__management_8py_source.html#l00173">173</a> of file <a class="el" href="simple__color__management_8py_source.html">simple_color_management.py</a>.</p>
 
 </div>
 </div>
@@ -331,18 +336,40 @@ Static Protected Attributes</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="simple__color__management_8py_source.html#l00129">129</a> of file <a class="el" href="simple__color__management_8py_source.html">simple_color_management.py</a>.</p>
+<p class="definition">Definition at line <a class="el" href="simple__color__management_8py_source.html#l00139">139</a> of file <a class="el" href="simple__color__management_8py_source.html">simple_color_management.py</a>.</p>
 
 </div>
 </div>
-<a id="a6ff657baf4fa5f6698da8b3c783e9d54" name="a6ff657baf4fa5f6698da8b3c783e9d54"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a6ff657baf4fa5f6698da8b3c783e9d54">&#9670;&#160;</a></span>get_colors()</h2>
+<a id="a3b304fe6e2753c5bbf5fd4e0fc89947b" name="a3b304fe6e2753c5bbf5fd4e0fc89947b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3b304fe6e2753c5bbf5fd4e0fc89947b">&#9670;&#160;</a></span>force_start_monitoring()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"> Dict[str, Any] modules.simple_color_management.SimpleColorManager.get_colors </td>
+          <td class="memname">modules.simple_color_management.SimpleColorManager.force_start_monitoring </td>
+          <td>(</td>
+          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>self</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Force start monitoring with better error handling. </p>
+<dl class="section return"><dt>Returns</dt><dd>True if successful, False otherwise </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="simple__color__management_8py_source.html#l00286">286</a> of file <a class="el" href="simple__color__management_8py_source.html">simple_color_management.py</a>.</p>
+
+</div>
+</div>
+<a id="a93e755af17a7613aeea6ecb894f1975c" name="a93e755af17a7613aeea6ecb894f1975c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a93e755af17a7613aeea6ecb894f1975c">&#9670;&#160;</a></span>get_colors()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"> dict[str, Any] modules.simple_color_management.SimpleColorManager.get_colors </td>
           <td>(</td>
           <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>self</em></span></td><td>)</td>
           <td></td>
@@ -353,7 +380,7 @@ Static Protected Attributes</h2></td></tr>
 <p>Get current colors from cache - maintains original API compatibility. </p>
 <dl class="section return"><dt>Returns</dt><dd>Dictionary containing current color configuration </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="simple__color__management_8py_source.html#l00102">102</a> of file <a class="el" href="simple__color__management_8py_source.html">simple_color_management.py</a>.</p>
+<p class="definition">Definition at line <a class="el" href="simple__color__management_8py_source.html#l00103">103</a> of file <a class="el" href="simple__color__management_8py_source.html">simple_color_management.py</a>.</p>
 
 </div>
 </div>
@@ -372,18 +399,18 @@ Static Protected Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="simple__color__management_8py_source.html#l00223">223</a> of file <a class="el" href="simple__color__management_8py_source.html">simple_color_management.py</a>.</p>
+<p class="definition">Definition at line <a class="el" href="simple__color__management_8py_source.html#l00326">326</a> of file <a class="el" href="simple__color__management_8py_source.html">simple_color_management.py</a>.</p>
 
 </div>
 </div>
-<a id="abbd8f24cbff2cccc851771637ae06ec4" name="abbd8f24cbff2cccc851771637ae06ec4"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#abbd8f24cbff2cccc851771637ae06ec4">&#9670;&#160;</a></span>load_colors()</h2>
+<a id="afcc978f898ca7a0458f45bd91eec07a4" name="afcc978f898ca7a0458f45bd91eec07a4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afcc978f898ca7a0458f45bd91eec07a4">&#9670;&#160;</a></span>load_colors()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"> Dict[str, Any] modules.simple_color_management.SimpleColorManager.load_colors </td>
+          <td class="memname"> dict[str, Any] modules.simple_color_management.SimpleColorManager.load_colors </td>
           <td>(</td>
           <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>self</em></span></td><td>)</td>
           <td></td>
@@ -394,7 +421,29 @@ Static Protected Attributes</h2></td></tr>
 <p>Load colors from file - maintains original API compatibility. </p>
 <dl class="section return"><dt>Returns</dt><dd>Dictionary containing loaded color configuration </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="simple__color__management_8py_source.html#l00095">95</a> of file <a class="el" href="simple__color__management_8py_source.html">simple_color_management.py</a>.</p>
+<p class="definition">Definition at line <a class="el" href="simple__color__management_8py_source.html#l00096">96</a> of file <a class="el" href="simple__color__management_8py_source.html">simple_color_management.py</a>.</p>
+
+</div>
+</div>
+<a id="adfd8ff0eebc2eec7e0be6ad49f025a99" name="adfd8ff0eebc2eec7e0be6ad49f025a99"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adfd8ff0eebc2eec7e0be6ad49f025a99">&#9670;&#160;</a></span>manual_reload_colors()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">modules.simple_color_management.SimpleColorManager.manual_reload_colors </td>
+          <td>(</td>
+          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>self</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Manually reload colors without automatic restart. </p>
+<dl class="section return"><dt>Returns</dt><dd>True if successful, False otherwise </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="simple__color__management_8py_source.html#l00265">265</a> of file <a class="el" href="simple__color__management_8py_source.html">simple_color_management.py</a>.</p>
 
 </div>
 </div>
@@ -413,7 +462,7 @@ Static Protected Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="simple__color__management_8py_source.html#l00226">226</a> of file <a class="el" href="simple__color__management_8py_source.html">simple_color_management.py</a>.</p>
+<p class="definition">Definition at line <a class="el" href="simple__color__management_8py_source.html#l00304">304</a> of file <a class="el" href="simple__color__management_8py_source.html">simple_color_management.py</a>.</p>
 
 </div>
 </div>
@@ -440,7 +489,7 @@ Static Protected Attributes</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="simple__color__management_8py_source.html#l00109">109</a> of file <a class="el" href="simple__color__management_8py_source.html">simple_color_management.py</a>.</p>
+<p class="definition">Definition at line <a class="el" href="simple__color__management_8py_source.html#l00119">119</a> of file <a class="el" href="simple__color__management_8py_source.html">simple_color_management.py</a>.</p>
 
 </div>
 </div>
@@ -461,13 +510,13 @@ Static Protected Attributes</h2></td></tr>
 
 <p>Stop all monitoring threads and observers. </p>
 
-<p class="definition">Definition at line <a class="el" href="simple__color__management_8py_source.html#l00209">209</a> of file <a class="el" href="simple__color__management_8py_source.html">simple_color_management.py</a>.</p>
+<p class="definition">Definition at line <a class="el" href="simple__color__management_8py_source.html#l00312">312</a> of file <a class="el" href="simple__color__management_8py_source.html">simple_color_management.py</a>.</p>
 
 </div>
 </div>
 <a name="doc-variable-members" id="doc-variable-members"></a><h2 id="header-doc-variable-members" class="groupheader">Member Data Documentation</h2>
-<a id="a6e26c7bc1923223eb399c001a181ba0b" name="a6e26c7bc1923223eb399c001a181ba0b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a6e26c7bc1923223eb399c001a181ba0b">&#9670;&#160;</a></span>_color_manager_instance</h2>
+<a id="a10e9f255b32c991e8469cb733ff724ef" name="a10e9f255b32c991e8469cb733ff724ef"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a10e9f255b32c991e8469cb733ff724ef">&#9670;&#160;</a></span>_auto_start_attempted</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -476,7 +525,31 @@ Static Protected Attributes</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">Optional modules.simple_color_management.SimpleColorManager._color_manager_instance = None</td>
+          <td class="memname">bool modules.simple_color_management.SimpleColorManager._auto_start_attempted = False</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel protected">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="simple__color__management_8py_source.html#l00038">38</a> of file <a class="el" href="simple__color__management_8py_source.html">simple_color_management.py</a>.</p>
+
+</div>
+</div>
+<a id="a479551299525f68f536a14950d2ece04" name="a479551299525f68f536a14950d2ece04"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a479551299525f68f536a14950d2ece04">&#9670;&#160;</a></span>_color_manager_instance</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classmodules_1_1simple__color__management_1_1SimpleColorManager.html">SimpleColorManager</a> modules.simple_color_management.SimpleColorManager._color_manager_instance = None</td>
         </tr>
       </table>
   </td>
@@ -486,7 +559,7 @@ Static Protected Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="simple__color__management_8py_source.html#l00233">233</a> of file <a class="el" href="simple__color__management_8py_source.html">simple_color_management.py</a>.</p>
+<p class="definition">Definition at line <a class="el" href="simple__color__management_8py_source.html#l00333">333</a> of file <a class="el" href="simple__color__management_8py_source.html">simple_color_management.py</a>.</p>
 
 </div>
 </div>
@@ -586,14 +659,14 @@ Static Protected Attributes</h2></td></tr>
 
 </div>
 </div>
-<a id="a41a4c7890eed1590a8896fdb06d4a034" name="a41a4c7890eed1590a8896fdb06d4a034"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a41a4c7890eed1590a8896fdb06d4a034">&#9670;&#160;</a></span>colordict</h2>
+<a id="a74029105535e0eae2fe6448cbb5a6317" name="a74029105535e0eae2fe6448cbb5a6317"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a74029105535e0eae2fe6448cbb5a6317">&#9670;&#160;</a></span>colordict</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">Dict[str, Any] modules.simple_color_management.SimpleColorManager.colordict = self._load_colors()</td>
+          <td class="memname">dict[str, Any] modules.simple_color_management.SimpleColorManager.colordict = self._load_colors()</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -630,7 +703,7 @@ Static Protected Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="simple__color__management_8py_source.html#l00136">136</a> of file <a class="el" href="simple__color__management_8py_source.html">simple_color_management.py</a>.</p>
+<p class="definition">Definition at line <a class="el" href="simple__color__management_8py_source.html#l00146">146</a> of file <a class="el" href="simple__color__management_8py_source.html">simple_color_management.py</a>.</p>
 
 </div>
 </div>

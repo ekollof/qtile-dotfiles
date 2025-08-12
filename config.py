@@ -82,7 +82,10 @@ mouse = [
         start=lazy.window.get_position(),
     ),
     Drag(
-        [mod], "Button3", lazy.window.set_size_floating(), start=lazy.window.get_size()  # Complex operation
+        [mod],
+        "Button3",
+        lazy.window.set_size_floating(),
+        start=lazy.window.get_size()  # Complex operation
     ),
     Click([mod], "Button2", lazy.window.bring_to_front()),
 ]
@@ -118,7 +121,9 @@ def reload(module: str) -> None:
 
 def remapkeys() -> None:
     """
-    @brief Remap keys if needed (placeholder for custom key remapping)  # Complex operation
+    @brief Remap keys if needed (placeholder for custom key remapping)
+
+    Complex operation for custom key remapping functionality.
     """
     pass
 

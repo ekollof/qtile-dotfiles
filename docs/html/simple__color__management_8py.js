@@ -1,9 +1,10 @@
 var simple__color__management_8py =
 [
     [ "modules.simple_color_management.SimpleColorManager", "classmodules_1_1simple__color__management_1_1SimpleColorManager.html", "classmodules_1_1simple__color__management_1_1SimpleColorManager" ],
+    [ "modules.simple_color_management.force_start_color_monitoring", "namespacemodules_1_1simple__color__management.html#ab0a4ef631709d61bf4878b544332ae85", null ],
     [ "modules.simple_color_management.get_color_file_status", "namespacemodules_1_1simple__color__management.html#aa084230bf8ea5220e08dc6964da60fd3", null ],
     [ "modules.simple_color_management.get_color_manager", "namespacemodules_1_1simple__color__management.html#ad22cc9538c3d49ac764b3b4d301420f9", null ],
-    [ "modules.simple_color_management.get_colors", "namespacemodules_1_1simple__color__management.html#a7f64ade1def600e01dc10b7130f9a3a3", null ],
+    [ "modules.simple_color_management.get_colors", "namespacemodules_1_1simple__color__management.html#afb9e0d4d2875157015b9e56584e8779d", null ],
     [ "modules.simple_color_management.get_monitoring_performance_status", "namespacemodules_1_1simple__color__management.html#a4ddf9fd657d9f89c69ac6bb94a438fd2", null ],
     [ "modules.simple_color_management.manual_color_reload", "namespacemodules_1_1simple__color__management.html#a2f314952db7c089c577e803bb56879ab", null ],
     [ "modules.simple_color_management.optimize_color_monitoring", "namespacemodules_1_1simple__color__management.html#aa27e760fc7ac11731f0b862949aaa77e", null ],
