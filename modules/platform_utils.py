@@ -210,7 +210,7 @@ class PlatformConfig:
         """
         return {
             "linux": ["rofi", "dmenu", "albert", "ulauncher"],
-            "openbsd": ["dmenu", "rofi"],
+            "openbsd": ["rofi", "dmenu"],
             "freebsd": ["rofi", "dmenu"],
             "netbsd": ["dmenu"],
         }
