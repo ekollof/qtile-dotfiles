@@ -1,156 +1,136 @@
-# Qtile Bitmap Icons Setup
+# Icons Directory Structure
 
-This directory contains bitmap and vector icons to replace emoticons in your qtile status bar.
+This directory contains the modern dynamic icon system for the qtile configuration.
 
-## Available Icon Methods
+## Directory Structure
 
-### 1. SVG Vector Icons (Recommended) ⭐
-Uses crisp vector SVG images that scale perfectly at any size. Currently configured with white color (#F8F0FC) for dark themes.
+### `icons/` (Static Source Icons)
+- **Source icons** that are version controlled
+- Contains original SVG/PNG files for reference
+- Safe to modify and commit
 
-### 2. Image Icons (PNG files)
-Uses bitmap PNG images in the status bar. Clean and professional looking.
+### `icons/themed/` (Generated - Ignored)
+- **Dynamically generated** themed icons
+- Colors match your current theme automatically  
+- **Not tracked in git** - regenerated on each system
+- Created automatically when qtile starts
 
-### 3. Nerd Font Icons 
-Uses Nerd Font character codes for icons. Requires a Nerd Font to be installed.
+### `icons/dynamic/` (Generated - Ignored)
+- **Runtime generated** icons based on system state
+- Battery levels, network status, CPU usage, etc.
+- **Not tracked in git** - created as needed
+- Cached for performance
+
+## Platform-Specific Mascots 🎨
+
+The `platform` icon automatically shows the appropriate mascot for your OS:
+
+- 🐧 **Linux**: Tux the penguin (black/white with colored beak)
+- 🐡 **OpenBSD**: Puffy the pufferfish (colorful spikes and fins)
+- 👹 **FreeBSD**: Beastie the daemon (red body with dark horns)
+- 🏁 **NetBSD**: Flag logo (multi-colored stripes)
+- 🍎 **macOS**: Apple logo (gradient with green leaf)
+- 🪟 **Windows**: Four-pane logo (blue/green/yellow/red)
+- 🖥️ **Unknown**: Generic computer (detailed monitor)
+
+All mascots use **6-9 themed colors** and adapt to your color scheme!
+
+## Dynamic Icon Features
+
+### Multi-Color Theming
+- Icons automatically use colors from your current theme
+- **6-9 colors per icon** for proper contrast and depth
+- Professional quality with highlights, shadows, and details
+
+### System Integration  
+- **Battery icons** show charge level and charging status
+- **Network icons** indicate connection strength and activity
+- **Volume icons** reflect current audio state
+- **CPU/Memory icons** show usage levels with color coding
+
+### Auto-Generation
+Icons are created automatically:
+- **On qtile startup** - themed icons generated
+- **On color change** - icons regenerated with new colors
+- **Runtime** - dynamic icons created as needed
+
+## Legacy Icon Methods (Still Available)
+
+The old icon system is still supported as fallback:
+
+### 1. SVG Vector Icons
+Uses crisp vector SVG images that scale perfectly.
+
+### 2. Image Icons (PNG files) 
+Uses bitmap PNG images in the status bar.
+
+### 3. Nerd Font Icons
+Uses Nerd Font character codes for icons.
 
 ### 4. Text Symbols
 Uses simple text characters as icon replacements.
 
-### 5. Original Emoticons
-The original emoticon setup (🐍, 🔼, 🔄, etc.)
+## Switching Icon Systems
 
-## Quick Start
-
-1. **Use SVG icons (currently active):**
-   ```bash
-   cd ~/.config/qtile
-   python3 scripts/switch_icons.py svg
-   ```
-
-2. **Switch to bitmap images:**
-   ```bash
-   python3 scripts/switch_icons.py image
-   ```
-
-3. **Switch to Nerd Font icons:**
-   ```bash
-   python3 scripts/switch_icons.py nerd_font
-   ```
-
-4. **Switch back to emoticons:**
-   ```bash
-   python3 scripts/switch_icons.py emoticons
-   ```
-
-5. **Check current status:**
-   ```bash
-   python3 scripts/switch_icons.py status
-   ```
-
-6. **Restart qtile to see changes:**
-   Press `Super+Ctrl+R` or restart qtile
-
-## Icon Mappings
-
-| Original | Name | PNG File | SVG File | Nerd Font | Text |
-|----------|------|----------|----------|-----------|------|
-| 🐍 | Python | python.png | python.svg | \ue73c | Py |
-| 🔼 | Updates | arrow-up.png | arrow-up.svg | \uf0aa | ↑ |
-| 🔄 | Refresh | refresh.png | refresh.svg | \uf2f1 | ⟲ |
-| 📭 | Mail | mail.png | mail.svg | \uf0e0 | ✉ |
-| 🎫 | Ticket | ticket.png | ticket.svg | \uf3ff | 🎟 |
-| 🌡 | Temperature | thermometer.png | thermometer.svg | \uf2c9 | T° |
-| 🔋 | Battery | battery.png | battery.svg | \uf240 | ⚡ |
-| ⚡ | Charging | zap.png | zap.svg | \uf0e7 | ⚡ |
-| 🪫 | Low Battery | battery-low.png | battery-low.svg | \uf244 | ⚠ |
-
-## Additional Icons Available
-
-- clock.svg/clock.png - Clock/time icon
-- monitor.svg/monitor.png - Monitor/display icon  
-- cpu.svg/cpu.png - CPU/processor icon
-- activity.svg/activity.png - Activity/performance icon
-- wifi.svg/wifi.png - WiFi/network icon
-- volume.svg/volume.png - Audio/volume icon
-
-## Customization
-
-### Adding New Icons
-
-1. Add SVG files to this directory (preferred)
-2. Or add PNG files directly
-3. Update the icon mappings in `modules/bars_with_icons.py`
-
-### Changing Icon Colors
-
-For SVG icons:
 ```bash
-# Restore original colors and re-apply with new color
-python3 scripts/fix_svg_colors.py restore
-# Edit the script to use your preferred color, then run:
-python3 scripts/fix_svg_colors.py
+cd ~/.config/qtile
+
+# Use modern dynamic system (default)
+python3 scripts/switch_icons.py dynamic
+
+# Use static SVG icons  
+python3 scripts/switch_icons.py svg
+
+# Use bitmap images
+python3 scripts/switch_icons.py image
+
+# Use Nerd Font icons
+python3 scripts/switch_icons.py nerd_font
+
+# Check current status
+python3 scripts/switch_icons.py status
 ```
 
-### Changing Icon Size
+## Manual Icon Regeneration
 
-For PNG icons, edit `icon_size` in `scripts/download_icons.py` and re-run:
-```bash
-python3 scripts/improve_icons.py
+Icons regenerate automatically, but you can force it:
+
+```python
+from modules.bars import EnhancedBarManager
+from modules.colors import color_manager
+from qtile_config import get_config
+
+config = get_config()
+bar_manager = EnhancedBarManager(color_manager, config)
+bar_manager.refresh_themed_icons()
 ```
 
-### Using Your Own Icons
+## Why Generated Icons Are Ignored
 
-Replace any PNG file in this directory with your preferred icon (keep same filename).
+Generated icons are **system-specific**:
+- Different colors per user's theme
+- Different mascots per operating system  
+- Different system states (battery, network, etc.)
+- Would cause merge conflicts between users
 
-## Nerd Font Setup
+Only the **source code** that generates the icons is tracked in git.
 
-If you want to use Nerd Font icons:
+## Available Icon Types
 
-1. Install a Nerd Font: https://www.nerdfonts.com/
-2. Update the font name in `bars_with_icons.py`:
-   ```python
-   font="YourNerdFont Mono"  # Replace with your font name
-   ```
-
-## Troubleshooting
-
-### Icons not appearing
-- Check that PNG files exist in the icons directory
-- Verify file permissions are readable
-- Try switching to text mode as fallback
-
-### Nerd Font icons showing as squares
-- Ensure you have a Nerd Font installed
-- Update the font name in the configuration
-- Check your terminal supports the font
-
-### Script errors
-- Ensure Python 3 and required modules are installed
-- Check file paths and permissions
-- Review qtile logs for error messages
-
-## Files
-
-- `icon_reference.json` - Icon mapping reference
-- `*.svg` - Vector SVG icon files (recommended)
-- `*.png` - Bitmap PNG icon files  
-- `*.colorbackup` - Original SVG color backups
-- `../scripts/download_icons.py` - Icon downloader script
-- `../scripts/switch_icons.py` - Configuration switcher
-- `../scripts/fix_svg_colors.py` - SVG color adjuster
-- `../scripts/fix_svgs.py` - SVG compatibility fixer
-- `../modules/bars_with_icons.py` - Enhanced bars module
-
-## Current Status
-
-✅ **SVG icons active** with white color (#F8F0FC)  
-✅ **15 vector icons** ready for use  
-✅ **15 bitmap icons** available as fallback  
-✅ **Color backup files** preserved for easy restoration
+| Icon Name | Description | Colors Used | Dynamic |
+|-----------|-------------|-------------|---------|
+| platform | OS mascot | 6-9 themed colors | No |
+| battery_* | Battery states | Level-based colors | Yes |
+| wifi_* | Network strength | Signal-based colors | Yes |
+| volume_* | Audio levels | Level-based colors | Yes |
+| cpu_* | Processor load | Usage-based colors | Yes |
+| memory_* | RAM usage | Usage-based colors | Yes |
+| mail | Email indicator | Theme colors | No |
+| updates | Update indicator | Warning colors | No |
+| refresh | Refresh action | Accent colors | No |
 
 ## Credits
 
-Icons sourced from:
-- Feather Icons (https://feathericons.com/) - MIT License
-- Tabler Icons (https://tabler.io/icons/) - MIT License  
-- DevIcons (https://devicon.dev/) - MIT License
+- **Platform Mascots**: Custom SVG implementations of official OS mascots
+- **Dynamic System**: Built with modern Python 3.10+ features
+- **Legacy Icons**: Feather Icons, Tabler Icons, DevIcons (MIT License)
