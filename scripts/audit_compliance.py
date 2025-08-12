@@ -117,11 +117,11 @@ class ComplianceAuditor:
 
         # Check for legacy type usage in annotations
         type_patterns = [
-            (r'\bDict\[[^\]]+\]', "Use 'dict[...]' instead of 'dict[...]'"),
-            (r'\bList\[[^\]]+\]', "Use 'list[...]' instead of 'list[...]'"),
-            (r'\bTuple\[[^\]]+\]', "Use 'tuple[...]' instead of 'tuple[...]'"),
-            (r'\bUnion\[[^\]]+\]', "Use '|' union syntax instead of '...'"),
-            (r'\bOptional\[[^\]]+\]', "Use '... | None' instead of '... | None'"),
+            (r'\bDict\[[^\]]+\]', "Use 'dict[...]' instead of 'Dict[...]'"),
+            (r'\bList\[[^\]]+\]', "Use 'list[...]' instead of 'List[...]'"),
+            (r'\bTuple\[[^\]]+\]', "Use 'tuple[...]' instead of 'Tuple[...]'"),
+            (r'\bUnion\[[^\]]+\]', "Use '|' union syntax instead of 'Union[...]'"),
+            (r'\bOptional\[[^\]]+\]', "Use '... | None' instead of 'Optional[...]'"),
         ]
 
         for i, line in enumerate(lines, 1):

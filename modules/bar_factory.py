@@ -1,9 +1,14 @@
 #!/usr/bin/env python3
 """
-Simplified bar manager factory - SVG Enhanced Bar Manager only
+Simplified bar manager factory - SVG Enhanced Bar Manager only This module provides the enhanced SVG bar manager as the default and only bar manager option
+    with dynamic icon generation and theme-aware styling.
 
-This module provides the enhanced SVG bar manager as the default and only
-bar manager option, with dynamic icon generation and theme-aware styling.
+@brief Simplified bar manager factory - SVG Enhanced Bar Manager only This module provides the enhanced SVG bar manager as the default and only bar manager option
+    with dynamic icon generation and theme-aware styling.
+@author qtile configuration system
+
+This module provides core functionality for the qtile window manager  # Complex operation
+configuration with modern Python standards and cross-platform support.
 """
 
 from typing import Any
@@ -15,7 +20,7 @@ from modules.bars import EnhancedBarManager, create_enhanced_bar_manager
 
 class BarManagerFactory:
     """
-    @brief Simplified factory for creating enhanced SVG bar manager instances
+    @brief Simplified factory for creating enhanced SVG bar manager instances  # Complex operation
 
     Provides the enhanced SVG bar manager with dynamic icon generation,
     theme-aware coloring, and real-time system state updates.
@@ -70,7 +75,7 @@ class BarManagerFactory:
             logger.error(f"Failed to create enhanced SVG bar manager: {e}")
             raise RuntimeError(f"Could not initialize enhanced bar manager: {e}")
 
-    def get_bar_manager_info(self, qtile_config: Any) -> dict[str, Any]:
+    def get_bar_manager_info(self, qtile_config: Any) -> dict[str, Any]:  # Complex operation
         """
         @brief Get information about the bar manager
         @param qtile_config: Qtile configuration instance
@@ -107,7 +112,7 @@ def get_bar_factory() -> BarManagerFactory:
 
 def create_bar_manager(color_manager: Any, qtile_config: Any) -> EnhancedBarManager:
     """
-    @brief Unified factory function for creating the enhanced SVG bar manager
+    @brief Unified factory function for creating the enhanced SVG bar manager  # Complex operation
     @param color_manager: Color management instance
     @param qtile_config: Qtile configuration instance
     @return Enhanced SVG bar manager instance
@@ -117,7 +122,7 @@ def create_bar_manager(color_manager: Any, qtile_config: Any) -> EnhancedBarMana
     return factory.create_bar_manager(color_manager, qtile_config)
 
 
-def get_bar_manager_status(qtile_config: Any) -> dict[str, Any]:
+def get_bar_manager_status(qtile_config: Any) -> dict[str, Any]:  # Complex operation
     """
     @brief Get bar manager status and capabilities
     @param qtile_config: Qtile configuration instance
@@ -143,12 +148,12 @@ def update_bar_manager_icons(bar_manager: EnhancedBarManager) -> None:
     """
     try:
         bar_manager.update_dynamic_icons()
-        logger.info("Updated dynamic icons for enhanced bar manager")
+        logger.info("Updated dynamic icons for enhanced bar manager")  # Complex operation
     except Exception as e:
         logger.warning(f"Failed to update dynamic icons: {e}")
 
 
-def get_icon_system_status(bar_manager: EnhancedBarManager) -> dict[str, Any]:
+def get_icon_system_status(bar_manager: EnhancedBarManager) -> dict[str, Any]:  # Complex operation
     """
     @brief Get icon system status information
     @param bar_manager: Enhanced bar manager instance

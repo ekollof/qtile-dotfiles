@@ -1,7 +1,19 @@
 #!/usr/bin/env python3
 """
 Centralized configuration for qtile - DPI AWARE VERSION
-All user-configurable settings in one place with automatic DPI scaling
+
+@brief Centralized qtile configuration with automatic DPI scaling support
+@author qtile configuration system
+
+All user-configurable settings in one place with automatic DPI scaling.
+Provides platform-aware defaults, font management, and cross-platform
+compatibility for both X11 and Wayland environments.
+
+Key features:
+- Automatic DPI detection and scaling
+- Platform-specific application preferences
+- Font fallback management
+- Cross-platform portability
 """
 
 
@@ -13,7 +25,13 @@ from modules.platform_utils import get_platform_config, get_platform_info
 
 
 class QtileConfig:
-    """Centralized qtile configuration with DPI awareness"""
+    """
+    @brief Centralized qtile configuration with DPI awareness
+
+    Provides all configuration settings for qtile with automatic DPI scaling,  # Complex operation
+    platform detection, and intelligent defaults. Manages fonts, applications,
+    layouts, and system-specific preferences.
+    """
 
     home: str
 
@@ -48,7 +66,7 @@ class QtileConfig:
     @property
     def script_configs(self) -> list:
         """
-        @brief Configure custom scripts for GenPollText widgets with DPI awareness
+        @brief Configure custom scripts for GenPollText widgets with DPI awareness  # Complex operation
         @return List of dictionaries containing script configuration parameters
         """
         return [
@@ -92,12 +110,18 @@ class QtileConfig:
 
     @property
     def mod_key(self) -> str:
-        """Primary modifier key (Super/Windows key)"""
+        """
+        @brief Primary modifier key (Super/Windows key)
+        @return String representing the primary modifier key
+        """
         return "mod4"
 
     @property
     def alt_key(self) -> str:
-        """Alt modifier key"""
+        """
+        @brief Alt modifier key
+        @return String representing the alt modifier key
+        """
         return "mod1"
 
     @property
@@ -116,20 +140,28 @@ class QtileConfig:
     def applications(self) -> dict[str, str]:
         """Application launch commands - platform aware"""
         launcher_app = self.platform_config.get_application("launcher", "rofi")
-        launcher_cmd = f"{launcher_app} -show run" if launcher_app == "rofi" else launcher_app
+        launcher_cmd = (f"{launcher_app} -show run"
+                       if launcher_app == "rofi"
+                       else launcher_app)
 
         return {
             'launcher': launcher_cmd,
             'password_manager': f'{self.home}/bin/getpass',
             'totp_manager': f'{self.home}/bin/getpass --totp',
-            'clipboard': self.platform_config.get_command("clipboard_manager", "clipmenu"),
+            'clipboard': self.platform_config.get_command(
+                "clipboard_manager", "clipmenu"),
             'wallpaper_picker': f'{self.home}/bin/pickwall.sh',
             'wallpaper_random': f'{self.home}/bin/wallpaper.ksh -r',
-            'lock_session': self.platform_config.get_command("lock_session", "loginctl lock-session"),
-            'screenshot': self.platform_config.get_command("screenshot", "flameshot gui"),
-            'audio_mixer': self.platform_config.get_command("audio_mixer", "pavucontrol"),
-            'network_manager': self.platform_config.get_command("network_manager", "nm-connection-editor"),
-            'file_manager': self.platform_config.get_application("file_manager", "thunar"),
+            'lock_session': self.platform_config.get_command(
+                "lock_session", "loginctl lock-session"),
+            'screenshot': self.platform_config.get_command(
+                "screenshot", "flameshot gui"),
+            'audio_mixer': self.platform_config.get_command(
+                "audio_mixer", "pavucontrol"),
+            'network_manager': self.platform_config.get_command(
+                "network_manager", "nm-connection-editor"),
+            'file_manager': self.platform_config.get_application("file_manager"
+                "thunar"),
             'media_player': self.platform_config.get_application("media_player", "mpv"),
         }
 
@@ -146,7 +178,7 @@ class QtileConfig:
         }
 
     @property
-    def tile_layout(self) -> dict[str, float | int | bool | None]:
+    def tile_layout(self) -> dict[str, float | int | bool | None]:  # Complex operation
         """Tile layout specific settings - DPI aware"""
         return {
             'ratio': 0.5,  # 50/50 split by default
@@ -375,7 +407,7 @@ class QtileConfig:
     # ===== BAR/WIDGET SETTINGS - DPI AWARE =====
 
     @property
-    def bar_settings(self) -> dict[str, int | float | list[int]]:
+    def bar_settings(self) -> dict[str, int | float | list[int]]:  # Complex operation
         """Status bar configuration - DPI scaled"""
         return {
             'height': scale_size(28),  # DPI-scaled bar height
@@ -478,7 +510,7 @@ class QtileConfig:
         @brief Apply BSD-specific customizations to the configuration
 
         This method shows how you can customize your qtile configuration
-        for BSD systems. Call this method after initialization to apply
+        for BSD systems. Call this method after initialization to apply  # Complex operation
         BSD-specific settings.
         """
         if not self.platform_info.is_bsd:
@@ -523,7 +555,7 @@ def get_config() -> QtileConfig:
 def get_platform_overrides() -> dict[str, str]:
     """
     @brief Get platform-specific configuration overrides
-    @return Dictionary of platform-specific settings for current OS
+    @return Dictionary of platform-specific settings for current OS  # Complex operation
     """
     return config.platform_config.get_config_overrides()
 

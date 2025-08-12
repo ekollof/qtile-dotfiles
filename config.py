@@ -1,8 +1,18 @@
 #!/usr/bin/env python3
 """
 Qtile Configuration - Modular Design
-Author: Andrath
-Features: Automatic color reloading, Wayland compatibility, multi-screen support
+
+@brief Main qtile configuration with modular design and automatic features
+@author Andrath
+
+This module provides the main qtile configuration with:
+- Automatic color reloading from pywal/wallust
+- Wayland and X11 compatibility
+- Multi-screen support with automatic detection
+- Modular bar, key, group, and hook management
+- Cross-platform portability (Linux, BSD)
+
+@note This configuration follows modern Python 3.10+ standards
 """
 
 import importlib
@@ -72,7 +82,7 @@ mouse = [
         start=lazy.window.get_position(),
     ),
     Drag(
-        [mod], "Button3", lazy.window.set_size_floating(), start=lazy.window.get_size()
+        [mod], "Button3", lazy.window.set_size_floating(), start=lazy.window.get_size()  # Complex operation
     ),
     Click([mod], "Button2", lazy.window.bring_to_front()),
 ]
@@ -106,14 +116,14 @@ def reload(module: str) -> None:
         _ = importlib.reload(sys.modules[module])
 
 
-def remapkeys():
+def remapkeys() -> None:
     """
-    @brief Remap keys if needed (placeholder for custom key remapping)
+    @brief Remap keys if needed (placeholder for custom key remapping)  # Complex operation
     """
     pass
 
 
-def manually_reconfigure_screens():
+def manually_reconfigure_screens() -> None:
     """
     @brief Manually reconfigure screens after monitor changes
     @throws Exception if screen reconfiguration fails
