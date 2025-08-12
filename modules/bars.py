@@ -85,7 +85,7 @@ class EnhancedBarManager:
 
         return {
             "font": get_available_font(self.qtile_config.preferred_font),
-            "fontsize": scale_font(12),
+            "fontsize": scale_font(self.qtile_config.preferred_fontsize),
             "padding": scale_size(3),
         }
 
@@ -450,7 +450,7 @@ class EnhancedBarManager:
                     foreground=icon_color,
                     background=bg_color,
                     font=get_available_font(self.qtile_config.preferred_font),
-                    fontsize=scale_font(16),
+                    fontsize=scale_font(self.qtile_config.preferred_icon_fontsize),
                     padding=scale_size(3),
                 )
 
@@ -460,7 +460,7 @@ class EnhancedBarManager:
                     text=self.icons["text"].get(icon_key, text_fallback),
                     foreground=icon_color,
                     background=bg_color,
-                    fontsize=scale_font(16),
+                    fontsize=scale_font(self.qtile_config.preferred_icon_fontsize),
                     padding=scale_size(3),
                 )
 
@@ -469,7 +469,7 @@ class EnhancedBarManager:
             text=text_fallback or "?",
             foreground=icon_color,
             background=bg_color,
-            fontsize=scale_font(16),
+            fontsize=scale_font(self.qtile_config.preferred_icon_fontsize),
             padding=scale_size(3),
         )
 
@@ -729,7 +729,7 @@ class EnhancedBarManager:
                             font=get_available_font(
                                 self.qtile_config.preferred_font
                             ),
-                            fontsize=scale_font(12),
+                            fontsize=scale_font(self.qtile_config.preferred_icon_fontsize),
                             padding=scale_size(3),
                         )
                     )
@@ -742,7 +742,7 @@ class EnhancedBarManager:
                         font=get_available_font(
                             self.qtile_config.preferred_font
                         ),
-                        fontsize=scale_font(12),
+                        fontsize=scale_font(self.qtile_config.preferred_fontsize),
                         padding=scale_size(3),
                         update_interval=config["update_interval"],
                         func=self._safe_script_call(

@@ -45,14 +45,44 @@ class QtileConfig:
         self.platform_config = get_platform_config()
 
     # ===== FONT SETTINGS =====
+    # 
+    # 🎯 TO CHANGE FONT SIZES: Simply modify the return values below!
+    # - preferred_fontsize: Controls text size (widgets, window titles, etc.)
+    # - preferred_icon_fontsize: Controls icon/symbol size (usually larger)
+    # 
+    # Both values are automatically scaled for high-DPI displays.
+    # After changes, restart qtile with Super+Ctrl+R
 
     @property
     def preferred_font(self) -> str:
         """
         @brief User's preferred font - change this to your preferred font
         @return Font name string for use in qtile widgets
+        @example To use JetBrains Mono: return "JetBrains Mono Nerd Font"
         """
         return "BerkeleyMono Nerd Font Mono"
+
+    @property
+    def preferred_fontsize(self) -> int:
+        """
+        @brief User's preferred base font size (before DPI scaling)
+        @return Base font size in points
+        @note This will be automatically scaled for high-DPI displays
+        @example For larger text, change to: return 14
+        @example For smaller text, change to: return 10
+        """
+        return 12  # 🔧 CHANGE THIS VALUE to adjust font size
+
+    @property
+    def preferred_icon_fontsize(self) -> int:
+        """
+        @brief User's preferred icon font size (before DPI scaling)
+        @return Base icon font size in points
+        @note Icons may need larger fonts for better visibility
+        @example For larger icons, change to: return 18
+        @example For smaller icons, change to: return 14
+        """
+        return 16  # 🔧 CHANGE THIS VALUE to adjust icon font size
 
     # ===== DPI SETTINGS =====
 
@@ -484,7 +514,7 @@ class QtileConfig:
         """
         return {
             "font": get_available_font(self.preferred_font),
-            "fontsize": scale_font(12),  # DPI-scaled font size
+            "fontsize": scale_font(self.preferred_fontsize),  # DPI-scaled configurable font size
             "padding": scale_size(3),  # DPI-scaled padding
         }
 
