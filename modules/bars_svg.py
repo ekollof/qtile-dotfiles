@@ -281,7 +281,7 @@ class EnhancedBarManager:
             logger.warning(f"Failed to recolor icon {icon_path}: {e}")
             return icon_path
 
-    def _create_icon_widget(self, icon_key: str, text_fallback: str = "", color: str | None = None, **dynamic_kwargs) -> widget.base._Widget:
+    def _create_icon_widget(self, icon_key: str, text_fallback: str = "", color: str | None = None, **dynamic_kwargs) -> Any:
         """
         @brief Create an icon widget based on the selected method with dynamic support
         @param icon_key: Icon identifier key
@@ -550,7 +550,7 @@ class EnhancedBarManager:
                 return fallback
         return call_script
 
-    def _get_script_widgets(self, colordict: Dict[str, Any]) -> List[widget.base._Widget]:
+    def _get_script_widgets(self, colordict: Dict[str, Any]) -> List[Any]:
         """
         @brief Create GenPollText widgets for available scripts with dynamic icons
         @param colordict: Color dictionary from color manager
