@@ -185,10 +185,10 @@ class PlatformConfig:
         @return Dictionary mapping platforms to browser preference lists
         """
         return {
-            "linux": ["brave", "firefox", "chromium", "google-chrome"],
-            "openbsd": ["firefox", "chromium", "iridium"],
-            "freebsd": ["firefox", "chromium", "brave"],
-            "netbsd": ["firefox", "seamonkey"],
+            "linux": ["brave", "chromium", "google-chrome"],
+            "openbsd": ["chrome", "iridium"],
+            "freebsd": ["chromium", "brave"],
+            "netbsd": ["chromium"],
         }
 
     def _get_file_manager_preferences(self) -> Dict[str, List[str]]:
