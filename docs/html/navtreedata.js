@@ -52,7 +52,7 @@ var NAVTREE =
 var NAVTREEINDEX =
 [
 "annotated.html",
-"config_8py.html"
+"classqtile__config_1_1QtileConfig.html#aeab31e063ddf3db1ce5546b41f388ab8"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronization';

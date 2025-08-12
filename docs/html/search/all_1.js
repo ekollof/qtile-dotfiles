@@ -2,6 +2,7 @@ var searchData=
 [
   ['alt_5fkey_0',['alt_key',['../classqtile__config_1_1QtileConfig.html#a3b767e4b5c3717e3798c72cc50b1346d',1,'qtile_config.QtileConfig.alt_key'],['../classqtile__config_1_1QtileConfig.html#ae9899486add51ec73ee6bba78463f53b',1,'qtile_config.QtileConfig.alt_key(self)']]],
   ['applications_1',['applications',['../classqtile__config_1_1QtileConfig.html#aacc4e4b10588966e6f8e4c55ad1c7a0f',1,'qtile_config.QtileConfig.applications'],['../classqtile__config_1_1QtileConfig.html#ad7431b3a3c2a41bd553709e688233533',1,'qtile_config.QtileConfig.applications(self)']]],
-  ['auto_5ffullscreen_2',['auto_fullscreen',['../namespaceconfig.html#a49dcb82f85e41becb0e9622e489f09eb',1,'config']]],
-  ['autostart_5fscript_3',['autostart_script',['../classqtile__config_1_1QtileConfig.html#aa2d2a8aaa52d5627eeda9b27ad3d737c',1,'qtile_config.QtileConfig.autostart_script'],['../classqtile__config_1_1QtileConfig.html#a0e50ed82b6cf60132cb070f62df95127',1,'qtile_config.QtileConfig.autostart_script(self)']]]
+  ['apply_5fbsd_5fcustomizations_2',['apply_bsd_customizations',['../classqtile__config_1_1QtileConfig.html#a33865a849bec4a9980dde254b3332c5b',1,'qtile_config::QtileConfig']]],
+  ['auto_5ffullscreen_3',['auto_fullscreen',['../namespaceconfig.html#a49dcb82f85e41becb0e9622e489f09eb',1,'config']]],
+  ['autostart_5fscript_4',['autostart_script',['../classqtile__config_1_1QtileConfig.html#aa2d2a8aaa52d5627eeda9b27ad3d737c',1,'qtile_config.QtileConfig.autostart_script'],['../classqtile__config_1_1QtileConfig.html#a0e50ed82b6cf60132cb070f62df95127',1,'qtile_config.QtileConfig.autostart_script(self)']]]
 ];
