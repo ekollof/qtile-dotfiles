@@ -4,13 +4,12 @@ System-level commands for qtile
 """
 
 import subprocess
+
 from libqtile.log_utils import logger
 
 
 def run_system_command(
-    commands: list[list[str]],
-    operation: str,
-    timeout: int = 5
+    commands: list[list[str]], operation: str, timeout: int = 5
 ) -> bool:
     """Run system commands with unified error handling
 
@@ -29,11 +28,15 @@ def run_system_command(
                 check=True,
                 capture_output=True,
                 timeout=timeout,
-                text=True
+                text=True,
             )
             logger.debug(f"{operation} successful: {' '.join(cmd)}")
             return True
-        except (subprocess.CalledProcessError, FileNotFoundError, subprocess.TimeoutExpired) as e:
+        except (
+            subprocess.CalledProcessError,
+            FileNotFoundError,
+            subprocess.TimeoutExpired,
+        ) as e:
             logger.debug(f"Command failed: {' '.join(cmd)} - {e}")
             continue
 
@@ -60,6 +63,7 @@ class SystemCommands:
         """Manually force all windows to tile"""
         try:
             from modules.hooks import create_hook_manager
+
             hook_manager = create_hook_manager(self.color_manager)
             count = hook_manager.force_retile_all_windows(qtile)
             logger.info(f"Manual retile completed - {count} windows retiled")
@@ -70,8 +74,8 @@ class SystemCommands:
         """Manually reconfigure screens after monitor changes"""
         try:
             logger.info("Manual screen reconfiguration requested")
-            from modules.screens import refresh_screens, get_screen_count
             from modules.bar_factory import create_bar_manager
+            from modules.screens import get_screen_count, refresh_screens
 
             refresh_screens()
             new_screen_count = get_screen_count()
@@ -79,6 +83,7 @@ class SystemCommands:
 
             # Recreate screens
             from qtile_config import get_config
+
             qtile_config = get_config()
             bar_manager = create_bar_manager(self.color_manager, qtile_config)
             new_screens = bar_manager.create_screens(new_screen_count)
@@ -94,14 +99,20 @@ class SystemCommands:
         try:
             logger.info("Showing hotkey display")
             from modules.hotkeys import create_hotkey_display
-            hotkey_display = create_hotkey_display(key_manager, self.color_manager)
+
+            hotkey_display = create_hotkey_display(
+                key_manager, self.color_manager
+            )
             hotkey_display.show_hotkeys()
         except Exception as e:
             logger.error(f"Error showing hotkeys: {e}")
             # Fallback to simple dmenu
             try:
                 from modules.hotkeys import create_hotkey_display
-                hotkey_display = create_hotkey_display(key_manager, self.color_manager)
+
+                hotkey_display = create_hotkey_display(
+                    key_manager, self.color_manager
+                )
                 hotkey_display.show_hotkeys_simple()
             except Exception as e2:
                 logger.error(f"Fallback hotkey display also failed: {e2}")
@@ -134,14 +145,18 @@ class SystemCommands:
         """Get system information"""
         try:
             return {
-                'qtile_version': getattr(qtile, 'version', 'unknown'),
-                'screen_count': len(qtile.screens),
-                'group_count': len(qtile.groups),
-                'current_group': qtile.current_group.name,
-                'current_screen': qtile.screens.index(qtile.current_screen),
-                'current_layout': qtile.current_group.layout.name,
-                'window_count': len(qtile.current_group.windows),
-                'color_manager_status': self.color_manager.is_monitoring() if self.color_manager else False,
+                "qtile_version": getattr(qtile, "version", "unknown"),
+                "screen_count": len(qtile.screens),
+                "group_count": len(qtile.groups),
+                "current_group": qtile.current_group.name,
+                "current_screen": qtile.screens.index(qtile.current_screen),
+                "current_layout": qtile.current_group.layout.name,
+                "window_count": len(qtile.current_group.windows),
+                "color_manager_status": (
+                    self.color_manager.is_monitoring()
+                    if self.color_manager
+                    else False
+                ),
             }
         except Exception as e:
             logger.error(f"Error getting system info: {e}")
@@ -151,28 +166,33 @@ class SystemCommands:
         """Dump current qtile state for debugging"""
         try:
             state = {
-                'system_info': self.get_system_info(qtile),
-                'groups': [
+                "system_info": self.get_system_info(qtile),
+                "groups": [
                     {
-                        'name': g.name,
-                        'layout': g.layout.name,
-                        'window_count': len(g.windows),
-                        'windows': [w.name for w in g.windows] if hasattr(g, 'windows') else []
+                        "name": g.name,
+                        "layout": g.layout.name,
+                        "window_count": len(g.windows),
+                        "windows": (
+                            [w.name for w in g.windows]
+                            if hasattr(g, "windows")
+                            else []
+                        ),
                     }
                     for g in qtile.groups
                 ],
-                'screens': [
+                "screens": [
                     {
-                        'index': i,
-                        'group': screen.group.name if screen.group else None,
-                        'width': screen.width,
-                        'height': screen.height,
+                        "index": i,
+                        "group": screen.group.name if screen.group else None,
+                        "width": screen.width,
+                        "height": screen.height,
                     }
                     for i, screen in enumerate(qtile.screens)
-                ]
+                ],
             }
 
             import json
+
             debug_output = json.dumps(state, indent=2)
             logger.info(f"Qtile state dump:\n{debug_output}")
             return state
@@ -188,9 +208,9 @@ class SystemCommands:
             # Try to normalize all layouts
             for group in qtile.groups:
                 try:
-                    if hasattr(group.layout, 'normalize'):
+                    if hasattr(group.layout, "normalize"):
                         group.layout.normalize()
-                    elif hasattr(group.layout, 'reset'):
+                    elif hasattr(group.layout, "reset"):
                         group.layout.reset()
                 except Exception:
                     pass
@@ -203,10 +223,10 @@ class SystemCommands:
 
             # Switch to a safe layout (tile or max)
             try:
-                qtile.current_group.setlayout('tile')
+                qtile.current_group.setlayout("tile")
             except Exception:
                 try:
-                    qtile.current_group.setlayout('max')
+                    qtile.current_group.setlayout("max")
                 except Exception:
                     pass
 
@@ -230,7 +250,7 @@ class SystemCommands:
         try:
             for group in qtile.groups:
                 for window in group.windows:
-                    if getattr(window, 'urgent', False):
+                    if getattr(window, "urgent", False):
                         group.cmd_toscreen()
                         window.cmd_focus()
                         logger.debug(f"Focused urgent window: {window.name}")
@@ -247,10 +267,10 @@ class SystemCommands:
     def brightness_up(qtile):
         """Increase screen brightness"""
         brightness_commands = [
-            ['xbacklight', '-inc', '10'],           # xbacklight (most common)
-            ['brightnessctl', 'set', '+10%'],       # brightnessctl
-            ['light', '-A', '10'],                  # light utility
-            ['doas', 'xbacklight', '-inc', '10']    # OpenBSD with doas
+            ["xbacklight", "-inc", "10"],  # xbacklight (most common)
+            ["brightnessctl", "set", "+10%"],  # brightnessctl
+            ["light", "-A", "10"],  # light utility
+            ["doas", "xbacklight", "-inc", "10"],  # OpenBSD with doas
         ]
         run_system_command(brightness_commands, "brightness increase")
 
@@ -258,10 +278,10 @@ class SystemCommands:
     def brightness_down(qtile):
         """Decrease screen brightness"""
         brightness_commands = [
-            ['xbacklight', '-dec', '10'],
-            ['brightnessctl', 'set', '10%-'],
-            ['light', '-U', '10'],
-            ['doas', 'xbacklight', '-dec', '10']
+            ["xbacklight", "-dec", "10"],
+            ["brightnessctl", "set", "10%-"],
+            ["light", "-U", "10"],
+            ["doas", "xbacklight", "-dec", "10"],
         ]
         run_system_command(brightness_commands, "brightness decrease")
 
@@ -269,10 +289,15 @@ class SystemCommands:
     def volume_up(qtile):
         """Increase system volume"""
         volume_commands = [
-            ['pactl', 'set-sink-volume', '@DEFAULT_SINK@', '+5%'],   # PulseAudio
-            ['amixer', 'sset', 'Master', '5%+'],                     # ALSA
-            ['mixerctl', 'outputs.master=+0.05'],                    # OpenBSD sndio
-            ['doas', 'mixerctl', 'outputs.master=+0.05']             # OpenBSD with doas
+            [
+                "pactl",
+                "set-sink-volume",
+                "@DEFAULT_SINK@",
+                "+5%",
+            ],  # PulseAudio
+            ["amixer", "sset", "Master", "5%+"],  # ALSA
+            ["mixerctl", "outputs.master=+0.05"],  # OpenBSD sndio
+            ["doas", "mixerctl", "outputs.master=+0.05"],  # OpenBSD with doas
         ]
         run_system_command(volume_commands, "volume increase")
 
@@ -280,10 +305,10 @@ class SystemCommands:
     def volume_down(qtile):
         """Decrease system volume"""
         volume_commands = [
-            ['pactl', 'set-sink-volume', '@DEFAULT_SINK@', '-5%'],
-            ['amixer', 'sset', 'Master', '5%-'],
-            ['mixerctl', 'outputs.master=-0.05'],
-            ['doas', 'mixerctl', 'outputs.master=-0.05']
+            ["pactl", "set-sink-volume", "@DEFAULT_SINK@", "-5%"],
+            ["amixer", "sset", "Master", "5%-"],
+            ["mixerctl", "outputs.master=-0.05"],
+            ["doas", "mixerctl", "outputs.master=-0.05"],
         ]
         run_system_command(volume_commands, "volume decrease")
 
@@ -291,10 +316,10 @@ class SystemCommands:
     def volume_mute_toggle(qtile):
         """Toggle volume mute"""
         mute_commands = [
-            ['pactl', 'set-sink-mute', '@DEFAULT_SINK@', 'toggle'],
-            ['amixer', 'sset', 'Master', 'toggle'],
-            ['mixerctl', 'outputs.master.mute=toggle'],
-            ['doas', 'mixerctl', 'outputs.master.mute=toggle']
+            ["pactl", "set-sink-mute", "@DEFAULT_SINK@", "toggle"],
+            ["amixer", "sset", "Master", "toggle"],
+            ["mixerctl", "outputs.master.mute=toggle"],
+            ["doas", "mixerctl", "outputs.master.mute=toggle"],
         ]
         run_system_command(mute_commands, "volume mute toggle")
 
@@ -302,11 +327,16 @@ class SystemCommands:
     def media_play_pause(qtile):
         """Toggle media play/pause"""
         media_commands = [
-            ['playerctl', 'play-pause'],                    # Most media players
-            ['mpc', 'toggle'],                              # MPD
-            ['cmus-remote', '-u'],                          # cmus
-            ['dbus-send', '--print-reply', '--dest=org.mpris.MediaPlayer2.spotify',
-             '/org/mpris/MediaPlayer2', 'org.mpris.MediaPlayer2.Player.PlayPause']  # Spotify via dbus
+            ["playerctl", "play-pause"],  # Most media players
+            ["mpc", "toggle"],  # MPD
+            ["cmus-remote", "-u"],  # cmus
+            [
+                "dbus-send",
+                "--print-reply",
+                "--dest=org.mpris.MediaPlayer2.spotify",
+                "/org/mpris/MediaPlayer2",
+                "org.mpris.MediaPlayer2.Player.PlayPause",
+            ],  # Spotify via dbus
         ]
         run_system_command(media_commands, "media play/pause toggle")
 
@@ -314,9 +344,9 @@ class SystemCommands:
     def media_next(qtile):
         """Skip to next media track"""
         next_commands = [
-            ['playerctl', 'next'],
-            ['mpc', 'next'],
-            ['cmus-remote', '-n']
+            ["playerctl", "next"],
+            ["mpc", "next"],
+            ["cmus-remote", "-n"],
         ]
         run_system_command(next_commands, "media next")
 
@@ -324,9 +354,9 @@ class SystemCommands:
     def media_prev(qtile):
         """Skip to previous media track"""
         prev_commands = [
-            ['playerctl', 'previous'],
-            ['mpc', 'prev'],
-            ['cmus-remote', '-r']
+            ["playerctl", "previous"],
+            ["mpc", "prev"],
+            ["cmus-remote", "-r"],
         ]
         run_system_command(prev_commands, "media previous")
 
@@ -336,9 +366,9 @@ class SystemCommands:
         # First check if wifi is on or off, then toggle
         # This is a simplified version - you might want to enhance this
         toggle_commands = [
-            ['nmcli', 'radio', 'wifi', 'off'],              # NetworkManager
-            ['rfkill', 'block', 'wifi'],                    # rfkill
-            ['doas', 'ifconfig', 'iwn0', 'down'],           # OpenBSD
+            ["nmcli", "radio", "wifi", "off"],  # NetworkManager
+            ["rfkill", "block", "wifi"],  # rfkill
+            ["doas", "ifconfig", "iwn0", "down"],  # OpenBSD
         ]
         run_system_command(toggle_commands, "WiFi toggle")
 
@@ -346,9 +376,9 @@ class SystemCommands:
     def bluetooth_toggle(qtile):
         """Toggle Bluetooth on/off"""
         bt_commands = [
-            ['bluetoothctl', 'power', 'off'],               # bluetoothctl
-            ['rfkill', 'block', 'bluetooth'],               # rfkill
-            ['doas', 'rcctl', 'stop', 'bluetooth'],         # OpenBSD
+            ["bluetoothctl", "power", "off"],  # bluetoothctl
+            ["rfkill", "block", "bluetooth"],  # rfkill
+            ["doas", "rcctl", "stop", "bluetooth"],  # OpenBSD
         ]
         run_system_command(bt_commands, "Bluetooth toggle")
 
@@ -356,9 +386,9 @@ class SystemCommands:
     def keyboard_backlight_toggle(qtile):
         """Toggle keyboard backlight"""
         kb_light_commands = [
-            ['brightnessctl', '--device=kbd_backlight', 'set', '+33%'],
-            ['light', '-s', 'sysfs/leds/kbd_backlight', '-A', '33'],
-            ['xset', 'led', '3']                             # Fallback
+            ["brightnessctl", "--device=kbd_backlight", "set", "+33%"],
+            ["light", "-s", "sysfs/leds/kbd_backlight", "-A", "33"],
+            ["xset", "led", "3"],  # Fallback
         ]
         run_system_command(kb_light_commands, "keyboard backlight toggle")
 
@@ -367,7 +397,7 @@ class SystemCommands:
         """Toggle external display"""
         # This is a basic implementation - you might want to customize
         display_commands = [
-            ['xrandr', '--auto'],                           # Auto-detect displays
-            ['autorandr', '--change'],                      # If using autorandr
+            ["xrandr", "--auto"],  # Auto-detect displays
+            ["autorandr", "--change"],  # If using autorandr
         ]
         run_system_command(display_commands, "display toggle")

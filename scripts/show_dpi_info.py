@@ -12,9 +12,11 @@ testing utilities for qtile's DPI-aware configuration system.
 
 import sys
 from pathlib import Path
+
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from modules.dpi_utils import get_dpi_manager
+
 
 def main() -> None:
     """
@@ -45,6 +47,7 @@ def main() -> None:
     print(f"  scale_size(20) = {dpi_manager.scale(20)}px")
     print(f"  scale_font(12) = {dpi_manager.scale_font(12)}px")
     print(f"  scale_font(16) = {dpi_manager.scale_font(16)}px")
+
 
 if __name__ == "__main__":
     main()

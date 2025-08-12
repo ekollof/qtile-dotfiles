@@ -40,7 +40,7 @@ class ComplianceAuditor:
             "python_syntax": 0,
             "documentation": 0,
             "portability": 0,
-            "code_quality": 0
+            "code_quality": 0,
         }
 
     def audit_project(self) -> dict[str, Any]:
@@ -56,7 +56,11 @@ class ComplianceAuditor:
 
         for file_path in python_files:
             # Skip __pycache__, generated files, and scripts directory
-            if "__pycache__" in str(file_path) or ".pyc" in str(file_path) or "scripts/" in str(file_path):
+            if (
+                "__pycache__" in str(file_path)
+                or ".pyc" in str(file_path)
+                or "scripts/" in str(file_path)
+            ):
                 continue
 
             self._audit_file(file_path)
@@ -71,14 +75,15 @@ class ComplianceAuditor:
         @param file_path: Path to the Python file to audit
         """
         try:
-            content = file_path.read_text(encoding='utf-8')
+            content = file_path.read_text(encoding="utf-8")
 
             # Parse AST for deeper analysis
             try:
                 tree = ast.parse(content)
             except SyntaxError as e:
-                self._add_issue("syntax_error", file_path, 0,
-                              f"Syntax error: {e}")
+                self._add_issue(
+                    "syntax_error", file_path, 0, f"Syntax error: {e}"
+                )
                 return
 
             # Run all compliance checks
@@ -88,26 +93,47 @@ class ComplianceAuditor:
             self._check_code_quality(file_path, content, tree)
 
         except Exception as e:
-            self._add_issue("file_error", file_path, 0,
-                          f"Could not process file: {e}")
+            self._add_issue(
+                "file_error", file_path, 0, f"Could not process file: {e}"
+            )
 
-    def _check_python_syntax(self, file_path: Path, content: str, tree: ast.AST) -> None:
+    def _check_python_syntax(
+        self, file_path: Path, content: str, tree: ast.AST
+    ) -> None:
         """
         @brief Check for modern Python 3.10+ syntax compliance
         @param file_path: Path to the file being checked
         @param content: File content as string
         @param tree: Parsed AST tree
         """
-        lines = content.split('\n')
+        lines = content.split("\n")
 
         # Check for legacy type annotations
         legacy_types = [
-            (r'from typing import.*\bDict\b', "Use 'dict' instead of 'Dict' (Python 3.9+)"),
-            (r'from typing import.*\bList\b', "Use 'list' instead of 'List' (Python 3.9+)"),
-            (r'from typing import.*\bTuple\b', "Use 'tuple' instead of 'Tuple' (Python 3.9+)"),
-            (r'from typing import.*\bSet\b', "Use 'set' instead of 'Set' (Python 3.9+)"),
-            (r'from typing import.*\bUnion\b', "Use '|' union syntax instead of 'Union' (Python 3.10+)"),
-            (r'from typing import.*\bOptional\b', "Use '| None' instead of 'Optional' (Python 3.10+)"),
+            (
+                r"from typing import.*\bDict\b",
+                "Use 'dict' instead of 'Dict' (Python 3.9+)",
+            ),
+            (
+                r"from typing import.*\bList\b",
+                "Use 'list' instead of 'List' (Python 3.9+)",
+            ),
+            (
+                r"from typing import.*\bTuple\b",
+                "Use 'tuple' instead of 'Tuple' (Python 3.9+)",
+            ),
+            (
+                r"from typing import.*\bSet\b",
+                "Use 'set' instead of 'Set' (Python 3.9+)",
+            ),
+            (
+                r"from typing import.*\bUnion\b",
+                "Use '|' union syntax instead of 'Union' (Python 3.10+)",
+            ),
+            (
+                r"from typing import.*\bOptional\b",
+                "Use '| None' instead of 'Optional' (Python 3.10+)",
+            ),
         ]
 
         for i, line in enumerate(lines, 1):
@@ -117,11 +143,14 @@ class ComplianceAuditor:
 
         # Check for legacy type usage in annotations
         type_patterns = [
-            (r'\bDict\[[^\]]+\]', "Use 'dict[...]' instead of 'dict[...]'"),
-            (r'\bList\[[^\]]+\]', "Use 'list[...]' instead of 'list[...]'"),
-            (r'\bTuple\[[^\]]+\]', "Use 'tuple[...]' instead of 'tuple[...]'"),
-            (r'\bUnion\[[^\]]+\]', "Use '|' union syntax instead of '...'"),
-            (r'\bOptional\[[^\]]+\]', "Use '... | None' instead of '... | None'"),
+            (r"\bDict\[[^\]]+\]", "Use 'dict[...]' instead of 'dict[...]'"),
+            (r"\bList\[[^\]]+\]", "Use 'list[...]' instead of 'list[...]'"),
+            (r"\bTuple\[[^\]]+\]", "Use 'tuple[...]' instead of 'tuple[...]'"),
+            (r"\bUnion\[[^\]]+\]", "Use '|' union syntax instead of '...'"),
+            (
+                r"\bOptional\[[^\]]+\]",
+                "Use '... | None' instead of '... | None'",
+            ),
         ]
 
         for i, line in enumerate(lines, 1):
@@ -130,19 +159,29 @@ class ComplianceAuditor:
                     self._add_issue("python_syntax", file_path, i, message)
 
         # Check for os.path usage
-        if re.search(r'import os\.path|from os import path', content):
-            self._add_issue("python_syntax", file_path, 0,
-                          "Use 'pathlib.Path' instead of 'os.path' for better portability")
+        if re.search(r"import os\.path|from os import path", content):
+            self._add_issue(
+                "python_syntax",
+                file_path,
+                0,
+                "Use 'pathlib.Path' instead of 'os.path' for better portability",
+            )
 
         # Look for match statements usage (good practice for Python 3.10+)
         has_match = any(isinstance(node, ast.Match) for node in ast.walk(tree))
         has_if_elif_chains = self._detect_long_if_elif_chains(tree)
 
         if has_if_elif_chains and not has_match:
-            self._add_issue("python_syntax", file_path, 0,
-                          "Consider using 'match' statements instead of long if/elif chains")
+            self._add_issue(
+                "python_syntax",
+                file_path,
+                0,
+                "Consider using 'match' statements instead of long if/elif chains",
+            )
 
-    def _check_documentation(self, file_path: Path, content: str, tree: ast.AST) -> None:
+    def _check_documentation(
+        self, file_path: Path, content: str, tree: ast.AST
+    ) -> None:
         """
         @brief Check documentation compliance (doxygen format)
         @param file_path: Path to the file being checked
@@ -153,11 +192,16 @@ class ComplianceAuditor:
         if isinstance(tree, ast.Module):
             module_docstring = ast.get_docstring(tree)
             if not module_docstring:
-                self._add_issue("documentation", file_path, 1,
-                              "Module missing docstring")
+                self._add_issue(
+                    "documentation", file_path, 1, "Module missing docstring"
+                )
             elif not self._is_doxygen_format(module_docstring):
-                self._add_issue("documentation", file_path, 1,
-                              "Module docstring not in doxygen format (@brief, etc.)")
+                self._add_issue(
+                    "documentation",
+                    file_path,
+                    1,
+                    "Module docstring not in doxygen format (@brief, etc.)",
+                )
 
         # Check functions and classes
         for node in ast.walk(tree):
@@ -176,17 +220,23 @@ class ComplianceAuditor:
         """
         # Check for platform-specific imports/calls
         platform_specific = [
-            (r'import winreg|from winreg', "Windows-specific module"),
-            (r'import pwd|from pwd', "Unix-specific module (consider alternatives)"),
-            (r'import grp|from grp', "Unix-specific module (consider alternatives)"),
-            (r'\.chown\(', "Unix-specific operation"),
-            (r'\.chmod\(', "Unix-specific operation (ensure cross-platform)"),
-            (r'/proc/', "Linux-specific filesystem path"),
-            (r'/sys/', "Linux-specific filesystem path"),
-            (r'C:\\|\\\\', "Windows-specific path format"),
+            (r"import winreg|from winreg", "Windows-specific module"),
+            (
+                r"import pwd|from pwd",
+                "Unix-specific module (consider alternatives)",
+            ),
+            (
+                r"import grp|from grp",
+                "Unix-specific module (consider alternatives)",
+            ),
+            (r"\.chown\(", "Unix-specific operation"),
+            (r"\.chmod\(", "Unix-specific operation (ensure cross-platform)"),
+            (r"/proc/", "Linux-specific filesystem path"),
+            (r"/sys/", "Linux-specific filesystem path"),
+            (r"C:\\|\\\\", "Windows-specific path format"),
         ]
 
-        lines = content.split('\n')
+        lines = content.split("\n")
         for i, line in enumerate(lines, 1):
             for pattern, message in platform_specific:
                 if re.search(pattern, line):
@@ -194,9 +244,18 @@ class ComplianceAuditor:
 
         # Check for hardcoded paths
         hardcoded_paths = [
-            (r'"/usr/[^"]*"', "Hardcoded Unix path - consider making configurable"),
-            (r'"/etc/[^"]*"', "Hardcoded Unix path - consider making configurable"),
-            (r'"/var/[^"]*"', "Hardcoded Unix path - consider making configurable"),
+            (
+                r'"/usr/[^"]*"',
+                "Hardcoded Unix path - consider making configurable",
+            ),
+            (
+                r'"/etc/[^"]*"',
+                "Hardcoded Unix path - consider making configurable",
+            ),
+            (
+                r'"/var/[^"]*"',
+                "Hardcoded Unix path - consider making configurable",
+            ),
             (r'"/tmp/[^"]*"', "Use tempfile module instead of hardcoded /tmp"),
         ]
 
@@ -205,7 +264,9 @@ class ComplianceAuditor:
                 if re.search(pattern, line):
                     self._add_issue("portability", file_path, i, message)
 
-    def _check_code_quality(self, file_path: Path, content: str, tree: ast.AST) -> None:
+    def _check_code_quality(
+        self, file_path: Path, content: str, tree: ast.AST
+    ) -> None:
         """
         @brief Check code quality standards (PEP 8, type hints, error handling)
         @param file_path: Path to the file being checked
@@ -215,37 +276,61 @@ class ComplianceAuditor:
         # Check for missing type hints
         for node in ast.walk(tree):
             if isinstance(node, ast.FunctionDef):
-                if not node.returns and node.name not in ['__init__', '__str__', '__repr__']:
-                    self._add_issue("code_quality", file_path, node.lineno,
-                                  f"Function '{node.name}' missing return type annotation")
+                if not node.returns and node.name not in [
+                    "__init__",
+                    "__str__",
+                    "__repr__",
+                ]:
+                    self._add_issue(
+                        "code_quality",
+                        file_path,
+                        node.lineno,
+                        f"Function '{node.name}' missing return type annotation",
+                    )
 
                 # Check function parameters for type hints
                 for arg in node.args.args:
-                    if not arg.annotation and arg.arg != 'self':
-                        self._add_issue("code_quality", file_path, node.lineno,
-                                      f"Parameter '{arg.arg}' in '{node.name}' missing type annotation")
+                    if not arg.annotation and arg.arg != "self":
+                        self._add_issue(
+                            "code_quality",
+                            file_path,
+                            node.lineno,
+                            f"Parameter '{arg.arg}' in '{node.name}' missing type annotation",
+                        )
 
         # Check for bare except clauses
         for node in ast.walk(tree):
             if isinstance(node, ast.ExceptHandler):
                 if node.type is None:
-                    self._add_issue("code_quality", file_path, node.lineno,
-                                  "Bare 'except:' clause - specify exception types")
+                    self._add_issue(
+                        "code_quality",
+                        file_path,
+                        node.lineno,
+                        "Bare 'except:' clause - specify exception types",
+                    )
 
         # Check function complexity (simplified cyclomatic complexity)
         for node in ast.walk(tree):
             if isinstance(node, ast.FunctionDef):
                 complexity = self._calculate_complexity(node)
                 if complexity > 10:
-                    self._add_issue("code_quality", file_path, node.lineno,
-                                  f"Function '{node.name}' has high complexity ({complexity}) - consider refactoring")
+                    self._add_issue(
+                        "code_quality",
+                        file_path,
+                        node.lineno,
+                        f"Function '{node.name}' has high complexity ({complexity}) - consider refactoring",
+                    )
 
         # Check line length (PEP 8)
-        lines = content.split('\n')
+        lines = content.split("\n")
         for i, line in enumerate(lines, 1):
             if len(line) > 88:  # Slightly more lenient than strict PEP 8
-                self._add_issue("code_quality", file_path, i,
-                              f"Line too long ({len(line)} characters) - PEP 8 recommends ≤79")
+                self._add_issue(
+                    "code_quality",
+                    file_path,
+                    i,
+                    f"Line too long ({len(line)} characters) - PEP 8 recommends ≤79",
+                )
 
     def _detect_long_if_elif_chains(self, tree: ast.AST) -> bool:
         """
@@ -257,8 +342,10 @@ class ComplianceAuditor:
             if isinstance(node, ast.If):
                 elif_count = 0
                 current = node
-                while hasattr(current, 'orelse') and current.orelse:
-                    if len(current.orelse) == 1 and isinstance(current.orelse[0], ast.If):
+                while hasattr(current, "orelse") and current.orelse:
+                    if len(current.orelse) == 1 and isinstance(
+                        current.orelse[0], ast.If
+                    ):
                         elif_count += 1
                         current = current.orelse[0]
                     else:
@@ -273,10 +360,12 @@ class ComplianceAuditor:
         @param docstring: Docstring to check
         @return True if doxygen format detected
         """
-        doxygen_tags = ['@brief', '@param', '@return', '@throws']
+        doxygen_tags = ["@brief", "@param", "@return", "@throws"]
         return any(tag in docstring for tag in doxygen_tags)
 
-    def _check_function_docs(self, file_path: Path, node: ast.FunctionDef) -> None:
+    def _check_function_docs(
+        self, file_path: Path, node: ast.FunctionDef
+    ) -> None:
         """
         @brief Check function documentation compliance
         @param file_path: Path to the file
@@ -284,15 +373,25 @@ class ComplianceAuditor:
         """
         docstring = ast.get_docstring(node)
         if not docstring:
-            if not node.name.startswith('_'):  # Public functions need docs
-                self._add_issue("documentation", file_path, node.lineno,
-                              f"Public function '{node.name}' missing docstring")
+            if not node.name.startswith("_"):  # Public functions need docs
+                self._add_issue(
+                    "documentation",
+                    file_path,
+                    node.lineno,
+                    f"Public function '{node.name}' missing docstring",
+                )
         else:
             if not self._is_doxygen_format(docstring):
-                self._add_issue("documentation", file_path, node.lineno,
-                              f"Function '{node.name}' docstring not in doxygen format")
+                self._add_issue(
+                    "documentation",
+                    file_path,
+                    node.lineno,
+                    f"Function '{node.name}' docstring not in doxygen format",
+                )
 
-    def _check_async_function_docs(self, file_path: Path, node: ast.AsyncFunctionDef) -> None:
+    def _check_async_function_docs(
+        self, file_path: Path, node: ast.AsyncFunctionDef
+    ) -> None:
         """
         @brief Check async function documentation compliance
         @param file_path: Path to the file
@@ -300,13 +399,21 @@ class ComplianceAuditor:
         """
         docstring = ast.get_docstring(node)
         if not docstring:
-            if not node.name.startswith('_'):  # Public functions need docs
-                self._add_issue("documentation", file_path, node.lineno,
-                              f"Public async function '{node.name}' missing docstring")
+            if not node.name.startswith("_"):  # Public functions need docs
+                self._add_issue(
+                    "documentation",
+                    file_path,
+                    node.lineno,
+                    f"Public async function '{node.name}' missing docstring",
+                )
         else:
             if not self._is_doxygen_format(docstring):
-                self._add_issue("documentation", file_path, node.lineno,
-                              f"Async function '{node.name}' docstring not in doxygen format")
+                self._add_issue(
+                    "documentation",
+                    file_path,
+                    node.lineno,
+                    f"Async function '{node.name}' docstring not in doxygen format",
+                )
 
     def _check_class_docs(self, file_path: Path, node: ast.ClassDef) -> None:
         """
@@ -316,11 +423,19 @@ class ComplianceAuditor:
         """
         docstring = ast.get_docstring(node)
         if not docstring:
-            self._add_issue("documentation", file_path, node.lineno,
-                          f"Class '{node.name}' missing docstring")
+            self._add_issue(
+                "documentation",
+                file_path,
+                node.lineno,
+                f"Class '{node.name}' missing docstring",
+            )
         elif not self._is_doxygen_format(docstring):
-            self._add_issue("documentation", file_path, node.lineno,
-                          f"Class '{node.name}' docstring not in doxygen format")
+            self._add_issue(
+                "documentation",
+                file_path,
+                node.lineno,
+                f"Class '{node.name}' docstring not in doxygen format",
+            )
 
     def _calculate_complexity(self, node: ast.FunctionDef) -> int:
         """
@@ -340,7 +455,9 @@ class ComplianceAuditor:
 
         return complexity
 
-    def _add_issue(self, category: str, file_path: Path, line_number: int, message: str) -> None:
+    def _add_issue(
+        self, category: str, file_path: Path, line_number: int, message: str
+    ) -> None:
         """
         @brief Add a compliance issue to the results
         @param category: Issue category (python_syntax, documentation, etc.)
@@ -352,7 +469,7 @@ class ComplianceAuditor:
             "category": category,
             "file": str(file_path.relative_to(self.project_root)),
             "line": line_number,
-            "message": message
+            "message": message,
         }
         self.issues.append(issue)
         self.stats["total_issues"] += 1
@@ -373,7 +490,7 @@ class ComplianceAuditor:
             ("Python Syntax", "python_syntax"),
             ("Documentation", "documentation"),
             ("Portability", "portability"),
-            ("Code Quality", "code_quality")
+            ("Code Quality", "code_quality"),
         ]
 
         for name, key in categories:
@@ -395,7 +512,9 @@ class ComplianceAuditor:
                 print("-" * (len(name) + 8))
 
                 for issue in issues_by_category[key][:10]:  # Limit to first 10
-                    line_info = f":{issue['line']}" if issue['line'] > 0 else ""
+                    line_info = (
+                        f":{issue['line']}" if issue["line"] > 0 else ""
+                    )
                     print(f"  {issue['file']}{line_info}")
                     print(f"    {issue['message']}")
 
@@ -404,8 +523,18 @@ class ComplianceAuditor:
                     print(f"    ... and {remaining} more issues")
 
         # Calculate compliance score
-        total_possible_issues = self.stats["files_checked"] * 10  # Rough estimate
-        compliance_score = max(0, 100 - (self.stats["total_issues"] / max(1, total_possible_issues) * 100))
+        total_possible_issues = (
+            self.stats["files_checked"] * 10
+        )  # Rough estimate
+        compliance_score = max(
+            0,
+            100
+            - (
+                self.stats["total_issues"]
+                / max(1, total_possible_issues)
+                * 100
+            ),
+        )
 
         print(f"\n📈 Compliance Score: {compliance_score:.1f}%")
 
@@ -422,7 +551,7 @@ class ComplianceAuditor:
             "stats": self.stats,
             "issues": self.issues,
             "issues_by_category": issues_by_category,
-            "compliance_score": compliance_score
+            "compliance_score": compliance_score,
         }
 
 
@@ -432,14 +561,32 @@ def main():
     """
     import argparse
 
-    parser = argparse.ArgumentParser(description="Audit qtile project compliance")
-    parser.add_argument("--project-root", "-r", default=".",
-                       help="Root directory of the qtile project")
-    parser.add_argument("--category", "-c",
-                       choices=["python_syntax", "documentation", "portability", "code_quality"],
-                       help="Check only specific category")
-    parser.add_argument("--summary-only", "-s", action="store_true",
-                       help="Show only summary statistics")
+    parser = argparse.ArgumentParser(
+        description="Audit qtile project compliance"
+    )
+    parser.add_argument(
+        "--project-root",
+        "-r",
+        default=".",
+        help="Root directory of the qtile project",
+    )
+    parser.add_argument(
+        "--category",
+        "-c",
+        choices=[
+            "python_syntax",
+            "documentation",
+            "portability",
+            "code_quality",
+        ],
+        help="Check only specific category",
+    )
+    parser.add_argument(
+        "--summary-only",
+        "-s",
+        action="store_true",
+        help="Show only summary statistics",
+    )
 
     args = parser.parse_args()
 

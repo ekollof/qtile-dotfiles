@@ -8,12 +8,12 @@ using doxygen. It creates a Doxyfile configuration, removes old docs, and
 generates fresh documentation.
 """
 
-import subprocess
+import os
 import shutil
+import subprocess
+import sys
 from pathlib import Path
 
-import sys
-import os
 
 class DoxygenDocGenerator:
     """
@@ -41,29 +41,43 @@ class DoxygenDocGenerator:
         """
         # Check doxygen
         try:
-            result = subprocess.run(['doxygen', '--version'],
-                                  capture_output=True, text=True, timeout=10)
+            result = subprocess.run(
+                ["doxygen", "--version"],
+                capture_output=True,
+                text=True,
+                timeout=10,
+            )
             if result.returncode == 0:
                 print(f"✓ Doxygen found: {result.stdout.strip()}")
             else:
                 return False
         except (subprocess.TimeoutExpired, FileNotFoundError):
             print("✗ Doxygen is not installed or not accessible")
-            print("  Please install doxygen: sudo apt install doxygen (Debian/Ubuntu)")
+            print(
+                "  Please install doxygen: sudo apt install doxygen (Debian/Ubuntu)"
+            )
             print("  Or: sudo pkg install doxygen (FreeBSD/OpenBSD)")
             return False
 
         # Check doxypypy
         try:
-            result = subprocess.run(['doxypypy', '--version'],
-                                  capture_output=True, text=True, timeout=10)
+            result = subprocess.run(
+                ["doxypypy", "--version"],
+                capture_output=True,
+                text=True,
+                timeout=10,
+            )
             if result.returncode == 0:
                 print(f"✓ Doxypypy found: {result.stdout.strip()}")
                 return True
             else:
                 # Try alternative check
-                result = subprocess.run(['doxypypy', '--help'],
-                                      capture_output=True, text=True, timeout=10)
+                result = subprocess.run(
+                    ["doxypypy", "--help"],
+                    capture_output=True,
+                    text=True,
+                    timeout=10,
+                )
                 if result.returncode == 0:
                     print("✓ Doxypypy found (help available)")
                     return True
@@ -145,7 +159,7 @@ if __name__ == '__main__':
 
         filter_path = self.project_root / "python_filter.py"
         try:
-            with open(filter_path, 'w') as f:
+            with open(filter_path, "w") as f:
                 f.write(filter_script)
             filter_path.chmod(0o755)
             print(f"✓ Created Python filter at {filter_path}")
@@ -441,7 +455,7 @@ GENERATE_LEGEND        = YES
 DOT_CLEANUP            = YES
 """
 
-            with open(self.doxyfile_path, 'w') as f:
+            with open(self.doxyfile_path, "w") as f:
                 f.write(doxyfile_content)
 
             print(f"✓ Created Doxyfile at {self.doxyfile_path}")
@@ -460,10 +474,10 @@ DOT_CLEANUP            = YES
         # Remove old markdown docs but keep the directory structure
         if self.docs_dir.exists():
             for item in self.docs_dir.iterdir():
-                if item.is_file() and item.suffix == '.md':
+                if item.is_file() and item.suffix == ".md":
                     item.unlink()
                     print(f"  Removed: {item.name}")
-                elif item.is_dir() and item.name == 'html':
+                elif item.is_dir() and item.name == "html":
                     shutil.rmtree(item)
                     print(f"  Removed: {item.name}/ (directory)")
 
@@ -491,8 +505,12 @@ DOT_CLEANUP            = YES
             print(f"Working directory for doxygen: {current_dir}")
 
             # Run doxygen
-            result = subprocess.run(['doxygen', 'Doxyfile'],
-                                  capture_output=True, text=True, timeout=120)
+            result = subprocess.run(
+                ["doxygen", "Doxyfile"],
+                capture_output=True,
+                text=True,
+                timeout=120,
+            )
 
             if result.returncode == 0:
                 print("✓ Doxygen documentation generated successfully")
@@ -542,7 +560,7 @@ DOT_CLEANUP            = YES
 
         index_path = self.docs_dir / "index.html"
         try:
-            with open(index_path, 'w') as f:
+            with open(index_path, "w") as f:
                 f.write(index_content)
             print(f"✓ Created index redirect at {index_path}")
         except IOError as e:
@@ -565,9 +583,9 @@ DOT_CLEANUP            = YES
         """
         @brief Print a summary of the generated documentation
         """
-        print("\n" + "="*60)
+        print("\n" + "=" * 60)
         print("📚 DOCUMENTATION GENERATION COMPLETE")
-        print("="*60)
+        print("=" * 60)
 
         if self.html_dir.exists():
             html_files = list(self.html_dir.glob("*.html"))
@@ -599,8 +617,14 @@ DOT_CLEANUP            = YES
 
         # Debug: List files that should be processed
         print("\n🔍 DEBUG: Files that should be processed:")
-        for pattern in ["modules/*.py", "modules/**/*.py", "scripts/*.py", "*.py"]:
+        for pattern in [
+            "modules/*.py",
+            "modules/**/*.py",
+            "scripts/*.py",
+            "*.py",
+        ]:
             import glob
+
             files = glob.glob(pattern, recursive=True)
             for f in files[:5]:  # Show first 5
                 print(f"  Found: {f}")
@@ -612,7 +636,10 @@ DOT_CLEANUP            = YES
             ("Creating Doxyfile", self.create_doxyfile),
             ("Removing old docs", lambda: (self.remove_old_docs(), True)[1]),
             ("Generating documentation", self.generate_docs),
-            ("Creating index redirect", lambda: (self.create_index_redirect(), True)[1]),
+            (
+                "Creating index redirect",
+                lambda: (self.create_index_redirect(), True)[1],
+            ),
             ("Cleaning up", lambda: (self.cleanup_doxyfile(), True)[1]),
         ]
 
@@ -625,6 +652,7 @@ DOT_CLEANUP            = YES
         self.print_summary()
         return True
 
+
 def main() -> int:
     """
     @brief Main function to run the documentation generator
@@ -633,6 +661,7 @@ def main() -> int:
     generator = DoxygenDocGenerator()
     success = generator.run()
     return 0 if success else 1
+
 
 if __name__ == "__main__":
     sys.exit(main())

@@ -19,8 +19,9 @@ Key features:
 
 from pathlib import Path
 from typing import Any
+
+from modules.dpi_utils import get_dpi_manager, scale_font, scale_size
 from modules.font_utils import get_available_font
-from modules.dpi_utils import scale_size, scale_font, get_dpi_manager
 from modules.platform_utils import get_platform_config, get_platform_info
 
 
@@ -75,26 +76,26 @@ class QtileConfig:
         """
         return [
             {
-                'script_path': '~/bin/imap-checker.ksh',
-                'icon': '📭:',
-                'update_interval': 300,
-                'fallback': 'N/A',
-                'name': 'email checker'
+                "script_path": "~/bin/imap-checker.ksh",
+                "icon": "📭:",
+                "update_interval": 300,
+                "fallback": "N/A",
+                "name": "email checker",
             },
             {
-                'script_path': '~/bin/kayako.sh',
-                'icon': '🎫:',
-                'update_interval': 60,
-                'fallback': 'N/A',
-                'name': 'ticket checker'
+                "script_path": "~/bin/kayako.sh",
+                "icon": "🎫:",
+                "update_interval": 60,
+                "fallback": "N/A",
+                "name": "ticket checker",
             },
             {
-                'script_path': '~/bin/cputemp',
-                'icon': '🌡:',
-                'update_interval': 10,
-                'fallback': 'N/A',
-                'name': 'CPU temperature'
-            }
+                "script_path": "~/bin/cputemp",
+                "icon": "🌡:",
+                "update_interval": 10,
+                "fallback": "N/A",
+                "name": "CPU temperature",
+            },
         ]
 
     @property
@@ -153,29 +154,39 @@ class QtileConfig:
         @return Dictionary mapping application types to launch commands
         """
         launcher_app = self.platform_config.get_application("launcher", "rofi")
-        launcher_cmd = (f"{launcher_app} -show run"
-                       if launcher_app == "rofi"
-                       else launcher_app)
+        launcher_cmd = (
+            f"{launcher_app} -show run"
+            if launcher_app == "rofi"
+            else launcher_app
+        )
 
         return {
-            'launcher': launcher_cmd,
-            'password_manager': f'{self.home}/bin/getpass',
-            'totp_manager': f'{self.home}/bin/getpass --totp',
-            'clipboard': self.platform_config.get_command(
-                "clipboard_manager", "clipmenu"),
-            'wallpaper_picker': f'{self.home}/bin/pickwall.sh',
-            'wallpaper_random': f'{self.home}/bin/wallpaper.ksh -r',
-            'lock_session': self.platform_config.get_command(
-                "lock_session", "loginctl lock-session"),
-            'screenshot': self.platform_config.get_command(
-                "screenshot", "flameshot gui"),
-            'audio_mixer': self.platform_config.get_command(
-                "audio_mixer", "pavucontrol"),
-            'network_manager': self.platform_config.get_command(
-                "network_manager", "nm-connection-editor"),
-            'file_manager': self.platform_config.get_application("file_manager"
-                "thunar"),
-            'media_player': self.platform_config.get_application("media_player", "mpv"),
+            "launcher": launcher_cmd,
+            "password_manager": f"{self.home}/bin/getpass",
+            "totp_manager": f"{self.home}/bin/getpass --totp",
+            "clipboard": self.platform_config.get_command(
+                "clipboard_manager", "clipmenu"
+            ),
+            "wallpaper_picker": f"{self.home}/bin/pickwall.sh",
+            "wallpaper_random": f"{self.home}/bin/wallpaper.ksh -r",
+            "lock_session": self.platform_config.get_command(
+                "lock_session", "loginctl lock-session"
+            ),
+            "screenshot": self.platform_config.get_command(
+                "screenshot", "flameshot gui"
+            ),
+            "audio_mixer": self.platform_config.get_command(
+                "audio_mixer", "pavucontrol"
+            ),
+            "network_manager": self.platform_config.get_command(
+                "network_manager", "nm-connection-editor"
+            ),
+            "file_manager": self.platform_config.get_application(
+                "file_manager" "thunar"
+            ),
+            "media_player": self.platform_config.get_application(
+                "media_player", "mpv"
+            ),
         }
 
     # ===== LAYOUT SETTINGS - DPI AWARE =====
@@ -187,25 +198,27 @@ class QtileConfig:
         @return Dictionary with margin, border_width, and other layout settings
         """
         return {
-            'margin': scale_size(4),  # DPI-scaled gap between windows
-            'border_width': max(1, scale_size(1)),  # Minimum 1px border
-            'single_border_width': max(1, scale_size(1)),
-            'single_margin': scale_size(4),
+            "margin": scale_size(4),  # DPI-scaled gap between windows
+            "border_width": max(1, scale_size(1)),  # Minimum 1px border
+            "single_border_width": max(1, scale_size(1)),
+            "single_margin": scale_size(4),
         }
 
     @property
-    def tile_layout(self) -> dict[str, float | int | bool | None]:  # Complex operation
+    def tile_layout(
+        self,
+    ) -> dict[str, float | int | bool | None]:  # Complex operation
         """
         @brief Tile layout specific settings - DPI aware
         @return Dictionary with ratio, increment, and tiling configuration
         """
         return {
-            'ratio': 0.5,  # 50/50 split by default
-            'ratio_increment': 0.1,  # 10% resize increments
-            'master_match': None,
-            'expand': True,
-            'master_length': 1,
-            'shift_windows': True,
+            "ratio": 0.5,  # 50/50 split by default
+            "ratio_increment": 0.1,  # 10% resize increments
+            "master_match": None,
+            "expand": True,
+            "master_length": 1,
+            "shift_windows": True,
         }
 
     @property
@@ -215,12 +228,12 @@ class QtileConfig:
         @return Dictionary with ratio, min_ratio, and max_ratio for MonadTall
         """
         return {
-            'ratio': 0.6,  # Main window 60% width
-            'min_ratio': 0.25,
-            'max_ratio': 0.85,
-            'change_ratio': 0.05,  # 5% change increments
-            'change_size': scale_size(20),  # DPI-scaled size changes
-            'new_client_position': 'after_current',
+            "ratio": 0.6,  # Main window 60% width
+            "min_ratio": 0.25,
+            "max_ratio": 0.85,
+            "change_ratio": 0.05,  # 5% change increments
+            "change_size": scale_size(20),  # DPI-scaled size changes
+            "new_client_position": "after_current",
         }
 
     @property
@@ -230,10 +243,10 @@ class QtileConfig:
         @return Dictionary with ratio and fair settings for BSP layout
         """
         return {
-            'fair': True,  # Even space distribution
-            'grow_amount': scale_size(10),  # DPI-scaled grow amount
-            'lower_right': True,
-            'ratio': 1.6,  # Golden ratio
+            "fair": True,  # Even space distribution
+            "grow_amount": scale_size(10),  # DPI-scaled grow amount
+            "lower_right": True,
+            "ratio": 1.6,  # Golden ratio
         }
 
     # ===== FLOATING WINDOW RULES =====
@@ -246,48 +259,42 @@ class QtileConfig:
         """
         return [
             # Core system dialogs
-            {'wm_class': 'confirm'},
-            {'wm_class': 'download'},
-            {'wm_class': 'error'},
-            {'wm_class': 'file_progress'},
-            {'wm_class': 'notification'},
-            {'wm_class': 'splash'},
-            {'wm_class': 'toolbar'},
-
+            {"wm_class": "confirm"},
+            {"wm_class": "download"},
+            {"wm_class": "error"},
+            {"wm_class": "file_progress"},
+            {"wm_class": "notification"},
+            {"wm_class": "splash"},
+            {"wm_class": "toolbar"},
             # PIN entry and authentication
-            {'wm_class': 'pinentry-gtk-2'},
-            {'wm_class': 'pinentry'},
-            {'title': 'pinentry'},
-            {'wm_class': 'ssh-askpass'},
-
+            {"wm_class": "pinentry-gtk-2"},
+            {"wm_class": "pinentry"},
+            {"title": "pinentry"},
+            {"wm_class": "ssh-askpass"},
             # Git tools (gitk)
-            {'wm_class': 'confirmreset'},
-            {'wm_class': 'makebranch'},
-            {'wm_class': 'maketag'},
-            {'title': 'branchdialog'},
-
+            {"wm_class": "confirmreset"},
+            {"wm_class": "makebranch"},
+            {"wm_class": "maketag"},
+            {"title": "branchdialog"},
             # Desktop environment
-            {'wm_class': 'krunner'},
-            {'title': 'Desktop — Plasma'},
-
+            {"wm_class": "krunner"},
+            {"title": "Desktop — Plasma"},
             # Calculators and small tools
-            {'wm_class': 'gnome-calculator'},
-            {'wm_class': 'kcalc'},
-            {'wm_class': 'Galculator'},
-            {'wm_class': 'Gnome-calculator'},
-
+            {"wm_class": "gnome-calculator"},
+            {"wm_class": "kcalc"},
+            {"wm_class": "Galculator"},
+            {"wm_class": "Gnome-calculator"},
             # Screenshot tools
-            {'wm_class': 'flameshot'},
-            {'wm_class': 'spectacle'},
-            {'wm_class': 'org.kde.spectacle'},
-            {'wm_class': 'Xfce4-screenshooter'},
-
+            {"wm_class": "flameshot"},
+            {"wm_class": "spectacle"},
+            {"wm_class": "org.kde.spectacle"},
+            {"wm_class": "Xfce4-screenshooter"},
             # System utilities
-            {'wm_class': 'Gpick'},  # Color picker
-            {'wm_class': 'Arandr'},  # Display configuration
-            {'wm_class': 'Pavucontrol'},  # Audio control
-            {'wm_class': 'Nm-connection-editor'},  # Network manager
-            {'wm_class': 'Blueman-manager'},  # Bluetooth manager
+            {"wm_class": "Gpick"},  # Color picker
+            {"wm_class": "Arandr"},  # Display configuration
+            {"wm_class": "Pavucontrol"},  # Audio control
+            {"wm_class": "Nm-connection-editor"},  # Network manager
+            {"wm_class": "Blueman-manager"},  # Bluetooth manager
         ]
 
     @property
@@ -297,15 +304,15 @@ class QtileConfig:
         @return List of application names that should be forced to float
         """
         return [
-            'nm-connection-editor',    # NetworkManager GUI
-            'pavucontrol',            # PulseAudio volume control
-            'origin.exe',             # Origin game launcher
-            'steam',                  # Steam client (some windows)
-            'blueman-manager',        # Bluetooth manager
-            'arandr',                # Display settings
-            'lxappearance',          # Theme settings
-            'qt5ct',                 # Qt5 configuration
-            'kvantummanager',        # Kvantum theme manager
+            "nm-connection-editor",  # NetworkManager GUI
+            "pavucontrol",  # PulseAudio volume control
+            "origin.exe",  # Origin game launcher
+            "steam",  # Steam client (some windows)
+            "blueman-manager",  # Bluetooth manager
+            "arandr",  # Display settings
+            "lxappearance",  # Theme settings
+            "qt5ct",  # Qt5 configuration
+            "kvantummanager",  # Kvantum theme manager
         ]
 
     # ===== WORKSPACE/GROUP SETTINGS =====
@@ -317,15 +324,15 @@ class QtileConfig:
         @return List of tuples containing group names and layout settings
         """
         return [
-            ('1:chat', {'layout': 'max'}),
-            ('2:web', {'layout': 'tile'}),
-            ('3:shell', {'layout': 'tile'}),
-            ('4:work', {'layout': 'tile'}),
-            ('5:games', {'layout': 'tile'}),
-            ('6:dev', {'layout': 'tile'}),
-            ('7:mail', {'layout': 'tile'}),
-            ('8:misc', {'layout': 'tile'}),
-            ('9:doc', {'layout': 'tile'}),
+            ("1:chat", {"layout": "max"}),
+            ("2:web", {"layout": "tile"}),
+            ("3:shell", {"layout": "tile"}),
+            ("4:work", {"layout": "tile"}),
+            ("5:games", {"layout": "tile"}),
+            ("6:dev", {"layout": "tile"}),
+            ("7:mail", {"layout": "tile"}),
+            ("8:misc", {"layout": "tile"}),
+            ("9:doc", {"layout": "tile"}),
         ]
 
     @property
@@ -336,22 +343,22 @@ class QtileConfig:
         """
         return [
             {
-                'name': 'notepad',
-                'command': 'st -e nvim /tmp/notepad.md',
-                'width': 0.6,
-                'height': 0.6,
-                'x': 0.2,
-                'y': 0.2,
-                'opacity': 0.9,
+                "name": "notepad",
+                "command": "st -e nvim /tmp/notepad.md",
+                "width": 0.6,
+                "height": 0.6,
+                "x": 0.2,
+                "y": 0.2,
+                "opacity": 0.9,
             },
             {
-                'name': 'ncmpcpp',
-                'command': 'st -e ncmpcpp',
-                'width': 0.8,
-                'height': 0.8,
-                'x': 0.1,
-                'y': 0.1,
-                'opacity': 0.9,
+                "name": "ncmpcpp",
+                "command": "st -e ncmpcpp",
+                "width": 0.8,
+                "height": 0.8,
+                "x": 0.1,
+                "y": 0.1,
+                "opacity": 0.9,
             },
         ]
 
@@ -365,9 +372,9 @@ class QtileConfig:
         """
         cache_dir = f"{self.home}/.cache/wal"
         return {
-            'current': f"{cache_dir}/colors.json",
-            'backup': f"{cache_dir}/last_good_colors.json",
-            'backup_dir': f"{cache_dir}/backups",
+            "current": f"{cache_dir}/colors.json",
+            "backup": f"{cache_dir}/last_good_colors.json",
+            "backup_dir": f"{cache_dir}/backups",
         }
 
     @property
@@ -380,7 +387,7 @@ class QtileConfig:
             "special": {
                 "background": "#171616",
                 "foreground": "#EEE6EA",
-                "cursor": "#EEE6EA"
+                "cursor": "#EEE6EA",
             },
             "colors": {
                 "color0": "#171616",
@@ -398,8 +405,8 @@ class QtileConfig:
                 "color12": "#7AA2F7",
                 "color13": "#C678DD",
                 "color14": "#56B6C2",
-                "color15": "#EEE6EA"
-            }
+                "color15": "#EEE6EA",
+            },
         }
 
     # ===== MONITOR/SCREEN SETTINGS =====
@@ -411,9 +418,9 @@ class QtileConfig:
         @return Dictionary with timing and behavior settings for screen changes
         """
         return {
-            'startup_delay': 30,  # Seconds to wait before handling screen changes
-            'detection_delay': 2,  # Seconds to wait after screen change detection
-            'auto_restart_on_change': True,  # Restart qtile when screens change
+            "startup_delay": 30,  # Seconds to wait before handling screen changes
+            "detection_delay": 2,  # Seconds to wait after screen change detection
+            "auto_restart_on_change": True,  # Restart qtile when screens change
         }
 
     # ===== ICON SETTINGS =====
@@ -456,15 +463,17 @@ class QtileConfig:
     # ===== BAR/WIDGET SETTINGS - DPI AWARE =====
 
     @property
-    def bar_settings(self) -> dict[str, int | float | list[int]]:  # Complex operation
+    def bar_settings(
+        self,
+    ) -> dict[str, int | float | list[int]]:  # Complex operation
         """
         @brief Status bar configuration - DPI scaled
         @return Dictionary with height, opacity, and margin settings for the status bar
         """
         return {
-            'height': scale_size(28),  # DPI-scaled bar height
-            'opacity': 0.95,
-            'margin': [0, 0, 0, 0],  # top, right, bottom, left
+            "height": scale_size(28),  # DPI-scaled bar height
+            "opacity": 0.95,
+            "margin": [0, 0, 0, 0],  # top, right, bottom, left
         }
 
     @property
@@ -474,9 +483,9 @@ class QtileConfig:
         @return Dictionary with font, fontsize, and padding settings for widgets
         """
         return {
-            'font': get_available_font(self.preferred_font),
-            'fontsize': scale_font(12),  # DPI-scaled font size
-            'padding': scale_size(3),    # DPI-scaled padding
+            "font": get_available_font(self.preferred_font),
+            "fontsize": scale_font(12),  # DPI-scaled font size
+            "padding": scale_size(3),  # DPI-scaled padding
         }
 
     # ===== HOTKEY DISPLAY SETTINGS - DPI AWARE =====
@@ -489,13 +498,12 @@ class QtileConfig:
                 and transparency settings
         """
         return {
-            'rofi_width': scale_size(1200),  # DPI-scaled width
-            'rofi_lines': 25,
-            'dmenu_lines': 25,
-            'font': get_available_font(self.preferred_font),
-            'transparency': 0.95,
+            "rofi_width": scale_size(1200),  # DPI-scaled width
+            "rofi_lines": 25,
+            "dmenu_lines": 25,
+            "font": get_available_font(self.preferred_font),
+            "transparency": 0.95,
         }
-
 
     # ===== BSD-SPECIFIC CONFIGURATION EXAMPLES =====
 
@@ -515,52 +523,53 @@ class QtileConfig:
 
         # OpenBSD-specific settings
         if self.platform_info.is_openbsd:
-            bsd_overrides.update({
-                # OpenBSD package manager
-                'package_manager': 'pkg_add',
-                'package_search': 'pkg_info -Q',
-                'package_update': 'syspatch && pkg_add -u',
-
-                # OpenBSD-specific paths
-                'browser_config_path': f'{self.home}/.mozilla',
-                'audio_device': '/dev/audio',
-
-                # OpenBSD system commands
-                'system_info': 'sysctl hw.model hw.ncpu hw.physmem',
-                'mount_usb': 'doas mount /dev/sd1i /mnt/usb',
-                'wifi_config': 'doas ifconfig iwn0 scan',
-
-                # OpenBSD-specific hotkeys (examples)
-                'suspend_system': 'doas zzz',
-                'hibernate_system': 'doas ZZZ',
-            })
+            bsd_overrides.update(
+                {
+                    # OpenBSD package manager
+                    "package_manager": "pkg_add",
+                    "package_search": "pkg_info -Q",
+                    "package_update": "syspatch && pkg_add -u",
+                    # OpenBSD-specific paths
+                    "browser_config_path": f"{self.home}/.mozilla",
+                    "audio_device": "/dev/audio",
+                    # OpenBSD system commands
+                    "system_info": "sysctl hw.model hw.ncpu hw.physmem",
+                    "mount_usb": "doas mount /dev/sd1i /mnt/usb",
+                    "wifi_config": "doas ifconfig iwn0 scan",
+                    # OpenBSD-specific hotkeys (examples)
+                    "suspend_system": "doas zzz",
+                    "hibernate_system": "doas ZZZ",
+                }
+            )
 
         # FreeBSD-specific settings
         elif self.platform_info.is_freebsd:
-            bsd_overrides.update({
-                # FreeBSD package manager
-                'package_manager': 'pkg',
-                'package_search': 'pkg search',
-                'package_update': 'pkg update && pkg upgrade',
-
-                # FreeBSD-specific commands
-                'system_info': 'sysctl hw.model hw.ncpu hw.physmem',
-                'mount_usb': 'mount /dev/da0s1 /mnt/usb',
-                'wifi_config': 'ifconfig wlan0 scan',
-            })
+            bsd_overrides.update(
+                {
+                    # FreeBSD package manager
+                    "package_manager": "pkg",
+                    "package_search": "pkg search",
+                    "package_update": "pkg update && pkg upgrade",
+                    # FreeBSD-specific commands
+                    "system_info": "sysctl hw.model hw.ncpu hw.physmem",
+                    "mount_usb": "mount /dev/da0s1 /mnt/usb",
+                    "wifi_config": "ifconfig wlan0 scan",
+                }
+            )
 
         # NetBSD-specific settings
         elif self.platform_info.is_netbsd:
-            bsd_overrides.update({
-                # NetBSD package manager
-                'package_manager': 'pkgin',
-                'package_search': 'pkgin search',
-                'package_update': 'pkgin update && pkgin upgrade',
-
-                # NetBSD-specific commands
-                'system_info': 'sysctl hw.model hw.ncpu hw.physmem64',
-                'mount_usb': 'mount /dev/sd0e /mnt/usb',
-            })
+            bsd_overrides.update(
+                {
+                    # NetBSD package manager
+                    "package_manager": "pkgin",
+                    "package_search": "pkgin search",
+                    "package_update": "pkgin update && pkgin upgrade",
+                    # NetBSD-specific commands
+                    "system_info": "sysctl hw.model hw.ncpu hw.physmem64",
+                    "mount_usb": "mount /dev/sd0e /mnt/usb",
+                }
+            )
 
         return bsd_overrides
 
@@ -594,7 +603,9 @@ class QtileConfig:
         # BSD systems might need different font settings
         if self.platform_info.is_bsd:
             # Fallback to more common fonts on BSD
-            self.platform_config.add_override("fallback_font", "DejaVu Sans Mono")
+            self.platform_config.add_override(
+                "fallback_font", "DejaVu Sans Mono"
+            )
 
 
 # Create global config instance

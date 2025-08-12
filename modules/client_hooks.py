@@ -7,19 +7,20 @@ This module provides client/window event handling functionality for qtile,
 including window focusing, floating rules, and client state management.
 """
 
+from typing import Any
+
 from libqtile import hook
 from libqtile.log_utils import logger
-from typing import Any
 
 
 class ClientHooks:
     """
     @brief Handles client/window-related hooks for qtile
-    
+
     Manages window events, floating rules, focus tracking, and client
     state changes in the qtile window manager.
     """
-    
+
     def __init__(self, config: Any, window_manager: Any) -> None:
         """
         @brief Initialize client hooks manager
@@ -34,7 +35,7 @@ class ClientHooks:
         @brief Setup all client/window-related hooks
         """
         logger.debug("Setting up client hooks")
-        
+
         @hook.subscribe.client_new
         def enforce_tiling_behavior(window):
             """Enforce consistent tiling behavior for all windows"""
@@ -68,14 +69,17 @@ class ClientHooks:
         @hook.subscribe.client_focus
         def log_window_focus(window):
             """Log window focus events for debugging"""
-            if hasattr(self.config, 'debug_window_focus') and self.config.debug_window_focus:
+            if (
+                hasattr(self.config, "debug_window_focus")
+                and self.config.debug_window_focus
+            ):
                 window_name = self.window_manager._get_window_name(window)
                 logger.debug(f"Window focused: {window_name}")
 
         @hook.subscribe.client_urgent_hint_changed
         def handle_urgent_hint(window):
             """Handle urgent hint changes"""
-            if hasattr(window, 'urgent') and window.urgent:
+            if hasattr(window, "urgent") and window.urgent:
                 window_name = self.window_manager._get_window_name(window)
                 logger.info(f"Window marked urgent: {window_name}")
 
@@ -87,9 +91,13 @@ class ClientHooks:
         try:
             wm_class = window.window.get_wm_class()
             if wm_class and len(wm_class) > 0:
-                if wm_class[0].lower() in [fc.lower() for fc in self.config.force_floating_apps]:
+                if wm_class[0].lower() in [
+                    fc.lower() for fc in self.config.force_floating_apps
+                ]:
                     window.floating = True
-                    logger.debug(f"Set {wm_class[0]} to floating via force_floating_apps")
+                    logger.debug(
+                        f"Set {wm_class[0]} to floating via force_floating_apps"
+                    )
         except (IndexError, AttributeError, TypeError) as e:
             logger.debug(f"Could not check window class for floating: {e}")
 
@@ -122,9 +130,17 @@ class ClientHooks:
         @return Dictionary containing hook registration and rule counts
         """
         return {
-            'hooks_registered': self._count_registered_hooks(),
-            'force_floating_apps': len(self.config.force_floating_apps) if hasattr(self.config, 'force_floating_apps') else 0,
-            'floating_rules': len(self.config.floating_rules) if hasattr(self.config, 'floating_rules') else 0,
+            "hooks_registered": self._count_registered_hooks(),
+            "force_floating_apps": (
+                len(self.config.force_floating_apps)
+                if hasattr(self.config, "force_floating_apps")
+                else 0
+            ),
+            "floating_rules": (
+                len(self.config.floating_rules)
+                if hasattr(self.config, "floating_rules")
+                else 0
+            ),
         }
 
     def _count_registered_hooks(self) -> dict[str, int]:
@@ -134,8 +150,8 @@ class ClientHooks:
         """
         # This is a simplified count - in practice, qtile doesn't expose hook counts easily
         return {
-            'client_new': 5,  # enforce_tiling_behavior, handle_transient_window, set_floating_by_class, set_parent_for_transient, handle_swallow
-            'client_killed': 1,  # handle_unswallow
-            'client_focus': 1,  # log_window_focus
-            'client_urgent_hint_changed': 1  # handle_urgent_hint
+            "client_new": 5,  # enforce_tiling_behavior, handle_transient_window, set_floating_by_class, set_parent_for_transient, handle_swallow
+            "client_killed": 1,  # handle_unswallow
+            "client_focus": 1,  # log_window_focus
+            "client_urgent_hint_changed": 1,  # handle_urgent_hint
         }

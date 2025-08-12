@@ -7,6 +7,7 @@ Handles automatic screen detection and configuration
 import json
 import os
 import subprocess
+
 from libqtile.log_utils import logger
 
 
@@ -48,7 +49,9 @@ class ScreenManager:
         old_count = self.num_screens
         self.detect_screens()
         if old_count != self.num_screens:
-            logger.info(f"Screen count changed from {old_count} to {self.num_screens}")
+            logger.info(
+                f"Screen count changed from {old_count} to {self.num_screens}"
+            )
             return True
         return False
 
@@ -63,22 +66,34 @@ class ScreenManager:
 
     def _is_xephyr_environment(self) -> bool:
         """Check if we're in Xephyr testing environment"""
-        display = os.getenv('DISPLAY', '')
-        if ':99' in display or any('Xephyr' in str(v) for v in os.environ.values()):
-            logger.info("Detected Xephyr testing environment - using single screen")
+        display = os.getenv("DISPLAY", "")
+        if ":99" in display or any(
+            "Xephyr" in str(v) for v in os.environ.values()
+        ):
+            logger.info(
+                "Detected Xephyr testing environment - using single screen"
+            )
             return True
         return False
 
     def _try_wayland_detection(self) -> bool:
         """Try Wayland screen detection using wlr-randr"""
         try:
-            result = subprocess.run(['wlr-randr', '--json'],
-                                  capture_output=True, text=True, timeout=2)
+            result = subprocess.run(
+                ["wlr-randr", "--json"],
+                capture_output=True,
+                text=True,
+                timeout=2,
+            )
             if result.returncode == 0:
                 outputs = json.loads(result.stdout)
-                connected_screens = [o for o in outputs if o.get('enabled', False)]
+                connected_screens = [
+                    o for o in outputs if o.get("enabled", False)
+                ]
                 self.num_screens = len(connected_screens)
-                logger.info(f"Wayland: Found {self.num_screens} enabled outputs")
+                logger.info(
+                    f"Wayland: Found {self.num_screens} enabled outputs"
+                )
                 return True
         except Exception:
             pass
@@ -96,15 +111,18 @@ class ScreenManager:
 
     def _try_xrandr_query(self) -> bool:
         """Try xrandr --query for screen detection"""
-        result = subprocess.run(['xrandr', '--query'],
-                              capture_output=True, text=True, timeout=3)
+        result = subprocess.run(
+            ["xrandr", "--query"], capture_output=True, text=True, timeout=3
+        )
         if result.returncode == 0:
-            lines = result.stdout.split('\n')
+            lines = result.stdout.split("\n")
             connected_count = 0
             for line in lines:
-                if ' connected ' in line and not line.startswith(' '):
-                    if any(char.isdigit() and 'x' in line.split('connected')[1]
-                          for char in line.split('connected')[1]):
+                if " connected " in line and not line.startswith(" "):
+                    if any(
+                        char.isdigit() and "x" in line.split("connected")[1]
+                        for char in line.split("connected")[1]
+                    ):
                         connected_count += 1
 
             if connected_count > 0:
@@ -115,14 +133,20 @@ class ScreenManager:
 
     def _try_xrandr_listmonitors(self):
         """Try xrandr --listmonitors as fallback"""
-        result = subprocess.run(['xrandr', '--listmonitors'],
-                              capture_output=True, text=True, timeout=2)
+        result = subprocess.run(
+            ["xrandr", "--listmonitors"],
+            capture_output=True,
+            text=True,
+            timeout=2,
+        )
         if result.returncode == 0:
-            lines = result.stdout.strip().split('\n')
-            if lines and 'Monitors:' in lines[0]:
-                self.num_screens = int(lines[0].split(':')[1].strip())
+            lines = result.stdout.strip().split("\n")
+            if lines and "Monitors:" in lines[0]:
+                self.num_screens = int(lines[0].split(":")[1].strip())
             else:
-                self.num_screens = max(1, len([line for line in lines[1:] if line.strip()]))
+                self.num_screens = max(
+                    1, len([line for line in lines[1:] if line.strip()])
+                )
             logger.info(f"X11 listmonitors: Found {self.num_screens} monitors")
         else:
             raise Exception("xrandr --listmonitors failed")

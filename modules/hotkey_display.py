@@ -6,7 +6,8 @@ Main hotkey display class - orchestrates all hotkey display functionality
 import os
 import subprocess
 import tempfile
-from typing import final, TYPE_CHECKING
+from typing import TYPE_CHECKING, final
+
 from libqtile.log_utils import logger
 
 from .hotkey_categorizer import HotkeyCategorizer
@@ -20,7 +21,9 @@ if TYPE_CHECKING:
 class HotkeyDisplay:
     """Manages hotkey display functionality"""
 
-    def __init__(self, key_manager, color_manager: "ColorManager | None" = None) -> None:
+    def __init__(
+        self, key_manager, color_manager: "ColorManager | None" = None
+    ) -> None:
         self.key_manager = key_manager
         self.color_manager = color_manager
 
@@ -49,7 +52,9 @@ class HotkeyDisplay:
             # Create temporary theme file
             rofi_theme = self.theme_manager.get_rofi_theme()
 
-            with tempfile.NamedTemporaryFile(mode='w', suffix='.rasi', delete=False) as theme_file:
+            with tempfile.NamedTemporaryFile(
+                mode="w", suffix=".rasi", delete=False
+            ) as theme_file:
                 theme_file.write(rofi_theme)
                 theme_file_path = theme_file.name
 
@@ -65,7 +70,7 @@ class HotkeyDisplay:
                     input=rofi_input,
                     text=True,
                     capture_output=True,
-                    timeout=30
+                    timeout=30,
                 )
 
                 logger.debug("Hotkey display closed")
@@ -80,7 +85,9 @@ class HotkeyDisplay:
         except subprocess.TimeoutExpired:
             logger.warning("Hotkey display timed out")
         except FileNotFoundError:
-            logger.error("rofi not found - please install rofi to use hotkey display")
+            logger.error(
+                "rofi not found - please install rofi to use hotkey display"
+            )
             self._show_fallback_notification()
         except Exception as e:
             logger.error(f"Error showing hotkeys: {e}")
@@ -99,7 +106,7 @@ class HotkeyDisplay:
                 input=dmenu_input,
                 text=True,
                 capture_output=True,
-                timeout=30
+                timeout=30,
             )
 
         except FileNotFoundError:
@@ -134,6 +141,8 @@ class HotkeyDisplay:
         self.theme_manager.update_color_manager(color_manager)
 
 
-def create_hotkey_display(key_manager, color_manager: "ColorManager | None" = None) -> HotkeyDisplay:
+def create_hotkey_display(
+    key_manager, color_manager: "ColorManager | None" = None
+) -> HotkeyDisplay:
     """Create and return a hotkey display instance"""
     return HotkeyDisplay(key_manager, color_manager)

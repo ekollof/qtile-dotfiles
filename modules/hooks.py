@@ -5,19 +5,20 @@ Handles qtile hooks and event management
 Refactored for better maintainability while preserving backward compatibility
 """
 
+from .client_hooks import ClientHooks
+
 # Import all functionality from the new modular structure
 from .hook_manager import HookManager, create_hook_manager
-from .startup_hooks import StartupHooks
-from .client_hooks import ClientHooks
 from .screen_hooks import ScreenHooks
+from .startup_hooks import StartupHooks
 from .window_manager import WindowManager
 
 # Maintain backward compatibility by exposing the same interface
 __all__ = [
-    'HookManager',
-    'create_hook_manager',
-    'StartupHooks',
-    'ClientHooks',
-    'ScreenHooks',
-    'WindowManager'
+    "HookManager",
+    "create_hook_manager",
+    "StartupHooks",
+    "ClientHooks",
+    "ScreenHooks",
+    "WindowManager",
 ]

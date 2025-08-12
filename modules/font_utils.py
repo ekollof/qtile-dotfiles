@@ -9,11 +9,12 @@ Handles font detection, fallbacks, and cross-platform font management.
 @note This module follows Python 3.10+ standards and project guidelines
 """
 
-import subprocess
 import platform
+import subprocess
 from pathlib import Path
 
 from libqtile.log_utils import logger
+
 
 class FontManager:
     """
@@ -31,7 +32,7 @@ class FontManager:
     def get_available_font(
         self,
         preferred_font: str | None = None,
-        fallback_fonts: list[str] | None = None
+        fallback_fonts: list[str] | None = None,
     ) -> str:
         """
         @brief Get the best available font with user preference and smart fallbacks
@@ -50,9 +51,9 @@ class FontManager:
                 "DejaVu Sans Mono",
                 "Liberation Mono",
                 "Consolas",  # Windows
-                "Monaco",    # macOS
-                "Monospace", # Generic Linux
-                "monospace"  # Lowercase fallback
+                "Monaco",  # macOS
+                "Monospace",  # Generic Linux
+                "monospace",  # Lowercase fallback
             ]
 
         # Build preference list: user preference first, then fallbacks
@@ -98,9 +99,7 @@ class FontManager:
                     return self._check_font_macos(font_name)
                 case _:
                     # Unknown system: assume basic fonts are available
-                    basic_fonts = [
-                        "monospace", "mono", "sans-serif", "serif"
-                    ]
+                    basic_fonts = ["monospace", "mono", "sans-serif", "serif"]
                     return font_name.lower() in basic_fonts
         except Exception as e:
             logger.debug(f"Error checking font {font_name}: {e}")
@@ -116,10 +115,10 @@ class FontManager:
         try:
             # Use fc-match to check if font resolves to itself (preferred method)
             result = subprocess.run(
-                ['fc-match', '--format=%{family}', font_name],
+                ["fc-match", "--format=%{family}", font_name],
                 capture_output=True,
                 text=True,
-                timeout=5
+                timeout=5,
             )
             if result.returncode == 0:
                 matched_family = result.stdout.strip()
@@ -131,10 +130,10 @@ class FontManager:
         # Backup method: try fc-list as fallback
         try:
             result = subprocess.run(
-                ['fc-list', ':', 'family'],
+                ["fc-list", ":", "family"],
                 capture_output=True,
                 text=True,
-                timeout=5
+                timeout=5,
             )
             if result.returncode == 0:
                 return font_name.lower() in result.stdout.lower()
@@ -153,10 +152,10 @@ class FontManager:
         try:
             # Try fc-match if available (on systems with fontconfig)
             result = subprocess.run(
-                ['fc-match', '--format=%{family}', font_name],
+                ["fc-match", "--format=%{family}", font_name],
                 capture_output=True,
                 text=True,
-                timeout=5
+                timeout=5,
             )
             if result.returncode == 0:
                 matched_family = result.stdout.strip()
@@ -166,22 +165,23 @@ class FontManager:
 
         # Fallback: check common font directories
         font_dirs = [
-            Path('/usr/X11R6/lib/X11/fonts'),
-            Path('/usr/local/share/fonts'),
-            Path('/usr/share/fonts'),
-            Path('~/.fonts').expanduser(),
+            Path("/usr/X11R6/lib/X11/fonts"),
+            Path("/usr/local/share/fonts"),
+            Path("/usr/share/fonts"),
+            Path("~/.fonts").expanduser(),
         ]
 
         for font_dir in font_dirs:
             if font_dir.exists():
                 try:
-                    for font_file in font_dir.rglob('*'):
-                        if (font_file.is_file() and
-                            font_file.suffix.lower() in (
-                                '.ttf', '.otf', '.pfb', '.pcf'
-                            ) and
-                            font_name.replace(' ', '').lower() in 
-                            font_file.name.lower()):
+                    for font_file in font_dir.rglob("*"):
+                        if (
+                            font_file.is_file()
+                            and font_file.suffix.lower()
+                            in (".ttf", ".otf", ".pfb", ".pcf")
+                            and font_name.replace(" ", "").lower()
+                            in font_file.name.lower()
+                        ):
                             return True
                 except Exception:
                     continue
@@ -199,10 +199,10 @@ class FontManager:
         try:
             # Use system_profiler to check available fonts
             result = subprocess.run(
-                ['system_profiler', 'SPFontsDataType'],
+                ["system_profiler", "SPFontsDataType"],
                 capture_output=True,
                 text=True,
-                timeout=10
+                timeout=10,
             )
             if result.returncode == 0:
                 return font_name in result.stdout
@@ -221,14 +221,14 @@ class FontManager:
         """
         selected_font = self.get_available_font(preferred_font)
         return {
-            'preferred_font': preferred_font,
-            'selected_font': selected_font,
-            'is_preferred': (
+            "preferred_font": preferred_font,
+            "selected_font": selected_font,
+            "is_preferred": (
                 selected_font == preferred_font if preferred_font else False
             ),
-            'is_fallback': selected_font.lower() in ['monospace', 'mono'],
-            'system': self.system,
-            'cache_size': len(self._font_cache)
+            "is_fallback": selected_font.lower() in ["monospace", "mono"],
+            "system": self.system,
+            "cache_size": len(self._font_cache),
         }
 
     def clear_cache(self) -> None:
@@ -237,12 +237,13 @@ class FontManager:
         """
         self._font_cache.clear()
 
+
 # Global font manager instance
 _font_manager = FontManager()
 
+
 def get_available_font(
-    preferred_font: str | None = None,
-    fallback_fonts: list[str] | None = None
+    preferred_font: str | None = None, fallback_fonts: list[str] | None = None
 ) -> str:
     """
     @brief Convenience function to get an available font
@@ -251,6 +252,7 @@ def get_available_font(
     @return The first available font name
     """
     return _font_manager.get_available_font(preferred_font, fallback_fonts)
+
 
 def get_font_info(preferred_font: str | None = None) -> dict:
     """

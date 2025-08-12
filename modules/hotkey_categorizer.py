@@ -5,6 +5,7 @@ Hotkey categorization functionality
 
 from .hotkey_formatter import KeyFormatter
 
+
 class HotkeyCategorizer:
     """Handles categorization and organization of hotkeys"""
 
@@ -16,7 +17,7 @@ class HotkeyCategorizer:
             "System": [],
             "Applications": [],
             "Screen/Display": [],
-            "Other": []
+            "Other": [],
         }
 
     def clear_categories(self):
@@ -34,12 +35,19 @@ class HotkeyCategorizer:
             return "Group/Workspace"
 
         # Define keyword categories
-        window_words = ['window', 'focus', 'move', 'close', 'kill', 'floating']
-        layout_words = ['layout', 'tile', 'max', 'split']
-        group_words = ['group', 'workspace']
-        system_words = ['restart', 'quit', 'shutdown', 'reload', 'screen', 'color']
-        app_words = ['launch', 'spawn', 'browser', 'terminal']
-        display_words = ['screen', 'monitor', 'display']
+        window_words = ["window", "focus", "move", "close", "kill", "floating"]
+        layout_words = ["layout", "tile", "max", "split"]
+        group_words = ["group", "workspace"]
+        system_words = [
+            "restart",
+            "quit",
+            "shutdown",
+            "reload",
+            "screen",
+            "color",
+        ]
+        app_words = ["launch", "spawn", "browser", "terminal"]
+        display_words = ["screen", "monitor", "display"]
 
         # Categorize based on description content using match statements
         match True:
@@ -89,7 +97,9 @@ class HotkeyCategorizer:
 
         return self.categories
 
-    def build_formatted_list(self, include_instructions: bool = True) -> list[str]:
+    def build_formatted_list(
+        self, include_instructions: bool = True
+    ) -> list[str]:
         """Build the final formatted hotkey list with categories"""
         final_hotkeys = []
 

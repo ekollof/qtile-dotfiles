@@ -19,16 +19,16 @@ class LayoutAwareCommands:
 
         try:
             match layout_name:
-                case 'monadtall' | 'monadwide':
+                case "monadtall" | "monadwide":
                     # MonadTall/Wide: grow main window
                     qtile.current_group.layout.grow()
-                case 'tile':
+                case "tile":
                     # Tile: increase ratio
                     qtile.current_group.layout.increase_ratio()
-                case 'bsp':
+                case "bsp":
                     # BSP: grow window
                     qtile.current_group.layout.grow_right()
-                case 'matrix':
+                case "matrix":
                     # Matrix: add column (horizontal growth)
                     qtile.current_group.layout.add()
                 case _:
@@ -45,16 +45,16 @@ class LayoutAwareCommands:
 
         try:
             match layout_name:
-                case 'monadtall' | 'monadwide':
+                case "monadtall" | "monadwide":
                     # MonadTall/Wide: shrink main window
                     qtile.current_group.layout.shrink()
-                case 'tile':
+                case "tile":
                     # Tile: decrease ratio
                     qtile.current_group.layout.decrease_ratio()
-                case 'bsp':
+                case "bsp":
                     # BSP: shrink window
                     qtile.current_group.layout.grow_left()
-                case 'matrix':
+                case "matrix":
                     # Matrix: remove column (horizontal shrink)
                     qtile.current_group.layout.delete()
                 case _:
@@ -71,23 +71,25 @@ class LayoutAwareCommands:
 
         try:
             match layout_name:
-                case 'monadtall' | 'monadwide':
+                case "monadtall" | "monadwide":
                     # MonadTall/Wide: grow main window
                     qtile.current_group.layout.grow()
-                case 'tile':
+                case "tile":
                     # Tile: no vertical resize in tile layout
                     pass
-                case 'bsp':
+                case "bsp":
                     # BSP: grow window up
                     qtile.current_group.layout.grow_up()
-                case 'matrix':
+                case "matrix":
                     # Matrix: no vertical resize (columns only)
                     pass
                 case _:
                     # Max and Floating layouts: no-op
                     pass
         except Exception as e:
-            logger.debug(f"Smart vertical grow not supported in {layout_name}: {e}")
+            logger.debug(
+                f"Smart vertical grow not supported in {layout_name}: {e}"
+            )
 
     @staticmethod
     def smart_shrink_vertical(qtile):
@@ -96,23 +98,25 @@ class LayoutAwareCommands:
 
         try:
             match layout_name:
-                case 'monadtall' | 'monadwide':
+                case "monadtall" | "monadwide":
                     # MonadTall/Wide: shrink main window
                     qtile.current_group.layout.shrink()
-                case 'tile':
+                case "tile":
                     # Tile: no vertical resize in tile layout
                     pass
-                case 'bsp':
+                case "bsp":
                     # BSP: grow window down (shrink upward space)
                     qtile.current_group.layout.grow_down()
-                case 'matrix':
+                case "matrix":
                     # Matrix: no vertical resize (columns only)
                     pass
                 case _:
                     # Max and Floating layouts: no-op
                     pass
         except Exception as e:
-            logger.debug(f"Smart vertical shrink not supported in {layout_name}: {e}")
+            logger.debug(
+                f"Smart vertical shrink not supported in {layout_name}: {e}"
+            )
 
     @staticmethod
     def smart_normalize(qtile):
@@ -121,37 +125,37 @@ class LayoutAwareCommands:
 
         try:
             match layout_name:
-                case 'monadtall' | 'monadwide' | 'monadthreecol':
+                case "monadtall" | "monadwide" | "monadthreecol":
                     # Monad layouts: normalize secondary windows
                     qtile.current_group.layout.normalize()
-                case 'tile':
+                case "tile":
                     # Tile: reset to default ratios
                     qtile.current_group.layout.reset()
-                case 'bsp':
+                case "bsp":
                     # BSP: normalize window sizes
                     qtile.current_group.layout.normalize()
-                case 'columns':
+                case "columns":
                     # Columns: normalize column widths and reset ratios
                     qtile.current_group.layout.normalize()
-                case 'spiral':
+                case "spiral":
                     # Spiral: reset ratios to config values
                     qtile.current_group.layout.reset()
-                case 'verticaltile':
+                case "verticaltile":
                     # VerticalTile: normalize window sizes
                     qtile.current_group.layout.normalize()
-                case 'plasma':
+                case "plasma":
                     # Plasma: reset current window size to automatic
                     qtile.current_group.layout.reset_size()
-                case 'matrix':
+                case "matrix":
                     # Matrix: no normalize function, but we can do nothing gracefully
                     pass
-                case 'max' | 'floating':
+                case "max" | "floating":
                     # Max/Floating: no normalize needed
                     pass
-                case _ if hasattr(qtile.current_group.layout, 'normalize'):
+                case _ if hasattr(qtile.current_group.layout, "normalize"):
                     # Generic normalize fallback
                     qtile.current_group.layout.normalize()
-                case _ if hasattr(qtile.current_group.layout, 'reset'):
+                case _ if hasattr(qtile.current_group.layout, "reset"):
                     # Generic reset fallback
                     qtile.current_group.layout.reset()
         except Exception as e:
@@ -174,12 +178,12 @@ class LayoutAwareCommands:
         """Get information about the current layout"""
         layout = qtile.current_group.layout
         return {
-            'name': layout.name,
-            'supports_grow': hasattr(layout, 'grow'),
-            'supports_shrink': hasattr(layout, 'shrink'),
-            'supports_normalize': hasattr(layout, 'normalize'),
-            'supports_reset': hasattr(layout, 'reset'),
-            'supports_flip': hasattr(layout, 'flip'),
+            "name": layout.name,
+            "supports_grow": hasattr(layout, "grow"),
+            "supports_shrink": hasattr(layout, "shrink"),
+            "supports_normalize": hasattr(layout, "normalize"),
+            "supports_reset": hasattr(layout, "reset"),
+            "supports_flip": hasattr(layout, "flip"),
             # Note: maximize is now handled via lazy.window.toggle_maximize() which works with all layouts
         }
 
@@ -190,11 +194,11 @@ class LayoutAwareCommands:
 
         try:
             match layout_name:
-                case 'monadtall' | 'monadwide' | 'bsp':
+                case "monadtall" | "monadwide" | "bsp":
                     qtile.current_group.layout.flip()
-                case 'tile':
+                case "tile":
                     # Tile doesn't have flip, but we can swap main/secondary
-                    if hasattr(qtile.current_group.layout, 'swap_main'):
+                    if hasattr(qtile.current_group.layout, "swap_main"):
                         qtile.current_group.layout.swap_main()
         except Exception as e:
             logger.debug(f"Smart flip not supported in {layout_name}: {e}")

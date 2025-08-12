@@ -9,6 +9,7 @@ import shutil
 import subprocess
 from typing import Any
 
+
 class PlatformInfo:
     """
     @brief Container for platform-specific information and utilities
@@ -137,6 +138,7 @@ class PlatformInfo:
             "python_version": platform.python_version(),
             "hostname": platform.node(),
         }
+
 
 class PlatformConfig:
     """
@@ -274,7 +276,9 @@ class PlatformConfig:
             },
         }
 
-    def get_application(self, app_type: str, fallback: str | None = None) -> str:
+    def get_application(
+        self, app_type: str, fallback: str | None = None
+    ) -> str:
         """
         @brief Get the best available application for the current platform
         @param app_type: Type of application to find
@@ -289,24 +293,34 @@ class PlatformConfig:
                 case "openbsd" | "freebsd" | "netbsd" | "dragonfly":
                     preferences = self._application_preferences[app_type].get(
                         system,
-                        self._application_preferences[app_type].get("openbsd", [])
+                        self._application_preferences[app_type].get(
+                            "openbsd", []
+                        ),
                     )
                 case "linux":
-                    preferences = self._application_preferences[app_type]["linux"]
+                    preferences = self._application_preferences[app_type][
+                        "linux"
+                    ]
                 case _:
                     preferences = self._application_preferences[app_type].get(
                         system,
-                        self._application_preferences[app_type].get("linux", [])
+                        self._application_preferences[app_type].get(
+                            "linux", []
+                        ),
                     )
 
-            app = self.platform.get_preferred_application(app_type, preferences)
+            app = self.platform.get_preferred_application(
+                app_type, preferences
+            )
             if app:
                 return app
 
         # If no preferred app found, return fallback or default
         return fallback or "xterm"
 
-    def get_command(self, command_type: str, fallback: str | None = None) -> str:
+    def get_command(
+        self, command_type: str, fallback: str | None = None
+    ) -> str:
         """
         @brief Get platform-specific command override
         @param command_type: Type of command to get
@@ -318,15 +332,25 @@ class PlatformConfig:
         # Use match statement for platform-specific command selection
         match system:
             case "linux":
-                command = self._config_overrides.get("linux", {}).get(command_type)
+                command = self._config_overrides.get("linux", {}).get(
+                    command_type
+                )
             case "openbsd":
-                command = self._config_overrides.get("openbsd", {}).get(command_type)
+                command = self._config_overrides.get("openbsd", {}).get(
+                    command_type
+                )
             case "freebsd":
-                command = self._config_overrides.get("freebsd", {}).get(command_type)
+                command = self._config_overrides.get("freebsd", {}).get(
+                    command_type
+                )
             case "netbsd":
-                command = self._config_overrides.get("netbsd", {}).get(command_type)
+                command = self._config_overrides.get("netbsd", {}).get(
+                    command_type
+                )
             case _:
-                command = self._config_overrides.get(system, {}).get(command_type)
+                command = self._config_overrides.get(system, {}).get(
+                    command_type
+                )
 
         if command:
             # Verify the base command exists
@@ -359,9 +383,11 @@ class PlatformConfig:
             self._config_overrides[system] = {}
         self._config_overrides[system][key] = value
 
+
 # Global platform detection instances
 _platform_info: PlatformInfo | None = None
 _platform_config: PlatformConfig | None = None
+
 
 def get_platform_info() -> PlatformInfo:
     """
@@ -373,6 +399,7 @@ def get_platform_info() -> PlatformInfo:
         _platform_info = PlatformInfo()
     return _platform_info
 
+
 def get_platform_config() -> PlatformConfig:
     """
     @brief Get the global platform configuration instance
@@ -382,6 +409,7 @@ def get_platform_config() -> PlatformConfig:
     if _platform_config is None:
         _platform_config = PlatformConfig(get_platform_info())
     return _platform_config
+
 
 def detect_desktop_environment() -> str | None:
     """
@@ -395,7 +423,7 @@ def detect_desktop_environment() -> str | None:
         "XDG_CURRENT_DESKTOP",
         "DESKTOP_SESSION",
         "GNOME_DESKTOP_SESSION_ID",
-        "KDE_FULL_SESSION"
+        "KDE_FULL_SESSION",
     ]
 
     for var in desktop_vars:
@@ -418,9 +446,7 @@ def detect_desktop_environment() -> str | None:
         if platform_info.has_command("pgrep"):
             try:
                 result = subprocess.run(
-                    ["pgrep", "-f", process],
-                    capture_output=True,
-                    timeout=2
+                    ["pgrep", "-f", process], capture_output=True, timeout=2
                 )
                 if result.returncode == 0:
                     return desktop

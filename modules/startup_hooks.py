@@ -6,6 +6,7 @@ Startup hooks for qtile - SIMPLIFIED VERSION
 import os
 import subprocess
 from pathlib import Path
+
 from libqtile import hook, qtile
 from libqtile.log_utils import logger
 
@@ -35,7 +36,9 @@ class StartupHooks:
         @hook.subscribe.startup_complete
         def setup_color_watching():
             """Additional setup after qtile is fully loaded"""
-            logger.info("Qtile startup completed - starting simplified color monitoring")
+            logger.info(
+                "Qtile startup completed - starting simplified color monitoring"
+            )
             try:
                 # Check if already monitoring
                 if self.color_manager.is_monitoring():
@@ -54,13 +57,15 @@ class StartupHooks:
                     logger.warning("❌ Color monitoring failed to start")
                     # Try force start as fallback
                     logger.info("Attempting force start...")
-                    if hasattr(self.color_manager, 'force_start_monitoring'):
+                    if hasattr(self.color_manager, "force_start_monitoring"):
                         result = self.color_manager.force_start_monitoring()
                         logger.info(f"Force start result: {result}")
 
             except Exception as e:
                 logger.error(f"Failed to start color monitoring: {e}")
-                logger.error("Color changes won't trigger automatic qtile restart")
+                logger.error(
+                    "Color changes won't trigger automatic qtile restart"
+                )
                 logger.error("Use Super + Ctrl + C for manual color reload")
 
         @hook.subscribe.startup_complete
@@ -72,24 +77,33 @@ class StartupHooks:
         """Run the autostart script"""
         try:
             autostart_script = Path(self.config.autostart_script)
-            if autostart_script.exists() and os.access(autostart_script, os.X_OK):
+            if autostart_script.exists() and os.access(
+                autostart_script, os.X_OK
+            ):
                 logger.info(f"Running autostart script: {autostart_script}")
-                subprocess.Popen([str(autostart_script)],
-                                 stdout=subprocess.DEVNULL,
-                                 stderr=subprocess.DEVNULL,
-                                 stdin=subprocess.DEVNULL,
-                                 start_new_session=True)
+                subprocess.Popen(
+                    [str(autostart_script)],
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                    stdin=subprocess.DEVNULL,
+                    start_new_session=True,
+                )
                 logger.info("Autostart script launched successfully")
         except Exception as e:
             logger.error(f"Failed to launch autostart script: {e}")
 
     def _schedule_window_retiling(self):
         """Schedule window retiling with a delay"""
+
         def retile_windows():
             if qtile:
                 try:
-                    retiled_count = self.window_manager.retile_windows_after_startup(qtile)
-                    logger.info(f"Startup retiling completed - {retiled_count} windows processed")
+                    retiled_count = (
+                        self.window_manager.retile_windows_after_startup(qtile)
+                    )
+                    logger.info(
+                        f"Startup retiling completed - {retiled_count} windows processed"
+                    )
                 except Exception as e:
                     logger.error(f"Error during startup window retiling: {e}")
 
@@ -104,18 +118,26 @@ class StartupHooks:
             script_path = self.config.autostart_script
             script_path_obj = Path(script_path)
             return {
-                'valid': script_path_obj.exists() and os.access(script_path, os.X_OK),
-                'exists': script_path_obj.exists(),
-                'executable': os.access(script_path, os.X_OK),
-                'path': script_path,
-                'errors': []
+                "valid": script_path_obj.exists()
+                and os.access(script_path, os.X_OK),
+                "exists": script_path_obj.exists(),
+                "executable": os.access(script_path, os.X_OK),
+                "path": script_path,
+                "errors": [],
             }
         except:
-            return {'valid': False, 'errors': ['No autostart script configured']}
+            return {
+                "valid": False,
+                "errors": ["No autostart script configured"],
+            }
 
     def get_startup_status(self) -> dict:
         """Get status of startup components"""
         return {
-            'color_monitoring': self.color_manager.is_monitoring() if self.color_manager else False,
-            'autostart_validation': self.validate_autostart_script(),
+            "color_monitoring": (
+                self.color_manager.is_monitoring()
+                if self.color_manager
+                else False
+            ),
+            "autostart_validation": self.validate_autostart_script(),
         }

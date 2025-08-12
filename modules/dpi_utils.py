@@ -4,9 +4,10 @@ DPI awareness utilities for qtile configuration
 Automatically scales fonts, bars, and widgets based on display DPI
 """
 
-import subprocess
 import os
+import subprocess
 from pathlib import Path
+
 from libqtile.log_utils import logger
 
 
@@ -40,14 +41,14 @@ class DPIManager:
             self._try_xrandr,
             self._try_xresources,
             self._try_environment,
-            self._use_fallback
+            self._use_fallback,
         ]
-        
+
         for method in detection_methods:
             dpi = method()
             if dpi is not None:
                 return dpi
-                
+
         # This should never happen since _use_fallback always returns a value
         return 96.0
 
@@ -58,16 +59,23 @@ class DPIManager:
         @throws subprocess.TimeoutExpired if command times out
         """
         try:
-            result = subprocess.run(['xdpyinfo'], capture_output=True, text=True, timeout=2)
+            result = subprocess.run(
+                ["xdpyinfo"], capture_output=True, text=True, timeout=2
+            )
             if result.returncode == 0:
-                for line in result.stdout.split('\n'):
-                    if 'dots per inch' in line.lower():
+                for line in result.stdout.split("\n"):
+                    if "dots per inch" in line.lower():
                         # Parse: "resolution:    96x96 dots per inch"
-                        dpi_part = line.split('resolution:')[1].strip()
-                        x_dpi = float(dpi_part.split('x')[0].strip())
+                        dpi_part = line.split("resolution:")[1].strip()
+                        x_dpi = float(dpi_part.split("x")[0].strip())
                         logger.info(f"Detected DPI via xdpyinfo: {x_dpi}")
                         return x_dpi
-        except (subprocess.TimeoutExpired, FileNotFoundError, ValueError, IndexError):
+        except (
+            subprocess.TimeoutExpired,
+            FileNotFoundError,
+            ValueError,
+            IndexError,
+        ):
             pass
         return None
 
@@ -78,10 +86,17 @@ class DPIManager:
         @throws subprocess.TimeoutExpired if xrandr command times out
         """
         try:
-            result = subprocess.run(['xrandr', '--query'], capture_output=True, text=True, timeout=2)
+            result = subprocess.run(
+                ["xrandr", "--query"],
+                capture_output=True,
+                text=True,
+                timeout=2,
+            )
             if result.returncode == 0:
-                for line in result.stdout.split('\n'):
-                    if (' connected primary ' in line or ' connected ' in line) and 'mm x ' in line:
+                for line in result.stdout.split("\n"):
+                    if (
+                        " connected primary " in line or " connected " in line
+                    ) and "mm x " in line:
                         dpi = self._parse_xrandr_line(line)
                         if dpi:
                             logger.info(f"Detected DPI via xrandr: {dpi}")
@@ -102,18 +117,26 @@ class DPIManager:
 
         # Find resolution part (e.g., "1920x1080+0+0" -> "1920x1080")
         for i, part in enumerate(parts):
-            if 'x' in part and part.replace('x', '').replace('+', '').replace('-', '').isdigit():
-                resolution_part = part.split('+')[0]  # Get resolution before position
+            if (
+                "x" in part
+                and part.replace("x", "")
+                .replace("+", "")
+                .replace("-", "")
+                .isdigit()
+            ):
+                resolution_part = part.split("+")[
+                    0
+                ]  # Get resolution before position
             # Find physical dimensions (e.g., "597mm x 336mm")
-            if part.endswith('mm'):
-                mm_part = parts[i-2:i+1]  # Get "597mm x 336mm"
+            if part.endswith("mm"):
+                mm_part = parts[i - 2 : i + 1]  # Get "597mm x 336mm"
                 break
 
         if resolution_part and mm_part and len(mm_part) >= 3:
             try:
                 # Extract pixel width and physical width in millimeters
-                width_px = int(resolution_part.split('x')[0])
-                width_mm = float(mm_part[0].replace('mm', ''))
+                width_px = int(resolution_part.split("x")[0])
+                width_mm = float(mm_part[0].replace("mm", ""))
                 # Calculate DPI: pixels per inch = pixels / (mm / 25.4 mm/inch)
                 return round(width_px / (width_mm / 25.4))
             except (ValueError, IndexError):
@@ -123,12 +146,12 @@ class DPIManager:
     def _try_xresources(self) -> float | None:
         """Try to get DPI from .Xresources"""
         try:
-            xresources_path = Path('~/.Xresources').expanduser()
+            xresources_path = Path("~/.Xresources").expanduser()
             if xresources_path.exists():
-                with open(xresources_path, 'r') as f:
+                with open(xresources_path, "r") as f:
                     for line in f:
-                        if line.strip().startswith('Xft.dpi:'):
-                            dpi = float(line.split(':')[1].strip())
+                        if line.strip().startswith("Xft.dpi:"):
+                            dpi = float(line.split(":")[1].strip())
                             logger.info(f"Detected DPI via .Xresources: {dpi}")
                             return dpi
         except (FileNotFoundError, ValueError, IndexError):
@@ -137,7 +160,7 @@ class DPIManager:
 
     def _try_environment(self) -> float | None:
         """Try to get DPI from environment variables"""
-        env_dpi = os.getenv('QT_SCALE_FACTOR')
+        env_dpi = os.getenv("QT_SCALE_FACTOR")
         if env_dpi:
             try:
                 scale = float(env_dpi)
@@ -182,7 +205,7 @@ class DPIManager:
         @return Scaled font size with intelligent rounding for readability
         """
         scaled = base_font_size * self.scale_factor
-        
+
         # Apply intelligent rounding based on size ranges for better readability
         if scaled < 8:
             return 8  # Minimum readable font size
@@ -197,13 +220,13 @@ class DPIManager:
         @return Dictionary containing DPI, scale factor, category, and recommended sizes
         """
         return {
-            'dpi': self.dpi,
-            'scale_factor': self.scale_factor,
-            'category': self._get_dpi_category(),
-            'recommended_font_base': self._get_recommended_base_font(),
-            'bar_height': self.scale(28),
-            'icon_size': self.scale(16),
-            'margin': self.scale(4),
+            "dpi": self.dpi,
+            "scale_factor": self.scale_factor,
+            "category": self._get_dpi_category(),
+            "recommended_font_base": self._get_recommended_base_font(),
+            "bar_height": self.scale(28),
+            "icon_size": self.scale(16),
+            "margin": self.scale(4),
         }
 
     def _get_dpi_category(self) -> str:
@@ -230,6 +253,7 @@ class DPIManager:
 # Global DPI manager instance
 _dpi_manager = None
 
+
 def get_dpi_manager() -> DPIManager:
     """
     @brief Get the global DPI manager instance
@@ -240,6 +264,7 @@ def get_dpi_manager() -> DPIManager:
         _dpi_manager = DPIManager()
     return _dpi_manager
 
+
 def scale_size(size: int | float) -> int:
     """
     @brief Convenience function to scale a size
@@ -247,6 +272,7 @@ def scale_size(size: int | float) -> int:
     @return DPI-scaled size as integer
     """
     return get_dpi_manager().scale(size)
+
 
 def scale_font(font_size: int | float) -> int:
     """
@@ -256,12 +282,14 @@ def scale_font(font_size: int | float) -> int:
     """
     return get_dpi_manager().scale_font(font_size)
 
+
 def get_dpi() -> float:
     """
     @brief Convenience function to get current DPI
     @return Current system DPI value
     """
     return get_dpi_manager().dpi
+
 
 def get_scale_factor() -> float:
     """

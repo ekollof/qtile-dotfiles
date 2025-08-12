@@ -5,8 +5,9 @@ Handles workspace groups and window layouts
 """
 
 from libqtile import layout
-from libqtile.config import Group, Key, Match, ScratchPad, DropDown
+from libqtile.config import DropDown, Group, Key, Match, ScratchPad
 from libqtile.lazy import lazy
+
 from qtile_config import get_config
 
 
@@ -25,28 +26,28 @@ class GroupManager:
 
         return [
             layout.Tile(
-                margin=defaults['margin'],
-                border_width=defaults['border_width'],
+                margin=defaults["margin"],
+                border_width=defaults["border_width"],
                 border_focus=colordict["special"]["foreground"],
                 border_normal=colordict["special"]["background"],
                 **self.config.tile_layout,
             ),
             layout.MonadTall(
-                margin=defaults['margin'],
-                border_width=defaults['border_width'],
+                margin=defaults["margin"],
+                border_width=defaults["border_width"],
                 border_focus=colordict["special"]["foreground"],
                 border_normal=colordict["special"]["background"],
                 **self.config.monad_tall_layout,
             ),
             layout.Matrix(
-                margin=defaults['margin'],
-                border_width=defaults['border_width'],
+                margin=defaults["margin"],
+                border_width=defaults["border_width"],
                 border_focus=colordict["special"]["foreground"],
                 border_normal=colordict["special"]["background"],
             ),
             layout.Bsp(
-                margin=defaults['margin'],
-                border_width=defaults['border_width'],
+                margin=defaults["margin"],
+                border_width=defaults["border_width"],
                 border_focus=colordict["special"]["foreground"],
                 border_normal=colordict["special"]["background"],
                 **self.config.bsp_layout,
@@ -62,16 +63,16 @@ class GroupManager:
         # Convert config rules to Match objects
         float_rules = []
         for rule in self.config.floating_rules:
-            if 'wm_class' in rule:
-                float_rules.append(Match(wm_class=rule['wm_class']))
-            elif 'title' in rule:
-                float_rules.append(Match(title=rule['title']))
+            if "wm_class" in rule:
+                float_rules.append(Match(wm_class=rule["wm_class"]))
+            elif "title" in rule:
+                float_rules.append(Match(title=rule["title"]))
 
         return layout.Floating(
             float_rules=float_rules,
             border_focus=colordict["special"]["foreground"],
             border_normal=colordict["special"]["background"],
-            border_width=defaults['border_width'],
+            border_width=defaults["border_width"],
         )
 
     def get_groups(self):
@@ -83,15 +84,17 @@ class GroupManager:
         # Add scratchpad
         dropdowns = []
         for scratch_config in self.config.scratchpads:
-            dropdowns.append(DropDown(
-                str(scratch_config['name']),
-                str(scratch_config['command']),
-                width=scratch_config['width'],
-                height=scratch_config['height'],
-                x=scratch_config['x'],
-                y=scratch_config['y'],
-                opacity=scratch_config['opacity'],
-            ))
+            dropdowns.append(
+                DropDown(
+                    str(scratch_config["name"]),
+                    str(scratch_config["command"]),
+                    width=scratch_config["width"],
+                    height=scratch_config["height"],
+                    x=scratch_config["x"],
+                    y=scratch_config["y"],
+                    opacity=scratch_config["opacity"],
+                )
+            )
         groups.append(ScratchPad("scratch", dropdowns))
 
         return groups, self.config.groups
@@ -105,7 +108,9 @@ class GroupManager:
             # Switch to another group
             keys.append(Key([self.mod], str(i), lazy.group[name].toscreen()))
             # Send current window to another group
-            keys.append(Key([self.mod, "shift"], str(i), lazy.window.togroup(name)))
+            keys.append(
+                Key([self.mod, "shift"], str(i), lazy.window.togroup(name))
+            )
 
         return keys
 

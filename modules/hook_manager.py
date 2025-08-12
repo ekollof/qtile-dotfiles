@@ -11,13 +11,16 @@ Provides centralized management of startup, client, and screen hooks.
 """
 
 from typing import Any
+
 from libqtile.log_utils import logger
+
 from qtile_config import get_config
 
-from .startup_hooks import StartupHooks
 from .client_hooks import ClientHooks
 from .screen_hooks import ScreenHooks
+from .startup_hooks import StartupHooks
 from .window_manager import WindowManager
+
 
 class HookManager:
     """
@@ -66,10 +69,10 @@ class HookManager:
         @return Dictionary containing status of startup, client, screen, and window manager hooks
         """
         status = {
-            'startup': self.startup_hooks.get_startup_status(),
-            'client': self.client_hooks.get_client_statistics(),
-            'screen': self.screen_hooks.get_screen_status(),
-            'window_manager': self.get_window_manager_status(),
+            "startup": self.startup_hooks.get_startup_status(),
+            "client": self.client_hooks.get_client_statistics(),
+            "screen": self.screen_hooks.get_screen_status(),
+            "window_manager": self.get_window_manager_status(),
         }
         return status
 
@@ -80,43 +83,54 @@ class HookManager:
         """
         try:
             from libqtile import qtile
+
             if qtile:
                 return {
-                    'statistics': self.window_manager.get_window_statistics(qtile),
-                    'floating_windows': self.window_manager.list_floating_windows(qtile),
-                    'problematic_windows': self.window_manager.get_problematic_windows(qtile),
-                    'floating_rules_validation': self.window_manager.validate_floating_rules(),
+                    "statistics": self.window_manager.get_window_statistics(
+                        qtile
+                    ),
+                    "floating_windows": self.window_manager.list_floating_windows(
+                        qtile
+                    ),
+                    "problematic_windows": self.window_manager.get_problematic_windows(
+                        qtile
+                    ),
+                    "floating_rules_validation": self.window_manager.validate_floating_rules(),
                 }
             else:
-                return {'error': 'Qtile instance not available'}
+                return {"error": "Qtile instance not available"}
         except Exception as e:
             logger.error(f"Error getting window manager status: {e}")
-            return {'error': str(e)}
+            return {"error": str(e)}
 
     def validate_configuration(self) -> dict[str, Any]:
         """Validate the entire hook configuration"""
         validation = {
-            'valid': True,
-            'warnings': [],
-            'errors': [],
-            'component_validations': {}
+            "valid": True,
+            "warnings": [],
+            "errors": [],
+            "component_validations": {},
         }
 
         # Validate each component
         components = {
-            'startup': self.startup_hooks.validate_autostart_script(),
-            'screen': self.screen_hooks.validate_screen_configuration(),
-            'window_manager': self.window_manager.validate_floating_rules(),
+            "startup": self.startup_hooks.validate_autostart_script(),
+            "screen": self.screen_hooks.validate_screen_configuration(),
+            "window_manager": self.window_manager.validate_floating_rules(),
         }
 
         for component_name, component_validation in components.items():
-            validation['component_validations'][component_name] = component_validation
+            validation["component_validations"][
+                component_name
+            ] = component_validation
 
-            if not component_validation.get('valid', True):
-                validation['valid'] = False
+            if not component_validation.get("valid", True):
+                validation["valid"] = False
 
-            validation['warnings'].extend(component_validation.get('warnings', []))
-            validation['errors'].extend(component_validation.get('errors', []))
+            validation["warnings"].extend(
+                component_validation.get("warnings", [])
+            )
+            validation["errors"].extend(component_validation.get("errors", []))
 
         return validation
 
@@ -126,28 +140,31 @@ class HookManager:
             from libqtile import qtile
 
             diagnostics = {
-                'hook_status': self.get_hook_status(),
-                'configuration_validation': self.validate_configuration(),
-                'qtile_available': qtile is not None,
+                "hook_status": self.get_hook_status(),
+                "configuration_validation": self.validate_configuration(),
+                "qtile_available": qtile is not None,
             }
 
             if qtile:
-                diagnostics.update({
-                    'qtile_version': getattr(qtile, 'version', 'unknown'),
-                    'screen_count': len(qtile.screens),
-                    'group_count': len(qtile.groups),
-                    'total_windows': len(qtile.windows_map),
-                })
+                diagnostics.update(
+                    {
+                        "qtile_version": getattr(qtile, "version", "unknown"),
+                        "screen_count": len(qtile.screens),
+                        "group_count": len(qtile.groups),
+                        "total_windows": len(qtile.windows_map),
+                    }
+                )
 
             return diagnostics
         except Exception as e:
             logger.error(f"Error generating diagnostics: {e}")
-            return {'error': str(e)}
+            return {"error": str(e)}
 
     def emergency_reset(self) -> dict[str, Any]:
         """Emergency reset of window states"""
         try:
             from libqtile import qtile
+
             if qtile:
                 logger.warning("Performing emergency hook manager reset")
 
@@ -156,20 +173,27 @@ class HookManager:
                 logger.info(f"Emergency reset: retiled {retiled} windows")
 
                 # Reset any problematic window states
-                problematic = self.window_manager.get_problematic_windows(qtile)
+                problematic = self.window_manager.get_problematic_windows(
+                    qtile
+                )
                 for window_info in problematic:
-                    logger.info(f"Found problematic window: {window_info['name']} - {window_info['issues']}")
+                    logger.info(
+                        f"Found problematic window: {window_info['name']} - {window_info['issues']}"
+                    )
 
                 return {
-                    'retiled_windows': retiled,
-                    'problematic_windows': len(problematic),
-                    'success': True
+                    "retiled_windows": retiled,
+                    "problematic_windows": len(problematic),
+                    "success": True,
                 }
             else:
-                return {'error': 'Qtile instance not available', 'success': False}
+                return {
+                    "error": "Qtile instance not available",
+                    "success": False,
+                }
         except Exception as e:
             logger.error(f"Error during emergency reset: {e}")
-            return {'error': str(e), 'success': False}
+            return {"error": str(e), "success": False}
 
     def reload_configuration(self) -> None:
         """
@@ -187,10 +211,12 @@ class HookManager:
         """Get performance metrics for hook operations"""
         # This could track timing and frequency of hook operations
         return {
-            'startup_time': getattr(self.color_manager, '_startup_time', 0),
-            'hooks_configured': True,
-            'window_operations': 'Available',
-            'screen_monitoring': 'Active' if self.color_manager.is_monitoring() else 'Inactive'
+            "startup_time": getattr(self.color_manager, "_startup_time", 0),
+            "hooks_configured": True,
+            "window_operations": "Available",
+            "screen_monitoring": (
+                "Active" if self.color_manager.is_monitoring() else "Inactive"
+            ),
         }
 
     # Backward compatibility methods
@@ -204,6 +230,7 @@ class HookManager:
     def _should_window_float(self, window: Any) -> bool:
         """Determine if window should float (backward compatibility)"""
         return self.window_manager.should_window_float(window)
+
 
 def create_hook_manager(color_manager: Any) -> HookManager:
     """

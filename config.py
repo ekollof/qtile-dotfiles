@@ -16,10 +16,10 @@ This module provides the main qtile configuration with:
 """
 
 import importlib
-
 import os
 import sys
 from pathlib import Path
+
 from libqtile import qtile
 from libqtile.config import Click, Drag
 from libqtile.lazy import lazy
@@ -52,7 +52,9 @@ hook_manager = create_hook_manager(color_manager)
 # Start color monitoring for automatic wallpaper/theme changes
 try:
     color_manager.force_start_monitoring()
-    logger.info("Color monitoring started - qtile will restart when wallpaper changes")
+    logger.info(
+        "Color monitoring started - qtile will restart when wallpaper changes"
+    )
 except Exception as e:
     logger.warning(f"Failed to start color monitoring: {e}")
 
@@ -85,7 +87,7 @@ mouse = [
         [mod],
         "Button3",
         lazy.window.set_size_floating(),
-        start=lazy.window.get_size()  # Complex operation
+        start=lazy.window.get_size(),  # Complex operation
     ),
     Click([mod], "Button2", lazy.window.bring_to_front()),
 ]

@@ -3,10 +3,11 @@
 Theme management for hotkey display
 """
 
-from typing import Any, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from modules.simple_color_management import ColorManager
+
 
 class ThemeManager:
     """Manages themes for hotkey display applications"""
@@ -19,20 +20,22 @@ class ThemeManager:
         if self.color_manager:
             colors = self.color_manager.get_colors()
             return {
-                'background': colors['special']['background'],
-                'foreground': colors['special']['foreground'],
-                'accent': colors['colors']['color4'],  # Usually blue
-                'secondary': colors['colors']['color8'],  # Usually gray
-                'highlight': colors['colors']['color3']  # Usually yellow/orange
+                "background": colors["special"]["background"],
+                "foreground": colors["special"]["foreground"],
+                "accent": colors["colors"]["color4"],  # Usually blue
+                "secondary": colors["colors"]["color8"],  # Usually gray
+                "highlight": colors["colors"][
+                    "color3"
+                ],  # Usually yellow/orange
             }
         else:
             # Fallback colors
             return {
-                'background': '#1e1e1e',
-                'foreground': '#d4d4d4',
-                'accent': '#569cd6',
-                'secondary': '#666666',
-                'highlight': '#dcdcaa'
+                "background": "#1e1e1e",
+                "foreground": "#d4d4d4",
+                "accent": "#569cd6",
+                "secondary": "#666666",
+                "highlight": "#dcdcaa",
             }
 
     def get_rofi_theme(self) -> str:
@@ -115,10 +118,10 @@ element-text {{
         colors = self.get_colors()
 
         return {
-            'nb': colors['background'],   # Normal background
-            'nf': colors['foreground'],   # Normal foreground
-            'sb': colors['accent'],       # Selected background
-            'sf': '#ffffff'               # Selected foreground
+            "nb": colors["background"],  # Normal background
+            "nf": colors["foreground"],  # Normal foreground
+            "sb": colors["accent"],  # Selected background
+            "sf": "#ffffff",  # Selected foreground
         }
 
     def get_rofi_command_args(self, theme_file_path: str) -> list[str]:
@@ -126,12 +129,16 @@ element-text {{
         return [
             "rofi",
             "-dmenu",
-            "-theme", theme_file_path,
-            "-p", "Qtile Hotkeys (press Escape to close)",
-            "-mesg", "Available keyboard shortcuts - Press Enter to close",
+            "-theme",
+            theme_file_path,
+            "-p",
+            "Qtile Hotkeys (press Escape to close)",
+            "-mesg",
+            "Available keyboard shortcuts - Press Enter to close",
             "-no-custom",
-            "-format", "i",
-            "-i"
+            "-format",
+            "i",
+            "-i",
         ]
 
     def get_dmenu_command_args(self) -> list[str]:
@@ -140,13 +147,20 @@ element-text {{
 
         return [
             "dmenu",
-            "-l", "25",  # Show 25 lines
-            "-p", "Qtile Hotkeys (ESC to close):",
-            "-fn", "Monospace-11",
-            "-nb", colors['background'],
-            "-nf", colors['foreground'],
-            "-sb", colors['accent'],
-            "-sf", "#ffffff"
+            "-l",
+            "25",  # Show 25 lines
+            "-p",
+            "Qtile Hotkeys (ESC to close):",
+            "-fn",
+            "Monospace-11",
+            "-nb",
+            colors["background"],
+            "-nf",
+            colors["foreground"],
+            "-sb",
+            colors["accent"],
+            "-sf",
+            "#ffffff",
         ]
 
     def create_notification_fallback_args(self) -> list[str]:
@@ -155,7 +169,8 @@ element-text {{
             "notify-send",
             "Qtile Hotkeys",
             "Super+S: Show hotkeys (install rofi/dmenu)\nSuper+Shift+R: Restart\nSuper+Q: Close window\nSuper+Return: Terminal",
-            "-t", "5000"
+            "-t",
+            "5000",
         ]
 
     def update_color_manager(self, color_manager: "ColorManager | None"):
