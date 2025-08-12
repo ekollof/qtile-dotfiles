@@ -936,15 +936,23 @@ class EnhancedBarManager:
             ]
         )
 
-        # Add systray only to primary screen
+        # Add systray only to primary screen with error handling
         if screen_num == 0:
-            barconfig.append(
-                widget.Systray(
-                    background=special.get("background", "#000000"),
-                    icon_size=scale_size(20),
-                    padding=scale_size(5),
+            try:
+                barconfig.append(
+                    widget.Systray(
+                        background=special.get("background", "#000000"),
+                        icon_size=scale_size(20),
+                        padding=scale_size(5),
+                        # Add defensive parameters for X11 stability
+                        fmt="{}",  # Ensure proper formatting
+                        update_interval=1.0,  # Refresh interval
+                    )
                 )
-            )
+            except Exception as e:
+                logger.warning(f"Failed to create systray widget: {e}")
+                # Continue without systray if there's an issue
+                pass
 
         # Add current layout widget
         barconfig.extend(
