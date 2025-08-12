@@ -443,15 +443,16 @@ class IconGenerator:
                 logger.debug(f"SVG IconGenerator got colors: {qtile_colors}")
                 
                 if qtile_colors and "special" in qtile_colors and "colors" in qtile_colors:
-                    # Use darker colors that should render properly in qtile
+                    # Use color5 for foreground to match widget text color exactly
                     colors = {
-                        "foreground": qtile_colors["special"]["foreground"],
+                        "foreground": qtile_colors["colors"]["color5"],  # Use color5 (#4A88A2) like widgets
                         "background": qtile_colors["special"]["background"],
                         "accent": qtile_colors["colors"]["color8"],     # Muted gray #8A8A9B
                         "highlight": qtile_colors["colors"]["color0"],  # Dark gray #424446  
-                        "warning": qtile_colors["colors"]["color11"],   # Keep this
-                        "error": qtile_colors["colors"]["color9"],      # Keep this
+                        "warning": qtile_colors["colors"]["color11"],   
+                        "error": qtile_colors["colors"]["color9"],      
                         "muted": qtile_colors["colors"]["color0"],      # Dark gray for muted
+                        "muted": qtile_colors["colors"]["color0"],      
                     }
                     logger.debug(f"SVG IconGenerator using colors: {colors}")
                     return colors
