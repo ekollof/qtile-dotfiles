@@ -76,8 +76,8 @@ class FontManager:
         # Ultimate fallback
         final_fallback = "monospace"
         logger.warning(
-            f"No fonts available from preferences, "
-            f"using final fallback: {final_fallback}"
+            f"No fonts available from preferences, using final "
+            f"fallback: {final_fallback}"
         )
         self._font_cache[cache_key] = final_fallback
         return final_fallback
@@ -98,7 +98,9 @@ class FontManager:
                     return self._check_font_macos(font_name)
                 case _:
                     # Unknown system: assume basic fonts are available
-                    basic_fonts = ["monospace", "mono", "sans-serif", "serif"]
+                    basic_fonts = [
+                        "monospace", "mono", "sans-serif", "serif"
+                    ]
                     return font_name.lower() in basic_fonts
         except Exception as e:
             logger.debug(f"Error checking font {font_name}: {e}")
@@ -175,8 +177,11 @@ class FontManager:
                 try:
                     for font_file in font_dir.rglob('*'):
                         if (font_file.is_file() and
-                            font_file.suffix.lower() in ('.ttf', '.otf', '.pfb', '.pcf') and
-                            font_name.replace(' ', '').lower() in font_file.name.lower()):
+                            font_file.suffix.lower() in (
+                                '.ttf', '.otf', '.pfb', '.pcf'
+                            ) and
+                            font_name.replace(' ', '').lower() in 
+                            font_file.name.lower()):
                             return True
                 except Exception:
                     continue
@@ -218,7 +223,9 @@ class FontManager:
         return {
             'preferred_font': preferred_font,
             'selected_font': selected_font,
-            'is_preferred': selected_font == preferred_font if preferred_font else False,
+            'is_preferred': (
+                selected_font == preferred_font if preferred_font else False
+            ),
             'is_fallback': selected_font.lower() in ['monospace', 'mono'],
             'system': self.system,
             'cache_size': len(self._font_cache)

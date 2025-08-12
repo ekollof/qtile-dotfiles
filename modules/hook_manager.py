@@ -169,7 +169,9 @@ class HookManager:
             return {'error': str(e), 'success': False}
 
     def reload_configuration(self) -> None:
-        """Reload hook configuration (placeholder for future implementation)"""
+        """
+        @brief Reload hook configuration (placeholder for future implementation)
+        """
         # This could be used to reload configuration without restarting qtile
         logger.info("Hook configuration reload requested")
         # Implementation would involve:
@@ -190,7 +192,10 @@ class HookManager:
 
     # Backward compatibility methods
     def autostart(self) -> Any:
-        """Run autostart script (backward compatibility)"""
+        """
+        @brief Run autostart script (backward compatibility)
+        @return Result from autostart execution
+        """
         return self.startup_hooks.run_autostart_script()
 
     def _should_window_float(self, window: Any) -> bool:

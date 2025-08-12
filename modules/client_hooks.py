@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 """
-Client hooks for qtile
+@brief Client hooks for qtile window management
+@file client_hooks.py
+
+This module provides client/window event handling functionality for qtile,
+including window focusing, floating rules, and client state management.
 """
 
 from libqtile import hook
@@ -8,7 +12,12 @@ from libqtile.log_utils import logger
 
 
 class ClientHooks:
-    """Handles client/window-related hooks"""
+    """
+    @brief Handles client/window-related hooks for qtile
+    
+    Manages window events, floating rules, focus tracking, and client
+    state changes in the qtile window manager.
+    """
     
     def __init__(self, config, window_manager):
         self.config = config
