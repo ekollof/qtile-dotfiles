@@ -1,6 +1,6 @@
 <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-<rect x="4" y="10" width="16" height="4" fill="#717F8D" rx="1"/>
-<rect x="5.5" y="11.5" width="13" height="1" fill="#131414" rx="0.5"/>
-<polygon points="8,6 10,8 6,8" fill="#3D3E3E"/>
-<polygon points="16,18 14,16 18,16" fill="#9EA1A3"/>
+<rect x="4" y="10" width="16" height="4" fill="#A29292" rx="1"/>
+<rect x="5.5" y="11.5" width="13" height="1" fill="#101010" rx="0.5"/>
+<polygon points="8,6 10,8 6,8" fill="#3B3B3B"/>
+<polygon points="16,18 14,16 18,16" fill="#A6A6A6"/>
 </svg>

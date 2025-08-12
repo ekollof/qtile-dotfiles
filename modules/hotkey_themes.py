@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 class ThemeManager:
     """Manages themes for hotkey display applications"""
 
-    def __init__(self, color_manager: "ColorManager | None" = None):
+    def __init__(self, color_manager: "ColorManager | None" = None):  # pyright: ignore[reportMissingSuperCall]
         self.color_manager = color_manager
 
     def get_colors(self) -> dict[str, str]:

@@ -27,7 +27,7 @@ class BarManagerFactory:
     theme-aware coloring, and real-time system state updates.
     """
 
-    def __init__(self) -> None:
+    def __init__(self) -> None:  # pyright: ignore[reportMissingSuperCall]
         """
         @brief Initialize bar manager factory with SVG support
         """

@@ -25,7 +25,7 @@ else:
 class GroupManager:
     """Manages workspace groups and layouts"""
 
-    def __init__(self, color_manager: ColorManager) -> None:
+    def __init__(self, color_manager: ColorManager) -> None:  # pyright: ignore[reportMissingSuperCall]
         self.color_manager = color_manager
         self.config = get_config()
         self.mod = self.config.mod_key

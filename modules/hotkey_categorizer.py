@@ -9,7 +9,7 @@ from .hotkey_formatter import KeyFormatter
 class HotkeyCategorizer:
     """Handles categorization and organization of hotkeys"""
 
-    def __init__(self):
+    def __init__(self):  # pyright: ignore[reportMissingSuperCall]
         self.categories = {
             "Window Management": [],
             "Layout Control": [],
