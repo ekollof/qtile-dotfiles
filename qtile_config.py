@@ -71,7 +71,7 @@ class QtileConfig:
         @example For larger text, change to: return 14
         @example For smaller text, change to: return 10
         """
-        return 12  # 🔧 CHANGE THIS VALUE to adjust font size
+        return 16  # 🔧 CHANGE THIS VALUE to adjust font size
 
     @property
     def preferred_icon_fontsize(self) -> int:
@@ -82,7 +82,7 @@ class QtileConfig:
         @example For larger icons, change to: return 18
         @example For smaller icons, change to: return 14
         """
-        return 16  # 🔧 CHANGE THIS VALUE to adjust icon font size
+        return 20  # 🔧 CHANGE THIS VALUE to adjust icon font size
 
     @property
     def preferred_bar_height(self) -> int:
@@ -93,7 +93,7 @@ class QtileConfig:
         @example For taller bar, change to: return 32
         @example For shorter bar, change to: return 24
         """
-        return 28  # 🔧 CHANGE THIS VALUE to adjust bar height
+        return 32  # 🔧 CHANGE THIS VALUE to adjust bar height
 
     # ===== DPI SETTINGS =====
 
