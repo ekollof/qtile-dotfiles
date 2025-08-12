@@ -13,7 +13,7 @@ import socket
 import subprocess
 import traceback
 from pathlib import Path
-from typing import Dict, List, Any
+from typing import Any
 
 from libqtile import bar
 from qtile_extras import widget
@@ -68,7 +68,7 @@ class EnhancedBarManager:
         # System state cache for dynamic icons
         self._system_state_cache = {}
 
-    def _get_widget_defaults(self) -> Dict[str, Any]:
+    def _get_widget_defaults(self) -> dict[str, Any]:
         """
         @brief Get DPI-aware widget defaults
         @return Dictionary of widget default settings
@@ -81,7 +81,7 @@ class EnhancedBarManager:
             'padding': scale_size(3),
         }
 
-    def _get_widget_defaults_without_background(self) -> Dict[str, Any]:
+    def _get_widget_defaults_without_background(self) -> dict[str, Any]:
         """
         @brief Get widget defaults without background for custom styling
         @return Dictionary of widget default settings excluding background
@@ -90,7 +90,7 @@ class EnhancedBarManager:
         defaults.pop('background', None)
         return defaults
 
-    def _get_widget_defaults_excluding(self, *exclude_params: str) -> Dict[str, Any]:
+    def _get_widget_defaults_excluding(self, *exclude_params: str) -> dict[str, Any]:
         """
         @brief Get widget defaults excluding specified parameters
         @param exclude_params: Parameter names to exclude from defaults
@@ -101,7 +101,7 @@ class EnhancedBarManager:
             defaults.pop(param, None)
         return defaults
 
-    def _initialize_icon_mappings(self) -> Dict[str, Dict[str, str]]:
+    def _initialize_icon_mappings(self) -> dict[str, dict[str, str]]:
         """
         @brief Initialize icon mappings for different methods
         @return Dictionary of icon mappings by method
@@ -550,7 +550,7 @@ class EnhancedBarManager:
                 return fallback
         return call_script
 
-    def _get_script_widgets(self, colordict: Dict[str, Any]) -> List[Any]:
+    def _get_script_widgets(self, colordict: dict[str, Any]) -> list[Any]:
         """
         @brief Create GenPollText widgets for available scripts with dynamic icons
         @param colordict: Color dictionary from color manager
@@ -857,7 +857,7 @@ class EnhancedBarManager:
         """
         return self.extension_defaults
 
-    def create_screens(self, screen_count: int) -> List[Any]:
+    def create_screens(self, screen_count: int | None = None) -> list[Any]:
         """
         @brief Create screen configurations with bars
         @param screen_count: Number of screens to create
@@ -883,7 +883,7 @@ class EnhancedBarManager:
         return screens
 
 
-def create_enhanced_bar_manager(color_manager, qtile_config) -> EnhancedBarManager:
+def create_enhanced_bar_manager(color_manager: Any, qtile_config: Any) -> EnhancedBarManager:
     """
     @brief Factory function to create enhanced bar manager
     @param color_manager: Color management instance

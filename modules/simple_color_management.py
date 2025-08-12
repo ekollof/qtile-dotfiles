@@ -9,7 +9,7 @@ import json
 import threading
 import time
 from pathlib import Path
-from typing import Dict, Any, Optional
+from typing import Any
 from libqtile import qtile
 from libqtile.log_utils import logger
 
@@ -37,7 +37,7 @@ class SimpleColorManager:
         self._shutdown_event = threading.Event()
         self._auto_start_attempted = False
 
-    def _load_colors(self) -> Dict[str, Any]:
+    def _load_colors(self) -> dict[str, Any]:
         """
         @brief Load colors from pywal file with fallback
         @return Dictionary containing color configuration with 'special' and 'colors' keys
@@ -53,7 +53,7 @@ class SimpleColorManager:
             logger.warning(f"Could not load colors from {self.colors_file}: {e}")
             return self._get_fallback_colors()
 
-    def _get_fallback_colors(self) -> Dict[str, Any]:
+    def _get_fallback_colors(self) -> dict[str, str]:
         """
         @brief Provide fallback colors when pywal file isn't available
         @return Dictionary with default color scheme containing 'special' and 'colors' keys
@@ -92,7 +92,7 @@ class SimpleColorManager:
         """
         return self._load_colors()
 
-    def get_colors(self) -> Dict[str, Any]:
+    def get_colors(self) -> dict[str, Any]:
         """
         @brief Get current colors from cache - maintains original API compatibility
         @return Dictionary containing current color configuration
@@ -320,7 +320,7 @@ class SimpleColorManager:
 
 
 # Global instance
-_color_manager_instance: Optional[SimpleColorManager] = None
+_color_manager_instance: SimpleColorManager | None = None
 
 def get_color_manager() -> SimpleColorManager:
     """Get singleton color manager"""
@@ -333,7 +333,7 @@ def get_color_manager() -> SimpleColorManager:
 color_manager = get_color_manager()
 
 # API functions for compatibility
-def get_colors() -> Dict[str, Any]:
+def get_colors() -> dict[str, Any]:
     return color_manager.get_colors()
 
 def start_color_monitoring():
