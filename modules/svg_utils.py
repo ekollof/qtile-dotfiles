@@ -436,26 +436,41 @@ class IconGenerator:
         @return Dictionary of colors
         """
         if self.color_manager:
-            qtile_colors = self.color_manager.get_colors()
-            return {
-                "foreground": qtile_colors["special"]["foreground"],
-                "background": qtile_colors["special"]["background"],
-                "accent": qtile_colors["colors"]["color5"],
-                "highlight": qtile_colors["colors"]["color6"],
-                "warning": qtile_colors["colors"]["color3"],
-                "error": qtile_colors["colors"]["color1"],
-                "muted": qtile_colors["colors"]["color8"],
-            }
-        else:
-            return {
-                "foreground": "#ffffff",
-                "background": "#000000",
-                "accent": "#5f87af",
-                "highlight": "#87af87",
-                "warning": "#d7af5f",
-                "error": "#d75f5f",
-                "muted": "#808080",
-            }
+            try:
+                qtile_colors = self.color_manager.get_colors()
+                # Debug: log what colors we're getting
+                from libqtile.log_utils import logger
+                logger.debug(f"SVG IconGenerator got colors: {qtile_colors}")
+                
+                if qtile_colors and "special" in qtile_colors and "colors" in qtile_colors:
+                    colors = {
+                        "foreground": qtile_colors["special"]["foreground"],
+                        "background": qtile_colors["special"]["background"],
+                        "accent": qtile_colors["colors"]["color5"],
+                        "highlight": qtile_colors["colors"]["color6"],
+                        "warning": qtile_colors["colors"]["color3"],
+                        "error": qtile_colors["colors"]["color1"],
+                        "muted": qtile_colors["colors"]["color8"],
+                    }
+                    logger.debug(f"SVG IconGenerator using colors: {colors}")
+                    return colors
+                else:
+                    logger.warning("Invalid color structure from color_manager")
+            except Exception as e:
+                logger.warning(f"Failed to get colors from color_manager: {e}")
+        
+        # Fallback colors
+        fallback = {
+            "foreground": "#ffffff",
+            "background": "#000000",
+            "accent": "#5f87af",
+            "highlight": "#87af87",
+            "warning": "#d7af5f",
+            "error": "#d75f5f",
+            "muted": "#808080",
+        }
+        logger.debug(f"SVG IconGenerator using fallback colors: {fallback}")
+        return fallback
 
     def battery_icon(self, level: int = 100, charging: bool = False) -> str:
         """

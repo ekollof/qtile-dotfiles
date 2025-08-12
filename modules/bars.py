@@ -67,11 +67,14 @@ class EnhancedBarManager:
         # Icon mappings for different methods
         self.icons = self._initialize_icon_mappings()
 
-        # Generate themed icon cache
-        self._update_themed_icon_cache()
-
         # System state cache for dynamic icons
         self._system_state_cache = {}
+        
+        # Generate themed icon cache (may use fallback colors initially)
+        self._update_themed_icon_cache()
+
+        # Schedule icon cache refresh after color manager is fully initialized
+        self._schedule_icon_refresh()
 
     def _get_widget_defaults(self) -> dict[str, Any]:
         """
@@ -189,6 +192,40 @@ class EnhancedBarManager:
         except Exception as e:
             logger.warning(f"Failed to generate themed icon cache: {e}")
             self.themed_icons = {}
+            
+    def _schedule_icon_refresh(self) -> None:
+        """
+        @brief Schedule icon cache refresh after color manager initialization
+        
+        This helps ensure icons get proper theme colors even if the color manager
+        wasn't fully initialized during bar manager construction.
+        """
+        def refresh_icons():
+            try:
+                # Force a fresh color load
+                if hasattr(self.color_manager, 'force_start_monitoring'):
+                    old_icons_count = len(self.themed_icons)
+                    self._update_themed_icon_cache() 
+                    new_icons_count = len(self.themed_icons)
+                    if new_icons_count > 0 and new_icons_count != old_icons_count:
+                        logger.info(f"Refreshed themed icons: {old_icons_count} -> {new_icons_count}")
+            except Exception as e:
+                logger.debug(f"Icon refresh failed (this is normal during startup): {e}")
+        
+        # Try to refresh icons after a short delay
+        import threading
+        threading.Timer(2.0, refresh_icons).start()
+        
+    def refresh_themed_icons(self) -> None:
+        """
+        @brief Public method to refresh themed icon cache when colors change
+        
+        Call this method when you know the color scheme has changed and
+        icons need to be regenerated with new colors.
+        """
+        logger.info("Refreshing themed icons with current colors...")
+        self._update_themed_icon_cache()
+        logger.info(f"Themed icon refresh complete: {len(self.themed_icons)} icons generated")
 
     def create_dynamic_icon(self, icon_type: str, **kwargs: Any) -> str:
         """
