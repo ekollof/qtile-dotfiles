@@ -619,18 +619,13 @@ class IconGenerator:
         """
         builder = SVGBuilder(self.size, self.size)
 
-        # CPU chip outline
+        # CPU chip outline - use filled rectangles to create outline effect
         chip_color = self.colors["foreground"]
-        builder.add_rect(
-            6,
-            6,
-            12,
-            12,
-            fill="none",
-            stroke=chip_color,
-            stroke_width=1.5,
-            rx=1,
-        )
+        
+        # Outer rectangle
+        builder.add_rect(6, 6, 12, 12, fill=chip_color, rx=1)
+        # Inner rectangle (creates outline effect)
+        builder.add_rect(7.5, 7.5, 9, 9, fill=self.colors["background"], rx=0.5)
 
         # CPU pins (top and bottom)
         for i in range(3):
@@ -677,11 +672,13 @@ class IconGenerator:
         """
         builder = SVGBuilder(self.size, self.size)
 
-        # RAM stick outline
+        # RAM stick outline - use filled rectangles to create outline effect
         ram_color = self.colors["foreground"]
-        builder.add_rect(
-            6, 4, 12, 16, fill="none", stroke=ram_color, stroke_width=1.5, rx=1
-        )
+        
+        # Outer rectangle
+        builder.add_rect(6, 4, 12, 16, fill=ram_color, rx=1)
+        # Inner rectangle (creates outline effect)
+        builder.add_rect(7.5, 5.5, 9, 13, fill=self.colors["background"], rx=0.5)
 
         # Memory chips (horizontal lines)
         for i in range(3):
@@ -714,18 +711,13 @@ class IconGenerator:
         """
         builder = SVGBuilder(self.size, self.size)
 
-        # Network cable/connector
+        # Network cable/connector - use filled rectangles to create outline effect
         connector_color = self.colors["foreground"]
-        builder.add_rect(
-            4,
-            10,
-            16,
-            4,
-            fill="none",
-            stroke=connector_color,
-            stroke_width=1.5,
-            rx=1,
-        )
+        
+        # Outer rectangle
+        builder.add_rect(4, 10, 16, 4, fill=connector_color, rx=1)
+        # Inner rectangle (creates outline effect)
+        builder.add_rect(5.5, 11.5, 13, 1, fill=self.colors["background"], rx=0.5)
 
         # RX indicator (down arrow)
         rx_color = self.colors["accent"] if rx_active else self.colors["muted"]
