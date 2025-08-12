@@ -656,7 +656,7 @@ class EnhancedBarManager:
                 **self._get_widget_defaults_excluding('background'),
                 foreground=colors.get("color5", "#ffffff"),
                 background=special.get("background", "#000000"),
-                format='{down:>7} ↓↑ {up:>7}',
+                format='{down:>3.0f}{down_suffix:<2} ↓↑ {up:>3.0f}{up_suffix:<2}',
                 update_interval=5,
             ),
 
