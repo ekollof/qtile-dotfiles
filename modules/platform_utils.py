@@ -152,7 +152,7 @@ class PlatformConfig:
         @param platform_info: Optional PlatformInfo instance, creates new if None
         """
         self.platform = platform_info or PlatformInfo()
-        self._config_overrides: dict[str, Dict[str, Any]] = {}
+        self._config_overrides: dict[str, dict[str, Any]] = {}
         self._load_platform_configs()
 
     def _load_platform_configs(self) -> None:
@@ -225,7 +225,7 @@ class PlatformConfig:
             "netbsd": ["mplayer", "mpv"],
         }
 
-    def _get_application_preferences(self) -> dict[str, Dict[str, list[str]]]:
+    def _get_application_preferences(self) -> dict[str, dict[str, list[str]]]:
         """
         @brief Aggregate all application preferences by type and platform
         @return Dictionary mapping application types to platform preferences
@@ -238,7 +238,7 @@ class PlatformConfig:
             "media_player": self._get_media_player_preferences(),
         }
 
-    def _get_command_overrides(self) -> dict[str, Dict[str, str]]:
+    def _get_command_overrides(self) -> dict[str, dict[str, str]]:
         """
         @brief Get platform-specific command overrides
         @return Dictionary mapping platforms to command overrides
