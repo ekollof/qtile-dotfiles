@@ -6,8 +6,10 @@ All user-configurable settings in one place with automatic DPI scaling
 
 
 from pathlib import Path
+from typing import Any
 from modules.font_utils import get_available_font
 from modules.dpi_utils import scale_size, scale_font, get_dpi_manager
+from modules.platform_utils import get_platform_config, get_platform_info
 
 
 class QtileConfig:
@@ -18,6 +20,8 @@ class QtileConfig:
     def __init__(self):
         self.home = str(Path.home())
         self.dpi_manager = get_dpi_manager()
+        self.platform_info = get_platform_info()
+        self.platform_config = get_platform_config()
 
     # ===== FONT SETTINGS =====
 
@@ -75,11 +79,11 @@ class QtileConfig:
     def mouse_warp_focus(self) -> bool:
         """
         @brief Enable mouse warping when changing window focus
-        
+
         When True, the mouse cursor automatically moves to the center of the
         newly focused window when using Super+hjkl navigation keys.
         When False, focus changes without moving the mouse cursor.
-        
+
         @return Boolean indicating whether mouse warping is enabled
         """
         return True
@@ -98,27 +102,35 @@ class QtileConfig:
 
     @property
     def terminal(self) -> str:
-        """Default terminal emulator"""
-        return "st"
+        """Default terminal emulator - platform aware"""
+        return self.platform_config.get_application("terminal", "st")
 
     @property
     def browser(self) -> str:
-        """Default web browser"""
-        return "brave"
+        """Default web browser - platform aware"""
+        return self.platform_config.get_application("browser", "firefox")
 
     # ===== APPLICATION COMMANDS =====
 
     @property
     def applications(self) -> dict[str, str]:
-        """Application launch commands"""
+        """Application launch commands - platform aware"""
+        launcher_app = self.platform_config.get_application("launcher", "rofi")
+        launcher_cmd = f"{launcher_app} -show run" if launcher_app == "rofi" else launcher_app
+
         return {
-            'launcher': 'rofi -show run',
+            'launcher': launcher_cmd,
             'password_manager': f'{self.home}/bin/getpass',
             'totp_manager': f'{self.home}/bin/getpass --totp',
-            'clipboard': 'clipmenu',
+            'clipboard': self.platform_config.get_command("clipboard_manager", "clipmenu"),
             'wallpaper_picker': f'{self.home}/bin/pickwall.sh',
             'wallpaper_random': f'{self.home}/bin/wallpaper.ksh -r',
-            'lock_session': 'loginctl lock-session',
+            'lock_session': self.platform_config.get_command("lock_session", "loginctl lock-session"),
+            'screenshot': self.platform_config.get_command("screenshot", "flameshot gui"),
+            'audio_mixer': self.platform_config.get_command("audio_mixer", "pavucontrol"),
+            'network_manager': self.platform_config.get_command("network_manager", "nm-connection-editor"),
+            'file_manager': self.platform_config.get_application("file_manager", "thunar"),
+            'media_player': self.platform_config.get_application("media_player", "mpv"),
         }
 
     # ===== LAYOUT SETTINGS - DPI AWARE =====
@@ -367,8 +379,110 @@ class QtileConfig:
         }
 
 
+    # ===== BSD-SPECIFIC CONFIGURATION EXAMPLES =====
+
+    def get_bsd_specific_overrides(self) -> dict[str, Any]:
+        """
+        @brief Get BSD-specific configuration overrides and examples
+        @return Dictionary of BSD-specific settings and examples
+
+        This method demonstrates how to add BSD-specific overrides
+        for applications, commands, and other settings that differ
+        between Linux and BSD systems.
+        """
+        if not self.platform_info.is_bsd:
+            return {}
+
+        bsd_overrides = {}
+
+        # OpenBSD-specific settings
+        if self.platform_info.is_openbsd:
+            bsd_overrides.update({
+                # OpenBSD package manager
+                'package_manager': 'pkg_add',
+                'package_search': 'pkg_info -Q',
+                'package_update': 'syspatch && pkg_add -u',
+
+                # OpenBSD-specific paths
+                'browser_config_path': f'{self.home}/.mozilla',
+                'audio_device': '/dev/audio',
+
+                # OpenBSD system commands
+                'system_info': 'sysctl hw.model hw.ncpu hw.physmem',
+                'mount_usb': 'doas mount /dev/sd1i /mnt/usb',
+                'wifi_config': 'doas ifconfig iwn0 scan',
+
+                # OpenBSD-specific hotkeys (examples)
+                'suspend_system': 'doas zzz',
+                'hibernate_system': 'doas ZZZ',
+            })
+
+        # FreeBSD-specific settings
+        elif self.platform_info.is_freebsd:
+            bsd_overrides.update({
+                # FreeBSD package manager
+                'package_manager': 'pkg',
+                'package_search': 'pkg search',
+                'package_update': 'pkg update && pkg upgrade',
+
+                # FreeBSD-specific commands
+                'system_info': 'sysctl hw.model hw.ncpu hw.physmem',
+                'mount_usb': 'mount /dev/da0s1 /mnt/usb',
+                'wifi_config': 'ifconfig wlan0 scan',
+            })
+
+        # NetBSD-specific settings
+        elif self.platform_info.is_netbsd:
+            bsd_overrides.update({
+                # NetBSD package manager
+                'package_manager': 'pkgin',
+                'package_search': 'pkgin search',
+                'package_update': 'pkgin update && pkgin upgrade',
+
+                # NetBSD-specific commands
+                'system_info': 'sysctl hw.model hw.ncpu hw.physmem64',
+                'mount_usb': 'mount /dev/sd0e /mnt/usb',
+            })
+
+        return bsd_overrides
+
+    def apply_bsd_customizations(self) -> None:
+        """
+        @brief Apply BSD-specific customizations to the configuration
+
+        This method shows how you can customize your qtile configuration
+        for BSD systems. Call this method after initialization to apply
+        BSD-specific settings.
+        """
+        if not self.platform_info.is_bsd:
+            return
+
+        # Get BSD-specific overrides
+        bsd_config = self.get_bsd_specific_overrides()
+
+        # Apply overrides to platform config
+        for key, value in bsd_config.items():
+            self.platform_config.add_override(key, value)
+
+        # BSD-specific application overrides (examples)
+        if self.platform_info.is_openbsd:
+            # OpenBSD often has different default applications
+            self.platform_config.add_override("text_editor", "vi")
+            self.platform_config.add_override("pdf_viewer", "xpdf")
+            self.platform_config.add_override("image_viewer", "xv")
+
+        # BSD systems might need different font settings
+        if self.platform_info.is_bsd:
+            # Fallback to more common fonts on BSD
+            self.platform_config.add_override("fallback_font", "DejaVu Sans Mono")
+
+
 # Create global config instance
 config = QtileConfig()
+
+# Apply BSD-specific customizations if running on BSD
+if config.platform_info.is_bsd:
+    config.apply_bsd_customizations()
 
 
 def get_config() -> QtileConfig:
@@ -377,3 +491,27 @@ def get_config() -> QtileConfig:
     @return Singleton QtileConfig instance with all user settings
     """
     return config
+
+
+def get_platform_overrides() -> dict[str, str]:
+    """
+    @brief Get platform-specific configuration overrides
+    @return Dictionary of platform-specific settings for current OS
+    """
+    return config.platform_config.get_config_overrides()
+
+
+def is_bsd_system() -> bool:
+    """
+    @brief Check if running on a BSD system
+    @return True if the current system is any BSD variant
+    """
+    return config.platform_info.is_bsd
+
+
+def is_linux_system() -> bool:
+    """
+    @brief Check if running on a Linux system
+    @return True if the current system is Linux
+    """
+    return config.platform_info.is_linux

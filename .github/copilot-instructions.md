@@ -25,3 +25,4 @@
 - Prefer composition over inheritance
 - Keep functions small and focused
 - Handle errors gracefully with appropriate exception handling
+- Avoid creating summaries and lists
