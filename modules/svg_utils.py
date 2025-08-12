@@ -723,6 +723,46 @@ class IconGenerator:
 
         return builder.build()
 
+    def updates_icon(self) -> str:
+        """
+        @brief Generate updates/arrow up icon
+        @return SVG string
+        """
+        builder = SVGBuilder(self.size, self.size)
+
+        # Arrow pointing up
+        builder.add_polygon([(12, 6), (8, 12), (10, 12), (10, 18), (14, 18), (14, 12), (16, 12)],
+                           fill=self.colors["accent"])
+
+        # Base/platform
+        builder.add_rect(7, 18, 10, 2, fill=self.colors["foreground"], rx=1)
+
+        return builder.build()
+
+    def refresh_icon(self) -> str:
+        """
+        @brief Generate refresh/reload icon
+        @return SVG string
+        """
+        builder = SVGBuilder(self.size, self.size)
+
+        # Circular arrow (refresh symbol)
+        # Main arc
+        builder.add_path("M12,4 A8,8 0 1,1 4,12", fill="none",
+                        stroke=self.colors["accent"], stroke_width=2)
+
+        # Arrow head
+        builder.add_polygon([(12, 4), (10, 2), (10, 6)], fill=self.colors["accent"])
+
+        # Secondary arc for complete refresh look
+        builder.add_path("M12,20 A8,8 0 1,1 20,12", fill="none",
+                        stroke=self.colors["accent"], stroke_width=2)
+
+        # Second arrow head
+        builder.add_polygon([(12, 20), (14, 22), (14, 18)], fill=self.colors["accent"])
+
+        return builder.build()
+
 
 def create_themed_icon_cache(color_manager, icon_dir: Path, size: int = 24) -> Dict[str, str]:
     """
@@ -767,6 +807,8 @@ def create_themed_icon_cache(color_manager, icon_dir: Path, size: int = 24) -> D
         "mail": generator.mail_icon(),
         "ticket": generator.ticket_icon(),
         "thermometer": generator.thermometer_icon(),
+        "updates": generator.updates_icon(),
+        "refresh": generator.refresh_icon(),
     }
 
     # Save icons and return paths

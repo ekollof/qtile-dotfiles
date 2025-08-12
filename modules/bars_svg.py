@@ -231,6 +231,12 @@ class EnhancedBarManager:
                 case "thermometer":
                     svg_content = self.icon_generator.thermometer_icon()
 
+                case "updates":
+                    svg_content = self.icon_generator.updates_icon()
+
+                case "refresh":
+                    svg_content = self.icon_generator.refresh_icon()
+
                 case _:
                     # Return static themed icon if available
                     return self.themed_icons.get(icon_type, "")
