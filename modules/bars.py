@@ -119,6 +119,7 @@ class EnhancedBarManager:
         return {
             "svg": {
                 "python": str(self.icon_dir / "python.svg"),
+                "platform": str(self.icon_dir / "platform.svg"),  # Platform-specific mascot
                 "updates": str(self.icon_dir / "arrow-up.svg"),
                 "refresh": str(self.icon_dir / "refresh.svg"),
                 "mail": str(self.icon_dir / "mail.svg"),
@@ -135,6 +136,7 @@ class EnhancedBarManager:
             },
             "image": {
                 "python": str(self.icon_dir / "python.png"),
+                "platform": str(self.icon_dir / "platform.png"),  # Platform-specific mascot
                 "updates": str(self.icon_dir / "arrow-up.png"),
                 "refresh": str(self.icon_dir / "refresh.png"),
                 "mail": str(self.icon_dir / "mail.png"),
@@ -146,6 +148,7 @@ class EnhancedBarManager:
             },
             "nerd_font": {
                 "python": "\ue73c",  # Python icon
+                "platform": "\uf17c",  # Desktop/computer icon (fallback for platform)
                 "updates": "\uf0aa",  # Arrow up
                 "refresh": "\uf2f1",  # Refresh
                 "mail": "\uf0e0",  # Mail
@@ -162,6 +165,7 @@ class EnhancedBarManager:
             },
             "text": {
                 "python": "🐍",
+                "platform": "🖥️",  # Computer emoji for platform
                 "updates": "⬆",
                 "refresh": "🔄",
                 "mail": "📧",
@@ -269,6 +273,9 @@ class EnhancedBarManager:
                     svg_content = self.icon_generator.network_icon(
                         rx_active, tx_active
                     )
+
+                case "platform":
+                    svg_content = self.icon_generator.platform_mascot_icon()
 
                 case "python":
                     svg_content = self.icon_generator.python_icon()
@@ -768,8 +775,8 @@ class EnhancedBarManager:
 
         # Start with core widgets
         barconfig = [
-            # Python logo with dynamic coloring
-            self._create_icon_widget("python"),
+            # Platform mascot with dynamic coloring (Tux for Linux, Puffy for OpenBSD, etc.)
+            self._create_icon_widget("platform"),
             widget.GroupBox(
                 **self._get_widget_defaults_excluding("background", "padding"),
                 background=special.get("background", "#000000"),

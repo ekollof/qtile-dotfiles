@@ -764,6 +764,36 @@ class IconGenerator:
 
         return builder.build()
 
+    def platform_mascot_icon(self) -> str:
+        """
+        @brief Generate platform-specific mascot icon
+        @return SVG string for current platform's mascot
+        """
+        try:
+            from modules.platform_icons import get_platform_mascot_icon
+            return get_platform_mascot_icon(self.color_manager, self.size)
+        except ImportError:
+            logger.warning("Platform icons module not available, using generic computer icon")
+            return self._generic_computer_icon()
+
+    def _generic_computer_icon(self) -> str:
+        """
+        @brief Generic computer icon fallback
+        @return SVG string
+        """
+        builder = SVGBuilder(self.size, self.size)
+        
+        # Computer monitor
+        builder.add_rect(4, 6, 16, 10, fill="none", 
+                        stroke=self.colors["foreground"], stroke_width=1.5, rx=1)
+        builder.add_rect(5, 7, 14, 8, fill=self.colors["foreground"])
+        
+        # Stand  
+        builder.add_rect(10, 16, 4, 1, fill=self.colors["foreground"])
+        builder.add_rect(8, 17, 8, 1, fill=self.colors["foreground"])
+        
+        return builder.build()
+
     def mail_icon(self) -> str:
         """
         @brief Generate mail/envelope icon
@@ -966,6 +996,7 @@ def create_themed_icon_cache(
             rx_active=True, tx_active=True
         ),
         "python": generator.python_icon(),
+        "platform": generator.platform_mascot_icon(),  # Platform-specific mascot
         "mail": generator.mail_icon(),
         "ticket": generator.ticket_icon(),
         "thermometer": generator.thermometer_icon(),

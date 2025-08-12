@@ -118,10 +118,15 @@ class PlatformMascotGenerator:
                 qtile_colors = self.color_manager.get_colors()
                 if qtile_colors and "colors" in qtile_colors:
                     return {
-                        "primary": qtile_colors["colors"]["color5"],      # Main color
-                        "secondary": qtile_colors["colors"]["color4"],    # Accent
+                        "primary": qtile_colors["colors"]["color5"],      # Main color (blue)
+                        "secondary": qtile_colors["colors"]["color11"],   # Warning/accent color
+                        "accent": qtile_colors["colors"]["color4"],       # Different blue
+                        "highlight": qtile_colors["colors"]["color15"],   # Light color
+                        "dark": qtile_colors["colors"]["color0"],         # Dark color
                         "background": qtile_colors["special"]["background"],
                         "foreground": qtile_colors["colors"]["color5"],   # Match text
+                        "white": qtile_colors["colors"]["color15"],       # Light/white
+                        "orange": qtile_colors["colors"]["color11"],      # Orange/yellow
                     }
             except Exception as e:
                 logger.debug(f"Could not get colors from color_manager: {e}")
@@ -129,9 +134,14 @@ class PlatformMascotGenerator:
         # Fallback colors
         return {
             "primary": "#4A88A2",      # Medium blue
-            "secondary": "#87AF87",    # Green accent  
+            "secondary": "#9E6C8F",    # Purple accent  
+            "accent": "#39919B",       # Teal
+            "highlight": "#C5C5DE",    # Light purple
+            "dark": "#424446",         # Dark gray
             "background": "#17191A",   # Dark background
             "foreground": "#4A88A2",   # Match text color
+            "white": "#C5C5DE",        # Light color
+            "orange": "#9E6C8F",       # Orange/accent
         }
     
     def _tux_penguin(self, size: int, colors: dict[str, str]) -> str:
@@ -141,26 +151,44 @@ class PlatformMascotGenerator:
         @param colors: Color scheme
         @return SVG content
         """
-        primary = colors["foreground"]
+        # Use multiple themed colors for contrast
+        black = colors["dark"]           # Dark body
+        white = colors["white"]          # Belly and face
+        orange = colors["orange"]        # Beak and feet
+        primary = colors["primary"]      # Eyes and details
+        
         return f'''<svg width="{size}" height="{size}" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
             <!-- Tux the Penguin - Linux Mascot -->
-            <!-- Body -->
-            <ellipse cx="12" cy="16" rx="6" ry="5" fill="{primary}" opacity="0.9"/>
-            <!-- Belly -->  
-            <ellipse cx="12" cy="15.5" rx="3.5" ry="3.5" fill="{primary}" opacity="0.6"/>
-            <!-- Head -->
-            <circle cx="12" cy="8" r="4.5" fill="{primary}"/>
-            <!-- Eyes -->
-            <circle cx="10.5" cy="7" r="0.8" fill="{primary}" opacity="0.4"/>
-            <circle cx="13.5" cy="7" r="0.8" fill="{primary}" opacity="0.4"/>
-            <!-- Beak -->
-            <polygon points="12,8.5 11,9.5 13,9.5" fill="{primary}" opacity="0.7"/>
-            <!-- Wings -->
-            <ellipse cx="8.5" cy="13" rx="1.5" ry="3" fill="{primary}" opacity="0.8"/>
-            <ellipse cx="15.5" cy="13" rx="1.5" ry="3" fill="{primary}" opacity="0.8"/>
-            <!-- Feet -->
-            <ellipse cx="10" cy="20.5" rx="1.2" ry="0.8" fill="{primary}" opacity="0.7"/>
-            <ellipse cx="14" cy="20.5" rx="1.2" ry="0.8" fill="{primary}" opacity="0.7"/>
+            <!-- Main body (black) -->
+            <ellipse cx="12" cy="16" rx="6" ry="5" fill="{black}"/>
+            
+            <!-- Head (black) -->
+            <circle cx="12" cy="8" r="4.5" fill="{black}"/>
+            
+            <!-- White belly -->  
+            <ellipse cx="12" cy="15.5" rx="3.5" ry="3.5" fill="{white}"/>
+            
+            <!-- White face area -->
+            <ellipse cx="12" cy="8.5" rx="2.5" ry="2" fill="{white}"/>
+            
+            <!-- Orange beak -->
+            <ellipse cx="12" cy="9.5" rx="1" ry="0.5" fill="{orange}"/>
+            
+            <!-- Eyes (black dots) -->
+            <circle cx="10.5" cy="7.5" r="0.6" fill="{black}"/>
+            <circle cx="13.5" cy="7.5" r="0.6" fill="{black}"/>
+            
+            <!-- Eye highlights -->
+            <circle cx="10.7" cy="7.3" r="0.2" fill="{white}"/>
+            <circle cx="13.7" cy="7.3" r="0.2" fill="{white}"/>
+            
+            <!-- Wings/flippers -->
+            <ellipse cx="7.5" cy="13" rx="1.5" ry="3" fill="{black}"/>
+            <ellipse cx="16.5" cy="13" rx="1.5" ry="3" fill="{black}"/>
+            
+            <!-- Orange feet -->
+            <ellipse cx="10" cy="20" rx="1.5" ry="0.8" fill="{orange}"/>
+            <ellipse cx="14" cy="20" rx="1.5" ry="0.8" fill="{orange}"/>
         </svg>'''
     
     def _puffy_pufferfish(self, size: int, colors: dict[str, str]) -> str:
@@ -170,30 +198,43 @@ class PlatformMascotGenerator:
         @param colors: Color scheme
         @return SVG content
         """
-        primary = colors["foreground"]
+        # Use multiple themed colors for contrast
+        body_color = colors["primary"]     # Main body
+        spike_color = colors["accent"]     # Spikes 
+        eye_color = colors["dark"]         # Eyes
+        mouth_color = colors["orange"]     # Mouth
+        fin_color = colors["secondary"]    # Fins and tail
+        
         return f'''<svg width="{size}" height="{size}" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
             <!-- Puffy the Pufferfish - OpenBSD Mascot -->
             <!-- Main body -->
-            <circle cx="12" cy="12" r="7" fill="{primary}" opacity="0.8"/>
+            <circle cx="12" cy="12" r="7" fill="{body_color}"/>
+            
             <!-- Spikes around body -->
-            <circle cx="8" cy="8" r="0.5" fill="{primary}"/>
-            <circle cx="16" cy="8" r="0.5" fill="{primary}"/>
-            <circle cx="8" cy="16" r="0.5" fill="{primary}"/>
-            <circle cx="16" cy="16" r="0.5" fill="{primary}"/>
-            <circle cx="6" cy="12" r="0.5" fill="{primary}"/>
-            <circle cx="18" cy="12" r="0.5" fill="{primary}"/>
-            <circle cx="12" cy="6" r="0.5" fill="{primary}"/>
-            <circle cx="12" cy="18" r="0.5" fill="{primary}"/>
+            <circle cx="8" cy="8" r="0.6" fill="{spike_color}"/>
+            <circle cx="16" cy="8" r="0.6" fill="{spike_color}"/>
+            <circle cx="8" cy="16" r="0.6" fill="{spike_color}"/>
+            <circle cx="16" cy="16" r="0.6" fill="{spike_color}"/>
+            <circle cx="6" cy="12" r="0.6" fill="{spike_color}"/>
+            <circle cx="18" cy="12" r="0.6" fill="{spike_color}"/>
+            <circle cx="12" cy="6" r="0.6" fill="{spike_color}"/>
+            <circle cx="12" cy="18" r="0.6" fill="{spike_color}"/>
+            
             <!-- Eyes -->
-            <circle cx="10" cy="10" r="1.2" fill="{primary}" opacity="0.4"/>
-            <circle cx="14" cy="10" r="1.2" fill="{primary}" opacity="0.4"/>
+            <circle cx="10" cy="10" r="1.2" fill="{colors["white"]}"/>
+            <circle cx="14" cy="10" r="1.2" fill="{colors["white"]}"/>
+            <circle cx="10" cy="10" r="0.7" fill="{eye_color}"/>
+            <circle cx="14" cy="10" r="0.7" fill="{eye_color}"/>
+            
             <!-- Mouth -->
-            <ellipse cx="12" cy="14" rx="1.5" ry="0.8" fill="{primary}" opacity="0.6"/>
+            <ellipse cx="12" cy="14" rx="1.5" ry="0.8" fill="{mouth_color}"/>
+            
             <!-- Fins -->
-            <ellipse cx="6" cy="14" rx="1" ry="2" fill="{primary}" opacity="0.7" transform="rotate(-20 6 14)"/>
-            <ellipse cx="18" cy="14" rx="1" ry="2" fill="{primary}" opacity="0.7" transform="rotate(20 18 14)"/>
+            <ellipse cx="6" cy="14" rx="1" ry="2" fill="{fin_color}" transform="rotate(-20 6 14)"/>
+            <ellipse cx="18" cy="14" rx="1" ry="2" fill="{fin_color}" transform="rotate(20 18 14)"/>
+            
             <!-- Tail -->
-            <polygon points="19,12 22,10 22,14" fill="{primary}" opacity="0.7"/>
+            <polygon points="19,12 22,10 22,14" fill="{fin_color}"/>
         </svg>'''
     
     def _beastie_daemon(self, size: int, colors: dict[str, str]) -> str:
