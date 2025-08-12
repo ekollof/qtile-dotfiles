@@ -379,7 +379,7 @@ class BarManager:
             widget.Prompt(),
             widget.TaskList(
                 border=colordict["colors"]["color1"],
-                foreground=colordict["colors"]["color5"],
+                foreground=colordict["special"]["foreground"],
                 background=colordict["special"]["background"],
                 theme_mode="preferred",
                 theme_path="/usr/share/icons/breeze-dark",
