@@ -110,6 +110,10 @@ autostart.log
 restart_trigger
 *.pyc
 
+# Generated icon files (system-specific, theme-specific)
+icons/themed/
+icons/dynamic/
+
 # Cache directories
 .cache/
 
