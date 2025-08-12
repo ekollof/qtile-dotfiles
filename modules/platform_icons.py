@@ -244,29 +244,45 @@ class PlatformMascotGenerator:
         @param colors: Color scheme  
         @return SVG content
         """
-        primary = colors["foreground"]
+        # Use multiple themed colors for contrast
+        body_color = colors["primary"]      # Main body (red/orange)
+        horn_color = colors["dark"]         # Horns (dark)
+        eye_color = colors["white"]         # Eyes (white)
+        pupil_color = colors["dark"]        # Pupils (dark)
+        trident_color = colors["accent"]    # Trident (metallic)
+        smile_color = colors["orange"]      # Smile (warm)
+        
         return f'''<svg width="{size}" height="{size}" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
             <!-- Beastie the BSD Daemon - FreeBSD Mascot -->
             <!-- Head -->
-            <circle cx="12" cy="10" r="5" fill="{primary}" opacity="0.8"/>
+            <circle cx="12" cy="10" r="5" fill="{body_color}"/>
+            
             <!-- Horns -->
-            <polygon points="9,6 8,4 10,5" fill="{primary}"/>
-            <polygon points="15,6 16,4 14,5" fill="{primary}"/>
+            <polygon points="9,6 8,4 10,5" fill="{horn_color}"/>
+            <polygon points="15,6 16,4 14,5" fill="{horn_color}"/>
+            
             <!-- Eyes -->
-            <circle cx="10.5" cy="9" r="0.8" fill="{primary}" opacity="0.4"/>
-            <circle cx="13.5" cy="9" r="0.8" fill="{primary}" opacity="0.4"/>
+            <circle cx="10.5" cy="9" r="1" fill="{eye_color}"/>
+            <circle cx="13.5" cy="9" r="1" fill="{eye_color}"/>
+            <circle cx="10.5" cy="9" r="0.5" fill="{pupil_color}"/>
+            <circle cx="13.5" cy="9" r="0.5" fill="{pupil_color}"/>
+            
             <!-- Smile -->
-            <path d="M 9.5 11.5 Q 12 13 14.5 11.5" stroke="{primary}" stroke-width="0.5" fill="none" opacity="0.6"/>
+            <path d="M 9.5 11.5 Q 12 13 14.5 11.5" stroke="{smile_color}" stroke-width="0.8" fill="none"/>
+            
             <!-- Body -->
-            <ellipse cx="12" cy="17" rx="4" ry="4.5" fill="{primary}" opacity="0.7"/>
+            <ellipse cx="12" cy="17" rx="4" ry="4.5" fill="{body_color}"/>
+            
             <!-- Arms -->
-            <ellipse cx="8" cy="15" rx="1" ry="2.5" fill="{primary}" opacity="0.6"/>
-            <ellipse cx="16" cy="15" rx="1" ry="2.5" fill="{primary}" opacity="0.6"/>
-            <!-- Trident (simplified) -->
-            <rect x="11.7" y="19" width="0.6" height="3" fill="{primary}"/>
-            <polygon points="11,19 12,18 13,19" fill="{primary}"/>
+            <ellipse cx="8" cy="15" rx="1" ry="2.5" fill="{body_color}"/>
+            <ellipse cx="16" cy="15" rx="1" ry="2.5" fill="{body_color}"/>
+            
+            <!-- Trident (metallic) -->
+            <rect x="11.7" y="19" width="0.6" height="3" fill="{trident_color}"/>
+            <polygon points="11,19 12,18 13,19" fill="{trident_color}"/>
+            
             <!-- Tail -->
-            <path d="M 12 20 Q 14 21 15 19" stroke="{primary}" stroke-width="0.8" fill="none" opacity="0.6"/>
+            <path d="M 12 20 Q 14 21 15 19" stroke="{colors["secondary"]}" stroke-width="1" fill="none"/>
         </svg>'''
     
     def _netbsd_flag(self, size: int, colors: dict[str, str]) -> str:
@@ -276,18 +292,29 @@ class PlatformMascotGenerator:
         @param colors: Color scheme
         @return SVG content
         """
-        primary = colors["foreground"]
+        # Use multiple themed colors for the flag
+        pole_color = colors["dark"]         # Flagpole (dark)
+        flag_primary = colors["primary"]    # Main flag color
+        flag_accent = colors["accent"]      # Flag accent/stripes
+        flag_highlight = colors["white"]    # Flag highlights
+        
         return f'''<svg width="{size}" height="{size}" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
             <!-- NetBSD Flag Logo -->
             <!-- Flagpole -->
-            <rect x="4" y="4" width="1" height="16" fill="{primary}"/>
-            <!-- Flag -->
-            <polygon points="5,4 5,14 18,9" fill="{primary}" opacity="0.8"/>
-            <!-- Flag pattern -->
-            <rect x="6" y="5.5" width="8" height="1" fill="{primary}" opacity="0.5"/>
-            <rect x="6" y="7.5" width="6" height="1" fill="{primary}" opacity="0.5"/>
-            <rect x="6" y="9.5" width="4" height="1" fill="{primary}" opacity="0.5"/>
-            <rect x="6" y="11.5" width="2" height="1" fill="{primary}" opacity="0.5"/>
+            <rect x="4" y="4" width="1.5" height="16" fill="{pole_color}"/>
+            
+            <!-- Main flag -->
+            <polygon points="5.5,4 5.5,14 18,9" fill="{flag_primary}"/>
+            
+            <!-- Flag stripes/pattern -->
+            <rect x="6.5" y="5.5" width="8" height="0.8" fill="{flag_accent}"/>
+            <rect x="6.5" y="7.2" width="6.5" height="0.8" fill="{flag_highlight}"/>
+            <rect x="6.5" y="8.9" width="5" height="0.8" fill="{flag_accent}"/>
+            <rect x="6.5" y="10.6" width="3.5" height="0.8" fill="{flag_highlight}"/>
+            <rect x="6.5" y="12.3" width="2" height="0.8" fill="{flag_accent}"/>
+            
+            <!-- Flag border -->
+            <polygon points="5.5,4 5.5,14 18,9" fill="none" stroke="{colors["dark"]}" stroke-width="0.3"/>
         </svg>'''
     
     def _apple_logo(self, size: int, colors: dict[str, str]) -> str:
@@ -297,15 +324,31 @@ class PlatformMascotGenerator:
         @param colors: Color scheme
         @return SVG content
         """
-        primary = colors["foreground"]
+        # Use multiple themed colors for the Apple logo
+        apple_body = colors["primary"]      # Main apple body
+        apple_leaf = colors["accent"]       # Leaf (green-ish)
+        apple_highlight = colors["white"]   # Highlight
+        bite_color = colors["background"]   # Bite mark (background color)
+        
         return f'''<svg width="{size}" height="{size}" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
             <!-- Apple Logo - macOS -->
-            <!-- Apple shape -->
-            <path d="M 12 20 C 8 20 6 17 6 14 C 6 11 8 9 11 9 C 11.5 9 12 9.1 12.5 9.2 C 13 9.1 13.5 9 14 9 C 17 9 19 11 19 14 C 19 17 17 20 14 20 C 13.5 20 13 19.8 12.5 19.6 C 13 19.8 12.5 20 12 20 Z" fill="{primary}" opacity="0.8"/>
+            <!-- Apple body with gradient effect -->
+            <path d="M 12 20 C 8 20 6 17 6 14 C 6 11 8 9 11 9 C 11.5 9 12 9.1 12.5 9.2 C 13 9.1 13.5 9 14 9 C 17 9 19 11 19 14 C 19 17 17 20 14 20 C 13.5 20 13 19.8 12.5 19.6 C 13 19.8 12.5 20 12 20 Z" fill="{apple_body}"/>
+            
+            <!-- Apple highlight -->
+            <ellipse cx="11" cy="12" rx="1.5" ry="3" fill="{apple_highlight}" opacity="0.3"/>
+            
             <!-- Leaf -->
-            <ellipse cx="14.5" cy="7" rx="1.5" ry="2.5" fill="{primary}" opacity="0.6" transform="rotate(30 14.5 7)"/>
-            <!-- Bite -->
-            <circle cx="16" cy="13" r="2" fill="{colors['background']}" opacity="0.9"/>
+            <ellipse cx="14.5" cy="7" rx="1.5" ry="2.5" fill="{apple_leaf}" transform="rotate(30 14.5 7)"/>
+            
+            <!-- Leaf detail -->
+            <path d="M 14 7.5 Q 15 6.5 15.5 8" stroke="{colors["dark"]}" stroke-width="0.3" fill="none"/>
+            
+            <!-- Bite mark -->
+            <circle cx="16" cy="13" r="2" fill="{bite_color}"/>
+            
+            <!-- Bite shadow -->
+            <circle cx="16.2" cy="13.2" r="1.8" fill="{colors["dark"]}" opacity="0.1"/>
         </svg>'''
     
     def _windows_logo(self, size: int, colors: dict[str, str]) -> str:
@@ -315,13 +358,30 @@ class PlatformMascotGenerator:
         @param colors: Color scheme
         @return SVG content
         """
-        primary = colors["foreground"]
+        # Use multiple themed colors for the Windows logo (classic four-color design)
+        blue_pane = colors["primary"]       # Top-left (blue)
+        green_pane = colors["accent"]       # Top-right (green) 
+        yellow_pane = colors["orange"]      # Bottom-left (yellow/orange)
+        red_pane = colors["secondary"]      # Bottom-right (red)
+        
         return f'''<svg width="{size}" height="{size}" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <!-- Windows Logo -->
-            <rect x="5" y="5" width="6" height="6" fill="{primary}" opacity="0.8"/>
-            <rect x="13" y="5" width="6" height="6" fill="{primary}" opacity="0.7"/>
-            <rect x="5" y="13" width="6" height="6" fill="{primary}" opacity="0.7"/>
-            <rect x="13" y="13" width="6" height="6" fill="{primary}" opacity="0.6"/>
+            <!-- Windows Logo - Classic Four Panes -->
+            <!-- Top-left pane (blue) -->
+            <rect x="5" y="5" width="6.5" height="6.5" fill="{blue_pane}"/>
+            
+            <!-- Top-right pane (green) -->
+            <rect x="12.5" y="5" width="6.5" height="6.5" fill="{green_pane}"/>
+            
+            <!-- Bottom-left pane (yellow) -->
+            <rect x="5" y="12.5" width="6.5" height="6.5" fill="{yellow_pane}"/>
+            
+            <!-- Bottom-right pane (red) -->
+            <rect x="12.5" y="12.5" width="6.5" height="6.5" fill="{red_pane}"/>
+            
+            <!-- Subtle borders for definition -->
+            <rect x="5" y="5" width="14" height="14" fill="none" stroke="{colors["dark"]}" stroke-width="0.2"/>
+            <line x1="12" y1="5" x2="12" y2="19" stroke="{colors["dark"]}" stroke-width="0.2"/>
+            <line x1="5" y1="12" x2="19" y2="12" stroke="{colors["dark"]}" stroke-width="0.2"/>
         </svg>'''
     
     def _generic_computer(self, size: int, colors: dict[str, str]) -> str:
@@ -331,13 +391,34 @@ class PlatformMascotGenerator:
         @param colors: Color scheme
         @return SVG content
         """
-        primary = colors["foreground"]
+        # Use multiple themed colors for the computer
+        monitor_frame = colors["dark"]        # Monitor frame (dark)
+        monitor_screen = colors["primary"]    # Screen (main color)
+        screen_glow = colors["accent"]        # Screen glow/activity
+        stand_color = colors["secondary"]     # Monitor stand
+        base_color = colors["highlight"]      # Base
+        
         return f'''<svg width="{size}" height="{size}" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <!-- Generic Computer -->
-            <rect x="4" y="6" width="16" height="10" rx="1" fill="{primary}" opacity="0.8"/>
-            <rect x="5" y="7" width="14" height="8" fill="{primary}" opacity="0.3"/>
-            <rect x="10" y="16" width="4" height="1" fill="{primary}" opacity="0.7"/>
-            <rect x="8" y="17" width="8" height="1" fill="{primary}" opacity="0.7"/>
+            <!-- Generic Computer Monitor -->
+            <!-- Monitor frame -->
+            <rect x="4" y="6" width="16" height="10" rx="1" fill="{monitor_frame}"/>
+            
+            <!-- Screen -->
+            <rect x="5" y="7" width="14" height="8" fill="{monitor_screen}"/>
+            
+            <!-- Screen activity/glow -->
+            <rect x="6" y="8" width="12" height="2" fill="{screen_glow}" opacity="0.6"/>
+            <rect x="6" y="11" width="8" height="1" fill="{screen_glow}" opacity="0.4"/>
+            <rect x="6" y="13" width="6" height="1" fill="{screen_glow}" opacity="0.3"/>
+            
+            <!-- Monitor stand -->
+            <rect x="10" y="16" width="4" height="2" fill="{stand_color}"/>
+            
+            <!-- Base -->
+            <ellipse cx="12" cy="18.5" rx="4" ry="0.5" fill="{base_color}"/>
+            
+            <!-- Power indicator -->
+            <circle cx="18" cy="15" r="0.5" fill="{colors["orange"]}"/>
         </svg>'''
 
 
