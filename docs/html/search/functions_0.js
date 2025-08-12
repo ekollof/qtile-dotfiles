@@ -1,0 +1,22 @@
+var searchData=
+[
+  ['_5f_5finit_5f_5f_0',['__init__',['../classmodules_1_1simple__color__management_1_1SimpleColorManager.html#a0db35660663da96f7d79fb5de3e25a2b',1,'modules.simple_color_management.SimpleColorManager.__init__()'],['../classmodules_1_1font__utils_1_1FontManager.html#a6553d53a8a692e090768adf729e95858',1,'modules.font_utils.FontManager.__init__()'],['../classmodules_1_1dpi__utils_1_1DPIManager.html#a8045b485cd97fe0f60e0d446465edd69',1,'modules.dpi_utils.DPIManager.__init__()'],['../classgenerate__docs_1_1DoxygenDocGenerator.html#ae27fd04946b488bbca04e90a247a87a4',1,'generate_docs.DoxygenDocGenerator.__init__()'],['../classqtile__config_1_1QtileConfig.html#ad33a592954f13f2ad4c606d05991fa81',1,'qtile_config.QtileConfig.__init__()']]],
+  ['_5fcheck_5ffont_5fbsd_1',['_check_font_bsd',['../classmodules_1_1font__utils_1_1FontManager.html#a606d7ca46f947dcf18bc67e5a7836eb5',1,'modules::font_utils::FontManager']]],
+  ['_5fcheck_5ffont_5flinux_2',['_check_font_linux',['../classmodules_1_1font__utils_1_1FontManager.html#a3efab57ed15d7f3bee8abd0f6b008ca6',1,'modules::font_utils::FontManager']]],
+  ['_5fcheck_5ffont_5fmacos_3',['_check_font_macos',['../classmodules_1_1font__utils_1_1FontManager.html#afae5d3c37d1b86684bb399ade66a92f3',1,'modules::font_utils::FontManager']]],
+  ['_5fdetect_5fwith_5ffallbacks_4',['_detect_with_fallbacks',['../classmodules_1_1dpi__utils_1_1DPIManager.html#a38a97914acb7cf381ce663ecb90eef2c',1,'modules::dpi_utils::DPIManager']]],
+  ['_5fget_5fdpi_5fcategory_5',['_get_dpi_category',['../classmodules_1_1dpi__utils_1_1DPIManager.html#a8081022b4d78a9c53a60ad401038ba1a',1,'modules::dpi_utils::DPIManager']]],
+  ['_5fget_5ffallback_5fcolors_6',['_get_fallback_colors',['../classmodules_1_1simple__color__management_1_1SimpleColorManager.html#a8bdfe96f6bacd2c817741ceb793a4c22',1,'modules::simple_color_management::SimpleColorManager']]],
+  ['_5fget_5frecommended_5fbase_5ffont_7',['_get_recommended_base_font',['../classmodules_1_1dpi__utils_1_1DPIManager.html#af00f28d7c2a6b62e93a49aea3a1d865a',1,'modules::dpi_utils::DPIManager']]],
+  ['_5fhandle_5fcolor_5fchange_8',['_handle_color_change',['../classmodules_1_1simple__color__management_1_1SimpleColorManager.html#ae87962866cd52255fdcd493e90335bf0',1,'modules::simple_color_management::SimpleColorManager']]],
+  ['_5fis_5ffont_5favailable_9',['_is_font_available',['../classmodules_1_1font__utils_1_1FontManager.html#ad1149b5f97261c399b48c0965040933a',1,'modules::font_utils::FontManager']]],
+  ['_5fload_5fcolors_10',['_load_colors',['../classmodules_1_1simple__color__management_1_1SimpleColorManager.html#aee8faff8eb4e7add0effb0910db909ae',1,'modules::simple_color_management::SimpleColorManager']]],
+  ['_5fparse_5fxrandr_5fline_11',['_parse_xrandr_line',['../classmodules_1_1dpi__utils_1_1DPIManager.html#a3434234bd57e0e45d9a2e4b419c9a1a4',1,'modules::dpi_utils::DPIManager']]],
+  ['_5fstart_5fpolling_12',['_start_polling',['../classmodules_1_1simple__color__management_1_1SimpleColorManager.html#a2b0e9291b7bc7b1bc115f5fd4d3a2f3d',1,'modules::simple_color_management::SimpleColorManager']]],
+  ['_5fstart_5fwatchdog_13',['_start_watchdog',['../classmodules_1_1simple__color__management_1_1SimpleColorManager.html#a50eafa982ecca9a662d0a4c4e0efe6d8',1,'modules::simple_color_management::SimpleColorManager']]],
+  ['_5ftry_5fenvironment_14',['_try_environment',['../classmodules_1_1dpi__utils_1_1DPIManager.html#a32c21b0eb54702ff0e961463c56963d0',1,'modules::dpi_utils::DPIManager']]],
+  ['_5ftry_5fxdpyinfo_15',['_try_xdpyinfo',['../classmodules_1_1dpi__utils_1_1DPIManager.html#a06ebbcf2ec6c074737283fd0addba6aa',1,'modules::dpi_utils::DPIManager']]],
+  ['_5ftry_5fxrandr_16',['_try_xrandr',['../classmodules_1_1dpi__utils_1_1DPIManager.html#ad81b94143e52ba9729700e459bdbb5a5',1,'modules::dpi_utils::DPIManager']]],
+  ['_5ftry_5fxresources_17',['_try_xresources',['../classmodules_1_1dpi__utils_1_1DPIManager.html#ae38cad9e2fa4f24cd09e75c1f1dbf63e',1,'modules::dpi_utils::DPIManager']]],
+  ['_5fuse_5ffallback_18',['_use_fallback',['../classmodules_1_1dpi__utils_1_1DPIManager.html#a2b1424eb6a275a303e8e763c24c06537',1,'modules::dpi_utils::DPIManager']]]
+];
