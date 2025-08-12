@@ -84,6 +84,17 @@ class QtileConfig:
         """
         return 16  # 🔧 CHANGE THIS VALUE to adjust icon font size
 
+    @property
+    def preferred_bar_height(self) -> int:
+        """
+        @brief User's preferred bar height (before DPI scaling)
+        @return Base bar height in pixels
+        @note This will be automatically scaled for high-DPI displays
+        @example For taller bar, change to: return 32
+        @example For shorter bar, change to: return 24
+        """
+        return 28  # 🔧 CHANGE THIS VALUE to adjust bar height
+
     # ===== DPI SETTINGS =====
 
     @property
@@ -501,7 +512,7 @@ class QtileConfig:
         @return Dictionary with height, opacity, and margin settings for the status bar
         """
         return {
-            "height": scale_size(28),  # DPI-scaled bar height
+            "height": scale_size(self.preferred_bar_height),  # DPI-scaled configurable bar height
             "opacity": 0.95,
             "margin": [0, 0, 0, 0],  # top, right, bottom, left
         }
