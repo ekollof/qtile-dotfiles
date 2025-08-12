@@ -636,7 +636,7 @@ class EnhancedBarManager:
                 **self._get_widget_defaults_excluding('background'),
                 foreground=colors.get("color5", "#ffffff"),
                 background=special.get("background", "#000000"),
-                format='{load_percent}%',
+                format='{load_percent:3.0f}%',
                 update_interval=5,
             ),
 
@@ -646,7 +646,7 @@ class EnhancedBarManager:
                 **self._get_widget_defaults_excluding('background'),
                 foreground=colors.get("color5", "#ffffff"),
                 background=special.get("background", "#000000"),
-                format='{MemPercent}%',
+                format='{MemPercent:3.0f}%',
                 update_interval=5,
             ),
 
@@ -656,7 +656,7 @@ class EnhancedBarManager:
                 **self._get_widget_defaults_excluding('background'),
                 foreground=colors.get("color5", "#ffffff"),
                 background=special.get("background", "#000000"),
-                format='{down} ↓↑ {up}',
+                format='{down:>7} ↓↑ {up:>7}',
                 update_interval=5,
             ),
 
