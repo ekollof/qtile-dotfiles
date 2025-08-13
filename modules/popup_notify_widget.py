@@ -23,6 +23,13 @@ from libqtile.log_utils import logger
 from libqtile.command import base
 from .simple_popup_notifications import show_popup_notification
 
+try:
+    import dbus
+    DBUS_AVAILABLE = True
+except ImportError:
+    DBUS_AVAILABLE = False
+    logger.warning("D-Bus not available - notification actions will not work")
+
 
 class PopupNotifyWidget(widget.Notify):
     """
@@ -39,6 +46,7 @@ class PopupNotifyWidget(widget.Notify):
     defaults = [
         ("show_in_bar", False, "Also show notifications in the status bar"),
         ("show_popups", True, "Show popup notifications"),
+        ("enable_actions", True, "Enable notification action buttons"),
     ]
 
     def __init__(self, **config: Any) -> None:
@@ -76,6 +84,23 @@ class PopupNotifyWidget(widget.Notify):
                 urgency_map = {0: 'low', 1: 'normal', 2: 'critical'}
                 urgency = urgency_map.get(raw_urgency, 'normal')
 
+                # Extract action buttons if enabled
+                actions = []
+                if self.enable_actions:
+                    try:
+                        raw_actions = getattr(notification, 'actions', [])
+                        # Actions come in pairs: [action_key, action_label, ...]
+                        for i in range(0, len(raw_actions), 2):
+                            if i + 1 < len(raw_actions):
+                                action_key = raw_actions[i]
+                                action_label = raw_actions[i + 1]
+                                actions.append((action_key, action_label))
+
+                        if actions:
+                            logger.debug(f"Found {len(actions)} action buttons: {actions}")
+                    except Exception as e:
+                        logger.warning(f"Error extracting actions: {e}")
+
                 # Extract icon information from D-Bus notification
                 icon_path = None
                 try:
@@ -102,7 +127,15 @@ class PopupNotifyWidget(widget.Notify):
                     icon_path = None
 
                 # Show popup using simple popup system
-                show_popup_notification(title, message, urgency, icon_path)
+                show_popup_notification(
+                    title,
+                    message,
+                    urgency,
+                    icon_path,
+                    actions=actions,
+                    notification_id=getattr(notification, 'id', 0),
+                    callback=self._handle_action_callback if actions else None
+                )
             else:
                 # show_popups is False - not showing popup
                 pass
@@ -124,6 +157,28 @@ class PopupNotifyWidget(widget.Notify):
         if self.show_in_bar:
             super().clear(notification)
 
+    def _handle_action_callback(self, notification_id: int, action_key: str) -> None:
+        """
+        @brief Handle action button click callback
+        @param notification_id: D-Bus notification ID
+        @param action_key: Action key that was clicked
+        """
+        try:
+            if DBUS_AVAILABLE:
+                # Send action response back to D-Bus notification server
+                bus = dbus.SessionBus()
+                notify_service = bus.get_object(
+                    'org.freedesktop.Notifications',
+                    '/org/freedesktop/Notifications'
+                )
+                notify_service.ActionInvoked(notification_id, action_key,
+                    dbus_interface='org.freedesktop.Notifications')
+                logger.info(f"Action callback sent: ID={notification_id}, action={action_key}")
+            else:
+                logger.warning(f"D-Bus not available - cannot send action: {action_key}")
+        except Exception as e:
+            logger.error(f"Failed to send action callback: {e}")
+
     @base.expose_command()
     def test_popup_notification(self) -> None:
         """
@@ -134,6 +189,22 @@ class PopupNotifyWidget(widget.Notify):
             "Test Popup",
             "This is a test popup notification",
             "normal"
+        )
+
+    @base.expose_command()
+    def test_action_notification(self) -> None:
+        """
+        @brief Test notification with action buttons
+        @return None
+        """
+        show_popup_notification(
+            "Action Test",
+            "This notification has action buttons",
+            "normal",
+            None,
+            actions=[("accept", "Accept"), ("decline", "Decline")],
+            notification_id=999,
+            callback=self._handle_action_callback
         )
 
 

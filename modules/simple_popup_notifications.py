@@ -24,7 +24,9 @@ Usage:
 
 import html
 import re
+import subprocess
 import time
+import webbrowser
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -61,6 +63,9 @@ class PopupNotification:
     @param timeout: Timeout in seconds (0 = no timeout)
     @param popup_layout: QtileExtras popup layout instance
     @param icon: Optional icon file path
+    @param actions: List of (action_key, action_label) tuples
+    @param notification_id: D-Bus notification ID for action callbacks
+    @param callback: Callback function for action button clicks
     """
     title: str
     message: str
@@ -69,6 +74,13 @@ class PopupNotification:
     timeout: float
     popup_layout: Any | None = None
     icon: str | None = None
+    actions: list[tuple[str, str]] = None
+    notification_id: int = 0
+    callback: Any | None = None
+
+    def __post_init__(self):
+        if self.actions is None:
+            self.actions = []
 
 
 class SimplePopupManager:
@@ -95,7 +107,7 @@ class SimplePopupManager:
         # Default configuration with DPI scaling
         self.config: dict[str, Any] = {
             "width": scale_size(400),
-            "height": scale_size(120),
+            "height": scale_size(120),  # Will be increased for buttons
             "margin_x": scale_size(20),
             "margin_y": scale_size(20),  # Will be adjusted for bar height
             "spacing": scale_size(10),
@@ -206,13 +218,25 @@ class SimplePopupManager:
         except Exception as e:
             logger.error(f"Failed to show popup notification: {e}")
 
-    def show_notification(self, title: str, message: str, urgency: str = "normal", icon: str | None = None) -> None:
+    def show_notification(
+        self,
+        title: str,
+        message: str,
+        urgency: str = "normal",
+        icon: str | None = None,
+        actions: list[tuple[str, str]] | None = None,
+        notification_id: int = 0,
+        callback: Any | None = None
+    ) -> None:
         """
         @brief Show a popup notification
         @param title: Notification title
         @param message: Notification message
         @param urgency: Urgency level (low, normal, critical)
         @param icon: Optional icon path
+        @param actions: List of (action_key, action_label) tuples for buttons
+        @param notification_id: D-Bus notification ID for callbacks
+        @param callback: Callback function for action button clicks
         """
         # Create notification object and delegate to internal method
         notification = PopupNotification(
@@ -221,26 +245,46 @@ class SimplePopupManager:
             urgency=urgency,
             created_at=time.time(),
             timeout=0.0,  # Will be set by _show_notification_object
-            icon=icon
+            icon=icon,
+            actions=actions or [],
+            notification_id=notification_id,
+            callback=callback
         )
 
         self._show_notification_object(notification)
 
-    def _sanitize_markup(self, text: str) -> str:
+    def _sanitize_markup(self, text: str) -> tuple[str, list[str]]:
         """
-        @brief Sanitize HTML content for safe Pango markup display
+        @brief Sanitize HTML content and extract URLs for safe Pango markup display
         @param text: Raw text that may contain HTML
-        @return Sanitized text with safe Pango markup
+        @return Tuple of (sanitized_text, list_of_urls)
         """
         if not text:
-            return ""
+            return "", []
 
         # Unescape HTML entities first
         text = html.unescape(text)
 
-        # Convert common HTML tags to Pango markup
-        # Handle links by extracting the text content
-        text = re.sub(r'<a[^>]*href=["\']([^"\']*)["\'][^>]*>(.*?)</a>', r'\2 (\1)', text)
+        # Extract URLs from text and HTML links
+        urls = []
+
+        # Extract URLs from HTML links
+        link_pattern = r'<a[^>]*href=["\']([^"\']*)["\'][^>]*>(.*?)</a>'
+        for match in re.finditer(link_pattern, text):
+            url = match.group(1)
+            link_text = match.group(2)
+            urls.append(url)
+            # Replace with clickable text
+            text = text.replace(match.group(0), f'<u>{link_text}</u> 🔗')
+
+        # Extract plain URLs (http/https/ftp)
+        url_pattern = r'https?://[^\s<>"\']+|ftp://[^\s<>"\']+|www\.[^\s<>"\']+\.[a-zA-Z]{2,}'
+        for match in re.finditer(url_pattern, text):
+            url = match.group(0)
+            if url not in urls:
+                urls.append(url)
+                # Make plain URLs underlined and clickable
+                text = text.replace(url, f'<u>{url}</u> 🔗')
 
         # Convert other HTML formatting to Pango equivalents
         text = re.sub(r'<b>(.*?)</b>', r'<b>\1</b>', text)
@@ -256,7 +300,32 @@ class SimplePopupManager:
         text = re.sub(r'<(?![biu/])', '&lt;', text)
         text = re.sub(r'(?<![biu])>', '&gt;', text)
 
-        return text
+        return text, urls
+
+    def _open_url(self, url: str) -> None:
+        """
+        @brief Open URL in default browser
+        @param url: URL to open
+        """
+        try:
+            # Add protocol if missing
+            if not url.startswith(('http://', 'https://', 'ftp://')):
+                if url.startswith('www.'):
+                    url = f'https://{url}'
+                else:
+                    url = f'https://{url}'
+
+            # Try different methods to open URL
+            try:
+                webbrowser.open(url)
+                logger.info(f"Opened URL: {url}")
+            except Exception:
+                # Fallback to xdg-open
+                subprocess.run(['xdg-open', url], check=False)
+                logger.info(f"Opened URL with xdg-open: {url}")
+
+        except Exception as e:
+            logger.error(f"Failed to open URL {url}: {e}")
 
     def _create_popup(self, notification: PopupNotification, x: int, y: int) -> PopupRelativeLayout:
         """
@@ -266,6 +335,15 @@ class SimplePopupManager:
         @param y: Y coordinate offset
         @return PopupRelativeLayout instance for display
         """
+        # Calculate if we need extra height for buttons/URLs
+        sanitized_message, urls = self._sanitize_markup(notification.message)
+        total_buttons = len(notification.actions) + len(urls)
+        has_buttons = total_buttons > 0
+
+        # Adjust popup height for buttons
+        popup_height = self.config["height"]
+        if has_buttons:
+            popup_height = int(popup_height * 1.4)  # 40% taller for buttons
         # Choose colors based on urgency using match statement
         match notification.urgency:
             case "critical":
@@ -351,12 +429,15 @@ class SimplePopupManager:
 
         # Message
         # Message text
+        # Message text with URL extraction
         if notification.message:
-            msg_y = 0.5 if notification.title else 0.2
-            msg_height = 0.4 if notification.title else 0.6
-
-            # Sanitize message content for safe HTML/markup display
-            sanitized_message = self._sanitize_markup(notification.message)
+            # Adjust message area height if we have buttons
+            if has_buttons:
+                msg_y = 0.5 if notification.title else 0.25
+                msg_height = 0.25 if notification.title else 0.5
+            else:
+                msg_y = 0.5 if notification.title else 0.2
+                msg_height = 0.4 if notification.title else 0.6
 
             controls.append(
                 PopupText(
@@ -375,11 +456,90 @@ class SimplePopupManager:
                 )
             )
 
-        # Create popup layout (without x,y in constructor)
+        # Add URL buttons for extracted links
+        current_button = 0
+
+        if urls:
+            try:
+                for url in urls[:2]:  # Limit to first 2 URLs to avoid crowding
+                    button_width = 0.4 if total_buttons <= 2 else 0.3
+                    button_x = 0.05 + (current_button * (button_width + 0.05))
+                    button_y = 0.75
+
+                    def make_url_handler(target_url=url):
+                        def handler(*args, **kwargs):
+                            self._open_url(target_url)
+                            # Keep popup open for URL clicks
+                        return handler
+
+                    url_button = PopupText(
+                        text=f"🔗 Open Link",
+                        pos_x=button_x,
+                        pos_y=button_y,
+                        width=button_width,
+                        height=0.15,
+                        fontsize=scale_font(11),
+                        foreground="#ffffff",
+                        background="#0066cc",  # Blue button color
+                        font=font_family,
+                        h_align="center",
+                        v_align="middle",
+                        markup=True,
+                    )
+                    url_button.add_callbacks({"Button1": make_url_handler()})
+                    controls.append(url_button)
+                    current_button += 1
+
+                logger.debug(f"Added {len(urls)} URL buttons")
+
+            except Exception as e:
+                logger.warning(f"Failed to add URL buttons: {e}")
+
+        # Add action buttons if present
+        if notification.actions:
+            try:
+                for i, (action_key, action_label) in enumerate(notification.actions):
+                    button_width = 0.4 if total_buttons <= 2 else 0.3
+                    button_x = 0.05 + (current_button * (button_width + 0.05))
+                    button_y = 0.75
+
+                    def make_action_handler(key=action_key, nid=notification.notification_id):
+                        def handler(*args, **kwargs):
+                            if notification.callback:
+                                notification.callback(nid, key)
+                            # Auto-close popup after action
+                            if notification.popup_layout:
+                                notification.popup_layout.hide()
+                        return handler
+
+                    action_button = PopupText(
+                        text=f"{action_label}",
+                        pos_x=button_x,
+                        pos_y=button_y,
+                        width=button_width,
+                        height=0.15,
+                        fontsize=scale_font(12),
+                        foreground="#ffffff",
+                        background="#28a745",  # Green button color
+                        font=font_family,
+                        h_align="center",
+                        v_align="middle",
+                        markup=True,
+                    )
+                    action_button.add_callbacks({"Button1": make_action_handler()})
+                    controls.append(action_button)
+                    current_button += 1
+
+                logger.debug(f"Added {len(notification.actions)} action buttons")
+
+            except Exception as e:
+                logger.warning(f"Failed to add action buttons: {e}")
+
+        # Create popup layout with adjusted height
         popup = PopupRelativeLayout(
             qtile,
             width=self.config["width"],
-            height=self.config["height"],
+            height=popup_height,
             controls=controls,
             background=bg_color,
             border=border_color,
@@ -576,32 +736,33 @@ def setup_popup_notifications(color_manager: Any, qtile_config: Any | None = Non
     logger.info("Simple popup notifications enabled")
 
 
-def show_popup_notification(title: str, message: str, urgency: str = "normal", icon: str | None = None) -> None:
+def show_popup_notification(
+    title: str,
+    message: str,
+    urgency: str = "normal",
+    icon: str | None = None,
+    actions: list[tuple[str, str]] | None = None,
+    notification_id: int = 0,
+    callback: Any | None = None
+) -> None:
     """
     @brief Show a popup notification
     @param title: Notification title
     @param message: Notification message
     @param urgency: Urgency level (low, normal, critical)
     @param icon: Optional icon path
+    @param actions: List of (action_key, action_label) tuples for buttons
+    @param notification_id: D-Bus notification ID for callbacks
+    @param callback: Callback function for action button clicks
     """
 
-
     if _popup_manager:
-
         try:
-            # Create notification object with icon
-            notification = PopupNotification(
-                title=title,
-                message=message,
-                urgency=urgency,
-                created_at=time.time(),
-                timeout=0.0,  # Will be set by _show_notification_object
-                icon=icon
+            _popup_manager.show_notification(
+                title, message, urgency, icon, actions, notification_id, callback
             )
-            _popup_manager._show_notification_object(notification)
-
         except Exception as e:
-            logger.error(f"Error in _popup_manager.show_notification: {e}")
+            logger.error(f"Error in popup manager: {e}")
     else:
         logger.warning("Popup manager not initialized - cannot show popup")
 
