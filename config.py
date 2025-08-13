@@ -21,9 +21,36 @@ import sys
 from pathlib import Path
 
 from libqtile import qtile  # type: ignore
-from libqtile.config import Click, Drag
+from libqtile.config import Click, Drag, Match
 from libqtile.lazy import lazy
 from libqtile.log_utils import logger
+
+# Fix qtile's problematic default floating rules before any layouts are created
+# This prevents electron apps from floating due to has_fixed_size/has_fixed_ratio checks
+from libqtile import layout
+# Use standards-compliant floating rules - only float appropriate window types
+layout.Floating.default_float_rules = [
+    # EWMH standard window types that should float
+    Match(wm_type="utility"),
+    Match(wm_type="notification"),
+    Match(wm_type="toolbar"),
+    Match(wm_type="splash"),
+    Match(wm_type="dialog"),
+    # Legacy WM_CLASS based rules for older applications
+    Match(wm_class="file_progress"),
+    Match(wm_class="confirm"),
+    Match(wm_class="dialog"),
+    Match(wm_class="download"),
+    Match(wm_class="error"),
+    Match(wm_class="notification"),
+    Match(wm_class="splash"),
+    Match(wm_class="toolbar"),
+    # Only float windows that are actually transient (modal dialogs with parent)
+    Match(func=lambda c: bool(c.is_transient_for())),
+    # NOTE: Removed problematic qtile defaults that cause normal windows to float:
+    # Match(func=lambda c: c.has_fixed_size()),
+    # Match(func=lambda c: c.has_fixed_ratio()),
+]
 
 # Import our custom modules
 from modules.bar_factory import create_bar_manager

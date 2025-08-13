@@ -7,10 +7,12 @@ Handles workspace groups and window layouts
 from typing import TYPE_CHECKING
 
 from libqtile import layout
-from libqtile.config import DropDown, Group, Key, Match, ScratchPad
+from libqtile.config import DropDown, Group, Key, Match, ScratchPad, _Match
 from libqtile.lazy import lazy
 
 from qtile_config import get_config
+
+
 
 if TYPE_CHECKING:
     from modules.simple_color_management import SimpleColorManager
@@ -20,6 +22,9 @@ else:
     from modules.simple_color_management import SimpleColorManager
 
     ColorManager = SimpleColorManager
+
+
+
 
 
 class GroupManager:
@@ -67,20 +72,20 @@ class GroupManager:
         ]
 
     def get_floating_layout(self):
-        """Get floating layout configuration"""
+        """Get floating layout configuration with fixed default rules"""
         colordict = self.color_manager.get_colors()
         defaults = self.config.layout_defaults
 
-        # Convert config rules to Match objects
-        float_rules = []
+        # Additional custom floating rules from config
+        additional_rules = []
         for rule in self.config.floating_rules:
             if "wm_class" in rule:
-                float_rules.append(Match(wm_class=rule["wm_class"]))
+                additional_rules.append(Match(wm_class=rule["wm_class"]))
             elif "title" in rule:
-                float_rules.append(Match(title=rule["title"]))
+                additional_rules.append(Match(title=rule["title"]))
 
         return layout.Floating(
-            float_rules=float_rules,
+            float_rules=additional_rules,
             border_focus=colordict["special"]["foreground"],
             border_normal=colordict["special"]["background"],
             border_width=defaults["border_width"],

@@ -42,7 +42,7 @@ class ClientHooks:
         def enforce_tiling_behavior(window: Any) -> None:
             """Enforce consistent tiling behavior for all windows"""
             self.window_manager.enforce_window_tiling(window)
-        
+
         # Store reference to make function accessible
         self._enforce_tiling_behavior = enforce_tiling_behavior
 
@@ -60,6 +60,8 @@ class ClientHooks:
         def set_parent_for_transient(window: Any) -> None:  # pyright: ignore[reportUnusedFunction]
             """Set parent for transient windows"""
             self.window_manager.set_parent_for_transient(window)
+
+
 
         @hook.subscribe.client_new  # pyright: ignore[reportUnknownMemberType]
         def handle_swallow(window: Any) -> None:  # pyright: ignore[reportUnusedFunction]

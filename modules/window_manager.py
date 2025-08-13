@@ -174,10 +174,10 @@ class WindowManager:
                 logger.debug(
                     f"Set transient window to floating: {self._get_window_name(window)}"
                 )
-            if hints and hints.get("max_width"):
+            if hints and hints.get("max_width") and hints.get("max_width") < 1000:
                 window.floating = True
                 logger.debug(
-                    f"Set window with max_width to floating: {self._get_window_name(window)}"
+                    f"Set window with small max_width to floating: {self._get_window_name(window)} (max_width={hints.get('max_width')})"
                 )
         except Exception as e:
             logger.debug(f"Error handling transient window: {e}")
