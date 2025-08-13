@@ -24,7 +24,8 @@ Usage:
 
 import time
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional
+from pathlib import Path
+from typing import Any
 import os
 
 from libqtile import qtile
@@ -49,34 +50,48 @@ except ImportError:
 
 @dataclass
 class PopupNotification:
-    """Represents a popup notification"""
+    """
+    @brief Represents a popup notification with all display data
+    @param title: Notification title text
+    @param message: Notification body text
+    @param urgency: Urgency level (low, normal, critical)
+    @param created_at: Unix timestamp when notification was created
+    @param timeout: Timeout in seconds (0 = no timeout)
+    @param popup_layout: QtileExtras popup layout instance
+    @param icon: Optional icon file path
+    """
     title: str
     message: str
     urgency: str
     created_at: float
     timeout: float
-    popup_layout: Optional[Any] = None
-    icon: Optional[str] = None
+    popup_layout: Any | None = None
+    icon: str | None = None
 
 
 class SimplePopupManager:
     """
-    @brief Simple popup notification manager
+    @brief Simple popup notification manager using qtile-extras
 
-    Manages popup notifications using qtile-extras toolkit with a simple
-    hook-based approach that works alongside the standard Notify widget.
+    Provides basic popup notifications using qtile-extras toolkit for
+    cross-platform compatibility.
+
+    @param color_manager: Color management instance for theming
     """
 
-    def __init__(self, color_manager: Any):
-        """Initialize popup manager"""
+    def __init__(self, color_manager: Any) -> None:
+        """
+        @brief Initialize popup manager
+        @param color_manager: Color management instance for theming
+        """
         self.color_manager = color_manager
-        self.active_notifications: List[PopupNotification] = []
+        self.active_notifications: list[PopupNotification] = []
         self.max_notifications = 5
         self.cleanup_scheduled = False
-        self.qtile_config = None  # Will be set during configuration
+        self.qtile_config: Any | None = None  # Will be set during configuration
 
         # Default configuration with DPI scaling
-        self.config = {
+        self.config: dict[str, Any] = {
             "width": scale_size(400),
             "height": scale_size(120),
             "margin_x": scale_size(20),
@@ -88,20 +103,23 @@ class SimplePopupManager:
         self._update_colors()
 
     def _update_colors(self) -> None:
-        """Update colors from color manager"""
+        """
+        @brief Update colors from color manager
+        @throws Exception: When color manager fails to provide colors
+        """
         try:
             colors = self.color_manager.get_colors()
             color_dict = colors.get("colors", {})
             special = colors.get("special", {})
 
-            self.colors = {
+            self.colors: dict[str, str] = {
                 "bg_normal": special.get("background", "#1e1e1e").lstrip("#"),
                 "fg_normal": special.get("foreground", "#ffffff").lstrip("#"),
                 "bg_urgent": color_dict.get("color1", "#3e1e1e").lstrip("#"),
                 "fg_urgent": color_dict.get("color9", "#ff6666").lstrip("#"),
                 "bg_low": special.get("background", "#1e1e1e").lstrip("#"),
                 "fg_low": color_dict.get("color8", "#888888").lstrip("#"),
-                "border_normal": color_dict.get("color8", "#555555").lstrip("#"),
+                "border_normal": color_dict.get("color6", "#555555").lstrip("#"),
                 "border_urgent": color_dict.get("color1", "#ff0000").lstrip("#"),
             }
         except Exception as e:
@@ -186,7 +204,7 @@ class SimplePopupManager:
         except Exception as e:
             logger.error(f"Failed to show popup notification: {e}")
 
-    def show_notification(self, title: str, message: str, urgency: str = "normal", icon: str = None) -> None:
+    def show_notification(self, title: str, message: str, urgency: str = "normal", icon: str | None = None) -> None:
         """
         @brief Show a popup notification
         @param title: Notification title
@@ -207,20 +225,27 @@ class SimplePopupManager:
         self._show_notification_object(notification)
 
     def _create_popup(self, notification: PopupNotification, x: int, y: int) -> PopupRelativeLayout:
-        """Create popup layout for notification"""
-        # Choose colors based on urgency
-        if notification.urgency == "critical":
-            bg_color = self.colors["bg_urgent"]
-            fg_color = self.colors["fg_urgent"]
-            border_color = self.colors["border_urgent"]
-        elif notification.urgency == "low":
-            bg_color = self.colors["bg_low"]
-            fg_color = self.colors["fg_low"]
-            border_color = self.colors["border_normal"]
-        else:
-            bg_color = self.colors["bg_normal"]
-            fg_color = self.colors["fg_normal"]
-            border_color = self.colors["border_normal"]
+        """
+        @brief Create popup layout for notification
+        @param notification: Notification data to display
+        @param x: X coordinate offset
+        @param y: Y coordinate offset
+        @return PopupRelativeLayout instance for display
+        """
+        # Choose colors based on urgency using match statement
+        match notification.urgency:
+            case "critical":
+                bg_color = self.colors["bg_urgent"]
+                fg_color = self.colors["fg_urgent"]
+                border_color = self.colors["border_urgent"]
+            case "low":
+                bg_color = self.colors["bg_low"]
+                fg_color = self.colors["fg_low"]
+                border_color = self.colors["border_normal"]
+            case _:
+                bg_color = self.colors["bg_normal"]
+                fg_color = self.colors["fg_normal"]
+                border_color = self.colors["border_normal"]
 
 
 
@@ -236,10 +261,10 @@ class SimplePopupManager:
         else:
             logger.debug(f"No qtile_config or preferred_font, using fallback: '{font_family}'")
 
-        # Check for notification icon
+        # Check for notification icon using pathlib
         has_icon = False
         icon_path = None
-        if notification.icon and os.path.exists(notification.icon):
+        if notification.icon and Path(notification.icon).exists():
             has_icon = True
             icon_path = notification.icon
             logger.debug(f"Found notification icon: {icon_path}")
@@ -434,11 +459,14 @@ class SimplePopupManager:
 
 
 # Global popup manager instance
-_popup_manager: Optional[SimplePopupManager] = None
+_popup_manager: SimplePopupManager | None = None
 
 
-def get_popup_manager() -> Optional[SimplePopupManager]:
-    """Get the global popup manager instance"""
+def get_popup_manager() -> SimplePopupManager | None:
+    """
+    @brief Get the global popup manager instance
+    @return SimplePopupManager instance or None if not initialized
+    """
     return _popup_manager
 
 
@@ -476,7 +504,7 @@ def _notification_callback(notification):
         logger.error(f"Traceback: {traceback.format_exc()}")
 
 
-def setup_popup_notifications(color_manager: Any, qtile_config: Any = None, config: Optional[Dict[str, Any]] = None) -> None:
+def setup_popup_notifications(color_manager: Any, qtile_config: Any | None = None, config: dict[str, Any] | None = None) -> None:
     """
     @brief Set up popup notifications using hooks
     @param color_manager: Color management instance
@@ -510,7 +538,7 @@ def setup_popup_notifications(color_manager: Any, qtile_config: Any = None, conf
     logger.info("Simple popup notifications enabled")
 
 
-def show_popup_notification(title: str, message: str, urgency: str = "normal", icon: str = None) -> None:
+def show_popup_notification(title: str, message: str, urgency: str = "normal", icon: str | None = None) -> None:
     """
     @brief Show a popup notification
     @param title: Notification title

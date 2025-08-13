@@ -15,20 +15,25 @@ Features:
 - Compatible with libnotify and notify-send
 """
 
-import os
-from typing import Any, Dict
+from pathlib import Path
+from typing import Any
 
 from libqtile import widget
 from libqtile.log_utils import logger
+from libqtile.command import base
 from .simple_popup_notifications import show_popup_notification
 
 
 class PopupNotifyWidget(widget.Notify):
     """
-    Simple Notify widget that shows popup notifications
+    @brief Notify widget that shows popup notifications
 
     This widget extends the standard qtile Notify widget to show popup
     notifications instead of (or in addition to) bar notifications.
+    Maintains full D-Bus compatibility with libnotify.
+
+    @param show_in_bar: Whether to also show notifications in status bar
+    @param show_popups: Whether to show popup notifications
     """
 
     defaults = [
@@ -36,8 +41,11 @@ class PopupNotifyWidget(widget.Notify):
         ("show_popups", True, "Show popup notifications"),
     ]
 
-    def __init__(self, **config: Any):
-        """Initialize popup notify widget"""
+    def __init__(self, **config: Any) -> None:
+        """
+        @brief Initialize popup notify widget
+        @param config: Widget configuration parameters
+        """
         super().__init__(**config)
         self.add_defaults(PopupNotifyWidget.defaults)
 
@@ -46,7 +54,10 @@ class PopupNotifyWidget(widget.Notify):
             self.text = ""
 
     def update(self, notification: Any) -> None:
-        """Override update method to show popup notifications (called by D-Bus)"""
+        """
+        @brief Override update method to show popup notifications
+        @param notification: D-Bus notification object from libnotify
+        """
 
         try:
             if self.show_popups:
@@ -79,8 +90,8 @@ class PopupNotifyWidget(widget.Notify):
                                        hints.get('image_path') or
                                        hints.get('icon_data'))
 
-                    # Validate icon path exists
-                    if icon_path and not os.path.exists(str(icon_path)):
+                    # Validate icon path exists using pathlib
+                    if icon_path and not Path(str(icon_path)).exists():
                         logger.debug(f"Icon path not found: {icon_path}")
                         icon_path = None
                     elif icon_path:
@@ -105,13 +116,20 @@ class PopupNotifyWidget(widget.Notify):
             # Fall back to bar display on error
             super().update(notification)
 
-    def clear(self, notification=None) -> None:
-        """Clear notification display"""
+    def clear(self, notification: Any = None) -> None:
+        """
+        @brief Clear notification display
+        @param notification: Optional notification object to clear
+        """
         if self.show_in_bar:
             super().clear(notification)
 
-    def cmd_test_popup_notification(self) -> None:
-        """Command to test popup notification functionality"""
+    @base.expose_command()
+    def test_popup_notification(self) -> None:
+        """
+        @brief Command to test popup notification functionality
+        @return None
+        """
         show_popup_notification(
             "Test Popup",
             "This is a test popup notification",
@@ -121,13 +139,10 @@ class PopupNotifyWidget(widget.Notify):
 
 def create_popup_notify_widget(**kwargs: Any) -> PopupNotifyWidget:
     """
-    Factory function to create a popup notify widget
-
-    Args:
-        **kwargs: Widget configuration options
-
-    Returns:
-        Configured PopupNotifyWidget instance
+    @brief Factory function to create a popup notify widget
+    @param kwargs: Keyword arguments to pass to the widget
+    @return PopupNotifyWidget instance
+    @throws Exception: When widget creation fails
     """
     try:
         widget_instance = PopupNotifyWidget(**kwargs)

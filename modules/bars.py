@@ -22,7 +22,7 @@ from qtile_extras import widget
 
 from modules.dpi_utils import scale_font, scale_size
 from modules.svg_utils import create_themed_icon_cache, get_svg_utils
-from modules.notifications import NotificationManager
+
 from modules.popup_notify_widget import create_popup_notify_widget
 
 
@@ -74,8 +74,7 @@ class EnhancedBarManager:
         # Generate themed icon cache (may use fallback colors initially)
         self._update_themed_icon_cache()
 
-        # Initialize notification manager
-        self.notification_manager = NotificationManager(color_manager)
+
 
         # Setup popup notifications using simple popup system
         notification_settings = self.qtile_config.notification_settings

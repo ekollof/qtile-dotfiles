@@ -7,7 +7,7 @@ import subprocess
 from typing import Any
 
 from libqtile.log_utils import logger
-from .notifications import send_qtile_notification
+
 from .simple_popup_notifications import show_popup_notification, get_popup_manager
 
 
@@ -419,11 +419,10 @@ class SystemCommands:
 
         # Method 1: Try our notification manager
         try:
-            send_qtile_notification(
+            show_popup_notification(
                 "Qtile Notification Test",
                 "Testing notification system - if you see this, it's working!",
-                timeout=5000,
-                urgency="normal"
+                "normal"
             )
             methods_tried.append("notification_manager: SUCCESS")
             success = True
@@ -467,11 +466,10 @@ class SystemCommands:
 
         # Try our notification manager first
         try:
-            send_qtile_notification(
+            show_popup_notification(
                 "🚨 Urgent Notification Test",
                 "This is an urgent notification test - it should stay visible longer",
-                timeout=0,  # No timeout for urgent
-                urgency="critical"
+                "critical"
             )
             success = True
             logger.info("✅ Urgent notification test completed via notification manager")
@@ -517,26 +515,17 @@ class SystemCommands:
             "dbus": "Unknown"
         }
 
-        # Test notification manager
+        # Test popup notification system
         try:
-            from .notifications import NotificationManager
-            # Try to get a color manager instance
-            try:
-                from .colors import color_manager
-                manager = NotificationManager(color_manager)
-                status = manager.get_notification_status()
-
-                status_info.update({
-                    "notification_manager": "Available",
-                    "qtile_builtin": "Yes" if status.get('qtile_builtin', False) else "No",
-                    "qtile_builtin_working": "Yes" if status.get('qtile_builtin_working', False) else "No",
-                    "notify_send": "Yes" if status.get('notify_send_available', False) else "No",
-                    "dbus": "Yes" if status.get('dbus_available', False) else "No"
-                })
-            except Exception as e:
-                status_info["notification_manager"] = f"Error: {str(e)[:50]}"
-        except ImportError:
-            status_info["notification_manager"] = "Not available"
+            popup_manager = get_popup_manager()
+            status_info.update({
+                "notification_system": "SimplePopup",
+                "popup_manager": "Available" if popup_manager else "Not initialized",
+                "qtile_extras": "Available",
+                "dbus_integration": "Yes"
+            })
+        except Exception as e:
+            status_info["notification_system"] = f"Error: {str(e)[:50]}"
 
         # Test Notify widget availability
         try:
@@ -563,11 +552,10 @@ class SystemCommands:
         # Try to send the status notification
         success = False
         try:
-            send_qtile_notification(
+            show_popup_notification(
                 "Notification System Status",
                 status_msg,
-                timeout=10000,
-                urgency="normal"
+                "normal"
             )
             success = True
             logger.info("✅ Notification status displayed successfully")

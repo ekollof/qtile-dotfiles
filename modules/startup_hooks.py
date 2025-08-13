@@ -10,7 +10,7 @@ from typing import Any
 
 from libqtile import hook, qtile
 from libqtile.log_utils import logger
-from .notifications import notify_qtile_event
+from .simple_popup_notifications import show_popup_notification
 
 
 class StartupHooks:
@@ -44,7 +44,7 @@ class StartupHooks:
 
             # Initialize notification system
             try:
-                notify_qtile_event("startup", "Notification system initialized")
+                show_popup_notification("Qtile Startup", "Notification system initialized", "normal")
                 logger.info("✅ Notification system initialized successfully")
             except Exception as e:
                 logger.warning(f"❌ Failed to initialize notification system: {e}")
