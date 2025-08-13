@@ -26,8 +26,10 @@ import time
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
 
-from libqtile import hook, qtile
+from libqtile import qtile
 from libqtile.log_utils import logger
+from modules.font_utils import get_available_font
+from modules.dpi_utils import scale_font, scale_size
 
 try:
     import libqtile.notify
@@ -69,18 +71,16 @@ class SimplePopupManager:
         self.active_notifications: List[PopupNotification] = []
         self.max_notifications = 5
         self.cleanup_scheduled = False
+        self.qtile_config = None  # Will be set during configuration
 
-        # Default configuration
+        # Default configuration with DPI scaling
         self.config = {
-            "width": 350,
-            "height": 100,
-            "margin_x": 20,
-            "margin_y": 60,
-            "spacing": 10,
+            "width": scale_size(400),
+            "height": scale_size(120),
+            "margin_x": scale_size(20),
+            "margin_y": scale_size(20),  # Will be adjusted for bar height
+            "spacing": scale_size(10),
             "corner": "top_right",
-            "timeout_normal": 5.0,
-            "timeout_low": 3.0,
-            "timeout_critical": 0.0,  # Never timeout
         }
 
         self._update_colors()
@@ -111,6 +111,31 @@ class SimplePopupManager:
                 "bg_low": "1e1e1e", "fg_low": "888888",
                 "border_normal": "555555", "border_urgent": "ff0000",
             }
+
+    def _adjust_positioning(self) -> None:
+        """Adjust popup positioning to respect bar height and gaps"""
+        if not self.qtile_config:
+            return
+
+        try:
+            # Get bar height and layout margins
+            bar_height = self.qtile_config.bar_settings["height"]
+            layout_margin = self.qtile_config.layout_defaults["margin"]
+
+            # Adjust margin_y to account for bar and gap
+            if self.config["corner"].startswith("top"):
+                self.config["margin_y"] = bar_height + layout_margin + scale_size(10)
+            else:
+                self.config["margin_y"] = layout_margin + scale_size(10)
+
+            # Adjust margin_x to account for gap
+            self.config["margin_x"] = layout_margin + scale_size(10)
+
+            logger.debug(f"Adjusted positioning: margin_x={self.config['margin_x']}, margin_y={self.config['margin_y']}")
+
+        except Exception as e:
+            logger.warning(f"Could not adjust positioning: {e}")
+            # Keep defaults
 
     def show_notification(self, title: str, message: str, urgency: str = "normal") -> None:
         """
@@ -150,7 +175,13 @@ class SimplePopupManager:
         # Create and show popup
         try:
             popup_layout = self._create_popup(notification, x, y)
-            popup_layout.show()
+            # Use qtile-extras positioning: relative_to=3 is top-right corner
+            popup_layout.show(
+                x=x,
+                y=y,
+                relative_to=3,  # Top-right corner
+                relative_to_bar=True  # Auto-adjust for bars and gaps
+            )
 
             notification.popup_layout = popup_layout
             self.active_notifications.append(notification)
@@ -185,6 +216,11 @@ class SimplePopupManager:
         # Create controls
         controls = []
 
+        # Get theme-aware font
+        font_family = "sans-serif"
+        if self.qtile_config and hasattr(self.qtile_config, 'preferred_font'):
+            font_family = get_available_font(self.qtile_config.preferred_font)
+
         # Title (if present)
         if notification.title:
             controls.append(
@@ -194,19 +230,22 @@ class SimplePopupManager:
                     pos_y=0.1,
                     width=0.9,
                     height=0.35,
-                    fontsize=14,
+                    fontsize=scale_font(16),
                     foreground=fg_color,
+                    font_family=font_family,
                     font_weight="bold",
                     h_align="left",
-                    v_align="top"
+                    v_align="top",
+                    wrap=True,
                 )
             )
 
         # Message
-        msg_y = 0.5 if notification.title else 0.1
-        msg_height = 0.4 if notification.title else 0.8
-
+        # Message text
         if notification.message:
+            msg_y = 0.5 if notification.title else 0.2
+            msg_height = 0.4 if notification.title else 0.6
+
             controls.append(
                 PopupText(
                     text=notification.message,
@@ -214,19 +253,18 @@ class SimplePopupManager:
                     pos_y=msg_y,
                     width=0.9,
                     height=msg_height,
-                    fontsize=12,
+                    fontsize=scale_font(14),
                     foreground=fg_color,
+                    font_family=font_family,
                     h_align="left",
                     v_align="top",
-                    wrap=True
+                    wrap=True,
                 )
             )
 
-        # Create popup layout
+        # Create popup layout (without x,y in constructor)
         popup = PopupRelativeLayout(
             qtile,
-            x=x,
-            y=y,
             width=self.config["width"],
             height=self.config["height"],
             controls=controls,
@@ -241,45 +279,45 @@ class SimplePopupManager:
         return popup
 
     def _calculate_position(self, stack_index: int) -> tuple[int, int]:
-        """Calculate position for notification"""
+        """Calculate position offset for notification using qtile-extras positioning"""
         try:
-            if qtile and qtile.current_screen:
-                screen_width = qtile.current_screen.width
-                screen_height = qtile.current_screen.height
-            else:
-                screen_width = 1920
-                screen_height = 1080
-
-            width = self.config["width"]
-            height = self.config["height"]
             margin_x = self.config["margin_x"]
             margin_y = self.config["margin_y"]
             spacing = self.config["spacing"]
+            height = self.config["height"]
+            width = self.config["width"]
 
-            # Calculate based on corner setting
-            if self.config["corner"] == "top_right":
-                x = screen_width - width - margin_x
-                y = margin_y + (stack_index * (height + spacing))
-            elif self.config["corner"] == "top_left":
-                x = margin_x
-                y = margin_y + (stack_index * (height + spacing))
-            elif self.config["corner"] == "bottom_right":
-                x = screen_width - width - margin_x
-                y = screen_height - margin_y - height - (stack_index * (height + spacing))
-            elif self.config["corner"] == "bottom_left":
-                x = margin_x
-                y = screen_height - margin_y - height - (stack_index * (height + spacing))
+            # Get current screen dimensions for bounds checking
+            if qtile and qtile.current_screen:
+                screen_height = qtile.current_screen.height
             else:
-                x = screen_width - width - margin_x
-                y = margin_y + (stack_index * (height + spacing))
+                screen_height = 1080
 
-            # Keep on screen
-            x = max(0, min(x, screen_width - width))
-            y = max(0, min(y, screen_height - height))
+            # For qtile-extras relative positioning:
+            # relative_to=3 (top-right) with relative_to_bar=True
+            # x,y are offsets from the top-right corner (after bar adjustment)
+
+            # X offset: negative margin to move left from right edge
+            # For relative_to=3, negative x moves popup left to stay on screen
+            x = -margin_x
+
+            # Y offset: margin from top + stack position
+            y = margin_y + (stack_index * (height + spacing))
+
+            # Bounds checking: if notification would go below screen, limit stack
+            max_y = screen_height - height - margin_y
+            if y > max_y:
+                # Calculate how many notifications can fit
+                max_notifications = max(1, int((max_y - margin_y) / (height + spacing)) + 1)
+                # Reposition within bounds
+                y = margin_y + ((stack_index % max_notifications) * (height + spacing))
+
+            logger.debug(f"Positioning notification at offset x={x}, y={y}")
 
             return (x, y)
-        except Exception:
-            return (100, 100)
+        except Exception as e:
+            logger.error(f"Position calculation error: {e}")
+            return (-370, 60)
 
     def _dismiss_oldest(self) -> None:
         """Dismiss the oldest notification"""
@@ -388,10 +426,11 @@ def _notification_callback(notification):
         logger.error(f"Traceback: {traceback.format_exc()}")
 
 
-def setup_popup_notifications(color_manager: Any, config: Optional[Dict[str, Any]] = None) -> None:
+def setup_popup_notifications(color_manager: Any, qtile_config: Any = None, config: Optional[Dict[str, Any]] = None) -> None:
     """
     @brief Set up popup notifications using hooks
     @param color_manager: Color management instance
+    @param qtile_config: Qtile configuration instance for positioning
     @param config: Optional configuration dictionary
     """
     global _popup_manager
@@ -403,10 +442,15 @@ def setup_popup_notifications(color_manager: Any, config: Optional[Dict[str, Any
     # Create popup manager
     _popup_manager = SimplePopupManager(color_manager)
 
-    # Apply custom configuration
+    # Apply custom configuration first
     if config:
         _popup_manager.config.update(config)
         _popup_manager._update_colors()
+
+    # Set qtile config for smart positioning (after custom config)
+    if qtile_config:
+        _popup_manager.qtile_config = qtile_config
+        _popup_manager._adjust_positioning()
 
     # Hook into D-Bus notifications to show popups (DISABLED - causing D-Bus issues)
     # TODO: Find a better way to intercept notify-send commands
