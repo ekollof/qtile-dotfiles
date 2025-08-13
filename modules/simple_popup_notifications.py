@@ -22,6 +22,8 @@ Usage:
     setup_popup_notifications(qtile, color_manager)
 """
 
+import html
+import re
 import time
 from dataclasses import dataclass
 from pathlib import Path
@@ -224,6 +226,38 @@ class SimplePopupManager:
 
         self._show_notification_object(notification)
 
+    def _sanitize_markup(self, text: str) -> str:
+        """
+        @brief Sanitize HTML content for safe Pango markup display
+        @param text: Raw text that may contain HTML
+        @return Sanitized text with safe Pango markup
+        """
+        if not text:
+            return ""
+
+        # Unescape HTML entities first
+        text = html.unescape(text)
+
+        # Convert common HTML tags to Pango markup
+        # Handle links by extracting the text content
+        text = re.sub(r'<a[^>]*href=["\']([^"\']*)["\'][^>]*>(.*?)</a>', r'\2 (\1)', text)
+
+        # Convert other HTML formatting to Pango equivalents
+        text = re.sub(r'<b>(.*?)</b>', r'<b>\1</b>', text)
+        text = re.sub(r'<strong>(.*?)</strong>', r'<b>\1</b>', text)
+        text = re.sub(r'<i>(.*?)</i>', r'<i>\1</i>', text)
+        text = re.sub(r'<em>(.*?)</em>', r'<i>\1</i>', text)
+        text = re.sub(r'<u>(.*?)</u>', r'<u>\1</u>', text)
+
+        # Remove any remaining HTML tags for safety
+        text = re.sub(r'<[^>]+>', '', text)
+
+        # Escape any remaining angle brackets that aren't Pango markup
+        text = re.sub(r'<(?![biu/])', '&lt;', text)
+        text = re.sub(r'(?<![biu])>', '&gt;', text)
+
+        return text
+
     def _create_popup(self, notification: PopupNotification, x: int, y: int) -> PopupRelativeLayout:
         """
         @brief Create popup layout for notification
@@ -321,9 +355,12 @@ class SimplePopupManager:
             msg_y = 0.5 if notification.title else 0.2
             msg_height = 0.4 if notification.title else 0.6
 
+            # Sanitize message content for safe HTML/markup display
+            sanitized_message = self._sanitize_markup(notification.message)
+
             controls.append(
                 PopupText(
-                    text=notification.message,
+                    text=sanitized_message,
                     pos_x=message_x,
                     pos_y=msg_y,
                     width=message_width,
@@ -331,6 +368,7 @@ class SimplePopupManager:
                     fontsize=scale_font(14),
                     foreground=fg_color,
                     font=font_family,
+                    markup=True,
                     h_align="left",
                     v_align="top",
                     wrap=True,
