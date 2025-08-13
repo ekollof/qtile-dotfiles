@@ -15,6 +15,7 @@ Features:
 - Compatible with libnotify and notify-send
 """
 
+import os
 from typing import Any, Dict
 
 from libqtile import widget
@@ -64,8 +65,33 @@ class PopupNotifyWidget(widget.Notify):
                 urgency_map = {0: 'low', 1: 'normal', 2: 'critical'}
                 urgency = urgency_map.get(raw_urgency, 'normal')
 
+                # Extract icon information from D-Bus notification
+                icon_path = None
+                try:
+                    # Check app_icon attribute (this is where notify-send puts icons)
+                    icon_path = getattr(notification, 'app_icon', None)
+
+                    # Fallback to hints if app_icon is empty
+                    if not icon_path:
+                        hints = getattr(notification, 'hints', {})
+                        if hints:
+                            icon_path = (hints.get('image-path') or
+                                       hints.get('image_path') or
+                                       hints.get('icon_data'))
+
+                    # Validate icon path exists
+                    if icon_path and not os.path.exists(str(icon_path)):
+                        logger.debug(f"Icon path not found: {icon_path}")
+                        icon_path = None
+                    elif icon_path:
+                        logger.debug(f"Found valid icon: {icon_path}")
+
+                except Exception as e:
+                    logger.warning(f"Error extracting icon: {e}")
+                    icon_path = None
+
                 # Show popup using simple popup system
-                show_popup_notification(title, message, urgency)
+                show_popup_notification(title, message, urgency, icon_path)
             else:
                 # show_popups is False - not showing popup
                 pass

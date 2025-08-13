@@ -25,6 +25,7 @@ Usage:
 import time
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
+import os
 
 from libqtile import qtile
 from libqtile.log_utils import logger
@@ -48,13 +49,14 @@ except ImportError:
 
 @dataclass
 class PopupNotification:
-    """Simple notification data structure"""
+    """Represents a popup notification"""
     title: str
     message: str
     urgency: str
     created_at: float
     timeout: float
     popup_layout: Optional[Any] = None
+    icon: Optional[str] = None
 
 
 class SimplePopupManager:
@@ -137,25 +139,20 @@ class SimplePopupManager:
             logger.warning(f"Could not adjust positioning: {e}")
             # Keep defaults
 
-    def show_notification(self, title: str, message: str, urgency: str = "normal") -> None:
+    def _show_notification_object(self, notification: PopupNotification) -> None:
         """
-        @brief Show a popup notification
-        @param title: Notification title
-        @param message: Notification message
-        @param urgency: Urgency level (low, normal, critical)
+        @brief Show a popup notification using notification object
+        @param notification: PopupNotification object with all details
         """
-        if not QTILE_EXTRAS_AVAILABLE or not qtile:
-            return
-
-        # Determine timeout based on urgency
-        if urgency == "critical":
-            timeout = self.config["timeout_critical"]
-        elif urgency == "low":
-            timeout = self.config["timeout_low"]
+        # Determine timeout
+        if notification.urgency == "critical":
+            timeout = 0.0  # Never timeout
+        elif notification.urgency == "low":
+            timeout = 3.0
         else:
-            timeout = self.config["timeout_normal"]
+            timeout = 5.0
 
-        # Limit active notifications
+        # Dismiss oldest if we have too many
         while len(self.active_notifications) >= self.max_notifications:
             self._dismiss_oldest()
 
@@ -163,14 +160,8 @@ class SimplePopupManager:
         stack_index = len(self.active_notifications)
         x, y = self._calculate_position(stack_index)
 
-        # Create notification object
-        notification = PopupNotification(
-            title=title,
-            message=message,
-            urgency=urgency,
-            created_at=time.time(),
-            timeout=timeout
-        )
+        # Update notification with position
+        notification.timeout = timeout
 
         # Create and show popup
         try:
@@ -186,7 +177,7 @@ class SimplePopupManager:
             notification.popup_layout = popup_layout
             self.active_notifications.append(notification)
 
-            logger.info(f"Showed popup notification: {title}")
+            logger.info(f"Showed popup notification: {notification.title}")
 
             # Schedule cleanup if needed
             if timeout > 0 and not self.cleanup_scheduled:
@@ -194,6 +185,26 @@ class SimplePopupManager:
 
         except Exception as e:
             logger.error(f"Failed to show popup notification: {e}")
+
+    def show_notification(self, title: str, message: str, urgency: str = "normal", icon: str = None) -> None:
+        """
+        @brief Show a popup notification
+        @param title: Notification title
+        @param message: Notification message
+        @param urgency: Urgency level (low, normal, critical)
+        @param icon: Optional icon path
+        """
+        # Create notification object and delegate to internal method
+        notification = PopupNotification(
+            title=title,
+            message=message,
+            urgency=urgency,
+            created_at=time.time(),
+            timeout=0.0,  # Will be set by _show_notification_object
+            icon=icon
+        )
+
+        self._show_notification_object(notification)
 
     def _create_popup(self, notification: PopupNotification, x: int, y: int) -> PopupRelativeLayout:
         """Create popup layout for notification"""
@@ -216,24 +227,63 @@ class SimplePopupManager:
         # Create controls
         controls = []
 
-        # Get theme-aware font
+        # Get theme-aware font with debugging
         font_family = "sans-serif"
         if self.qtile_config and hasattr(self.qtile_config, 'preferred_font'):
-            font_family = get_available_font(self.qtile_config.preferred_font)
+            preferred_font = self.qtile_config.preferred_font
+            font_family = get_available_font(preferred_font)
+            logger.debug(f"Font selection: preferred='{preferred_font}' -> selected='{font_family}'")
+        else:
+            logger.debug(f"No qtile_config or preferred_font, using fallback: '{font_family}'")
+
+        # Check for notification icon
+        has_icon = False
+        icon_path = None
+        if notification.icon and os.path.exists(notification.icon):
+            has_icon = True
+            icon_path = notification.icon
+            logger.debug(f"Found notification icon: {icon_path}")
+
+        # Adjust layout for icon
+        title_x = 0.25 if has_icon else 0.05
+        title_width = 0.7 if has_icon else 0.9
+        message_x = 0.25 if has_icon else 0.05
+        message_width = 0.7 if has_icon else 0.9
+
+        # Add icon if present
+        if has_icon and icon_path:
+            try:
+                from qtile_extras.popup.toolkit import PopupImage
+                controls.append(
+                    PopupImage(
+                        filename=icon_path,
+                        pos_x=0.05,
+                        pos_y=0.1,
+                        width=0.15,
+                        height=0.8,
+                        highlight=fg_color,
+                    )
+                )
+                logger.debug(f"Added icon to popup: {icon_path}")
+            except Exception as e:
+                logger.warning(f"Failed to add icon: {e}")
+                # Reset layout if icon failed
+                title_x = message_x = 0.05
+                title_width = message_width = 0.9
 
         # Title (if present)
         if notification.title:
             controls.append(
                 PopupText(
-                    text=notification.title,
-                    pos_x=0.05,
+                    text=f"<b>{notification.title}</b>",
+                    pos_x=title_x,
                     pos_y=0.1,
-                    width=0.9,
+                    width=title_width,
                     height=0.35,
                     fontsize=scale_font(16),
                     foreground=fg_color,
-                    font_family=font_family,
-                    font_weight="bold",
+                    font=font_family,
+                    markup=True,
                     h_align="left",
                     v_align="top",
                     wrap=True,
@@ -249,13 +299,13 @@ class SimplePopupManager:
             controls.append(
                 PopupText(
                     text=notification.message,
-                    pos_x=0.05,
+                    pos_x=message_x,
                     pos_y=msg_y,
-                    width=0.9,
+                    width=message_width,
                     height=msg_height,
                     fontsize=scale_font(14),
                     foreground=fg_color,
-                    font_family=font_family,
+                    font=font_family,
                     h_align="left",
                     v_align="top",
                     wrap=True,
@@ -460,19 +510,29 @@ def setup_popup_notifications(color_manager: Any, qtile_config: Any = None, conf
     logger.info("Simple popup notifications enabled")
 
 
-def show_popup_notification(title: str, message: str, urgency: str = "normal") -> None:
+def show_popup_notification(title: str, message: str, urgency: str = "normal", icon: str = None) -> None:
     """
     @brief Show a popup notification
     @param title: Notification title
     @param message: Notification message
     @param urgency: Urgency level (low, normal, critical)
+    @param icon: Optional icon path
     """
 
 
     if _popup_manager:
 
         try:
-            _popup_manager.show_notification(title, message, urgency)
+            # Create notification object with icon
+            notification = PopupNotification(
+                title=title,
+                message=message,
+                urgency=urgency,
+                created_at=time.time(),
+                timeout=0.0,  # Will be set by _show_notification_object
+                icon=icon
+            )
+            _popup_manager._show_notification_object(notification)
 
         except Exception as e:
             logger.error(f"Error in _popup_manager.show_notification: {e}")
