@@ -351,6 +351,71 @@ class SimplePopupManager:
         except Exception as e:
             logger.error(f"Failed to open URL {url}: {e}")
 
+    def _calculate_text_height(self, text: str, width: int, font_size: int, has_title: bool) -> int:
+        """
+        @brief Calculate required height for text content with proper word wrapping
+        @param text: Text content to measure
+        @param width: Available width for text
+        @param font_size: Font size in points
+        @param has_title: Whether notification has a title
+        @return Required height in pixels
+        """
+        if not text:
+            base_height = self.config["height"]
+            return max(base_height, 80)
+
+        # Remove HTML markup for length calculation
+        import re
+        clean_text = re.sub(r'<[^>]+>', '', text)
+
+        # Estimate character width (more accurate than 0.6)
+        # Monospace fonts are wider, proportional fonts vary
+        avg_char_width = font_size * 0.55  # Slightly more accurate estimation
+        available_chars = max(1, int((width * 0.9) / avg_char_width))  # 90% width for padding
+
+        # Split into paragraphs first
+        paragraphs = clean_text.split('\n')
+        total_lines = 0
+
+        for paragraph in paragraphs:
+            if not paragraph.strip():
+                total_lines += 1  # Empty line
+                continue
+
+            # Split paragraph into words
+            words = paragraph.split()
+            if not words:
+                total_lines += 1
+                continue
+
+            current_line_length = 0
+            lines_in_paragraph = 1
+
+            for word in words:
+                word_length = len(word)
+                # Check if adding this word would exceed line length
+                if current_line_length > 0 and current_line_length + word_length + 1 > available_chars:
+                    lines_in_paragraph += 1
+                    current_line_length = word_length
+                else:
+                    current_line_length += word_length + (1 if current_line_length > 0 else 0)
+
+            total_lines += lines_in_paragraph
+
+        # Calculate height components
+        title_height = 45 if has_title else 0
+        line_height = int(font_size * 1.4)  # Better line spacing
+        text_height = total_lines * line_height
+        padding = 30  # Top and bottom padding
+
+        total_height = title_height + text_height + padding
+
+        # Ensure reasonable bounds
+        min_height = self.config["height"]
+        max_height = 500  # Increased max height for very long messages
+
+        return max(min_height, min(max_height, int(total_height)))
+
     def _create_popup(self, notification: PopupNotification, x: int, y: int) -> Any:
         """
         @brief Create popup layout for notification
@@ -365,10 +430,17 @@ class SimplePopupManager:
         total_buttons = len(actions_list) + len(urls)
         has_buttons = total_buttons > 0
 
-        # Adjust popup height for buttons
-        popup_height = self.config["height"]
+        # Calculate required height based on text content
+        popup_height = self._calculate_text_height(
+            sanitized_message,
+            self.config["width"],
+            scale_font(14),
+            bool(notification.title)
+        )
+
+        # Add extra height for buttons if present
         if has_buttons:
-            popup_height = int(popup_height * 1.4)  # 40% taller for buttons
+            popup_height += 50  # Fixed additional height for button area
         # Choose colors based on urgency using match statement
         match notification.urgency:
             case "critical":
@@ -460,13 +532,13 @@ class SimplePopupManager:
         # Message text
         # Message text with URL extraction
         if notification.message:
-            # Adjust message area height if we have buttons
-            if has_buttons:
-                msg_y = 0.5 if notification.title else 0.25
-                msg_height = 0.25 if notification.title else 0.5
-            else:
-                msg_y = 0.5 if notification.title else 0.2
-                msg_height = 0.4 if notification.title else 0.6
+            # Calculate message area positioning based on content and buttons
+            title_height = 0.35 if notification.title else 0
+            button_space = 50 if has_buttons else 0
+            available_height = popup_height - button_space - (40 if notification.title else 20)
+
+            msg_y = (40 + title_height * popup_height) / popup_height if notification.title else 20 / popup_height
+            msg_height = available_height / popup_height
 
             assert PopupText is not None
             controls.append(
@@ -494,7 +566,8 @@ class SimplePopupManager:
                 for url in urls[:2]:  # Limit to first 2 URLs to avoid crowding
                     button_width = 0.4 if total_buttons <= 2 else 0.3
                     button_x = 0.05 + (current_button * (button_width + 0.05))
-                    button_y = 0.75
+                    # Position buttons at bottom, accounting for dynamic height
+                    button_y = 1.0 - (45 / popup_height)
 
                     def make_url_handler(target_url: str = url, mgr: Any = self):
                         def handler(
@@ -541,7 +614,8 @@ class SimplePopupManager:
                 for _i, (action_key, action_label) in enumerate(actions_list):
                     button_width = 0.4 if total_buttons <= 2 else 0.3
                     button_x = 0.05 + (current_button * (button_width + 0.05))
-                    button_y = 0.75
+                    # Position buttons at bottom, accounting for dynamic height
+                    button_y = 1.0 - (45 / popup_height)
 
                     def make_action_handler(
                         key: str = action_key,
