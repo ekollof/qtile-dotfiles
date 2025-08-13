@@ -351,27 +351,32 @@ class SimplePopupManager:
         except Exception as e:
             logger.error(f"Failed to open URL {url}: {e}")
 
-    def _calculate_text_height(self, text: str, width: int, font_size: int, has_title: bool) -> int:
+    def _calculate_text_height(self, text: str, width: int, message_font_size: int, has_title: bool, title_font_size: int | None = None) -> int:
         """
         @brief Calculate required height for text content with proper word wrapping
         @param text: Text content to measure
         @param width: Available width for text
-        @param font_size: Font size in points
+        @param message_font_size: DPI-scaled font size for message text
         @param has_title: Whether notification has a title
+        @param title_font_size: DPI-scaled font size for title text
         @return Required height in pixels
         """
         if not text:
             base_height = self.config["height"]
+            logger.debug(f"Empty text, using base height: {base_height}px")
             return max(base_height, 80)
 
         # Remove HTML markup for length calculation
         import re
         clean_text = re.sub(r'<[^>]+>', '', text)
 
-        # Estimate character width (more accurate than 0.6)
-        # Monospace fonts are wider, proportional fonts vary
-        avg_char_width = font_size * 0.55  # Slightly more accurate estimation
-        available_chars = max(1, int((width * 0.9) / avg_char_width))  # 90% width for padding
+        # More conservative character width estimation
+        # Account for proportional fonts being narrower on average
+        avg_char_width = message_font_size * 0.45  # More conservative estimation
+        text_area_width = width * 0.85  # Account for margins and padding
+        available_chars = max(20, int(text_area_width / avg_char_width))  # Minimum 20 chars per line
+
+        logger.debug(f"Text calc: font={message_font_size}px, width={width}px, chars_per_line={available_chars}")
 
         # Split into paragraphs first
         paragraphs = clean_text.split('\n')
@@ -382,7 +387,7 @@ class SimplePopupManager:
                 total_lines += 1  # Empty line
                 continue
 
-            # Split paragraph into words
+            # Split paragraph into words for proper word wrapping
             words = paragraph.split()
             if not words:
                 total_lines += 1
@@ -393,8 +398,8 @@ class SimplePopupManager:
 
             for word in words:
                 word_length = len(word)
-                # Check if adding this word would exceed line length
-                if current_line_length > 0 and current_line_length + word_length + 1 > available_chars:
+                # Check if adding this word would exceed line length (including space)
+                if current_line_length > 0 and current_line_length + 1 + word_length > available_chars:
                     lines_in_paragraph += 1
                     current_line_length = word_length
                 else:
@@ -402,19 +407,28 @@ class SimplePopupManager:
 
             total_lines += lines_in_paragraph
 
-        # Calculate height components
-        title_height = 45 if has_title else 0
-        line_height = int(font_size * 1.4)  # Better line spacing
-        text_height = total_lines * line_height
-        padding = 30  # Top and bottom padding
+        logger.debug(f"Text lines calculated: {total_lines} lines for text: '{clean_text[:50]}...'")
 
-        total_height = title_height + text_height + padding
+        # Calculate height components using DPI-scaled font sizes
+        title_font = title_font_size or scale_font(16)
+        title_height = int(title_font * 1.8) + 10 if has_title else 0  # Extra padding for title
+        line_height = int(message_font_size * 1.5)  # More generous line spacing
+        text_height = total_lines * line_height
+        top_padding = 15
+        bottom_padding = 15
+
+        total_height = top_padding + title_height + text_height + bottom_padding
+
+        logger.debug(f"Height components: title={title_height}px, text={text_height}px, padding={top_padding + bottom_padding}px")
 
         # Ensure reasonable bounds
-        min_height = self.config["height"]
-        max_height = 500  # Increased max height for very long messages
+        min_height = max(self.config["height"], 100)  # Higher minimum
+        max_height = 600  # Higher maximum for very long messages
 
-        return max(min_height, min(max_height, int(total_height)))
+        final_height = max(min_height, min(max_height, int(total_height)))
+        logger.debug(f"Final calculated height: {final_height}px")
+
+        return final_height
 
     def _create_popup(self, notification: PopupNotification, x: int, y: int) -> Any:
         """
@@ -430,17 +444,20 @@ class SimplePopupManager:
         total_buttons = len(actions_list) + len(urls)
         has_buttons = total_buttons > 0
 
-        # Calculate required height based on text content
+        # Calculate required height based on text content with DPI-scaled fonts
         popup_height = self._calculate_text_height(
             sanitized_message,
             self.config["width"],
-            scale_font(14),
-            bool(notification.title)
+            scale_font(14),  # Message font size
+            bool(notification.title),
+            scale_font(16)   # Title font size
         )
 
-        # Add extra height for buttons if present
+        # Add extra height for buttons if present (scale with font size)
         if has_buttons:
-            popup_height += 50  # Fixed additional height for button area
+            button_height = max(45, int(scale_font(12) * 3))  # More generous button area
+            popup_height += button_height
+            logger.debug(f"Added {button_height}px for buttons, total height: {popup_height}px")
         # Choose colors based on urgency using match statement
         match notification.urgency:
             case "critical":
@@ -511,20 +528,21 @@ class SimplePopupManager:
         # Title (if present)
         if notification.title and _QTILE_EXTRAS_AVAILABLE:
             assert PopupText is not None
+            title_font_size = scale_font(16)
+            title_height_px = int(title_font_size * 1.5)
             controls.append(
                 PopupText(
                     text=f"<b>{notification.title}</b>",
                     pos_x=title_x,
-                    pos_y=0.1,
+                    pos_y=10 / popup_height,  # 10px from top
                     width=title_width,
-                    height=0.35,
-                    fontsize=scale_font(16),
+                    height=title_height_px / popup_height,
+                    fontsize=title_font_size,
                     foreground=fg_color,
                     font=font_family,
                     markup=True,
                     h_align="left",
                     v_align="top",
-                    wrap=True,
                 )
             )
 
@@ -532,13 +550,22 @@ class SimplePopupManager:
         # Message text
         # Message text with URL extraction
         if notification.message:
-            # Calculate message area positioning based on content and buttons
-            title_height = 0.35 if notification.title else 0
-            button_space = 50 if has_buttons else 0
-            available_height = popup_height - button_space - (40 if notification.title else 20)
+            # Calculate message area positioning based on actual pixel heights
+            title_font_size = scale_font(16)
+            title_height_px = int(title_font_size * 1.8) + 10 if notification.title else 0
+            button_area_px = max(45, int(scale_font(12) * 3)) if has_buttons else 0
+            top_margin = 15
+            title_margin = 8 if notification.title else 0
+            bottom_margin = 15
 
-            msg_y = (40 + title_height * popup_height) / popup_height if notification.title else 20 / popup_height
-            msg_height = available_height / popup_height
+            # Message starts after title (if present) plus margins
+            msg_y_px = top_margin + title_height_px + title_margin
+            msg_height_px = popup_height - msg_y_px - button_area_px - bottom_margin
+
+            msg_y = msg_y_px / popup_height
+            msg_height = max(0.15, msg_height_px / popup_height)  # Ensure reasonable minimum height
+
+            logger.debug(f"Message positioning: y={msg_y_px}px ({msg_y:.2%}), height={msg_height_px}px ({msg_height:.2%})")
 
             assert PopupText is not None
             controls.append(
@@ -566,8 +593,10 @@ class SimplePopupManager:
                 for url in urls[:2]:  # Limit to first 2 URLs to avoid crowding
                     button_width = 0.4 if total_buttons <= 2 else 0.3
                     button_x = 0.05 + (current_button * (button_width + 0.05))
-                    # Position buttons at bottom, accounting for dynamic height
-                    button_y = 1.0 - (45 / popup_height)
+                    # Position buttons at bottom with fixed margin
+                    button_margin_bottom = 15
+                    button_height_px = max(35, int(scale_font(11) * 2.5))
+                    button_y = 1.0 - ((button_height_px + button_margin_bottom) / popup_height)
 
                     def make_url_handler(target_url: str = url, mgr: Any = self):
                         def handler(
@@ -590,7 +619,7 @@ class SimplePopupManager:
                             pos_x=button_x,
                             pos_y=button_y,
                             width=button_width,
-                            height=0.15,
+                            height=max(35, int(scale_font(11) * 2.5)) / popup_height,
                             fontsize=scale_font(11),
                             foreground="#ffffff",
                             background="#0066cc",  # Blue button color
@@ -614,8 +643,10 @@ class SimplePopupManager:
                 for _i, (action_key, action_label) in enumerate(actions_list):
                     button_width = 0.4 if total_buttons <= 2 else 0.3
                     button_x = 0.05 + (current_button * (button_width + 0.05))
-                    # Position buttons at bottom, accounting for dynamic height
-                    button_y = 1.0 - (45 / popup_height)
+                    # Position buttons at bottom with fixed margin
+                    button_margin_bottom = 15
+                    button_height_px = max(35, int(scale_font(12) * 2.5))
+                    button_y = 1.0 - ((button_height_px + button_margin_bottom) / popup_height)
 
                     def make_action_handler(
                         key: str = action_key,
@@ -648,7 +679,7 @@ class SimplePopupManager:
                             pos_x=button_x,
                             pos_y=button_y,
                             width=button_width,
-                            height=0.15,
+                            height=max(35, int(scale_font(12) * 2.5)) / popup_height,
                             fontsize=scale_font(12),
                             foreground="#ffffff",
                             background="#28a745",  # Green button color
