@@ -437,10 +437,16 @@ class ComplianceAuditor:
         complexity = 1  # Base complexity
 
         for child in ast.walk(node):
-            if (
-                isinstance(child, ast.If | ast.While | ast.For | ast.AsyncFor)
-                or isinstance(child, ast.ExceptHandler)
-                or isinstance(child, ast.ListComp | ast.DictComp | ast.SetComp)
+            if isinstance(
+                child,
+                ast.If
+                | ast.While
+                | ast.For
+                | ast.AsyncFor
+                | ast.ExceptHandler
+                | ast.ListComp
+                | ast.DictComp
+                | ast.SetComp,
             ):
                 complexity += 1
 

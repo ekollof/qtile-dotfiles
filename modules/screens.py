@@ -108,12 +108,15 @@ class ScreenManager:
             lines = result.stdout.split("\n")
             connected_count = 0
             for line in lines:
-                if " connected " in line and not line.startswith(" "):
-                    if any(
+                if (
+                    " connected " in line
+                    and not line.startswith(" ")
+                    and any(
                         char.isdigit() and "x" in line.split("connected")[1]
                         for char in line.split("connected")[1]
-                    ):
-                        connected_count += 1
+                    )
+                ):
+                    connected_count += 1
 
             if connected_count > 0:
                 self.num_screens = connected_count

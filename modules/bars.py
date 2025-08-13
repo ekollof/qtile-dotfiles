@@ -7,11 +7,11 @@ Integrates SVG utilities for theme-aware, scalable icon generation
 @author qtile configuration system
 """
 
+import contextlib
 import os
 import platform
 import socket
 import subprocess
-import contextlib
 import traceback
 from pathlib import Path
 from typing import Any
@@ -21,9 +21,8 @@ from libqtile.log_utils import logger
 from qtile_extras import widget
 
 from modules.dpi_utils import scale_font, scale_size
-from modules.svg_utils import create_themed_icon_cache, get_svg_utils
-
 from modules.popup_notify_widget import create_popup_notify_widget
+from modules.svg_utils import create_themed_icon_cache, get_svg_utils
 
 
 class EnhancedBarManager:
@@ -74,8 +73,6 @@ class EnhancedBarManager:
         # Generate themed icon cache (may use fallback colors initially)
         self._update_themed_icon_cache()
 
-
-
         # Setup popup notifications using simple popup system
         notification_settings = self.qtile_config.notification_settings
         if notification_settings.get("use_popups", False):
@@ -86,11 +83,14 @@ class EnhancedBarManager:
                 "margin_x": 20,
                 "margin_y": 60,
                 "spacing": 10,
-                "timeout_normal": notification_settings.get("default_timeout", 5000) / 1000.0,
-                "timeout_low": notification_settings.get("default_timeout_low", 3000) / 1000.0,
+                "timeout_normal": notification_settings.get("default_timeout", 5000)
+                / 1000.0,
+                "timeout_low": notification_settings.get("default_timeout_low", 3000)
+                / 1000.0,
                 "timeout_critical": 0.0,
             }
             from modules.simple_popup_notifications import setup_popup_notifications
+
             setup_popup_notifications(color_manager, self.qtile_config, popup_config)
             logger.info("Simple popup notifications configured and enabled")
 
@@ -938,18 +938,37 @@ class EnhancedBarManager:
                         **self._get_widget_defaults_excluding("background"),
                         foreground=special.get("foreground", "#ffffff"),
                         background=special.get("background", "#000000"),
-                        default_timeout=notification_settings.get("default_timeout", 5000) // 1000,
-                        default_timeout_low=notification_settings.get("default_timeout_low", 3000) // 1000,
-                        default_timeout_urgent=notification_settings.get("default_timeout_urgent", 0) // 1000 if notification_settings.get("default_timeout_urgent", 0) > 0 else None,
+                        default_timeout=notification_settings.get(
+                            "default_timeout", 5000
+                        )
+                        // 1000,
+                        default_timeout_low=notification_settings.get(
+                            "default_timeout_low", 3000
+                        )
+                        // 1000,
+                        default_timeout_urgent=notification_settings.get(
+                            "default_timeout_urgent", 0
+                        )
+                        // 1000
+                        if notification_settings.get("default_timeout_urgent", 0) > 0
+                        else None,
                         action=notification_settings.get("enable_actions", True),
-                        audiofile=None if not notification_settings.get("enable_sound", False) else notification_settings.get("sound_file"),
+                        audiofile=None
+                        if not notification_settings.get("enable_sound", False)
+                        else notification_settings.get("sound_file"),
                         show_in_bar=show_in_bar,
                         show_popups=use_popups,
                     )
 
                     barconfig.append(notification_widget)
-                    mode_desc = "popup" if use_popups and not show_in_bar else ("popup + bar" if use_popups else "bar only")
-                    logger.info(f"Added popup notification widget to primary screen ({mode_desc})")
+                    mode_desc = (
+                        "popup"
+                        if use_popups and not show_in_bar
+                        else ("popup + bar" if use_popups else "bar only")
+                    )
+                    logger.info(
+                        f"Added popup notification widget to primary screen ({mode_desc})"
+                    )
                 else:
                     logger.info("Notification system disabled in configuration")
             except Exception as e:

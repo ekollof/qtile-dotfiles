@@ -62,10 +62,6 @@ if [ -f ~/.Xresources ]; then
 	xrdb ~/.Xresources >/dev/null &
 fi
 
-
-
-
-
 # Set wallpaper
 if [ -f "${HOME}/.wallpaper" ]; then
 	wallpaper="$(cat "${HOME}/.wallpaper")"

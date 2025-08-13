@@ -250,14 +250,14 @@ class PlatformConfig:
             "linux": {
                 "lock_session": "loginctl lock-session",
                 "clipboard_manager": "clipmenu.sh",
-                "clipmenu" "screenshot": "flameshot gui",
+                "clipmenuscreenshot": "flameshot gui",
                 "audio_mixer": "pavucontrol",
                 "network_manager": "nm-connection-editor",
             },
             "openbsd": {
                 "lock_session": "xlock",
                 "clipboard_manager": "clipmenu.sh",
-                "clipmenu" "screenshot": "xwd | xwdtopnm | pnmtopng",
+                "clipmenuscreenshot": "xwd | xwdtopnm | pnmtopng",
                 "audio_mixer": "mixerctl",
                 "network_manager": "ifconfig",
             },

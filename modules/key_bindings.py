@@ -12,7 +12,13 @@ from libqtile.lazy import lazy
 class KeyBindings:
     """Defines all keyboard bindings for qtile"""
 
-    def __init__(self, config: Any, layout_commands: Any, window_commands: Any, system_commands: Any):
+    def __init__(
+        self,
+        config: Any,
+        layout_commands: Any,
+        window_commands: Any,
+        system_commands: Any,
+    ):
         self.config = config
         self.layout_commands = layout_commands
         self.window_commands = window_commands

@@ -30,26 +30,41 @@ import webbrowser
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
-import os
 
 from libqtile import qtile
 from libqtile.log_utils import logger
-from modules.font_utils import get_available_font
+
 from modules.dpi_utils import scale_font, scale_size
+from modules.font_utils import get_available_font
 
-try:
-    import libqtile.notify
-    NOTIFY_AVAILABLE = True
-except ImportError:
-    NOTIFY_AVAILABLE = False
-    logger.warning("libqtile.notify not available")
 
-try:
-    from qtile_extras.popup.toolkit import PopupRelativeLayout, PopupText
-    QTILE_EXTRAS_AVAILABLE = True
-except ImportError:
-    QTILE_EXTRAS_AVAILABLE = False
-    logger.warning("qtile-extras not available - popup notifications disabled")
+def _check_notify_availability() -> bool:
+    """Check if libqtile.notify is available"""
+    try:
+        import importlib.util
+
+        return importlib.util.find_spec("libqtile.notify") is not None
+    except ImportError:
+        logger.warning("libqtile.notify not available")
+        return False
+
+
+NOTIFY_AVAILABLE = _check_notify_availability()
+
+
+# Check qtile-extras availability and import components
+def _get_qtile_extras_components():
+    """Get qtile-extras components if available"""
+    try:
+        from qtile_extras.popup.toolkit import PopupRelativeLayout, PopupText
+
+        return True, PopupRelativeLayout, PopupText
+    except ImportError:
+        logger.warning("qtile-extras not available - popup notifications disabled")
+        return False, None, None
+
+
+_QTILE_EXTRAS_AVAILABLE, PopupRelativeLayout, PopupText = _get_qtile_extras_components()
 
 
 @dataclass
@@ -67,6 +82,7 @@ class PopupNotification:
     @param notification_id: D-Bus notification ID for action callbacks
     @param callback: Callback function for action button clicks
     """
+
     title: str
     message: str
     urgency: str
@@ -74,7 +90,7 @@ class PopupNotification:
     timeout: float
     popup_layout: Any | None = None
     icon: str | None = None
-    actions: list[tuple[str, str]] = None
+    actions: list[tuple[str, str]] | None = None
     notification_id: int = 0
     callback: Any | None = None
 
@@ -114,9 +130,9 @@ class SimplePopupManager:
             "corner": "top_right",
         }
 
-        self._update_colors()
+        self.update_colors()
 
-    def _update_colors(self) -> None:
+    def update_colors(self) -> None:
         """
         @brief Update colors from color manager
         @throws Exception: When color manager fails to provide colors
@@ -140,13 +156,17 @@ class SimplePopupManager:
             logger.debug(f"Failed to update colors: {e}")
             # Fallback colors
             self.colors = {
-                "bg_normal": "1e1e1e", "fg_normal": "ffffff",
-                "bg_urgent": "3e1e1e", "fg_urgent": "ff6666",
-                "bg_low": "1e1e1e", "fg_low": "888888",
-                "border_normal": "555555", "border_urgent": "ff0000",
+                "bg_normal": "1e1e1e",
+                "fg_normal": "ffffff",
+                "bg_urgent": "3e1e1e",
+                "fg_urgent": "ff6666",
+                "bg_low": "1e1e1e",
+                "fg_low": "888888",
+                "border_normal": "555555",
+                "border_urgent": "ff0000",
             }
 
-    def _adjust_positioning(self) -> None:
+    def adjust_positioning(self) -> None:
         """Adjust popup positioning to respect bar height and gaps"""
         if not self.qtile_config:
             return
@@ -165,7 +185,9 @@ class SimplePopupManager:
             # Adjust margin_x to account for gap
             self.config["margin_x"] = layout_margin + scale_size(10)
 
-            logger.debug(f"Adjusted positioning: margin_x={self.config['margin_x']}, margin_y={self.config['margin_y']}")
+            logger.debug(
+                f"Adjusted positioning: margin_x={self.config['margin_x']}, margin_y={self.config['margin_y']}"
+            )
 
         except Exception as e:
             logger.warning(f"Could not adjust positioning: {e}")
@@ -203,7 +225,7 @@ class SimplePopupManager:
                 x=x,
                 y=y,
                 relative_to=3,  # Top-right corner
-                relative_to_bar=True  # Auto-adjust for bars and gaps
+                relative_to_bar=True,  # Auto-adjust for bars and gaps
             )
 
             notification.popup_layout = popup_layout
@@ -226,7 +248,7 @@ class SimplePopupManager:
         icon: str | None = None,
         actions: list[tuple[str, str]] | None = None,
         notification_id: int = 0,
-        callback: Any | None = None
+        callback: Any | None = None,
     ) -> None:
         """
         @brief Show a popup notification
@@ -248,7 +270,7 @@ class SimplePopupManager:
             icon=icon,
             actions=actions or [],
             notification_id=notification_id,
-            callback=callback
+            callback=callback,
         )
 
         self._show_notification_object(notification)
@@ -275,30 +297,32 @@ class SimplePopupManager:
             link_text = match.group(2)
             urls.append(url)
             # Replace with clickable text
-            text = text.replace(match.group(0), f'<u>{link_text}</u> 🔗')
+            text = text.replace(match.group(0), f"<u>{link_text}</u> 🔗")
 
         # Extract plain URLs (http/https/ftp)
-        url_pattern = r'https?://[^\s<>"\']+|ftp://[^\s<>"\']+|www\.[^\s<>"\']+\.[a-zA-Z]{2,}'
+        url_pattern = (
+            r'https?://[^\s<>"\']+|ftp://[^\s<>"\']+|www\.[^\s<>"\']+\.[a-zA-Z]{2,}'
+        )
         for match in re.finditer(url_pattern, text):
             url = match.group(0)
             if url not in urls:
                 urls.append(url)
                 # Make plain URLs underlined and clickable
-                text = text.replace(url, f'<u>{url}</u> 🔗')
+                text = text.replace(url, f"<u>{url}</u> 🔗")
 
         # Convert other HTML formatting to Pango equivalents
-        text = re.sub(r'<b>(.*?)</b>', r'<b>\1</b>', text)
-        text = re.sub(r'<strong>(.*?)</strong>', r'<b>\1</b>', text)
-        text = re.sub(r'<i>(.*?)</i>', r'<i>\1</i>', text)
-        text = re.sub(r'<em>(.*?)</em>', r'<i>\1</i>', text)
-        text = re.sub(r'<u>(.*?)</u>', r'<u>\1</u>', text)
+        text = re.sub(r"<b>(.*?)</b>", r"<b>\1</b>", text)
+        text = re.sub(r"<strong>(.*?)</strong>", r"<b>\1</b>", text)
+        text = re.sub(r"<i>(.*?)</i>", r"<i>\1</i>", text)
+        text = re.sub(r"<em>(.*?)</em>", r"<i>\1</i>", text)
+        text = re.sub(r"<u>(.*?)</u>", r"<u>\1</u>", text)
 
         # Remove any remaining HTML tags for safety
-        text = re.sub(r'<[^>]+>', '', text)
+        text = re.sub(r"<[^>]+>", "", text)
 
         # Escape any remaining angle brackets that aren't Pango markup
-        text = re.sub(r'<(?![biu/])', '&lt;', text)
-        text = re.sub(r'(?<![biu])>', '&gt;', text)
+        text = re.sub(r"<(?![biu/])", "&lt;", text)
+        text = re.sub(r"(?<![biu])>", "&gt;", text)
 
         return text, urls
 
@@ -309,11 +333,11 @@ class SimplePopupManager:
         """
         try:
             # Add protocol if missing
-            if not url.startswith(('http://', 'https://', 'ftp://')):
-                if url.startswith('www.'):
-                    url = f'https://{url}'
+            if not url.startswith(("http://", "https://", "ftp://")):
+                if url.startswith("www."):
+                    url = f"https://{url}"
                 else:
-                    url = f'https://{url}'
+                    url = f"https://{url}"
 
             # Try different methods to open URL
             try:
@@ -321,13 +345,13 @@ class SimplePopupManager:
                 logger.info(f"Opened URL: {url}")
             except Exception:
                 # Fallback to xdg-open
-                subprocess.run(['xdg-open', url], check=False)
+                subprocess.run(["xdg-open", url], check=False)
                 logger.info(f"Opened URL with xdg-open: {url}")
 
         except Exception as e:
             logger.error(f"Failed to open URL {url}: {e}")
 
-    def _create_popup(self, notification: PopupNotification, x: int, y: int) -> PopupRelativeLayout:
+    def _create_popup(self, notification: PopupNotification, x: int, y: int) -> Any:
         """
         @brief Create popup layout for notification
         @param notification: Notification data to display
@@ -337,7 +361,8 @@ class SimplePopupManager:
         """
         # Calculate if we need extra height for buttons/URLs
         sanitized_message, urls = self._sanitize_markup(notification.message)
-        total_buttons = len(notification.actions) + len(urls)
+        actions_list = notification.actions or []
+        total_buttons = len(actions_list) + len(urls)
         has_buttons = total_buttons > 0
 
         # Adjust popup height for buttons
@@ -359,19 +384,21 @@ class SimplePopupManager:
                 fg_color = self.colors["fg_normal"]
                 border_color = self.colors["border_normal"]
 
-
-
         # Create controls
         controls = []
 
         # Get theme-aware font with debugging
         font_family = "sans-serif"
-        if self.qtile_config and hasattr(self.qtile_config, 'preferred_font'):
+        if self.qtile_config and hasattr(self.qtile_config, "preferred_font"):
             preferred_font = self.qtile_config.preferred_font
             font_family = get_available_font(preferred_font)
-            logger.debug(f"Font selection: preferred='{preferred_font}' -> selected='{font_family}'")
+            logger.debug(
+                f"Font selection: preferred='{preferred_font}' -> selected='{font_family}'"
+            )
         else:
-            logger.debug(f"No qtile_config or preferred_font, using fallback: '{font_family}'")
+            logger.debug(
+                f"No qtile_config or preferred_font, using fallback: '{font_family}'"
+            )
 
         # Check for notification icon using pathlib
         has_icon = False
@@ -391,6 +418,7 @@ class SimplePopupManager:
         if has_icon and icon_path:
             try:
                 from qtile_extras.popup.toolkit import PopupImage
+
                 controls.append(
                     PopupImage(
                         filename=icon_path,
@@ -409,7 +437,8 @@ class SimplePopupManager:
                 title_width = message_width = 0.9
 
         # Title (if present)
-        if notification.title:
+        if notification.title and _QTILE_EXTRAS_AVAILABLE:
+            assert PopupText is not None
             controls.append(
                 PopupText(
                     text=f"<b>{notification.title}</b>",
@@ -439,6 +468,7 @@ class SimplePopupManager:
                 msg_y = 0.5 if notification.title else 0.2
                 msg_height = 0.4 if notification.title else 0.6
 
+            assert PopupText is not None
             controls.append(
                 PopupText(
                     text=sanitized_message,
@@ -466,8 +496,10 @@ class SimplePopupManager:
                     button_x = 0.05 + (current_button * (button_width + 0.05))
                     button_y = 0.75
 
-                    def make_url_handler(target_url=url, mgr=self):
-                        def handler(popup_text=None, *args, **kwargs):
+                    def make_url_handler(target_url: str = url, mgr: Any = self):
+                        def handler(
+                            popup_text: Any = None, *args: Any, **kwargs: Any
+                        ) -> None:
                             logger.warning(f"🔗 URL button clicked: {target_url}")
                             try:
                                 mgr._open_url(target_url)
@@ -475,25 +507,28 @@ class SimplePopupManager:
                             except Exception as e:
                                 logger.error(f"Failed to open URL {target_url}: {e}")
                             # Keep popup open for URL clicks
+
                         return handler
 
-                    url_button = PopupText(
-                        text=f"🔗 Open Link",
-                        pos_x=button_x,
-                        pos_y=button_y,
-                        width=button_width,
-                        height=0.15,
-                        fontsize=scale_font(11),
-                        foreground="#ffffff",
-                        background="#0066cc",  # Blue button color
-                        font=font_family,
-                        h_align="center",
-                        v_align="middle",
-                        markup=True,
-                    )
-                    url_button.mouse_callbacks = {"Button1": make_url_handler()}
-                    controls.append(url_button)
-                    current_button += 1
+                    if _QTILE_EXTRAS_AVAILABLE:
+                        assert PopupText is not None
+                        url_button = PopupText(
+                            text="🔗 Open Link",
+                            pos_x=button_x,
+                            pos_y=button_y,
+                            width=button_width,
+                            height=0.15,
+                            fontsize=scale_font(11),
+                            foreground="#ffffff",
+                            background="#0066cc",  # Blue button color
+                            font=font_family,
+                            h_align="center",
+                            v_align="middle",
+                            markup=True,
+                        )
+                        url_button.mouse_callbacks = {"Button1": make_url_handler()}
+                        controls.append(url_button)
+                        current_button += 1
 
                 logger.debug(f"Added {len(urls)} URL buttons")
 
@@ -501,16 +536,25 @@ class SimplePopupManager:
                 logger.warning(f"Failed to add URL buttons: {e}")
 
         # Add action buttons if present
-        if notification.actions:
+        if actions_list:
             try:
-                for i, (action_key, action_label) in enumerate(notification.actions):
+                for _i, (action_key, action_label) in enumerate(actions_list):
                     button_width = 0.4 if total_buttons <= 2 else 0.3
                     button_x = 0.05 + (current_button * (button_width + 0.05))
                     button_y = 0.75
 
-                    def make_action_handler(key=action_key, nid=notification.notification_id, mgr=self, notif=notification):
-                        def handler(popup_text=None, *args, **kwargs):
-                            logger.warning(f"🔘 Action button clicked: {key} (ID: {nid})")
+                    def make_action_handler(
+                        key: str = action_key,
+                        nid: int = notification.notification_id,
+                        mgr=self,
+                        notif: Any = notification,
+                    ):
+                        def handler(
+                            popup_text: Any = None, *args: Any, **kwargs: Any
+                        ) -> None:
+                            logger.warning(
+                                f"🔘 Action button clicked: {key} (ID: {nid})"
+                            )
                             try:
                                 if notif.callback:
                                     notif.callback(nid, key)
@@ -520,32 +564,40 @@ class SimplePopupManager:
                                 logger.info("Popup dismissed after action")
                             except Exception as e:
                                 logger.error(f"Action handler error: {e}")
+
                         return handler
 
-                    action_button = PopupText(
-                        text=f"{action_label}",
-                        pos_x=button_x,
-                        pos_y=button_y,
-                        width=button_width,
-                        height=0.15,
-                        fontsize=scale_font(12),
-                        foreground="#ffffff",
-                        background="#28a745",  # Green button color
-                        font=font_family,
-                        h_align="center",
-                        v_align="middle",
-                        markup=True,
-                    )
-                    action_button.mouse_callbacks = {"Button1": make_action_handler()}
-                    controls.append(action_button)
-                    current_button += 1
+                    if _QTILE_EXTRAS_AVAILABLE:
+                        assert PopupText is not None
+                        action_button = PopupText(
+                            text=f"{action_label}",
+                            pos_x=button_x,
+                            pos_y=button_y,
+                            width=button_width,
+                            height=0.15,
+                            fontsize=scale_font(12),
+                            foreground="#ffffff",
+                            background="#28a745",  # Green button color
+                            font=font_family,
+                            h_align="center",
+                            v_align="middle",
+                            markup=True,
+                        )
+                        action_button.mouse_callbacks = {
+                            "Button1": make_action_handler()
+                        }
+                        controls.append(action_button)
+                        current_button += 1
 
-                logger.debug(f"Added {len(notification.actions)} action buttons")
+                logger.debug(f"Added {len(actions_list)} action buttons")
 
             except Exception as e:
                 logger.warning(f"Failed to add action buttons: {e}")
 
         # Create popup layout with adjusted height
+        if not _QTILE_EXTRAS_AVAILABLE:
+            return None
+        assert PopupRelativeLayout is not None
         popup = PopupRelativeLayout(
             qtile,
             width=self.config["width"],
@@ -556,7 +608,7 @@ class SimplePopupManager:
             border_width=2,
             initial_focus=None,
             close_on_click=True,
-            opacity=0.95
+            opacity=0.95,
         )
 
         return popup
@@ -568,7 +620,6 @@ class SimplePopupManager:
             margin_y = self.config["margin_y"]
             spacing = self.config["spacing"]
             height = self.config["height"]
-            width = self.config["width"]
 
             # Get current screen dimensions for bounds checking
             if qtile and qtile.current_screen:
@@ -591,7 +642,9 @@ class SimplePopupManager:
             max_y = screen_height - height - margin_y
             if y > max_y:
                 # Calculate how many notifications can fit
-                max_notifications = max(1, int((max_y - margin_y) / (height + spacing)) + 1)
+                max_notifications = max(
+                    1, int((max_y - margin_y) / (height + spacing)) + 1
+                )
                 # Reposition within bounds
                 y = margin_y + ((stack_index % max_notifications) * (height + spacing))
 
@@ -635,8 +688,10 @@ class SimplePopupManager:
         expired = []
 
         for notification in self.active_notifications:
-            if (notification.timeout > 0 and
-                current_time - notification.created_at > notification.timeout):
+            if (
+                notification.timeout > 0
+                and current_time - notification.created_at > notification.timeout
+            ):
                 expired.append(notification)
 
         # Remove expired notifications
@@ -660,7 +715,9 @@ class SimplePopupManager:
         for i, notification in enumerate(self.active_notifications):
             try:
                 new_x, new_y = self._calculate_position(i)
-                if notification.popup_layout and hasattr(notification.popup_layout, 'place'):
+                if notification.popup_layout and hasattr(
+                    notification.popup_layout, "place"
+                ):
                     notification.popup_layout.place(new_x, new_y)
             except Exception as e:
                 logger.debug(f"Error repositioning notification: {e}")
@@ -688,13 +745,13 @@ def get_popup_manager() -> SimplePopupManager | None:
     return _popup_manager
 
 
-def _notification_callback(notification):
+def _notification_callback(notification: Any) -> None:
     """Callback function to handle incoming D-Bus notifications"""
-    logger.info(f"🔔 D-Bus notification callback triggered!")
+    logger.info("🔔 D-Bus notification callback triggered!")
     logger.info(f"Notification object: {notification}")
     logger.info(f"Notification type: {type(notification)}")
 
-    if hasattr(notification, '__dict__'):
+    if hasattr(notification, "__dict__"):
         logger.info(f"Notification attributes: {notification.__dict__}")
 
     if not _popup_manager:
@@ -703,13 +760,13 @@ def _notification_callback(notification):
 
     try:
         # Extract notification data
-        title = getattr(notification, 'summary', 'Notification')
-        message = getattr(notification, 'body', '')
+        title = getattr(notification, "summary", "Notification")
+        message = getattr(notification, "body", "")
         logger.info(f"Extracted: title='{title}', message='{message}'")
 
         # Map urgency levels (D-Bus uses 0=low, 1=normal, 2=critical)
-        urgency_map = {0: 'low', 1: 'normal', 2: 'critical'}
-        urgency = urgency_map.get(getattr(notification, 'urgency', 1), 'normal')
+        urgency_map = {0: "low", 1: "normal", 2: "critical"}
+        urgency = urgency_map.get(getattr(notification, "urgency", 1), "normal")
         logger.info(f"Urgency: {urgency}")
 
         # Show popup
@@ -719,10 +776,15 @@ def _notification_callback(notification):
     except Exception as e:
         logger.error(f"❌ Error in notification callback: {e}")
         import traceback
+
         logger.error(f"Traceback: {traceback.format_exc()}")
 
 
-def setup_popup_notifications(color_manager: Any, qtile_config: Any | None = None, config: dict[str, Any] | None = None) -> None:
+def setup_popup_notifications(
+    color_manager: Any,
+    qtile_config: Any | None = None,
+    config: dict[str, Any] | None = None,
+) -> None:
     """
     @brief Set up popup notifications using hooks
     @param color_manager: Color management instance
@@ -731,7 +793,7 @@ def setup_popup_notifications(color_manager: Any, qtile_config: Any | None = Non
     """
     global _popup_manager
 
-    if not QTILE_EXTRAS_AVAILABLE:
+    if not _QTILE_EXTRAS_AVAILABLE:
         logger.warning("qtile-extras not available - popup notifications disabled")
         return
 
@@ -741,12 +803,12 @@ def setup_popup_notifications(color_manager: Any, qtile_config: Any | None = Non
     # Apply custom configuration first
     if config:
         _popup_manager.config.update(config)
-        _popup_manager._update_colors()
+        _popup_manager.update_colors()
 
     # Set qtile config for smart positioning (after custom config)
     if qtile_config:
         _popup_manager.qtile_config = qtile_config
-        _popup_manager._adjust_positioning()
+        _popup_manager.adjust_positioning()
 
     # Hook into D-Bus notifications to show popups (DISABLED - causing D-Bus issues)
     # TODO: Find a better way to intercept notify-send commands
@@ -763,7 +825,7 @@ def show_popup_notification(
     icon: str | None = None,
     actions: list[tuple[str, str]] | None = None,
     notification_id: int = 0,
-    callback: Any | None = None
+    callback: Any | None = None,
 ) -> None:
     """
     @brief Show a popup notification

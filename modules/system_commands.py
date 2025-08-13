@@ -3,12 +3,13 @@
 System-level commands for qtile
 """
 
+import contextlib
 import subprocess
 from typing import Any
 
 from libqtile.log_utils import logger
 
-from .simple_popup_notifications import show_popup_notification, get_popup_manager
+from .simple_popup_notifications import get_popup_manager, show_popup_notification
 
 
 def run_system_command(
@@ -211,19 +212,15 @@ class SystemCommands:
                     pass
 
             # Force retile if available
-            try:
+            with contextlib.suppress(Exception):
                 self.manual_retile_all(qtile)
-            except Exception:
-                pass
 
             # Switch to a safe layout (tile or max)
             try:
                 qtile.current_group.setlayout("tile")
             except Exception:
-                try:
+                with contextlib.suppress(Exception):
                     qtile.current_group.setlayout("max")
-                except Exception:
-                    pass
 
             logger.info("Emergency reset completed")
 
@@ -407,7 +404,7 @@ class SystemCommands:
             show_popup_notification(
                 "Qtile Popup Test",
                 "Testing popup notification system - if you see this popup, it's working!",
-                "normal"
+                "normal",
             )
             logger.info("✅ Popup notification test sent")
         except Exception as e:
@@ -422,7 +419,7 @@ class SystemCommands:
             show_popup_notification(
                 "Qtile Notification Test",
                 "Testing notification system - if you see this, it's working!",
-                "normal"
+                "normal",
             )
             methods_tried.append("notification_manager: SUCCESS")
             success = True
@@ -435,13 +432,20 @@ class SystemCommands:
         if not success:
             try:
                 import subprocess
-                subprocess.run([
-                    "notify-send",
-                    "-t", "5000",
-                    "-u", "normal",
-                    "Qtile Notification Test (fallback)",
-                    "Testing via notify-send command"
-                ], check=True, timeout=5)
+
+                subprocess.run(
+                    [
+                        "notify-send",
+                        "-t",
+                        "5000",
+                        "-u",
+                        "normal",
+                        "Qtile Notification Test (fallback)",
+                        "Testing via notify-send command",
+                    ],
+                    check=True,
+                    timeout=5,
+                )
                 methods_tried.append("notify-send: SUCCESS")
                 success = True
                 logger.info("✅ Notification test completed via notify-send")
@@ -469,30 +473,41 @@ class SystemCommands:
             show_popup_notification(
                 "🚨 Urgent Notification Test",
                 "This is an urgent notification test - it should stay visible longer",
-                "critical"
+                "critical",
             )
             success = True
-            logger.info("✅ Urgent notification test completed via notification manager")
+            logger.info(
+                "✅ Urgent notification test completed via notification manager"
+            )
         except Exception as e:
             logger.debug(f"Notification manager failed for urgent: {e}")
 
             # Fallback to notify-send
             try:
                 import subprocess
-                subprocess.run([
-                    "notify-send",
-                    "-t", "0",  # No timeout
-                    "-u", "critical",
-                    "🚨 Urgent Test (fallback)",
-                    "This urgent notification uses notify-send"
-                ], check=True, timeout=5)
+
+                subprocess.run(
+                    [
+                        "notify-send",
+                        "-t",
+                        "0",  # No timeout
+                        "-u",
+                        "critical",
+                        "🚨 Urgent Test (fallback)",
+                        "This urgent notification uses notify-send",
+                    ],
+                    check=True,
+                    timeout=5,
+                )
                 success = True
                 logger.info("✅ Urgent notification test completed via notify-send")
             except Exception as e2:
                 logger.warning(f"All urgent notification methods failed: {e}, {e2}")
 
         if not success:
-            logger.error("Urgent notification test failed - no working notification method")
+            logger.error(
+                "Urgent notification test failed - no working notification method"
+            )
 
     @staticmethod
     def notification_status(qtile: Any) -> None:
@@ -512,25 +527,30 @@ class SystemCommands:
             "qtile_builtin": "Unknown",
             "qtile_builtin_working": "Unknown",
             "notify_send": "Unknown",
-            "dbus": "Unknown"
+            "dbus": "Unknown",
         }
 
         # Test popup notification system
         try:
             popup_manager = get_popup_manager()
-            status_info.update({
-                "notification_system": "SimplePopup",
-                "popup_manager": "Available" if popup_manager else "Not initialized",
-                "qtile_extras": "Available",
-                "dbus_integration": "Yes"
-            })
+            status_info.update(
+                {
+                    "notification_system": "SimplePopup",
+                    "popup_manager": "Available"
+                    if popup_manager
+                    else "Not initialized",
+                    "qtile_extras": "Available",
+                    "dbus_integration": "Yes",
+                }
+            )
         except Exception as e:
             status_info["notification_system"] = f"Error: {str(e)[:50]}"
 
         # Test Notify widget availability
         try:
             from libqtile import widget
-            if hasattr(widget, 'Notify'):
+
+            if hasattr(widget, "Notify"):
                 status_info["notify_widget"] = "Available"
             else:
                 status_info["notify_widget"] = "Not available"
@@ -545,18 +565,14 @@ class SystemCommands:
             f"• Qtile working: {status_info['qtile_builtin_working']}",
             f"• notify-send: {status_info['notify_send']}",
             f"• D-Bus: {status_info['dbus']}",
-            f"• Notify widget: {status_info['notify_widget']}"
+            f"• Notify widget: {status_info['notify_widget']}",
         ]
         status_msg = "\n".join(status_lines)
 
         # Try to send the status notification
         success = False
         try:
-            show_popup_notification(
-                "Notification System Status",
-                status_msg,
-                "normal"
-            )
+            show_popup_notification("Notification System Status", status_msg, "normal")
             success = True
             logger.info("✅ Notification status displayed successfully")
         except Exception as e:
@@ -565,13 +581,20 @@ class SystemCommands:
             # Fallback to notify-send
             try:
                 import subprocess
-                subprocess.run([
-                    "notify-send",
-                    "-t", "10000",
-                    "-u", "normal",
-                    "Notification Status (fallback)",
-                    status_msg
-                ], check=True, timeout=5)
+
+                subprocess.run(
+                    [
+                        "notify-send",
+                        "-t",
+                        "10000",
+                        "-u",
+                        "normal",
+                        "Notification Status (fallback)",
+                        status_msg,
+                    ],
+                    check=True,
+                    timeout=5,
+                )
                 success = True
                 logger.info("✅ Notification status displayed via notify-send")
             except Exception as e2:

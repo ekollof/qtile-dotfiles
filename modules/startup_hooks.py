@@ -10,6 +10,7 @@ from typing import Any
 
 from libqtile import hook, qtile
 from libqtile.log_utils import logger
+
 from .simple_popup_notifications import show_popup_notification
 
 
@@ -44,7 +45,9 @@ class StartupHooks:
 
             # Initialize notification system
             try:
-                show_popup_notification("Qtile Startup", "Notification system initialized", "normal")
+                show_popup_notification(
+                    "Qtile Startup", "Notification system initialized", "normal"
+                )
                 logger.info("✅ Notification system initialized successfully")
             except Exception as e:
                 logger.warning(f"❌ Failed to initialize notification system: {e}")
@@ -129,7 +132,7 @@ class StartupHooks:
                 "path": script_path,
                 "errors": [],
             }
-        except:
+        except Exception:
             return {
                 "valid": False,
                 "errors": ["No autostart script configured"],

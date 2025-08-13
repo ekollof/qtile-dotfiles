@@ -20,18 +20,25 @@ from typing import Any
 
 from libqtile import widget
 from libqtile.log_utils import logger
-from libqtile.command import base
+
 from .simple_popup_notifications import show_popup_notification
 
-try:
-    import dbus
-    DBUS_AVAILABLE = True
-except ImportError:
-    DBUS_AVAILABLE = False
-    logger.warning("D-Bus not available - notification actions will not work")
+
+def _check_dbus_availability() -> bool:
+    """Check if D-Bus is available"""
+    try:
+        import importlib.util
+
+        return importlib.util.find_spec("dbus") is not None
+    except ImportError:
+        logger.warning("D-Bus not available - notification actions will not work")
+        return False
 
 
-class PopupNotifyWidget(widget.Notify):
+DBUS_AVAILABLE = _check_dbus_availability()
+
+
+class PopupNotifyWidget(widget.Notify):  # type: ignore[misc]
     """
     @brief Notify widget that shows popup notifications
 
@@ -70,25 +77,27 @@ class PopupNotifyWidget(widget.Notify):
         try:
             if self.show_popups:
                 # Extract notification data
-                title = getattr(notification, 'summary', 'Notification')
-                message = getattr(notification, 'body', '')
+                title = getattr(notification, "summary", "Notification")
+                message = getattr(notification, "body", "")
 
                 # Map urgency levels (D-Bus uses 0=low, 1=normal, 2=critical)
                 # Extract urgency from hints as per D-Bus specification
                 try:
-                    hints = getattr(notification, 'hints', {})
+                    hints = getattr(notification, "hints", {})
                     urgency_hint = hints.get("urgency") if hints else None
-                    raw_urgency = getattr(urgency_hint, 'value', 1) if urgency_hint else 1
-                except:
+                    raw_urgency = (
+                        getattr(urgency_hint, "value", 1) if urgency_hint else 1
+                    )
+                except Exception:
                     raw_urgency = 1
-                urgency_map = {0: 'low', 1: 'normal', 2: 'critical'}
-                urgency = urgency_map.get(raw_urgency, 'normal')
+                urgency_map = {0: "low", 1: "normal", 2: "critical"}
+                urgency = urgency_map.get(raw_urgency, "normal")
 
                 # Extract action buttons if enabled
                 actions = []
                 if self.enable_actions:
                     try:
-                        raw_actions = getattr(notification, 'actions', [])
+                        raw_actions = getattr(notification, "actions", [])
                         # Actions come in pairs: [action_key, action_label, ...]
                         for i in range(0, len(raw_actions), 2):
                             if i + 1 < len(raw_actions):
@@ -97,7 +106,9 @@ class PopupNotifyWidget(widget.Notify):
                                 actions.append((action_key, action_label))
 
                         if actions:
-                            logger.debug(f"Found {len(actions)} action buttons: {actions}")
+                            logger.debug(
+                                f"Found {len(actions)} action buttons: {actions}"
+                            )
                     except Exception as e:
                         logger.warning(f"Error extracting actions: {e}")
 
@@ -105,15 +116,17 @@ class PopupNotifyWidget(widget.Notify):
                 icon_path = None
                 try:
                     # Check app_icon attribute (this is where notify-send puts icons)
-                    icon_path = getattr(notification, 'app_icon', None)
+                    icon_path = getattr(notification, "app_icon", None)
 
                     # Fallback to hints if app_icon is empty
                     if not icon_path:
-                        hints = getattr(notification, 'hints', {})
+                        hints = getattr(notification, "hints", {})
                         if hints:
-                            icon_path = (hints.get('image-path') or
-                                       hints.get('image_path') or
-                                       hints.get('icon_data'))
+                            icon_path = (
+                                hints.get("image-path")
+                                or hints.get("image_path")
+                                or hints.get("icon_data")
+                            )
 
                     # Validate icon path exists using pathlib
                     if icon_path and not Path(str(icon_path)).exists():
@@ -133,8 +146,8 @@ class PopupNotifyWidget(widget.Notify):
                     urgency,
                     icon_path,
                     actions=actions,
-                    notification_id=getattr(notification, 'id', 0),
-                    callback=self._handle_action_callback if actions else None
+                    notification_id=getattr(notification, "id", 0),
+                    callback=self._handle_action_callback if actions else None,
                 )
             else:
                 # show_popups is False - not showing popup
@@ -166,47 +179,30 @@ class PopupNotifyWidget(widget.Notify):
         try:
             # Use qtile's built-in notification service for proper D-Bus handling
             from libqtile import notify
-            if hasattr(notify, 'notifier') and notify.notifier and hasattr(notify.notifier, '_service'):
+
+            if (
+                hasattr(notify, "notifier")
+                and notify.notifier
+                and hasattr(notify.notifier, "_service")
+            ):
                 # Send ActionInvoked signal first
                 notify.notifier._service.ActionInvoked(notification_id, action_key)
-                logger.info(f"Action invoked via qtile service: ID={notification_id}, action={action_key}")
+                logger.info(
+                    f"Action invoked via qtile service: ID={notification_id}, action={action_key}"
+                )
 
                 # Send NotificationClosed signal to complete the D-Bus interaction
-                notify.notifier._service.NotificationClosed(notification_id, 2)  # 2 = dismissed by user action
-                logger.info(f"Notification closed via qtile service: ID={notification_id}")
+                notify.notifier._service.NotificationClosed(
+                    notification_id, 2
+                )  # 2 = dismissed by user action
+                logger.info(
+                    f"Notification closed via qtile service: ID={notification_id}"
+                )
             else:
                 logger.warning("Qtile notification service not available")
 
         except Exception as e:
             logger.error(f"Failed to invoke action via qtile service: {e}")
-
-    @base.expose_command()
-    def test_popup_notification(self) -> None:
-        """
-        @brief Command to test popup notification functionality
-        @return None
-        """
-        show_popup_notification(
-            "Test Popup",
-            "This is a test popup notification",
-            "normal"
-        )
-
-    @base.expose_command()
-    def test_action_notification(self) -> None:
-        """
-        @brief Test notification with action buttons
-        @return None
-        """
-        show_popup_notification(
-            "Action Test",
-            "This notification has action buttons",
-            "normal",
-            None,
-            actions=[("accept", "Accept"), ("decline", "Decline")],
-            notification_id=999,
-            callback=self._handle_action_callback
-        )
 
 
 def create_popup_notify_widget(**kwargs: Any) -> PopupNotifyWidget:

@@ -3,17 +3,19 @@
 Window management commands for qtile
 """
 
+from typing import Any
+
 from libqtile.log_utils import logger
 
 
 class WindowCommands:
     """Commands for managing windows across screens and groups"""
 
-    def __init__(self, qtile_config):
+    def __init__(self, qtile_config: Any) -> None:
         self.qtile_config = qtile_config
 
     @staticmethod
-    def window_to_previous_screen(qtile):
+    def window_to_previous_screen(qtile: Any) -> None:
         """Move window to previous screen"""
         try:
             i = qtile.screens.index(qtile.current_screen)
@@ -27,7 +29,7 @@ class WindowCommands:
             logger.error(f"Error moving window to previous screen: {e}")
 
     @staticmethod
-    def window_to_next_screen(qtile):
+    def window_to_next_screen(qtile: Any) -> None:
         """Move window to next screen"""
         try:
             i = qtile.screens.index(qtile.current_screen)
@@ -41,7 +43,7 @@ class WindowCommands:
             logger.error(f"Error moving window to next screen: {e}")
 
     @staticmethod
-    def cycle_window_through_screens(qtile):
+    def cycle_window_through_screens(qtile: Any) -> None:
         """Cycle current window through all screens"""
         try:
             current_screen_idx = qtile.screens.index(qtile.current_screen)
@@ -57,7 +59,7 @@ class WindowCommands:
             logger.error(f"Error cycling window through screens: {e}")
 
     @staticmethod
-    def focus_previous_screen(qtile):
+    def focus_previous_screen(qtile: Any) -> None:
         """Focus previous screen"""
         try:
             qtile.cmd_prev_screen()
@@ -65,7 +67,7 @@ class WindowCommands:
             logger.error(f"Error focusing previous screen: {e}")
 
     @staticmethod
-    def focus_next_screen(qtile):
+    def focus_next_screen(qtile: Any) -> None:
         """Focus next screen"""
         try:
             qtile.cmd_next_screen()
@@ -73,7 +75,7 @@ class WindowCommands:
             logger.error(f"Error focusing next screen: {e}")
 
     @staticmethod
-    def toggle_window_floating(qtile):
+    def toggle_window_floating(qtile: Any) -> None:
         """Toggle floating state of current window"""
         try:
             if qtile.current_window:
@@ -84,7 +86,7 @@ class WindowCommands:
             logger.error(f"Error toggling window floating: {e}")
 
     @staticmethod
-    def toggle_window_fullscreen(qtile):
+    def toggle_fullscreen(qtile: Any) -> None:
         """Toggle fullscreen state of current window"""
         try:
             if qtile.current_window:
@@ -95,7 +97,7 @@ class WindowCommands:
             logger.error(f"Error toggling window fullscreen: {e}")
 
     @staticmethod
-    def kill_window(qtile):
+    def kill_window(qtile: Any) -> None:
         """Kill the current window"""
         try:
             if qtile.current_window:
@@ -106,7 +108,7 @@ class WindowCommands:
             logger.error(f"Error killing window: {e}")
 
     @staticmethod
-    def minimize_window(qtile):
+    def minimize_window(qtile: Any) -> None:
         """Minimize current window if supported"""
         try:
             if qtile.current_window and hasattr(qtile.current_window, "minimize"):
@@ -116,7 +118,7 @@ class WindowCommands:
             logger.error(f"Error minimizing window: {e}")
 
     @staticmethod
-    def get_window_info(qtile):
+    def get_window_info(qtile: Any) -> dict[str, Any] | None:
         """Get information about the current window"""
         try:
             if qtile.current_window:
@@ -141,7 +143,7 @@ class WindowCommands:
             return None
 
     @staticmethod
-    def move_window_to_group(qtile, group_name):
+    def move_window_to_group(qtile: Any, group_name: str) -> None:
         """Move current window to specified group"""
         try:
             if qtile.current_window and group_name in [g.name for g in qtile.groups]:
@@ -153,7 +155,7 @@ class WindowCommands:
             logger.error(f"Error moving window to group {group_name}: {e}")
 
     @staticmethod
-    def bring_group_to_front(qtile, group_name):
+    def bring_group_to_front(qtile: Any, group_name: str) -> None:
         """Bring specified group to current screen"""
         try:
             if group_name in [g.name for g in qtile.groups]:
@@ -165,7 +167,7 @@ class WindowCommands:
             logger.error(f"Error bringing group {group_name} to front: {e}")
 
     @staticmethod
-    def swap_window_to_main(qtile):
+    def swap_window_to_main(qtile: Any) -> None:
         """Swap current window with main window in layouts that support it"""
         try:
             layout_name = qtile.current_group.layout.name.lower()
@@ -180,7 +182,7 @@ class WindowCommands:
             logger.error(f"Error swapping window to main: {e}")
 
     @staticmethod
-    def smart_maximize(qtile):
+    def smart_maximize(qtile: Any) -> None:
         """
         Smart maximize that minimizes other windows when maximizing,
         and restores them when un-maximizing
@@ -208,14 +210,16 @@ class WindowCommands:
                 # Restore minimized windows in current group
                 restored_count = 0
                 for window in current_group.windows:
-                    if window != current_window and getattr(window, "minimized", False):
-                        # Check if window was minimized by our smart maximize
-                        if getattr(window, "_smart_maximized_hidden", False):
-                            window.toggle_minimize()
-                            # Clear the flag
-                            window._smart_maximized_hidden = False
-                            restored_count += 1
-                            logger.debug(f"Restored window: {window.name}")
+                    if (
+                        window != current_window
+                        and getattr(window, "minimized", False)
+                        and getattr(window, "_smart_maximized_hidden", False)
+                    ):
+                        window.toggle_minimize()
+                        # Clear the flag
+                        window._smart_maximized_hidden = False
+                        restored_count += 1
+                        logger.debug(f"Restored window: {window.name}")
 
                 logger.info(f"Restored {restored_count} windows")
 
@@ -252,7 +256,7 @@ class WindowCommands:
             except Exception as fallback_error:
                 logger.error(f"Fallback maximize also failed: {fallback_error}")
 
-    def _warp_mouse_to_window(self, qtile):
+    def _warp_mouse_to_window(self, qtile: Any) -> None:
         """Helper function to warp mouse to center of current window"""
         try:
             # Check if mouse warping is enabled
@@ -280,7 +284,7 @@ class WindowCommands:
         except Exception as e:
             logger.debug(f"Error warping mouse to window: {e}")
 
-    def _focus_first_window_in_stack(self, qtile):
+    def _focus_first_window_in_stack(self, qtile: Any) -> bool:
         """Helper function to ensure focus is on the first window in the current screen's stack"""
         try:
             current_group = qtile.current_screen.group
@@ -297,7 +301,7 @@ class WindowCommands:
             logger.debug(f"Error focusing first window in stack: {e}")
             return False
 
-    def focus_left_with_warp(self, qtile):
+    def focus_left_with_warp(self, qtile: Any) -> None:
         """Move focus left and warp mouse to target window"""
         try:
             # Execute the layout's left focus command
@@ -310,7 +314,7 @@ class WindowCommands:
         except Exception as e:
             logger.error(f"Error in focus_left_with_warp: {e}")
 
-    def focus_right_with_warp(self, qtile):
+    def focus_right_with_warp(self, qtile: Any) -> None:
         """Move focus right and warp mouse to target window"""
         try:
             # Execute the layout's right focus command
@@ -323,7 +327,7 @@ class WindowCommands:
         except Exception as e:
             logger.error(f"Error in focus_right_with_warp: {e}")
 
-    def focus_up_with_warp(self, qtile):
+    def focus_up_with_warp(self, qtile: Any) -> None:
         """Move focus up and warp mouse to target window"""
         try:
             # Execute the layout's up focus command
@@ -336,7 +340,7 @@ class WindowCommands:
         except Exception as e:
             logger.error(f"Error in focus_up_with_warp: {e}")
 
-    def focus_down_with_warp(self, qtile):
+    def focus_down_with_warp(self, qtile: Any) -> None:
         """Move focus down and warp mouse to target window"""
         try:
             # Execute the layout's down focus command
@@ -349,7 +353,7 @@ class WindowCommands:
         except Exception as e:
             logger.error(f"Error in focus_down_with_warp: {e}")
 
-    def focus_prev_screen_with_warp(self, qtile):
+    def focus_prev_screen_with_warp(self, qtile: Any) -> None:
         """Focus previous screen, focus first window in stack, and warp mouse"""
         try:
             # Execute the previous screen focus command
@@ -367,7 +371,7 @@ class WindowCommands:
         except Exception as e:
             logger.error(f"Error in focus_prev_screen_with_warp: {e}")
 
-    def focus_next_screen_with_warp(self, qtile):
+    def focus_next_screen_with_warp(self, qtile: Any) -> None:
         """Focus next screen, focus first window in stack, and warp mouse"""
         try:
             # Execute the next screen focus command

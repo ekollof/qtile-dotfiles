@@ -31,18 +31,17 @@ from .simple_color_management import (
 __all__ = [
     "ColorManager",
     "color_manager",
+    "get_color_file_status",
     "get_color_manager",
     "get_colors",
-    "start_color_monitoring",
-    "setup_color_monitoring",
-    "restart_color_monitoring",
-    # Compatibility stubs
-    "manual_color_reload",
-    "validate_current_colors",
-    "get_color_file_status",
     "get_monitoring_performance_status",
+    "manual_color_reload",
     "optimize_color_monitoring",
+    "restart_color_monitoring",
     "restart_color_monitoring_optimized",
+    "setup_color_monitoring",
+    "start_color_monitoring",
+    "validate_current_colors",
 ]
 
 # Load initial colors (maintain original behavior)

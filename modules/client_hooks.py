@@ -95,13 +95,14 @@ class ClientHooks:
         """
         try:
             wm_class = window.window.get_wm_class()
-            if wm_class and len(wm_class) > 0 and wm_class[0].lower() in [
-                fc.lower() for fc in self.config.force_floating_apps
-            ]:
+            if (
+                wm_class
+                and len(wm_class) > 0
+                and wm_class[0].lower()
+                in [fc.lower() for fc in self.config.force_floating_apps]
+            ):
                 window.floating = True
-                logger.debug(
-                    f"Set {wm_class[0]} to floating via force_floating_apps"
-                )
+                logger.debug(f"Set {wm_class[0]} to floating via force_floating_apps")
         except (IndexError, AttributeError, TypeError) as e:
             logger.debug(f"Could not check window class for floating: {e}")
 

@@ -3,10 +3,11 @@
 Main hotkey display class - orchestrates all hotkey display functionality
 """
 
+import contextlib
 import os
 import subprocess
 import tempfile
-from typing import TYPE_CHECKING, final
+from typing import TYPE_CHECKING, Any, final
 
 from libqtile.log_utils import logger
 
@@ -22,7 +23,7 @@ class HotkeyDisplay:
     """Manages hotkey display functionality"""
 
     def __init__(
-        self, key_manager, color_manager: "ColorManager | None" = None
+        self, key_manager: Any, color_manager: "ColorManager | None" = None
     ) -> None:
         self.key_manager = key_manager
         self.color_manager = color_manager
@@ -77,10 +78,8 @@ class HotkeyDisplay:
 
             finally:
                 # Clean up temporary theme file
-                try:
+                with contextlib.suppress(Exception):
                     os.unlink(theme_file_path)
-                except Exception:
-                    pass
 
         except subprocess.TimeoutExpired:
             logger.warning("Hotkey display timed out")
@@ -140,7 +139,7 @@ class HotkeyDisplay:
 
 
 def create_hotkey_display(
-    key_manager, color_manager: "ColorManager | None" = None
+    key_manager: Any, color_manager: "ColorManager | None" = None
 ) -> HotkeyDisplay:
     """Create and return a hotkey display instance"""
     return HotkeyDisplay(key_manager, color_manager)
