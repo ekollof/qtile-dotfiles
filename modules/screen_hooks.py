@@ -40,28 +40,19 @@ class ScreenHooks:
         # Add minimal delay to let the system settle
         time.sleep(self.config.screen_settings["detection_delay"])
 
-        startup_time = getattr(
-            self.color_manager, "_startup_time", time.time()
-        )
+        startup_time = getattr(self.color_manager, "_startup_time", time.time())
         current_time = time.time()
 
         # Only handle screen changes after qtile has been running for a while
-        if (
-            current_time - startup_time
-            > self.config.screen_settings["startup_delay"]
-        ):
-            logger.info(
-                "Screen change detected - checking for monitor changes"
-            )
+        if current_time - startup_time > self.config.screen_settings["startup_delay"]:
+            logger.info("Screen change detected - checking for monitor changes")
             if event is not None:
                 logger.debug(f"Screen change event data: {event}")
 
             try:
                 # Check if screen count actually changed
                 if self._refresh_and_check_screens():
-                    logger.info(
-                        "Monitor configuration changed - updating screens"
-                    )
+                    logger.info("Monitor configuration changed - updating screens")
                     self._reconfigure_screens()
                 else:
                     logger.info("Screen change detected but count unchanged")
@@ -69,9 +60,7 @@ class ScreenHooks:
                 logger.error(f"Error handling screen change: {e}")
                 logger.error(traceback.format_exc())
         else:
-            logger.info(
-                "Screen change detected but ignored (too soon after startup)"
-            )
+            logger.info("Screen change detected but ignored (too soon after startup)")
 
     def _handle_current_screen_change_event(self, event=None):
         """Handle changes to current screen focus"""
@@ -107,6 +96,7 @@ class ScreenHooks:
 
                 # Recreate screens with new configuration
                 from qtile_config import QtileConfig
+
                 config = QtileConfig()
                 bar_manager = EnhancedBarManager(self.color_manager, config)
                 new_screens = bar_manager.create_screens(new_screen_count)
@@ -115,9 +105,7 @@ class ScreenHooks:
                 qtile.config.screens = new_screens
 
                 # Restart qtile to apply new screen configuration
-                logger.info(
-                    f"Restarting qtile with {new_screen_count} screens"
-                )
+                logger.info(f"Restarting qtile with {new_screen_count} screens")
                 qtile.restart()
             else:
                 logger.warning(
@@ -134,9 +122,7 @@ class ScreenHooks:
 
             status = {
                 "screen_count": get_screen_count(),
-                "detection_delay": self.config.screen_settings[
-                    "detection_delay"
-                ],
+                "detection_delay": self.config.screen_settings["detection_delay"],
                 "startup_delay": self.config.screen_settings["startup_delay"],
                 "qtile_screens": len(qtile.screens) if qtile else 0,
                 "current_screen": (
@@ -171,7 +157,7 @@ class ScreenHooks:
         try:
             # Check detection delay
             delay = self.config.screen_settings["detection_delay"]
-            if not isinstance(delay, (int, float)) or delay < 0:
+            if not isinstance(delay, int | float) or delay < 0:
                 validation["errors"].append(
                     "Detection delay must be a non-negative number"
                 )
@@ -183,10 +169,7 @@ class ScreenHooks:
 
             # Check startup delay
             startup_delay = self.config.screen_settings["startup_delay"]
-            if (
-                not isinstance(startup_delay, (int, float))
-                or startup_delay < 0
-            ):
+            if not isinstance(startup_delay, int | float) or startup_delay < 0:
                 validation["errors"].append(
                     "Startup delay must be a non-negative number"
                 )
@@ -197,9 +180,7 @@ class ScreenHooks:
                 )
 
         except (AttributeError, KeyError, TypeError) as e:
-            validation["errors"].append(
-                f"Missing or invalid screen settings: {e}"
-            )
+            validation["errors"].append(f"Missing or invalid screen settings: {e}")
             validation["valid"] = False
 
         return validation
@@ -209,9 +190,7 @@ class ScreenHooks:
         logger.info("Forcing screen refresh")
         try:
             if self._refresh_and_check_screens():
-                logger.info(
-                    "Screen configuration changed during manual refresh"
-                )
+                logger.info("Screen configuration changed during manual refresh")
                 self._reconfigure_screens()
             else:
                 logger.info(

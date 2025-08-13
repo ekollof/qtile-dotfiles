@@ -7,12 +7,10 @@ Handles workspace groups and window layouts
 from typing import TYPE_CHECKING
 
 from libqtile import layout
-from libqtile.config import DropDown, Group, Key, Match, ScratchPad, _Match
+from libqtile.config import DropDown, Group, Key, Match, ScratchPad
 from libqtile.lazy import lazy
 
 from qtile_config import get_config
-
-
 
 if TYPE_CHECKING:
     from modules.simple_color_management import SimpleColorManager
@@ -22,9 +20,6 @@ else:
     from modules.simple_color_management import SimpleColorManager
 
     ColorManager = SimpleColorManager
-
-
-
 
 
 class GroupManager:
@@ -91,7 +86,7 @@ class GroupManager:
             border_width=defaults["border_width"],
         )
 
-    def get_groups(self):
+    def get_groups(self) -> tuple[list[Group], list[tuple[str, dict[str, str]]]]:
         """Get all workspace groups"""
         groups = []
         for name, _kwargs in self.config.groups:  # kwargs not currently used
@@ -115,7 +110,7 @@ class GroupManager:
 
         return groups, self.config.groups
 
-    def get_group_keys(self):
+    def get_group_keys(self) -> list[Key]:
         """Get group-related keyboard bindings"""
         _groups, group_names = self.get_groups()  # groups not used, just group_names
         keys = []
@@ -124,9 +119,7 @@ class GroupManager:
             # Switch to another group
             keys.append(Key([self.mod], str(i), lazy.group[name].toscreen()))
             # Send current window to another group
-            keys.append(
-                Key([self.mod, "shift"], str(i), lazy.window.togroup(name))
-            )
+            keys.append(Key([self.mod, "shift"], str(i), lazy.window.togroup(name)))
 
         return keys
 

@@ -15,9 +15,9 @@ from .hotkey_themes import ThemeManager
 
 # Maintain backward compatibility by exposing the same interface
 __all__ = [
-    "HotkeyDisplay",
-    "create_hotkey_display",
     "HotkeyCategorizer",
+    "HotkeyDisplay",
     "KeyFormatter",
     "ThemeManager",
+    "create_hotkey_display",
 ]

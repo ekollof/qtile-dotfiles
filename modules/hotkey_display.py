@@ -85,9 +85,7 @@ class HotkeyDisplay:
         except subprocess.TimeoutExpired:
             logger.warning("Hotkey display timed out")
         except FileNotFoundError:
-            logger.error(
-                "rofi not found - please install rofi to use hotkey display"
-            )
+            logger.error("rofi not found - please install rofi to use hotkey display")
             self._show_fallback_notification()
         except Exception as e:
             logger.error(f"Error showing hotkeys: {e}")

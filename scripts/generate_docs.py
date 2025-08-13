@@ -32,7 +32,9 @@ class DoxygenDocGenerator:
         # Project information
         self.project_name = "Qtile Configuration"
         self.project_version = "1.0.0"
-        self.project_brief = "Modular qtile configuration with DPI awareness and color management"
+        self.project_brief = (
+            "Modular qtile configuration with DPI awareness and color management"
+        )
 
     def check_dependencies(self) -> bool:
         """
@@ -53,9 +55,7 @@ class DoxygenDocGenerator:
                 return False
         except (subprocess.TimeoutExpired, FileNotFoundError):
             print("✗ Doxygen is not installed or not accessible")
-            print(
-                "  Please install doxygen: sudo apt install doxygen (Debian/Ubuntu)"
-            )
+            print("  Please install doxygen: sudo apt install doxygen (Debian/Ubuntu)")
             print("  Or: sudo pkg install doxygen (FreeBSD/OpenBSD)")
             return False
 
@@ -164,7 +164,7 @@ if __name__ == '__main__':
             filter_path.chmod(0o755)
             print(f"✓ Created Python filter at {filter_path}")
             return True
-        except IOError as e:
+        except OSError as e:
             print(f"✗ Failed to create Python filter: {e}")
             return False
 
@@ -461,7 +461,7 @@ DOT_CLEANUP            = YES
             print(f"✓ Created Doxyfile at {self.doxyfile_path}")
             return True
 
-        except IOError as e:
+        except OSError as e:
             print(f"✗ Failed to create Doxyfile: {e}")
             return False
 
@@ -563,7 +563,7 @@ DOT_CLEANUP            = YES
             with open(index_path, "w") as f:
                 f.write(index_content)
             print(f"✓ Created index redirect at {index_path}")
-        except IOError as e:
+        except OSError as e:
             print(f"✗ Failed to create index redirect: {e}")
 
     def cleanup_doxyfile(self) -> None:

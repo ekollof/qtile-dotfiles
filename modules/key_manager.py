@@ -19,7 +19,7 @@ from .window_commands import WindowCommands
 class KeyManager:
     """Manages keyboard bindings and shortcuts"""
 
-    def __init__(self, color_manager):
+    def __init__(self, color_manager: Any) -> None:
         self.color_manager = color_manager
         self.config = get_config()
         self.mod = self.config.mod_key
@@ -76,20 +76,19 @@ class KeyManager:
         for key in all_keys:
             modifiers = set(key.modifiers) if key.modifiers else set()
 
-            if modifiers == {self.mod}:
-                modifier_counts["mod_only"] += 1
-            elif modifiers == {self.mod, "shift"}:
-                modifier_counts["mod_shift"] += 1
-            elif modifiers == {self.mod, "control"}:
-                modifier_counts["mod_control"] += 1
-            elif self.alt in modifiers and self.mod in modifiers:
-                modifier_counts["mod_alt"] += 1
-            elif modifiers == {self.alt} or (
-                len(modifiers) == 2 and self.alt in modifiers
-            ):
-                modifier_counts["alt_only"] += 1
-            else:
-                modifier_counts["other"] += 1
+            match modifiers:
+                case x if x == {self.mod}:
+                    modifier_counts["mod_only"] += 1
+                case x if x == {self.mod, "shift"}:
+                    modifier_counts["mod_shift"] += 1
+                case x if x == {self.mod, "control"}:
+                    modifier_counts["mod_control"] += 1
+                case x if self.alt in x and self.mod in x:
+                    modifier_counts["mod_alt"] += 1
+                case x if x == {self.alt} or (len(x) == 2 and self.alt in x):
+                    modifier_counts["alt_only"] += 1
+                case _:
+                    modifier_counts["other"] += 1
 
         return modifier_counts
 
@@ -125,7 +124,7 @@ class KeyManager:
         return conflicts
 
     def get_available_keys(
-        self, modifier_combo: tuple | None = None
+        self, modifier_combo: tuple[str, ...] | None = None
     ) -> list[str]:
         """Get list of available (unused) keys for a given modifier combination"""
         if modifier_combo is None:
@@ -212,9 +211,7 @@ class KeyManager:
         used_keys = set()
         all_keys = self.get_keys()
         for key in all_keys:
-            key_modifiers = (
-                tuple(sorted(key.modifiers)) if key.modifiers else ()
-            )
+            key_modifiers = tuple(sorted(key.modifiers)) if key.modifiers else ()
             if key_modifiers == modifier_combo:
                 used_keys.add(key.key)
 
@@ -224,7 +221,7 @@ class KeyManager:
 
     def validate_configuration(self) -> dict[str, Any]:
         """Validate the key configuration"""
-        validation_results = {
+        validation_results: dict[str, Any] = {
             "valid": True,
             "errors": [],
             "warnings": [],
@@ -242,9 +239,7 @@ class KeyManager:
         # Check for reasonable number of bindings
         total_keys = validation_results["statistics"]["total_keys"]
         if total_keys < 10:
-            validation_results["warnings"].append(
-                "Very few key bindings defined"
-            )
+            validation_results["warnings"].append("Very few key bindings defined")
         elif total_keys > 100:
             validation_results["warnings"].append(
                 "Large number of key bindings may be hard to remember"
@@ -253,15 +248,13 @@ class KeyManager:
         # Check modifier distribution
         modifier_usage = validation_results["statistics"]["modifier_usage"]
         if modifier_usage["mod_only"] > 26:  # More than alphabet
-            validation_results["warnings"].append(
-                "Too many single modifier bindings"
-            )
+            validation_results["warnings"].append("Too many single modifier bindings")
 
         return validation_results
 
-    def export_key_reference(self, format="text") -> str:
+    def export_key_bindings(self, output_format: str = "text") -> str:
         """Export key bindings as reference documentation"""
-        match format:
+        match output_format:
             case "text":
                 return self._export_text_reference()
             case "markdown":
@@ -317,17 +310,13 @@ class KeyManager:
         for category, keys in categories.items():
             html.append(f"<h2>{category}</h2>")
             html.append("<table border='1'>")
-            html.append(
-                "<tr><th>Key Combination</th><th>Description</th></tr>"
-            )
+            html.append("<tr><th>Key Combination</th><th>Description</th></tr>")
 
             for key in keys:
                 modifiers = "+".join(key.modifiers) if key.modifiers else ""
                 combo = f"{modifiers}+{key.key}" if modifiers else key.key
                 desc = getattr(key, "desc", "No description")
-                html.append(
-                    f"<tr><td><code>{combo}</code></td><td>{desc}</td></tr>"
-                )
+                html.append(f"<tr><td><code>{combo}</code></td><td>{desc}</td></tr>")
 
             html.append("</table><br>")
 

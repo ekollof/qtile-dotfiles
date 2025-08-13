@@ -86,9 +86,7 @@ class HookManager:
 
             if qtile:
                 return {
-                    "statistics": self.window_manager.get_window_statistics(
-                        qtile
-                    ),
+                    "statistics": self.window_manager.get_window_statistics(qtile),
                     "floating_windows": self.window_manager.list_floating_windows(
                         qtile
                     ),
@@ -120,16 +118,12 @@ class HookManager:
         }
 
         for component_name, component_validation in components.items():
-            validation["component_validations"][
-                component_name
-            ] = component_validation
+            validation["component_validations"][component_name] = component_validation
 
             if not component_validation.get("valid", True):
                 validation["valid"] = False
 
-            validation["warnings"].extend(
-                component_validation.get("warnings", [])
-            )
+            validation["warnings"].extend(component_validation.get("warnings", []))
             validation["errors"].extend(component_validation.get("errors", []))
 
         return validation
@@ -173,9 +167,7 @@ class HookManager:
                 logger.info(f"Emergency reset: retiled {retiled} windows")
 
                 # Reset any problematic window states
-                problematic = self.window_manager.get_problematic_windows(
-                    qtile
-                )
+                problematic = self.window_manager.get_problematic_windows(qtile)
                 for window_info in problematic:
                     logger.info(
                         f"Found problematic window: {window_info['name']} - {window_info['issues']}"
@@ -205,7 +197,6 @@ class HookManager:
         # 1. Unsubscribing existing hooks
         # 2. Reloading config
         # 3. Re-setting up hooks
-        pass
 
     def get_performance_metrics(self) -> dict[str, Any]:
         """Get performance metrics for hook operations"""

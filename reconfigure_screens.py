@@ -22,9 +22,7 @@ def reconfigure_screens() -> bool:
     """
     try:
         # Use qtile's built-in reconfigure_screens command
-        cmd = [
-            "qtile", "cmd-obj", "-o", "cmd", "-f", "reconfigure_screens"
-        ]
+        cmd = ["qtile", "cmd-obj", "-o", "cmd", "-f", "reconfigure_screens"]
 
         print("Triggering Qtile screen reconfiguration...")
         result = subprocess.run(cmd, capture_output=True, text=True, timeout=10)
@@ -35,10 +33,9 @@ def reconfigure_screens() -> bool:
             # Also trigger a refresh of our screen detection
             try:
                 import sys
-                sys.path.insert(0, '/home/ekollof/.config/qtile')
-                from modules.screens import (
-                    refresh_screens, get_screen_count
-                )
+
+                sys.path.insert(0, "/home/ekollof/.config/qtile")
+                from modules.screens import get_screen_count, refresh_screens
 
                 changed = refresh_screens()
                 new_count = get_screen_count()
@@ -52,9 +49,7 @@ def reconfigure_screens() -> bool:
                     print("No screen count change detected")
 
             except Exception as e:
-                print(
-                    f"Warning: Could not update local screen detection: {e}"
-                )
+                print(f"Warning: Could not update local screen detection: {e}")
 
         else:
             print(f"Error triggering reconfiguration: {result.stderr}")
@@ -64,9 +59,7 @@ def reconfigure_screens() -> bool:
         print("Timeout waiting for Qtile response")
         return False
     except FileNotFoundError:
-        print(
-            "qtile command not found. Make sure Qtile is installed and in PATH"
-        )
+        print("qtile command not found. Make sure Qtile is installed and in PATH")
         return False
     except Exception as e:
         print(f"Unexpected error: {e}")

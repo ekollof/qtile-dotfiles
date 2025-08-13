@@ -38,7 +38,7 @@ class ClientHooks:
         """
         logger.debug("Setting up client hooks")
 
-        @hook.subscribe.client_new # pyright: ignore[reportUnknownMemberType]
+        @hook.subscribe.client_new  # pyright: ignore[reportUnknownMemberType]
         def enforce_tiling_behavior(window: Any) -> None:
             """Enforce consistent tiling behavior for all windows"""
             self.window_manager.enforce_window_tiling(window)
@@ -60,8 +60,6 @@ class ClientHooks:
         def set_parent_for_transient(window: Any) -> None:  # pyright: ignore[reportUnusedFunction]
             """Set parent for transient windows"""
             self.window_manager.set_parent_for_transient(window)
-
-
 
         @hook.subscribe.client_new  # pyright: ignore[reportUnknownMemberType]
         def handle_swallow(window: Any) -> None:  # pyright: ignore[reportUnusedFunction]
@@ -97,14 +95,13 @@ class ClientHooks:
         """
         try:
             wm_class = window.window.get_wm_class()
-            if wm_class and len(wm_class) > 0:
-                if wm_class[0].lower() in [
-                    fc.lower() for fc in self.config.force_floating_apps
-                ]:
-                    window.floating = True
-                    logger.debug(
-                        f"Set {wm_class[0]} to floating via force_floating_apps"
-                    )
+            if wm_class and len(wm_class) > 0 and wm_class[0].lower() in [
+                fc.lower() for fc in self.config.force_floating_apps
+            ]:
+                window.floating = True
+                logger.debug(
+                    f"Set {wm_class[0]} to floating via force_floating_apps"
+                )
         except (IndexError, AttributeError, TypeError) as e:
             logger.debug(f"Could not check window class for floating: {e}")
 
@@ -118,7 +115,6 @@ class ClientHooks:
         # 1. Detecting if this is a terminal window
         # 2. Finding child processes
         # 3. Hiding the terminal when child GUI apps are launched
-        pass
 
     def _handle_unswallow(self, window: Any) -> None:
         """
@@ -129,7 +125,6 @@ class ClientHooks:
         # This would involve:
         # 1. Detecting when a swallowed app is closed
         # 2. Restoring the parent terminal window
-        pass
 
     def get_client_statistics(self) -> dict[str, Any]:
         """

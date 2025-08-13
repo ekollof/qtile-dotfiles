@@ -15,10 +15,10 @@ from .window_commands import WindowCommands
 
 # Maintain backward compatibility by exposing the same interface
 __all__ = [
-    "KeyManager",
-    "create_key_manager",
-    "LayoutAwareCommands",
-    "WindowCommands",
-    "SystemCommands",
     "KeyBindings",
+    "KeyManager",
+    "LayoutAwareCommands",
+    "SystemCommands",
+    "WindowCommands",
+    "create_key_manager",
 ]

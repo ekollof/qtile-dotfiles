@@ -155,6 +155,7 @@ class PlatformConfig:
         """
         self.platform = platform_info or PlatformInfo()
         self._config_overrides: dict[str, dict[str, Any]] = {}
+        self._application_preferences: dict[str, Any] = {}
         self._load_platform_configs()
 
     def _load_platform_configs(self) -> None:
@@ -276,9 +277,7 @@ class PlatformConfig:
             },
         }
 
-    def get_application(
-        self, app_type: str, fallback: str | None = None
-    ) -> str:
+    def get_application(self, app_type: str, fallback: str | None = None) -> str:
         """
         @brief Get the best available application for the current platform
         @param app_type: Type of application to find
@@ -293,34 +292,24 @@ class PlatformConfig:
                 case "openbsd" | "freebsd" | "netbsd" | "dragonfly":
                     preferences = self._application_preferences[app_type].get(
                         system,
-                        self._application_preferences[app_type].get(
-                            "openbsd", []
-                        ),
+                        self._application_preferences[app_type].get("openbsd", []),
                     )
                 case "linux":
-                    preferences = self._application_preferences[app_type][
-                        "linux"
-                    ]
+                    preferences = self._application_preferences[app_type]["linux"]
                 case _:
                     preferences = self._application_preferences[app_type].get(
                         system,
-                        self._application_preferences[app_type].get(
-                            "linux", []
-                        ),
+                        self._application_preferences[app_type].get("linux", []),
                     )
 
-            app = self.platform.get_preferred_application(
-                app_type, preferences
-            )
+            app = self.platform.get_preferred_application(app_type, preferences)
             if app:
                 return app
 
         # If no preferred app found, return fallback or default
         return fallback or "xterm"
 
-    def get_command(
-        self, command_type: str, fallback: str | None = None
-    ) -> str:
+    def get_command(self, command_type: str, fallback: str | None = None) -> str:
         """
         @brief Get platform-specific command override
         @param command_type: Type of command to get
@@ -332,25 +321,15 @@ class PlatformConfig:
         # Use match statement for platform-specific command selection
         match system:
             case "linux":
-                command = self._config_overrides.get("linux", {}).get(
-                    command_type
-                )
+                command = self._config_overrides.get("linux", {}).get(command_type)
             case "openbsd":
-                command = self._config_overrides.get("openbsd", {}).get(
-                    command_type
-                )
+                command = self._config_overrides.get("openbsd", {}).get(command_type)
             case "freebsd":
-                command = self._config_overrides.get("freebsd", {}).get(
-                    command_type
-                )
+                command = self._config_overrides.get("freebsd", {}).get(command_type)
             case "netbsd":
-                command = self._config_overrides.get("netbsd", {}).get(
-                    command_type
-                )
+                command = self._config_overrides.get("netbsd", {}).get(command_type)
             case _:
-                command = self._config_overrides.get(system, {}).get(
-                    command_type
-                )
+                command = self._config_overrides.get(system, {}).get(command_type)
 
         if command:
             # Verify the base command exists

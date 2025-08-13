@@ -15,11 +15,12 @@ from typing import Any
 
 from modules.dpi_utils import scale_size
 
-# Import logger at module level to avoid binding issues  
+# Import logger at module level to avoid binding issues
 try:
     from libqtile.log_utils import logger
 except ImportError:
     import logging
+
     logger = logging.getLogger(__name__)
 
 
@@ -203,9 +204,7 @@ class SVGBuilder:
         """
         gradient = [f'<linearGradient id="{gradient_id}">']
         for offset, color in stops:
-            gradient.append(
-                f'  <stop offset="{offset}" stop-color="{color}"/>'
-            )
+            gradient.append(f'  <stop offset="{offset}" stop-color="{color}"/>')
         gradient.append("</linearGradient>")
         self.defs.extend(gradient)
         return self
@@ -269,9 +268,7 @@ class SVGManipulator:
             height = self._parse_dimension(root.get("height", "24"))
             viewbox = root.get("viewBox")
 
-            return SVGIcon(
-                content=content, width=width, height=height, viewbox=viewbox
-            )
+            return SVGIcon(content=content, width=width, height=height, viewbox=viewbox)
 
         except Exception:
             return None
@@ -289,9 +286,7 @@ class SVGManipulator:
         except ValueError:
             return 24  # Default fallback
 
-    def recolor_svg(
-        self, svg_icon: SVGIcon, color_map: dict[str, str]
-    ) -> SVGIcon:
+    def recolor_svg(self, svg_icon: SVGIcon, color_map: dict[str, str]) -> SVGIcon:
         """
         @brief Recolor SVG by replacing color values
         @param svg_icon: SVGIcon to modify
@@ -303,10 +298,7 @@ class SVGManipulator:
         for old_color, new_color in color_map.items():
             # Normalize color format
             old_color = old_color.lower().strip()
-            if old_color.startswith("#"):
-                old_hex = old_color[1:]
-            else:
-                old_hex = old_color
+            old_hex = old_color[1:] if old_color.startswith("#") else old_color
 
             # Replace various color formats
             patterns = [
@@ -331,10 +323,8 @@ class SVGManipulator:
                 f'stop-color="{new_color}"',
             ]
 
-            for pattern, replacement in zip(patterns, replacements):
-                content = re.sub(
-                    pattern, replacement, content, flags=re.IGNORECASE
-                )
+            for pattern, replacement in zip(patterns, replacements, strict=False):
+                content = re.sub(pattern, replacement, content, flags=re.IGNORECASE)
 
         return SVGIcon(
             content=content,
@@ -448,18 +438,29 @@ class IconGenerator:
                 qtile_colors = self.color_manager.get_colors()
                 # Debug: log what colors we're getting
                 logger.debug(f"SVG IconGenerator got colors: {qtile_colors}")
-                
-                if qtile_colors and "special" in qtile_colors and "colors" in qtile_colors:
+
+                if (
+                    qtile_colors
+                    and "special" in qtile_colors
+                    and "colors" in qtile_colors
+                ):
                     # Use color5 for foreground to match widget text color exactly
                     colors = {
-                        "foreground": qtile_colors["colors"]["color5"],  # Use color5 (#4A88A2) like widgets
+                        "foreground": qtile_colors["colors"][
+                            "color5"
+                        ],  # Use color5 (#4A88A2) like widgets
                         "background": qtile_colors["special"]["background"],
-                        "accent": qtile_colors["colors"]["color8"],     # Muted gray #8A8A9B
-                        "highlight": qtile_colors["colors"]["color0"],  # Dark gray #424446  
-                        "warning": qtile_colors["colors"]["color11"],   
-                        "error": qtile_colors["colors"]["color9"],      
-                        "muted": qtile_colors["colors"]["color0"],      # Dark gray for muted
-                        "muted": qtile_colors["colors"]["color0"],      
+                        "accent": qtile_colors["colors"][
+                            "color8"
+                        ],  # Muted gray #8A8A9B
+                        "highlight": qtile_colors["colors"][
+                            "color0"
+                        ],  # Dark gray #424446
+                        "warning": qtile_colors["colors"]["color11"],
+                        "error": qtile_colors["colors"]["color9"],
+                        "muted": qtile_colors["colors"][
+                            "color0"
+                        ],  # Dark gray for muted
                     }
                     logger.debug(f"SVG IconGenerator using colors: {colors}")
                     return colors
@@ -467,7 +468,7 @@ class IconGenerator:
                     logger.warning("Invalid color structure from color_manager")
             except Exception as e:
                 logger.warning(f"Failed to get colors from color_manager: {e}")
-        
+
         # Fallback colors
         fallback = {
             "foreground": "#ffffff",
@@ -558,10 +559,7 @@ class IconGenerator:
         ]
 
         for i, (radius, stroke_width) in enumerate(arcs):
-            if strength > i:
-                color = self.colors["accent"]
-            else:
-                color = self.colors["muted"]
+            color = self.colors["accent"] if strength > i else self.colors["muted"]
 
             # Create arc using path
             x1 = center_x + radius * 0.707  # cos(45°)
@@ -575,9 +573,7 @@ class IconGenerator:
             )
 
         # Center dot
-        builder.add_circle(
-            center_x, center_y, 1.5, fill=self.colors["foreground"]
-        )
+        builder.add_circle(center_x, center_y, 1.5, fill=self.colors["foreground"])
 
         return builder.build()
 
@@ -630,7 +626,7 @@ class IconGenerator:
 
         # CPU chip outline - use filled rectangles to create outline effect
         chip_color = self.colors["foreground"]
-        
+
         # Outer rectangle
         builder.add_rect(6, 6, 12, 12, fill=chip_color, rx=1)
         # Inner rectangle (creates outline effect)
@@ -683,7 +679,7 @@ class IconGenerator:
 
         # RAM stick outline - use filled rectangles to create outline effect
         ram_color = self.colors["foreground"]
-        
+
         # Outer rectangle
         builder.add_rect(6, 4, 12, 16, fill=ram_color, rx=1)
         # Inner rectangle (creates outline effect)
@@ -709,9 +705,7 @@ class IconGenerator:
 
         return builder.build()
 
-    def network_icon(
-        self, rx_active: bool = False, tx_active: bool = False
-    ) -> str:
+    def network_icon(self, rx_active: bool = False, tx_active: bool = False) -> str:
         """
         @brief Generate network activity icon
         @param rx_active: Whether receiving data
@@ -722,7 +716,7 @@ class IconGenerator:
 
         # Network cable/connector - use filled rectangles to create outline effect
         connector_color = self.colors["foreground"]
-        
+
         # Outer rectangle
         builder.add_rect(4, 10, 16, 4, fill=connector_color, rx=1)
         # Inner rectangle (creates outline effect)
@@ -771,9 +765,12 @@ class IconGenerator:
         """
         try:
             from modules.platform_icons import get_platform_mascot_icon
+
             return get_platform_mascot_icon(self.color_manager, self.size)
         except ImportError:
-            logger.warning("Platform icons module not available, using generic computer icon")
+            logger.warning(
+                "Platform icons module not available, using generic computer icon"
+            )
             return self._generic_computer_icon()
 
     def _generic_computer_icon(self) -> str:
@@ -782,16 +779,24 @@ class IconGenerator:
         @return SVG string
         """
         builder = SVGBuilder(self.size, self.size)
-        
+
         # Computer monitor
-        builder.add_rect(4, 6, 16, 10, fill="none", 
-                        stroke=self.colors["foreground"], stroke_width=1.5, rx=1)
+        builder.add_rect(
+            4,
+            6,
+            16,
+            10,
+            fill="none",
+            stroke=self.colors["foreground"],
+            stroke_width=1.5,
+            rx=1,
+        )
         builder.add_rect(5, 7, 14, 8, fill=self.colors["foreground"])
-        
-        # Stand  
+
+        # Stand
         builder.add_rect(10, 16, 4, 1, fill=self.colors["foreground"])
         builder.add_rect(8, 17, 8, 1, fill=self.colors["foreground"])
-        
+
         return builder.build()
 
     def mail_icon(self) -> str:
@@ -932,9 +937,7 @@ class IconGenerator:
         )
 
         # Arrow head
-        builder.add_polygon(
-            [(12, 4), (10, 2), (10, 6)], fill=self.colors["accent"]
-        )
+        builder.add_polygon([(12, 4), (10, 2), (10, 6)], fill=self.colors["accent"])
 
         # Secondary arc for complete refresh look
         builder.add_path(
@@ -945,9 +948,7 @@ class IconGenerator:
         )
 
         # Second arrow head
-        builder.add_polygon(
-            [(12, 20), (14, 22), (14, 18)], fill=self.colors["accent"]
-        )
+        builder.add_polygon([(12, 20), (14, 22), (14, 18)], fill=self.colors["accent"])
 
         return builder.build()
 
@@ -992,9 +993,7 @@ def create_themed_icon_cache(
         "network_idle": generator.network_icon(),
         "network_rx": generator.network_icon(rx_active=True),
         "network_tx": generator.network_icon(tx_active=True),
-        "network_active": generator.network_icon(
-            rx_active=True, tx_active=True
-        ),
+        "network_active": generator.network_icon(rx_active=True, tx_active=True),
         "python": generator.python_icon(),
         "platform": generator.platform_mascot_icon(),  # Platform-specific mascot
         "mail": generator.mail_icon(),

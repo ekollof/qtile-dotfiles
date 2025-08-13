@@ -34,10 +34,7 @@ class KeyFormatter:
         key_name = key.key
 
         # Combine modifiers and key
-        if modifiers:
-            key_combo = "+".join(modifiers) + "+" + key_name
-        else:
-            key_combo = key_name
+        key_combo = "+".join(modifiers) + "+" + key_name if modifiers else key_name
 
         return key_combo
 
@@ -90,9 +87,7 @@ class KeyFormatter:
                 return str(cmd)[:50]  # Truncate long descriptions
 
     @staticmethod
-    def format_hotkey_line(
-        key_combo: str, description: str, width: int = 25
-    ) -> str:
+    def format_hotkey_line(key_combo: str, description: str, width: int = 25) -> str:
         """Format a single hotkey line for display"""
         formatted_combo = KeyFormatter.format_key_combination(key_combo)
         return f"{formatted_combo:<{width}} {description}"

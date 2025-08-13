@@ -15,10 +15,10 @@ from .window_manager import WindowManager
 
 # Maintain backward compatibility by exposing the same interface
 __all__ = [
-    "HookManager",
-    "create_hook_manager",
-    "StartupHooks",
     "ClientHooks",
+    "HookManager",
     "ScreenHooks",
+    "StartupHooks",
     "WindowManager",
+    "create_hook_manager",
 ]

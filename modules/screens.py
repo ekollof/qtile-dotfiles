@@ -49,9 +49,7 @@ class ScreenManager:
         old_count = self.num_screens
         self.detect_screens()
         if old_count != self.num_screens:
-            logger.info(
-                f"Screen count changed from {old_count} to {self.num_screens}"
-            )
+            logger.info(f"Screen count changed from {old_count} to {self.num_screens}")
             return True
         return False
 
@@ -67,12 +65,8 @@ class ScreenManager:
     def _is_xephyr_environment(self) -> bool:
         """Check if we're in Xephyr testing environment"""
         display = os.getenv("DISPLAY", "")
-        if ":99" in display or any(
-            "Xephyr" in str(v) for v in os.environ.values()
-        ):
-            logger.info(
-                "Detected Xephyr testing environment - using single screen"
-            )
+        if ":99" in display or any("Xephyr" in str(v) for v in os.environ.values()):
+            logger.info("Detected Xephyr testing environment - using single screen")
             return True
         return False
 
@@ -87,13 +81,9 @@ class ScreenManager:
             )
             if result.returncode == 0:
                 outputs = json.loads(result.stdout)
-                connected_screens = [
-                    o for o in outputs if o.get("enabled", False)
-                ]
+                connected_screens = [o for o in outputs if o.get("enabled", False)]
                 self.num_screens = len(connected_screens)
-                logger.info(
-                    f"Wayland: Found {self.num_screens} enabled outputs"
-                )
+                logger.info(f"Wayland: Found {self.num_screens} enabled outputs")
                 return True
         except Exception:
             pass

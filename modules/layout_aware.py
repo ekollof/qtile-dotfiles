@@ -87,9 +87,7 @@ class LayoutAwareCommands:
                     # Max and Floating layouts: no-op
                     pass
         except Exception as e:
-            logger.debug(
-                f"Smart vertical grow not supported in {layout_name}: {e}"
-            )
+            logger.debug(f"Smart vertical grow not supported in {layout_name}: {e}")
 
     @staticmethod
     def smart_shrink_vertical(qtile):
@@ -114,9 +112,7 @@ class LayoutAwareCommands:
                     # Max and Floating layouts: no-op
                     pass
         except Exception as e:
-            logger.debug(
-                f"Smart vertical shrink not supported in {layout_name}: {e}"
-            )
+            logger.debug(f"Smart vertical shrink not supported in {layout_name}: {e}")
 
     @staticmethod
     def smart_normalize(qtile):

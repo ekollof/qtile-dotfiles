@@ -97,9 +97,7 @@ class HotkeyCategorizer:
 
         return self.categories
 
-    def build_formatted_list(
-        self, include_instructions: bool = True
-    ) -> list[str]:
+    def build_formatted_list(self, include_instructions: bool = True) -> list[str]:
         """Build the final formatted hotkey list with categories"""
         final_hotkeys = []
 

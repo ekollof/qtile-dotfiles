@@ -3,7 +3,7 @@
 Theme management for hotkey display
 """
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from modules.simple_color_management import ColorManager
@@ -24,9 +24,7 @@ class ThemeManager:
                 "foreground": colors["special"]["foreground"],
                 "accent": colors["colors"]["color4"],  # Usually blue
                 "secondary": colors["colors"]["color8"],  # Usually gray
-                "highlight": colors["colors"][
-                    "color3"
-                ],  # Usually yellow/orange
+                "highlight": colors["colors"]["color3"],  # Usually yellow/orange
             }
         else:
             # Fallback colors
@@ -52,24 +50,24 @@ configuration {{
 }}
 
 * {{
-    background-color: {colors['background']};
-    text-color: {colors['foreground']};
-    border-color: {colors['accent']};
+    background-color: {colors["background"]};
+    text-color: {colors["foreground"]};
+    border-color: {colors["accent"]};
     width: 1200;
     font: "Monospace 11";
 }}
 
 window {{
     transparency: "real";
-    background-color: {colors['background']}ee;
+    background-color: {colors["background"]}ee;
     border: 2px;
     border-radius: 8px;
     padding: 20px;
 }}
 
 inputbar {{
-    background-color: {colors['secondary']};
-    text-color: {colors['foreground']};
+    background-color: {colors["secondary"]};
+    text-color: {colors["foreground"]};
     border: 1px;
     border-radius: 4px;
     padding: 8px;
@@ -78,7 +76,7 @@ inputbar {{
 
 prompt {{
     background-color: transparent;
-    text-color: {colors['highlight']};
+    text-color: {colors["highlight"]};
     padding: 0px 8px 0px 0px;
 }}
 
@@ -92,14 +90,14 @@ listview {{
 
 element {{
     background-color: transparent;
-    text-color: {colors['foreground']};
+    text-color: {colors["foreground"]};
     orientation: horizontal;
     border-radius: 4px;
     padding: 6px;
 }}
 
 element selected {{
-    background-color: {colors['accent']};
+    background-color: {colors["accent"]};
     text-color: #ffffff;
 }}
 

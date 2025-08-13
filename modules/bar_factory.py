@@ -90,9 +90,7 @@ class BarManagerFactory:
 
         except Exception as e:
             logger.error(f"Failed to create enhanced SVG bar manager: {e}")
-            raise RuntimeError(
-                f"Could not initialize enhanced bar manager: {e}"
-            )
+            raise RuntimeError(f"Could not initialize enhanced bar manager: {e}") from e
 
     def get_bar_manager_info(
         self, qtile_config: Any
@@ -131,9 +129,7 @@ def get_bar_factory() -> BarManagerFactory:
     return _bar_factory
 
 
-def create_bar_manager(
-    color_manager: Any, qtile_config: Any
-) -> EnhancedBarManager:
+def create_bar_manager(color_manager: Any, qtile_config: Any) -> EnhancedBarManager:
     """
     @brief Unified factory function for creating the enhanced SVG bar manager  # Complex operation
     @param color_manager: Color management instance

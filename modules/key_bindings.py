@@ -10,9 +10,7 @@ from libqtile.lazy import lazy
 class KeyBindings:
     """Defines all keyboard bindings for qtile"""
 
-    def __init__(
-        self, config, layout_commands, window_commands, system_commands
-    ):
+    def __init__(self, config, layout_commands, window_commands, system_commands):
         self.config = config
         self.layout_commands = layout_commands
         self.window_commands = window_commands
@@ -176,17 +174,13 @@ class KeyBindings:
             Key(
                 [self.mod],
                 "comma",
-                lazy.function(
-                    self.window_commands.focus_next_screen_with_warp
-                ),
+                lazy.function(self.window_commands.focus_next_screen_with_warp),
                 desc="Focus next screen and warp mouse",
             ),
             Key(
                 [self.mod],
                 "period",
-                lazy.function(
-                    self.window_commands.focus_prev_screen_with_warp
-                ),
+                lazy.function(self.window_commands.focus_prev_screen_with_warp),
                 desc="Focus previous screen and warp mouse",
             ),
             # Window state toggles
@@ -202,9 +196,7 @@ class KeyBindings:
                 lazy.window.toggle_fullscreen(),
                 desc="Toggle fullscreen",
             ),
-            Key(
-                [self.mod], "q", lazy.window.kill(), desc="Kill focused window"
-            ),
+            Key([self.mod], "q", lazy.window.kill(), desc="Kill focused window"),
             # Window focus and arrangement
             Key(
                 [self.mod],
@@ -298,9 +290,7 @@ class KeyBindings:
         """Get system control keys"""
         return [
             # Qtile system controls
-            Key(
-                [self.mod, "shift"], "r", lazy.restart(), desc="Restart qtile"
-            ),
+            Key([self.mod, "shift"], "r", lazy.restart(), desc="Restart qtile"),
             Key(
                 [self.mod, "shift"],
                 "q",

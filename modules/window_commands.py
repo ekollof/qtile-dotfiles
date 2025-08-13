@@ -20,13 +20,9 @@ class WindowCommands:
             if i != 0:
                 group = qtile.screens[i - 1].group.name
                 qtile.current_window.togroup(group)
-                logger.debug(
-                    f"Moved window to screen {i - 1} (group: {group})"
-                )
+                logger.debug(f"Moved window to screen {i - 1} (group: {group})")
             else:
-                logger.debug(
-                    "Already on first screen, cannot move to previous"
-                )
+                logger.debug("Already on first screen, cannot move to previous")
         except Exception as e:
             logger.error(f"Error moving window to previous screen: {e}")
 
@@ -38,9 +34,7 @@ class WindowCommands:
             if i + 1 != len(qtile.screens):
                 group = qtile.screens[i + 1].group.name
                 qtile.current_window.togroup(group)
-                logger.debug(
-                    f"Moved window to screen {i + 1} (group: {group})"
-                )
+                logger.debug(f"Moved window to screen {i + 1} (group: {group})")
             else:
                 logger.debug("Already on last screen, cannot move to next")
         except Exception as e:
@@ -84,9 +78,7 @@ class WindowCommands:
         try:
             if qtile.current_window:
                 qtile.current_window.toggle_floating()
-                state = (
-                    "floating" if qtile.current_window.floating else "tiled"
-                )
+                state = "floating" if qtile.current_window.floating else "tiled"
                 logger.debug(f"Window is now {state}")
         except Exception as e:
             logger.error(f"Error toggling window floating: {e}")
@@ -97,11 +89,7 @@ class WindowCommands:
         try:
             if qtile.current_window:
                 qtile.current_window.toggle_fullscreen()
-                state = (
-                    "fullscreen"
-                    if qtile.current_window.fullscreen
-                    else "windowed"
-                )
+                state = "fullscreen" if qtile.current_window.fullscreen else "windowed"
                 logger.debug(f"Window is now {state}")
         except Exception as e:
             logger.error(f"Error toggling window fullscreen: {e}")
@@ -121,9 +109,7 @@ class WindowCommands:
     def minimize_window(qtile):
         """Minimize current window if supported"""
         try:
-            if qtile.current_window and hasattr(
-                qtile.current_window, "minimize"
-            ):
+            if qtile.current_window and hasattr(qtile.current_window, "minimize"):
                 qtile.current_window.minimize()
                 logger.debug("Window minimized")
         except Exception as e:
@@ -141,9 +127,7 @@ class WindowCommands:
                     )(),
                     "floating": qtile.current_window.floating,
                     "fullscreen": qtile.current_window.fullscreen,
-                    "minimized": getattr(
-                        qtile.current_window, "minimized", False
-                    ),
+                    "minimized": getattr(qtile.current_window, "minimized", False),
                     "group": (
                         qtile.current_window.group.name
                         if qtile.current_window.group
@@ -160,9 +144,7 @@ class WindowCommands:
     def move_window_to_group(qtile, group_name):
         """Move current window to specified group"""
         try:
-            if qtile.current_window and group_name in [
-                g.name for g in qtile.groups
-            ]:
+            if qtile.current_window and group_name in [g.name for g in qtile.groups]:
                 qtile.current_window.togroup(group_name)
                 logger.debug(f"Moved window to group: {group_name}")
             else:
@@ -213,14 +195,10 @@ class WindowCommands:
             is_maximized = getattr(current_window, "maximized", False)
             current_group = qtile.current_group
 
-            logger.debug(
-                f"Smart maximize called for window: {current_window.name}"
-            )
+            logger.debug(f"Smart maximize called for window: {current_window.name}")
             logger.debug(f"Window currently maximized: {is_maximized}")
             logger.debug(f"Current group: {current_group.name}")
-            logger.debug(
-                f"Windows in group: {[w.name for w in current_group.windows]}"
-            )
+            logger.debug(f"Windows in group: {[w.name for w in current_group.windows]}")
 
             if is_maximized:
                 # Un-maximize: restore the window and bring back other windows
@@ -230,14 +208,12 @@ class WindowCommands:
                 # Restore minimized windows in current group
                 restored_count = 0
                 for window in current_group.windows:
-                    if window != current_window and getattr(
-                        window, "minimized", False
-                    ):
+                    if window != current_window and getattr(window, "minimized", False):
                         # Check if window was minimized by our smart maximize
                         if getattr(window, "_smart_maximized_hidden", False):
                             window.toggle_minimize()
                             # Clear the flag
-                            setattr(window, "_smart_maximized_hidden", False)
+                            window._smart_maximized_hidden = False
                             restored_count += 1
                             logger.debug(f"Restored window: {window.name}")
 
@@ -255,9 +231,8 @@ class WindowCommands:
                         and not getattr(window, "minimized", False)
                         and not window.floating
                     ):  # Don't minimize floating windows
-
                         # Mark that this window was hidden by smart maximize
-                        setattr(window, "_smart_maximized_hidden", True)
+                        window._smart_maximized_hidden = True
                         window.toggle_minimize()
                         hidden_count += 1
                         logger.debug(f"Minimized window: {window.name}")
@@ -275,9 +250,7 @@ class WindowCommands:
                 qtile.current_window.toggle_maximize()
                 logger.info("Fallback: Used regular maximize")
             except Exception as fallback_error:
-                logger.error(
-                    f"Fallback maximize also failed: {fallback_error}"
-                )
+                logger.error(f"Fallback maximize also failed: {fallback_error}")
 
     def _warp_mouse_to_window(self, qtile):
         """Helper function to warp mouse to center of current window"""
@@ -302,9 +275,7 @@ class WindowCommands:
 
             # Warp mouse to center of window
             qtile.core.warp_pointer(center_x, center_y)
-            logger.debug(
-                f"Warped mouse to window center: ({center_x}, {center_y})"
-            )
+            logger.debug(f"Warped mouse to window center: ({center_x}, {center_y})")
 
         except Exception as e:
             logger.debug(f"Error warping mouse to window: {e}")
@@ -319,9 +290,7 @@ class WindowCommands:
                 if first_window:
                     # Focus the first window
                     current_group.focus(first_window)
-                    logger.debug(
-                        f"Focused first window in stack: {first_window.name}"
-                    )
+                    logger.debug(f"Focused first window in stack: {first_window.name}")
                     return True
             return False
         except Exception as e:

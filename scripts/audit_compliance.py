@@ -81,9 +81,7 @@ class ComplianceAuditor:
             try:
                 tree = ast.parse(content)
             except SyntaxError as e:
-                self._add_issue(
-                    "syntax_error", file_path, 0, f"Syntax error: {e}"
-                )
+                self._add_issue("syntax_error", file_path, 0, f"Syntax error: {e}")
                 return
 
             # Run all compliance checks
@@ -93,9 +91,7 @@ class ComplianceAuditor:
             self._check_code_quality(file_path, content, tree)
 
         except Exception as e:
-            self._add_issue(
-                "file_error", file_path, 0, f"Could not process file: {e}"
-            )
+            self._add_issue("file_error", file_path, 0, f"Could not process file: {e}")
 
     def _check_python_syntax(
         self, file_path: Path, content: str, tree: ast.AST
@@ -264,9 +260,7 @@ class ComplianceAuditor:
                 if re.search(pattern, line):
                     self._add_issue("portability", file_path, i, message)
 
-    def _check_code_quality(
-        self, file_path: Path, content: str, tree: ast.AST
-    ) -> None:
+    def _check_code_quality(self, file_path: Path, content: str, tree: ast.AST) -> None:
         """
         @brief Check code quality standards (PEP 8, type hints, error handling)
         @param file_path: Path to the file being checked
@@ -300,14 +294,13 @@ class ComplianceAuditor:
 
         # Check for bare except clauses
         for node in ast.walk(tree):
-            if isinstance(node, ast.ExceptHandler):
-                if node.type is None:
-                    self._add_issue(
-                        "code_quality",
-                        file_path,
-                        node.lineno,
-                        "Bare 'except:' clause - specify exception types",
-                    )
+            if isinstance(node, ast.ExceptHandler) and node.type is None:
+                self._add_issue(
+                    "code_quality",
+                    file_path,
+                    node.lineno,
+                    "Bare 'except:' clause - specify exception types",
+                )
 
         # Check function complexity (simplified cyclomatic complexity)
         for node in ast.walk(tree):
@@ -363,9 +356,7 @@ class ComplianceAuditor:
         doxygen_tags = ["@brief", "@param", "@return", "@throws"]
         return any(tag in docstring for tag in doxygen_tags)
 
-    def _check_function_docs(
-        self, file_path: Path, node: ast.FunctionDef
-    ) -> None:
+    def _check_function_docs(self, file_path: Path, node: ast.FunctionDef) -> None:
         """
         @brief Check function documentation compliance
         @param file_path: Path to the file
@@ -446,11 +437,11 @@ class ComplianceAuditor:
         complexity = 1  # Base complexity
 
         for child in ast.walk(node):
-            if isinstance(child, (ast.If, ast.While, ast.For, ast.AsyncFor)):
-                complexity += 1
-            elif isinstance(child, ast.ExceptHandler):
-                complexity += 1
-            elif isinstance(child, (ast.ListComp, ast.DictComp, ast.SetComp)):
+            if (
+                isinstance(child, ast.If | ast.While | ast.For | ast.AsyncFor)
+                or isinstance(child, ast.ExceptHandler)
+                or isinstance(child, ast.ListComp | ast.DictComp | ast.SetComp)
+            ):
                 complexity += 1
 
         return complexity
@@ -507,14 +498,12 @@ class ComplianceAuditor:
 
         # Print detailed issues
         for name, key in categories:
-            if key in issues_by_category and issues_by_category[key]:
+            if issues_by_category.get(key):
                 print(f"\n🔍 {name} Issues")
                 print("-" * (len(name) + 8))
 
                 for issue in issues_by_category[key][:10]:  # Limit to first 10
-                    line_info = (
-                        f":{issue['line']}" if issue["line"] > 0 else ""
-                    )
+                    line_info = f":{issue['line']}" if issue["line"] > 0 else ""
                     print(f"  {issue['file']}{line_info}")
                     print(f"    {issue['message']}")
 
@@ -523,17 +512,10 @@ class ComplianceAuditor:
                     print(f"    ... and {remaining} more issues")
 
         # Calculate compliance score
-        total_possible_issues = (
-            self.stats["files_checked"] * 10
-        )  # Rough estimate
+        total_possible_issues = self.stats["files_checked"] * 10  # Rough estimate
         compliance_score = max(
             0,
-            100
-            - (
-                self.stats["total_issues"]
-                / max(1, total_possible_issues)
-                * 100
-            ),
+            100 - (self.stats["total_issues"] / max(1, total_possible_issues) * 100),
         )
 
         print(f"\n📈 Compliance Score: {compliance_score:.1f}%")
@@ -561,9 +543,7 @@ def main():
     """
     import argparse
 
-    parser = argparse.ArgumentParser(
-        description="Audit qtile project compliance"
-    )
+    parser = argparse.ArgumentParser(description="Audit qtile project compliance")
     parser.add_argument(
         "--project-root",
         "-r",

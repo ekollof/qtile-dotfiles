@@ -20,14 +20,16 @@ import os
 import sys
 from pathlib import Path
 
-from libqtile import qtile  # type: ignore
+# Fix qtile's problematic default floating rules before any layouts are created
+# This prevents electron apps from floating due to has_fixed_size/has_fixed_ratio checks
+from libqtile import (
+    layout,
+    qtile,  # type: ignore
+)
 from libqtile.config import Click, Drag, Match
 from libqtile.lazy import lazy
 from libqtile.log_utils import logger
 
-# Fix qtile's problematic default floating rules before any layouts are created
-# This prevents electron apps from floating due to has_fixed_size/has_fixed_ratio checks
-from libqtile import layout
 # Use standards-compliant floating rules - only float appropriate window types
 layout.Floating.default_float_rules = [
     # EWMH standard window types that should float
@@ -79,9 +81,7 @@ hook_manager = create_hook_manager(color_manager)
 # Start color monitoring for automatic wallpaper/theme changes
 try:
     color_manager.force_start_monitoring()
-    logger.info(
-        "Color monitoring started - qtile will restart when wallpaper changes"
-    )
+    logger.info("Color monitoring started - qtile will restart when wallpaper changes")
 except Exception as e:
     logger.warning(f"Failed to start color monitoring: {e}")
 
@@ -154,7 +154,6 @@ def remapkeys() -> None:
 
     Complex operation for custom key remapping functionality.
     """
-    pass
 
 
 def manually_reconfigure_screens() -> None:

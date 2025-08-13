@@ -16,7 +16,6 @@ Key features:
 - Cross-platform portability
 """
 
-
 from pathlib import Path
 from typing import Any
 
@@ -45,11 +44,11 @@ class QtileConfig:
         self.platform_config = get_platform_config()
 
     # ===== FONT SETTINGS =====
-    # 
+    #
     # 🎯 TO CHANGE FONT SIZES: Simply modify the return values below!
     # - preferred_fontsize: Controls text size (widgets, window titles, etc.)
     # - preferred_icon_fontsize: Controls icon/symbol size (usually larger)
-    # 
+    #
     # Both values are automatically scaled for high-DPI displays.
     # After changes, restart qtile with Super+Ctrl+R
 
@@ -196,9 +195,7 @@ class QtileConfig:
         """
         launcher_app = self.platform_config.get_application("launcher", "rofi")
         launcher_cmd = (
-            f"{launcher_app} -show run"
-            if launcher_app == "rofi"
-            else launcher_app
+            f"{launcher_app} -show run" if launcher_app == "rofi" else launcher_app
         )
 
         return {
@@ -222,12 +219,8 @@ class QtileConfig:
             "network_manager": self.platform_config.get_command(
                 "network_manager", "nm-connection-editor"
             ),
-            "file_manager": self.platform_config.get_application(
-                "file_manager" "thunar"
-            ),
-            "media_player": self.platform_config.get_application(
-                "media_player", "mpv"
-            ),
+            "file_manager": self.platform_config.get_application("file_managerthunar"),
+            "media_player": self.platform_config.get_application("media_player", "mpv"),
         }
 
     # ===== LAYOUT SETTINGS - DPI AWARE =====
@@ -512,7 +505,9 @@ class QtileConfig:
         @return Dictionary with height, opacity, and margin settings for the status bar
         """
         return {
-            "height": scale_size(self.preferred_bar_height),  # DPI-scaled configurable bar height
+            "height": scale_size(
+                self.preferred_bar_height
+            ),  # DPI-scaled configurable bar height
             "opacity": 0.95,
             "margin": [0, 0, 0, 0],  # top, right, bottom, left
         }
@@ -525,7 +520,9 @@ class QtileConfig:
         """
         return {
             "font": get_available_font(self.preferred_font),
-            "fontsize": scale_font(self.preferred_fontsize),  # DPI-scaled configurable font size
+            "fontsize": scale_font(
+                self.preferred_fontsize
+            ),  # DPI-scaled configurable font size
             "padding": scale_size(3),  # DPI-scaled padding
         }
 
@@ -644,9 +641,7 @@ class QtileConfig:
         # BSD systems might need different font settings
         if self.platform_info.is_bsd:
             # Fallback to more common fonts on BSD
-            self.platform_config.add_override(
-                "fallback_font", "DejaVu Sans Mono"
-            )
+            self.platform_config.add_override("fallback_font", "DejaVu Sans Mono")
 
 
 # Create global config instance

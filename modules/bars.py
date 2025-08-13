@@ -11,6 +11,7 @@ import os
 import platform
 import socket
 import subprocess
+import contextlib
 import traceback
 from pathlib import Path
 from typing import Any
@@ -49,14 +50,12 @@ class EnhancedBarManager:
         self.themed_icon_dir = self.icon_dir / "themed"
 
         # Initialize SVG utilities
-        self.svg_manipulator, self.icon_generator = get_svg_utils(
-            color_manager
-        )
+        self.svg_manipulator, self.icon_generator = get_svg_utils(color_manager)
 
         # Create directories
         self.dynamic_icon_dir.mkdir(parents=True, exist_ok=True)
         self.themed_icon_dir.mkdir(parents=True, exist_ok=True)
-        
+
         # Initialize themed icons cache
         self.themed_icons: dict[str, str] = {}
 
@@ -69,7 +68,7 @@ class EnhancedBarManager:
 
         # System state cache for dynamic icons
         self._system_state_cache = {}
-        
+
         # Generate themed icon cache (may use fallback colors initially)
         self._update_themed_icon_cache()
 
@@ -98,9 +97,7 @@ class EnhancedBarManager:
         defaults.pop("background", None)
         return defaults
 
-    def _get_widget_defaults_excluding(
-        self, *exclude_params: str
-    ) -> dict[str, Any]:
+    def _get_widget_defaults_excluding(self, *exclude_params: str) -> dict[str, Any]:
         """
         @brief Get widget defaults excluding specified parameters
         @param exclude_params: Parameter names to exclude from defaults
@@ -119,7 +116,9 @@ class EnhancedBarManager:
         return {
             "svg": {
                 "python": str(self.icon_dir / "python.svg"),
-                "platform": str(self.icon_dir / "platform.svg"),  # Platform-specific mascot
+                "platform": str(
+                    self.icon_dir / "platform.svg"
+                ),  # Platform-specific mascot
                 "updates": str(self.icon_dir / "arrow-up.svg"),
                 "refresh": str(self.icon_dir / "refresh.svg"),
                 "mail": str(self.icon_dir / "mail.svg"),
@@ -136,7 +135,9 @@ class EnhancedBarManager:
             },
             "image": {
                 "python": str(self.icon_dir / "python.png"),
-                "platform": str(self.icon_dir / "platform.png"),  # Platform-specific mascot
+                "platform": str(
+                    self.icon_dir / "platform.png"
+                ),  # Platform-specific mascot
                 "updates": str(self.icon_dir / "arrow-up.png"),
                 "refresh": str(self.icon_dir / "refresh.png"),
                 "mail": str(self.icon_dir / "mail.png"),
@@ -196,40 +197,48 @@ class EnhancedBarManager:
         except Exception as e:
             logger.warning(f"Failed to generate themed icon cache: {e}")
             self.themed_icons = {}
-            
+
     def _schedule_icon_refresh(self) -> None:
         """
         @brief Schedule icon cache refresh after color manager initialization
-        
+
         This helps ensure icons get proper theme colors even if the color manager
         wasn't fully initialized during bar manager construction.
         """
+
         def refresh_icons():
             try:
                 # Force a fresh color load
-                if hasattr(self.color_manager, 'force_start_monitoring'):
+                if hasattr(self.color_manager, "force_start_monitoring"):
                     old_icons_count = len(self.themed_icons)
-                    self._update_themed_icon_cache() 
+                    self._update_themed_icon_cache()
                     new_icons_count = len(self.themed_icons)
                     if new_icons_count > 0 and new_icons_count != old_icons_count:
-                        logger.info(f"Refreshed themed icons: {old_icons_count} -> {new_icons_count}")
+                        logger.info(
+                            f"Refreshed themed icons: {old_icons_count} -> {new_icons_count}"
+                        )
             except Exception as e:
-                logger.debug(f"Icon refresh failed (this is normal during startup): {e}")
-        
+                logger.debug(
+                    f"Icon refresh failed (this is normal during startup): {e}"
+                )
+
         # Try to refresh icons after a short delay
         import threading
+
         threading.Timer(2.0, refresh_icons).start()
-        
+
     def refresh_themed_icons(self) -> None:
         """
         @brief Public method to refresh themed icon cache when colors change
-        
+
         Call this method when you know the color scheme has changed and
         icons need to be regenerated with new colors.
         """
         logger.info("Refreshing themed icons with current colors...")
         self._update_themed_icon_cache()
-        logger.info(f"Themed icon refresh complete: {len(self.themed_icons)} icons generated")
+        logger.info(
+            f"Themed icon refresh complete: {len(self.themed_icons)} icons generated"
+        )
 
     def create_dynamic_icon(self, icon_type: str, **kwargs: Any) -> str:
         """
@@ -243,16 +252,12 @@ class EnhancedBarManager:
                 case "battery":
                     level = kwargs.get("level", 100)
                     charging = kwargs.get("charging", False)
-                    svg_content = self.icon_generator.battery_icon(
-                        level, charging
-                    )
+                    svg_content = self.icon_generator.battery_icon(level, charging)
 
                 case "wifi":
                     strength = kwargs.get("strength", 3)
                     connected = kwargs.get("connected", True)
-                    svg_content = self.icon_generator.wifi_icon(
-                        strength, connected
-                    )
+                    svg_content = self.icon_generator.wifi_icon(strength, connected)
 
                 case "volume":
                     level = kwargs.get("level", 100)
@@ -270,9 +275,7 @@ class EnhancedBarManager:
                 case "network":
                     rx_active = kwargs.get("rx_active", False)
                     tx_active = kwargs.get("tx_active", False)
-                    svg_content = self.icon_generator.network_icon(
-                        rx_active, tx_active
-                    )
+                    svg_content = self.icon_generator.network_icon(rx_active, tx_active)
 
                 case "platform":
                     svg_content = self.icon_generator.platform_mascot_icon()
@@ -366,9 +369,7 @@ class EnhancedBarManager:
         match self.icon_method:
             case "svg_dynamic":
                 # Use dynamic SVG generation
-                icon_path = self.create_dynamic_icon(
-                    icon_key, **dynamic_kwargs
-                )
+                icon_path = self.create_dynamic_icon(icon_key, **dynamic_kwargs)
                 if icon_path and Path(icon_path).exists():
                     try:
                         return widget.Image(
@@ -391,9 +392,7 @@ class EnhancedBarManager:
                             margin=scale_size(2),
                         )
                     except Exception as e:
-                        logger.warning(
-                            f"Failed to load themed icon {themed_path}: {e}"
-                        )
+                        logger.warning(f"Failed to load themed icon {themed_path}: {e}")
 
             case "svg_static":
                 # Use static themed icons
@@ -406,9 +405,7 @@ class EnhancedBarManager:
                             margin=scale_size(2),
                         )
                     except Exception as e:
-                        logger.warning(
-                            f"Failed to load themed icon {themed_path}: {e}"
-                        )
+                        logger.warning(f"Failed to load themed icon {themed_path}: {e}")
 
             case "svg":
                 # Use original SVG files with recoloring
@@ -422,9 +419,7 @@ class EnhancedBarManager:
                             margin=scale_size(2),
                         )
                     except Exception as e:
-                        logger.warning(
-                            f"Failed to load SVG icon {themed_path}: {e}"
-                        )
+                        logger.warning(f"Failed to load SVG icon {themed_path}: {e}")
 
             case "image":
                 # Use PNG images
@@ -437,9 +432,7 @@ class EnhancedBarManager:
                             margin=scale_size(2),
                         )
                     except Exception as e:
-                        logger.warning(
-                            f"Failed to load PNG icon {icon_path}: {e}"
-                        )
+                        logger.warning(f"Failed to load PNG icon {icon_path}: {e}")
 
             case "nerd_font":
                 # Use Nerd Font icons
@@ -489,14 +482,10 @@ class EnhancedBarManager:
                     return result
                 case "openbsd" | "freebsd" | "netbsd" | "dragonfly":
                     result = self._check_bsd_battery(system)
-                    logger.debug(
-                        f"BSD ({system}) battery check result: {result}"
-                    )
+                    logger.debug(f"BSD ({system}) battery check result: {result}")
                     return result
                 case _:
-                    logger.debug(
-                        f"Unsupported platform for battery widget: {system}"
-                    )
+                    logger.debug(f"Unsupported platform for battery widget: {system}")
                     return False
 
         except Exception as e:
@@ -554,38 +543,27 @@ class EnhancedBarManager:
                 has_battery = "battery" in output_lower
 
                 # Additional checks for OpenBSD - apm might show "no battery" or similar
-                if (
-                    "no battery" in output_lower
-                    or "not present" in output_lower
-                ):
+                if "no battery" in output_lower or "not present" in output_lower:
                     logger.debug("apm output indicates no battery present")
                     return False
 
-                logger.debug(
-                    f"OpenBSD battery detection result: {has_battery}"
-                )
+                logger.debug(f"OpenBSD battery detection result: {has_battery}")
 
                 # If apm suggests battery exists, test actual widget compatibility
                 if has_battery:
                     return self._test_battery_widget_compatibility()
                 return False
             else:
-                logger.debug(
-                    f"Checking {system} battery with 'acpiconf' command"
-                )
+                logger.debug(f"Checking {system} battery with 'acpiconf' command")
                 result = subprocess.run(
                     ["acpiconf", "-i", "0"],
                     capture_output=True,
                     text=True,
                     timeout=5,
                 )
-                logger.debug(
-                    f"acpiconf command result: returncode={result.returncode}"
-                )
+                logger.debug(f"acpiconf command result: returncode={result.returncode}")
                 has_battery = result.returncode == 0
-                logger.debug(
-                    f"{system} battery detection result: {has_battery}"
-                )
+                logger.debug(f"{system} battery detection result: {has_battery}")
 
                 # Test actual widget compatibility if acpiconf suggests battery exists
                 if has_battery:
@@ -629,9 +607,7 @@ class EnhancedBarManager:
         @return True if Battery widget is compatible
         """
         try:
-            logger.debug(
-                "Testing Battery widget compatibility by attempting creation"
-            )
+            logger.debug("Testing Battery widget compatibility by attempting creation")
             # Try to create a minimal battery widget to test compatibility
             _ = widget.Battery(format="{percent:2.0%}")
             logger.debug("Battery widget compatibility test passed")
@@ -641,9 +617,7 @@ class EnhancedBarManager:
                 logger.debug(f"Battery widget not compatible: {e}")
                 return False
             else:
-                logger.warning(
-                    f"Unexpected error during battery widget test: {e}"
-                )
+                logger.warning(f"Unexpected error during battery widget test: {e}")
                 return False
         except Exception as e:
             logger.debug(f"Battery widget compatibility test failed: {e}")
@@ -656,11 +630,7 @@ class EnhancedBarManager:
         @return True if script is available
         """
         path_obj = Path(script_path).expanduser()
-        return (
-            path_obj.exists()
-            and path_obj.is_file()
-            and os.access(path_obj, os.X_OK)
-        )
+        return path_obj.exists() and path_obj.is_file() and os.access(path_obj, os.X_OK)
 
     def _safe_script_call(self, script_path: str, fallback: str = "N/A"):
         """
@@ -726,10 +696,10 @@ class EnhancedBarManager:
                             text=config["icon"],
                             foreground=colors.get("color5", "#ffffff"),
                             background=special.get("background", "#000000"),
-                            font=get_available_font(
-                                self.qtile_config.preferred_font
+                            font=get_available_font(self.qtile_config.preferred_font),
+                            fontsize=scale_font(
+                                self.qtile_config.preferred_icon_fontsize
                             ),
-                            fontsize=scale_font(self.qtile_config.preferred_icon_fontsize),
                             padding=scale_size(3),
                         )
                     )
@@ -739,9 +709,7 @@ class EnhancedBarManager:
                     widget.GenPollText(
                         foreground=colors.get("color5", "#ffffff"),
                         background=special.get("background", "#000000"),
-                        font=get_available_font(
-                            self.qtile_config.preferred_font
-                        ),
+                        font=get_available_font(self.qtile_config.preferred_font),
                         fontsize=scale_font(self.qtile_config.preferred_fontsize),
                         padding=scale_size(3),
                         update_interval=config["update_interval"],
@@ -750,9 +718,7 @@ class EnhancedBarManager:
                         ),
                     )
                 )
-                logger.debug(
-                    f"Added {config['name']} widget with dynamic icon"
-                )
+                logger.debug(f"Added {config['name']} widget with dynamic icon")
             else:
                 logger.debug(
                     f"{config['name']} script not found: {config['script_path']}"
@@ -890,9 +856,7 @@ class EnhancedBarManager:
                     [
                         self._create_icon_widget("battery"),
                         widget.Battery(
-                            **self._get_widget_defaults_excluding(
-                                "background"
-                            ),
+                            **self._get_widget_defaults_excluding("background"),
                             foreground=colors.get("color5", "#ffffff"),
                             background=special.get("background", "#000000"),
                             format="{percent:2.0%}",
@@ -906,9 +870,7 @@ class EnhancedBarManager:
                         ),
                     ]
                 )
-                logger.info(
-                    "Successfully added Battery widget with dynamic icon"
-                )
+                logger.info("Successfully added Battery widget with dynamic icon")
             except RuntimeError as e:
                 if "Unknown platform" in str(e):
                     logger.warning(
@@ -926,9 +888,7 @@ class EnhancedBarManager:
                 )
                 logger.info("Continuing without Battery widget")
         else:
-            logger.info(
-                "Skipping Battery widget - not supported on this platform"
-            )
+            logger.info("Skipping Battery widget - not supported on this platform")
 
         # Clock and system tray
         barconfig.extend(
@@ -959,7 +919,6 @@ class EnhancedBarManager:
             except Exception as e:
                 logger.warning(f"Failed to create systray widget: {e}")
                 # Continue without systray if there's an issue
-                pass
 
         # Add current layout widget
         barconfig.extend(
@@ -994,10 +953,8 @@ class EnhancedBarManager:
             # Clear dynamic icon cache to force regeneration
             if self.dynamic_icon_dir.exists():
                 for icon_file in self.dynamic_icon_dir.glob("*.svg"):
-                    try:
+                    with contextlib.suppress(Exception):
                         icon_file.unlink()
-                    except Exception:
-                        pass
 
             logger.info("Dynamic icons updated for new color scheme")
 
@@ -1017,7 +974,8 @@ class EnhancedBarManager:
                 "dynamic": str(self.dynamic_icon_dir),
                 "themed": str(self.themed_icon_dir),
             },
-            "svg_utils_available": hasattr(self.svg_manipulator, 'load_svg') and callable(getattr(self.svg_manipulator, 'load_svg', None)),
+            "svg_utils_available": hasattr(self.svg_manipulator, "load_svg")
+            and callable(getattr(self.svg_manipulator, "load_svg", None)),
         }
 
     def get_widget_defaults(self) -> dict[str, Any]:

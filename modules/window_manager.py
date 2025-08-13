@@ -11,10 +11,10 @@ from libqtile.log_utils import logger
 class WindowManager:
     """Handles window state management and floating window logic"""
 
-    def __init__(self, config):
+    def __init__(self, config: Any) -> None:
         self.config = config
 
-    def should_window_float(self, window) -> bool:
+    def should_window_float(self, window: Any) -> bool:
         """Determine if a window should be floating based on floating rules"""
         try:
             wm_class = window.window.get_wm_class()
@@ -28,22 +28,19 @@ class WindowManager:
             if self._check_transient_window(window):
                 return True
 
-            if self._check_wm_hints(window):
-                return True
-
-            return False
+            return bool(self._check_wm_hints(window))
 
         except (IndexError, AttributeError, TypeError) as e:
             logger.debug(f"Could not determine if window should float: {e}")
             return False  # Default to tiling if we can't determine
 
-    def _check_force_floating_apps(self, wm_class) -> bool:
+    def _check_force_floating_apps(self, wm_class: list[str]) -> bool:
         """Check if window class is in force floating apps list"""
         return wm_class[0].lower() in [
             fc.lower() for fc in self.config.force_floating_apps
         ]
 
-    def _check_floating_rules(self, wm_class, window) -> bool:
+    def _check_floating_rules(self, wm_class: list[str], window: Any) -> bool:
         """Check against floating rules from configuration"""
         for rule in self.config.floating_rules:
             if self._check_wm_class_rule(wm_class, rule):
@@ -52,7 +49,7 @@ class WindowManager:
                 return True
         return False
 
-    def _check_wm_class_rule(self, wm_class, rule) -> bool:
+    def _check_wm_class_rule(self, wm_class: list[str], rule: dict[str, Any]) -> bool:
         """Check if window class matches floating rule"""
         if "wm_class" not in rule:
             return False
@@ -60,11 +57,9 @@ class WindowManager:
         rule_class = rule["wm_class"].lower()
         if wm_class[0].lower() == rule_class:
             return True
-        if len(wm_class) >= 2 and wm_class[1].lower() == rule_class:
-            return True
-        return False
+        return bool(len(wm_class) >= 2 and wm_class[1].lower() == rule_class)
 
-    def _check_title_rule(self, window, rule) -> bool:
+    def _check_title_rule(self, window: Any, rule: dict[str, Any]) -> bool:
         """Check if window title matches floating rule"""
         if "title" not in rule:
             return False
@@ -75,18 +70,16 @@ class WindowManager:
         except Exception:
             return False
 
-    def _check_transient_window(self, window) -> bool:
+    def _check_transient_window(self, window: Any) -> bool:
         """Check if window is transient (should float)"""
         return bool(window.window.get_wm_transient_for())
 
-    def _check_wm_hints(self, window) -> bool:
+    def _check_wm_hints(self, window: Any) -> bool:
         """Check WM hints for dialog-like windows"""
         hints = window.window.get_wm_normal_hints()
-        if hints and hints.get("max_width") and hints.get("max_width") < 1000:
-            return True
-        return False
+        return bool(hints and hints.get("max_width") and hints.get("max_width") < 1000)
 
-    def enforce_window_tiling(self, window):
+    def enforce_window_tiling(self, window: Any) -> None:
         """Enforce consistent tiling behavior for a window"""
         try:
             # Determine if this window should float based on our rules
@@ -106,7 +99,7 @@ class WindowManager:
         except (IndexError, AttributeError, TypeError) as e:
             logger.debug(f"Could not determine window floating behavior: {e}")
 
-    def force_retile_all_windows(self, qtile) -> int:
+    def force_retile_all_windows(self, qtile: Any) -> int:
         """Manual command to force all windows to tile (useful for testing/debugging)"""
         try:
             retiled_count = 0
@@ -125,15 +118,13 @@ class WindowManager:
                             f"Could not check window during manual retiling: {e}"
                         )
                         continue
-            logger.info(
-                f"Manual retiling complete - retiled {retiled_count} windows"
-            )
+            logger.info(f"Manual retiling complete - retiled {retiled_count} windows")
             return retiled_count
         except Exception as e:
             logger.error(f"Error during manual retiling: {e}")
             return 0
 
-    def retile_windows_after_startup(self, qtile) -> int:
+    def retile_windows_after_startup(self, qtile: Any) -> int:
         """Force all windows to tile after qtile restart (except explicitly floating ones)"""
         try:
             retiled_count = 0
@@ -148,14 +139,10 @@ class WindowManager:
                             window.floating = False  # Force to tile
                             retiled_count += 1
                             app_name = self._get_window_name(window)
-                            logger.info(
-                                f"Re-tiled window after restart: {app_name}"
-                            )
+                            logger.info(f"Re-tiled window after restart: {app_name}")
 
                     except (IndexError, AttributeError, TypeError) as e:
-                        logger.debug(
-                            f"Could not check window during retiling: {e}"
-                        )
+                        logger.debug(f"Could not check window during retiling: {e}")
                         continue
             logger.info(
                 f"Completed window retiling after startup - retiled {retiled_count} windows"
@@ -165,7 +152,7 @@ class WindowManager:
             logger.error(f"Error during window retiling: {e}")
             return 0
 
-    def handle_transient_window(self, window):
+    def handle_transient_window(self, window: Any) -> None:
         """Handle WM hints for transient windows"""
         try:
             hints = window.window.get_wm_normal_hints()
@@ -182,16 +169,13 @@ class WindowManager:
         except Exception as e:
             logger.debug(f"Error handling transient window: {e}")
 
-    def set_parent_for_transient(self, window):
+    def set_parent_for_transient(self, window: Any) -> None:
         """Set parent for transient windows"""
         try:
             if window.window.get_wm_transient_for():
                 parent = window.window.get_wm_transient_for()
                 for client in window.qtile.windows_map.values():
-                    if (
-                        hasattr(client, "window")
-                        and client.window.wid == parent
-                    ):
+                    if hasattr(client, "window") and client.window.wid == parent:
                         window.parent = client
                         logger.debug(
                             f"Set parent for transient window: {self._get_window_name(window)}"
@@ -200,10 +184,10 @@ class WindowManager:
         except Exception as e:
             logger.debug(f"Error setting parent for transient window: {e}")
 
-    def get_window_statistics(self, qtile) -> dict[str, Any]:
+    def get_window_statistics(self, qtile: Any) -> dict[str, Any]:
         """Get statistics about current windows"""
         try:
-            stats = {
+            stats: dict[str, Any] = {
                 "total_windows": 0,
                 "floating_windows": 0,
                 "tiled_windows": 0,
@@ -245,7 +229,7 @@ class WindowManager:
 
     def validate_floating_rules(self) -> dict[str, Any]:
         """Validate the floating rules configuration"""
-        validation = {
+        validation: dict[str, Any] = {
             "valid": True,
             "warnings": [],
             "errors": [],
@@ -258,9 +242,7 @@ class WindowManager:
             validation["rule_count"] = len(self.config.floating_rules)
             for i, rule in enumerate(self.config.floating_rules):
                 if not isinstance(rule, dict):
-                    validation["errors"].append(
-                        f"Rule {i} is not a dictionary"
-                    )
+                    validation["errors"].append(f"Rule {i} is not a dictionary")
                     validation["valid"] = False
                 elif "wm_class" not in rule and "title" not in rule:
                     validation["warnings"].append(
@@ -268,9 +250,7 @@ class WindowManager:
                     )
 
             # Check force floating apps
-            validation["force_floating_count"] = len(
-                self.config.force_floating_apps
-            )
+            validation["force_floating_count"] = len(self.config.force_floating_apps)
             for app in self.config.force_floating_apps:
                 if not isinstance(app, str):
                     validation["errors"].append(
@@ -279,14 +259,12 @@ class WindowManager:
                     validation["valid"] = False
 
         except AttributeError as e:
-            validation["errors"].append(
-                f"Missing configuration attribute: {e}"
-            )
+            validation["errors"].append(f"Missing configuration attribute: {e}")
             validation["valid"] = False
 
         return validation
 
-    def _get_window_name(self, window) -> str:
+    def _get_window_name(self, window: Any) -> str:
         """Get a human-readable name for a window"""
         try:
             wm_class = window.window.get_wm_class()
@@ -299,7 +277,7 @@ class WindowManager:
         except Exception:
             return "Unknown"
 
-    def _get_window_class(self, window) -> str | None:
+    def _get_window_class(self, window: Any) -> str | None:
         """Get the WM class of a window"""
         try:
             wm_class = window.window.get_wm_class()
@@ -309,7 +287,7 @@ class WindowManager:
         except Exception:
             return None
 
-    def list_floating_windows(self, qtile) -> list[dict[str, Any]]:
+    def list_floating_windows(self, qtile: Any) -> list[dict[str, Any]]:
         """Get list of currently floating windows with details"""
         floating_windows = []
         try:
@@ -322,9 +300,7 @@ class WindowManager:
                     window_info = {
                         "name": self._get_window_name(window),
                         "class": self._get_window_class(window),
-                        "transient": bool(
-                            window.window.get_wm_transient_for()
-                        ),
+                        "transient": bool(window.window.get_wm_transient_for()),
                         "group": (
                             window.group.name
                             if hasattr(window, "group") and window.group
@@ -337,7 +313,7 @@ class WindowManager:
 
         return floating_windows
 
-    def get_problematic_windows(self, qtile) -> list[dict[str, Any]]:
+    def get_problematic_windows(self, qtile: Any) -> list[dict[str, Any]]:
         """Get list of windows that might be causing issues"""
         problematic = []
         try:
@@ -365,9 +341,7 @@ class WindowManager:
                                 "class": self._get_window_class(window),
                                 "issues": issues,
                                 "floating": window.floating,
-                                "transient": bool(
-                                    window.window.get_wm_transient_for()
-                                ),
+                                "transient": bool(window.window.get_wm_transient_for()),
                             }
                         )
         except Exception as e:

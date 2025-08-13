@@ -119,14 +119,9 @@ class DPIManager:
         for i, part in enumerate(parts):
             if (
                 "x" in part
-                and part.replace("x", "")
-                .replace("+", "")
-                .replace("-", "")
-                .isdigit()
+                and part.replace("x", "").replace("+", "").replace("-", "").isdigit()
             ):
-                resolution_part = part.split("+")[
-                    0
-                ]  # Get resolution before position
+                resolution_part = part.split("+")[0]  # Get resolution before position
             # Find physical dimensions (e.g., "597mm x 336mm")
             if part.endswith("mm"):
                 mm_part = parts[i - 2 : i + 1]  # Get "597mm x 336mm"
@@ -148,7 +143,7 @@ class DPIManager:
         try:
             xresources_path = Path("~/.Xresources").expanduser()
             if xresources_path.exists():
-                with open(xresources_path, "r") as f:
+                with open(xresources_path) as f:
                     for line in f:
                         if line.strip().startswith("Xft.dpi:"):
                             dpi = float(line.split(":")[1].strip())

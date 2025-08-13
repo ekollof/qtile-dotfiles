@@ -4,6 +4,7 @@ System-level commands for qtile
 """
 
 import subprocess
+from typing import Any
 
 from libqtile.log_utils import logger
 
@@ -47,10 +48,10 @@ def run_system_command(
 class SystemCommands:
     """Commands for system-level operations and qtile management"""
 
-    def __init__(self, color_manager):
+    def __init__(self, color_manager: Any) -> None:
         self.color_manager = color_manager
 
-    def manual_color_reload(self, qtile):
+    def manual_color_reload(self, qtile: Any) -> None:
         """Manually reload colors"""
         try:
             logger.info("Manual color reload requested")
@@ -59,7 +60,7 @@ class SystemCommands:
         except Exception as e:
             logger.error(f"Error reloading colors: {e}")
 
-    def manual_retile_all(self, qtile):
+    def manual_retile_all(self, qtile: Any) -> None:
         """Manually force all windows to tile"""
         try:
             from modules.hooks import create_hook_manager
@@ -70,7 +71,7 @@ class SystemCommands:
         except Exception as e:
             logger.error(f"Manual retile failed: {e}")
 
-    def manual_screen_reconfigure(self, qtile):
+    def manual_screen_reconfigure(self, qtile: Any) -> None:
         """Manually reconfigure screens after monitor changes"""
         try:
             logger.info("Manual screen reconfiguration requested")
@@ -94,15 +95,13 @@ class SystemCommands:
         except Exception as e:
             logger.error(f"Screen reconfiguration failed: {e}")
 
-    def show_hotkeys(self, qtile, key_manager):
+    def show_hotkeys(self, qtile: Any, key_manager: Any) -> None:
         """Show hotkey display window"""
         try:
             logger.info("Showing hotkey display")
             from modules.hotkeys import create_hotkey_display
 
-            hotkey_display = create_hotkey_display(
-                key_manager, self.color_manager
-            )
+            hotkey_display = create_hotkey_display(key_manager, self.color_manager)
             hotkey_display.show_hotkeys()
         except Exception as e:
             logger.error(f"Error showing hotkeys: {e}")
@@ -110,14 +109,12 @@ class SystemCommands:
             try:
                 from modules.hotkeys import create_hotkey_display
 
-                hotkey_display = create_hotkey_display(
-                    key_manager, self.color_manager
-                )
+                hotkey_display = create_hotkey_display(key_manager, self.color_manager)
                 hotkey_display.show_hotkeys_simple()
             except Exception as e2:
                 logger.error(f"Fallback hotkey display also failed: {e2}")
 
-    def restart_qtile(self, qtile):
+    def restart_qtile(self, qtile: Any) -> None:
         """Restart qtile"""
         try:
             logger.info("Restarting qtile")
@@ -125,7 +122,7 @@ class SystemCommands:
         except Exception as e:
             logger.error(f"Error restarting qtile: {e}")
 
-    def shutdown_qtile(self, qtile):
+    def shutdown_qtile(self, qtile: Any) -> None:
         """Shutdown qtile"""
         try:
             logger.info("Shutting down qtile")
@@ -133,7 +130,7 @@ class SystemCommands:
         except Exception as e:
             logger.error(f"Error shutting down qtile: {e}")
 
-    def reload_config(self, qtile):
+    def reload_config(self, qtile: Any) -> None:
         """Reload qtile configuration"""
         try:
             logger.info("Reloading qtile configuration")
@@ -141,7 +138,7 @@ class SystemCommands:
         except Exception as e:
             logger.error(f"Error reloading config: {e}")
 
-    def get_system_info(self, qtile):
+    def get_system_info(self, qtile: Any) -> dict[str, Any]:
         """Get system information"""
         try:
             return {
@@ -153,16 +150,14 @@ class SystemCommands:
                 "current_layout": qtile.current_group.layout.name,
                 "window_count": len(qtile.current_group.windows),
                 "color_manager_status": (
-                    self.color_manager.is_monitoring()
-                    if self.color_manager
-                    else False
+                    self.color_manager.is_monitoring() if self.color_manager else False
                 ),
             }
         except Exception as e:
             logger.error(f"Error getting system info: {e}")
             return {}
 
-    def debug_dump_state(self, qtile):
+    def debug_dump_state(self, qtile: Any) -> dict[str, Any]:
         """Dump current qtile state for debugging"""
         try:
             state = {
@@ -173,9 +168,7 @@ class SystemCommands:
                         "layout": g.layout.name,
                         "window_count": len(g.windows),
                         "windows": (
-                            [w.name for w in g.windows]
-                            if hasattr(g, "windows")
-                            else []
+                            [w.name for w in g.windows] if hasattr(g, "windows") else []
                         ),
                     }
                     for g in qtile.groups
@@ -200,7 +193,7 @@ class SystemCommands:
             logger.error(f"Error dumping state: {e}")
             return {}
 
-    def emergency_reset(self, qtile):
+    def emergency_reset(self, qtile: Any) -> None:
         """Emergency reset - try to recover from problematic state"""
         try:
             logger.warning("Emergency reset initiated")
@@ -235,7 +228,7 @@ class SystemCommands:
         except Exception as e:
             logger.error(f"Emergency reset failed: {e}")
 
-    def cycle_through_groups(self, qtile, direction=1):
+    def cycle_through_groups(self, qtile: Any, direction: int = 1) -> None:
         """Cycle through groups in order"""
         try:
             current_idx = qtile.groups.index(qtile.current_group)
@@ -245,7 +238,7 @@ class SystemCommands:
         except Exception as e:
             logger.error(f"Error cycling groups: {e}")
 
-    def focus_urgent_window(self, qtile):
+    def focus_urgent_window(self, qtile: Any) -> bool:
         """Focus the next urgent window if any"""
         try:
             for group in qtile.groups:
@@ -264,7 +257,7 @@ class SystemCommands:
     # ===== LAPTOP FUNCTION KEY SUPPORT =====
 
     @staticmethod
-    def brightness_up(qtile):
+    def brightness_up(qtile: Any) -> None:
         """Increase screen brightness"""
         brightness_commands = [
             ["xbacklight", "-inc", "10"],  # xbacklight (most common)
@@ -275,7 +268,7 @@ class SystemCommands:
         run_system_command(brightness_commands, "brightness increase")
 
     @staticmethod
-    def brightness_down(qtile):
+    def brightness_down(qtile: Any) -> None:
         """Decrease screen brightness"""
         brightness_commands = [
             ["xbacklight", "-dec", "10"],
@@ -286,7 +279,7 @@ class SystemCommands:
         run_system_command(brightness_commands, "brightness decrease")
 
     @staticmethod
-    def volume_up(qtile):
+    def volume_up(qtile: Any) -> None:
         """Increase system volume"""
         volume_commands = [
             [
@@ -302,7 +295,7 @@ class SystemCommands:
         run_system_command(volume_commands, "volume increase")
 
     @staticmethod
-    def volume_down(qtile):
+    def volume_down(qtile: Any) -> None:
         """Decrease system volume"""
         volume_commands = [
             ["pactl", "set-sink-volume", "@DEFAULT_SINK@", "-5%"],
@@ -313,7 +306,7 @@ class SystemCommands:
         run_system_command(volume_commands, "volume decrease")
 
     @staticmethod
-    def volume_mute_toggle(qtile):
+    def volume_mute_toggle(qtile: Any) -> None:
         """Toggle volume mute"""
         mute_commands = [
             ["pactl", "set-sink-mute", "@DEFAULT_SINK@", "toggle"],
@@ -324,7 +317,7 @@ class SystemCommands:
         run_system_command(mute_commands, "volume mute toggle")
 
     @staticmethod
-    def media_play_pause(qtile):
+    def media_play_pause(qtile: Any) -> None:
         """Toggle media play/pause"""
         media_commands = [
             ["playerctl", "play-pause"],  # Most media players
@@ -341,7 +334,7 @@ class SystemCommands:
         run_system_command(media_commands, "media play/pause toggle")
 
     @staticmethod
-    def media_next(qtile):
+    def media_next(qtile: Any) -> None:
         """Skip to next media track"""
         next_commands = [
             ["playerctl", "next"],
@@ -351,7 +344,7 @@ class SystemCommands:
         run_system_command(next_commands, "media next")
 
     @staticmethod
-    def media_prev(qtile):
+    def media_prev(qtile: Any) -> None:
         """Skip to previous media track"""
         prev_commands = [
             ["playerctl", "previous"],
@@ -361,7 +354,7 @@ class SystemCommands:
         run_system_command(prev_commands, "media previous")
 
     @staticmethod
-    def wifi_toggle(qtile):
+    def wifi_toggle(qtile: Any) -> None:
         """Toggle WiFi on/off"""
         # First check if wifi is on or off, then toggle
         # This is a simplified version - you might want to enhance this
@@ -373,7 +366,7 @@ class SystemCommands:
         run_system_command(toggle_commands, "WiFi toggle")
 
     @staticmethod
-    def bluetooth_toggle(qtile):
+    def bluetooth_toggle(qtile: Any) -> None:
         """Toggle Bluetooth on/off"""
         bt_commands = [
             ["bluetoothctl", "power", "off"],  # bluetoothctl
@@ -383,7 +376,7 @@ class SystemCommands:
         run_system_command(bt_commands, "Bluetooth toggle")
 
     @staticmethod
-    def keyboard_backlight_toggle(qtile):
+    def keyboard_backlight_toggle(qtile: Any) -> None:
         """Toggle keyboard backlight"""
         kb_light_commands = [
             ["brightnessctl", "--device=kbd_backlight", "set", "+33%"],
@@ -393,7 +386,7 @@ class SystemCommands:
         run_system_command(kb_light_commands, "keyboard backlight toggle")
 
     @staticmethod
-    def display_toggle(qtile):
+    def display_toggle(qtile: Any) -> None:
         """Toggle external display"""
         # This is a basic implementation - you might want to customize
         display_commands = [

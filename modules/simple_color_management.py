@@ -17,9 +17,9 @@ try:
     from watchdog.events import FileSystemEventHandler
     from watchdog.observers import Observer
 
-    WATCHDOG_AVAILABLE = True
+    watchdog_available = True
 except ImportError:
-    WATCHDOG_AVAILABLE = False
+    watchdog_available = False
     # Create dummy classes for type checking
     Observer = None  # type: ignore
     FileSystemEventHandler = None  # type: ignore
@@ -29,7 +29,7 @@ except ImportError:
 class SimpleColorManager:
     """Simplified color manager - same API, much less complexity"""
 
-    def __init__(self, colors_file: str = "~/.cache/wal/colors.json"):
+    def __init__(self, colors_file: str = "~/.cache/wal/colors.json") -> None:
         self.colors_file = Path(colors_file).expanduser()
         self.colordict = self._load_colors()
         self._observer = None
@@ -46,14 +46,12 @@ class SimpleColorManager:
         @throws json.JSONDecodeError when color file is corrupted
         """
         try:
-            with open(self.colors_file, "r") as f:
+            with open(self.colors_file) as f:
                 colors = json.load(f)
                 logger.info(f"Loaded colors from {self.colors_file}")
                 return colors
         except (FileNotFoundError, json.JSONDecodeError, KeyError) as e:
-            logger.warning(
-                f"Could not load colors from {self.colors_file}: {e}"
-            )
+            logger.warning(f"Could not load colors from {self.colors_file}: {e}")
             return self._get_fallback_colors()
 
     def _get_fallback_colors(self) -> dict[str, dict[str, str]]:
@@ -105,9 +103,7 @@ class SimpleColorManager:
             self._auto_start_attempted = True
             try:
                 self.start_monitoring()
-                logger.info(
-                    "Auto-started color monitoring on first color access"
-                )
+                logger.info("Auto-started color monitoring on first color access")
             except Exception as e:
                 logger.warning(f"Failed to auto-start color monitoring: {e}")
 
@@ -124,7 +120,7 @@ class SimpleColorManager:
         self._shutdown_event.clear()
         self._watching = True
 
-        if WATCHDOG_AVAILABLE:
+        if watchdog_available:
             self._start_watchdog()
         else:
             self._start_polling()
@@ -136,19 +132,16 @@ class SimpleColorManager:
         @brief Start watchdog-based file monitoring for color changes
         @throws Exception if watchdog setup fails
         """
-        if (
-            not WATCHDOG_AVAILABLE
-            or Observer is None
-            or FileSystemEventHandler is None
-        ):
+        if not watchdog_available or Observer is None or FileSystemEventHandler is None:
             logger.warning("Watchdog not available, file monitoring disabled")
             return
 
         class ColorChangeHandler(FileSystemEventHandler):  # type: ignore
-            def __init__(self, manager):
+            def __init__(self, manager: Any) -> None:
+                super().__init__()
                 self.manager = manager
 
-            def on_modified(self, event):
+            def on_modified(self, event: Any) -> None:  # type: ignore[override]
                 if not event.is_directory and event.src_path == str(
                     self.manager.colors_file
                 ):
@@ -211,7 +204,7 @@ class SimpleColorManager:
 
         return True
 
-    def _detect_color_changes(self, old_colors: dict) -> bool:
+    def _detect_color_changes(self, old_colors: dict[str, Any]) -> bool:
         """
         @brief Check if colors actually changed
         @param old_colors Previous color dictionary
@@ -237,9 +230,7 @@ class SimpleColorManager:
                 for screen in qtile.config.screens:
                     if hasattr(screen, "top") and screen.top:
                         # Force regeneration of themed icons
-                        logger.info(
-                            "Updating dynamic SVG icons for new color scheme"
-                        )
+                        logger.info("Updating dynamic SVG icons for new color scheme")
                         break
         except Exception as e:
             logger.debug(f"Could not update SVG icons: {e}")
@@ -253,15 +244,11 @@ class SimpleColorManager:
                 logger.info("Restarting qtile to apply new colors...")
                 qtile.restart()
             except AttributeError:
-                logger.warning(
-                    "qtile.restart() not available (running outside qtile?)"
-                )
+                logger.warning("qtile.restart() not available (running outside qtile?)")
             except Exception as e:
                 logger.error(f"Failed to restart qtile: {e}")
         else:
-            logger.warning(
-                "qtile instance not available or restart method missing"
-            )
+            logger.warning("qtile instance not available or restart method missing")
 
     def _handle_color_change(self):
         """
@@ -311,9 +298,7 @@ class SimpleColorManager:
 
             # Check if colors actually changed
             if old_colors != self.colordict:
-                logger.info(
-                    "Colors changed, updating SVG icons and restarting qtile"
-                )
+                logger.info("Colors changed, updating SVG icons and restarting qtile")
                 self._handle_color_change()
             else:
                 logger.info("Colors unchanged, no restart needed")
