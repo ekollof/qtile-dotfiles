@@ -22,6 +22,8 @@ from qtile_extras import widget
 
 from modules.dpi_utils import scale_font, scale_size
 from modules.svg_utils import create_themed_icon_cache, get_svg_utils
+from modules.notifications import NotificationManager
+from modules.popup_notify_widget import create_popup_notify_widget
 
 
 class EnhancedBarManager:
@@ -71,6 +73,27 @@ class EnhancedBarManager:
 
         # Generate themed icon cache (may use fallback colors initially)
         self._update_themed_icon_cache()
+
+        # Initialize notification manager
+        self.notification_manager = NotificationManager(color_manager)
+
+        # Setup popup notifications using simple popup system
+        notification_settings = self.qtile_config.notification_settings
+        if notification_settings.get("use_popups", False):
+            popup_config = {
+                "width": 350,
+                "height": 100,
+                "corner": "top_right",
+                "margin_x": 20,
+                "margin_y": 60,
+                "spacing": 10,
+                "timeout_normal": notification_settings.get("default_timeout", 5000) / 1000.0,
+                "timeout_low": notification_settings.get("default_timeout_low", 3000) / 1000.0,
+                "timeout_critical": 0.0,
+            }
+            from modules.simple_popup_notifications import setup_popup_notifications
+            setup_popup_notifications(color_manager, popup_config)
+            logger.info("Simple popup notifications configured and enabled")
 
         # Schedule icon cache refresh after color manager is fully initialized
         self._schedule_icon_refresh()
@@ -902,6 +925,35 @@ class EnhancedBarManager:
                 ),
             ]
         )
+
+        # Add notification widget for libnotify compatibility
+        try:
+            notification_settings = self.qtile_config.notification_settings
+            if notification_settings.get("enabled", True):
+                use_popups = notification_settings.get("use_popups", False)
+                show_in_bar = notification_settings.get("show_in_bar", True)
+
+                # Create popup notification widget
+                notification_widget = create_popup_notify_widget(
+                    **self._get_widget_defaults_excluding("background"),
+                    foreground=colors.get("color5", "#ffffff"),
+                    background=special.get("background", "#000000"),
+                    default_timeout=notification_settings.get("default_timeout", 5000) // 1000,
+                    default_timeout_low=notification_settings.get("default_timeout_low", 3000) // 1000,
+                    default_timeout_urgent=notification_settings.get("default_timeout_urgent", 0) // 1000 if notification_settings.get("default_timeout_urgent", 0) > 0 else None,
+                    action=notification_settings.get("enable_actions", True),
+                    audiofile=None if not notification_settings.get("enable_sound", False) else notification_settings.get("sound_file"),
+                    show_in_bar=show_in_bar,
+                    show_popups=use_popups,
+                )
+
+                barconfig.append(notification_widget)
+                mode_desc = "popup" if use_popups and not show_in_bar else ("popup + bar" if use_popups else "bar only")
+                logger.info(f"Added popup notification widget ({mode_desc})")
+            else:
+                logger.info("Notification system disabled in configuration")
+        except Exception as e:
+            logger.warning(f"Failed to add notification widget: {e}")
 
         # Add systray only to primary screen with error handling
         if screen_num == 0:

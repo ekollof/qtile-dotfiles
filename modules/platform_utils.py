@@ -249,15 +249,15 @@ class PlatformConfig:
         return {
             "linux": {
                 "lock_session": "loginctl lock-session",
-                "clipboard_manager": "clipmenu",
-                "screenshot": "flameshot gui",
+                "clipboard_manager": "clipmenu.sh",
+                "clipmenu" "screenshot": "flameshot gui",
                 "audio_mixer": "pavucontrol",
                 "network_manager": "nm-connection-editor",
             },
             "openbsd": {
                 "lock_session": "xlock",
-                "clipboard_manager": "xclip",
-                "screenshot": "xwd | xwdtopnm | pnmtopng",
+                "clipboard_manager": "clipmenu.sh",
+                "clipmenu" "screenshot": "xwd | xwdtopnm | pnmtopng",
                 "audio_mixer": "mixerctl",
                 "network_manager": "ifconfig",
             },

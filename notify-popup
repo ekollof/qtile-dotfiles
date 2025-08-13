@@ -1,0 +1,209 @@
+#!/usr/bin/env python3
+"""
+QtilePopup - notify-send replacement for qtile popup notifications
+
+A drop-in replacement for notify-send that shows popup notifications
+using qtile's popup system instead of relying on broken D-Bus integration.
+
+Usage:
+    notify-popup [OPTIONS] <SUMMARY> [BODY]
+
+    Replace notify-send with this script by creating a symlink:
+    ln -sf /path/to/notify-popup ~/.local/bin/notify-send
+
+Options:
+    -u, --urgency=LEVEL     Set urgency level (low, normal, critical)
+    -t, --expire-time=TIME  Set timeout in milliseconds
+    -i, --icon=ICON         Icon (ignored for compatibility)
+    -c, --category=TYPE     Category (ignored for compatibility)
+    -h, --help              Show this help message
+
+Examples:
+    notify-popup "Hello" "This is a popup notification"
+    notify-popup -u critical "Alert" "This is urgent!"
+    notify-popup -t 3000 "Timeout" "This will disappear in 3 seconds"
+"""
+
+import argparse
+import subprocess
+import sys
+from pathlib import Path
+
+
+def parse_arguments():
+    """Parse command line arguments compatible with notify-send"""
+    parser = argparse.ArgumentParser(
+        description="Show popup notifications using qtile popup system",
+        add_help=False  # We'll handle help manually for better compatibility
+    )
+
+    parser.add_argument('-u', '--urgency',
+                       choices=['low', 'normal', 'critical'],
+                       default='normal',
+                       help='Set urgency level')
+
+    parser.add_argument('-t', '--expire-time',
+                       type=int,
+                       default=5000,
+                       help='Timeout in milliseconds')
+
+    parser.add_argument('-i', '--icon',
+                       default='',
+                       help='Icon (ignored for compatibility)')
+
+    parser.add_argument('-c', '--category',
+                       default='',
+                       help='Category (ignored for compatibility)')
+
+    parser.add_argument('-h', '--help',
+                       action='store_true',
+                       help='Show help message')
+
+    parser.add_argument('summary',
+                       nargs='?',
+                       help='Notification title/summary')
+
+    parser.add_argument('body',
+                       nargs='?',
+                       default='',
+                       help='Notification message body')
+
+    return parser.parse_args()
+
+
+def show_help():
+    """Show help message"""
+    print(__doc__.strip())
+
+
+def call_qtile_popup(title, message, urgency):
+    """Call qtile popup system directly"""
+    try:
+        # Escape quotes in title and message for shell safety
+        title_escaped = title.replace("'", "\\'").replace('"', '\\"')
+        message_escaped = message.replace("'", "\\'").replace('"', '\\"')
+
+        # Build qtile command to show popup
+        qtile_cmd = [
+            'qtile', 'cmd-obj', '-o', 'cmd', '-f', 'eval', '-a',
+            f"from modules.simple_popup_notifications import show_popup_notification; "
+            f"show_popup_notification('{title_escaped}', '{message_escaped}', '{urgency}')"
+        ]
+
+        # Execute qtile command
+        result = subprocess.run(
+            qtile_cmd,
+            capture_output=True,
+            text=True,
+            timeout=10
+        )
+
+        if result.returncode != 0:
+            print(f"Warning: qtile command failed: {result.stderr}", file=sys.stderr)
+            return False
+
+        return True
+
+    except subprocess.TimeoutExpired:
+        print("Error: qtile command timed out", file=sys.stderr)
+        return False
+    except subprocess.CalledProcessError as e:
+        print(f"Error: qtile command failed: {e}", file=sys.stderr)
+        return False
+    except Exception as e:
+        print(f"Error: unexpected error calling qtile: {e}", file=sys.stderr)
+        return False
+
+
+def fallback_to_real_notify_send(args):
+    """Fallback to real notify-send if available"""
+    try:
+        # Look for real notify-send in common locations
+        notify_send_paths = [
+            '/usr/bin/notify-send',
+            '/bin/notify-send',
+            '/usr/local/bin/notify-send'
+        ]
+
+        real_notify_send = None
+        for path in notify_send_paths:
+            if Path(path).exists():
+                real_notify_send = path
+                break
+
+        if not real_notify_send:
+            return False
+
+        # Build command for real notify-send
+        cmd = [real_notify_send]
+
+        if args.urgency != 'normal':
+            cmd.extend(['-u', args.urgency])
+
+        if args.expire_time != 5000:
+            cmd.extend(['-t', str(args.expire_time)])
+
+        if args.icon:
+            cmd.extend(['-i', args.icon])
+
+        if args.category:
+            cmd.extend(['-c', args.category])
+
+        if args.summary:
+            cmd.append(args.summary)
+
+        if args.body:
+            cmd.append(args.body)
+
+        # Execute real notify-send
+        subprocess.run(cmd, timeout=10)
+        return True
+
+    except Exception as e:
+        print(f"Warning: fallback to notify-send failed: {e}", file=sys.stderr)
+        return False
+
+
+def main():
+    """Main function"""
+    args = parse_arguments()
+
+    # Handle help
+    if args.help:
+        show_help()
+        return 0
+
+    # Validate arguments
+    if not args.summary:
+        print("Error: summary is required", file=sys.stderr)
+        print("Usage: notify-popup [OPTIONS] <SUMMARY> [BODY]", file=sys.stderr)
+        return 1
+
+    # Try qtile popup first
+    success = call_qtile_popup(args.summary, args.body, args.urgency)
+
+    if success:
+        return 0
+
+    # Fallback to real notify-send if qtile fails
+    print("Warning: qtile popup failed, trying fallback to notify-send", file=sys.stderr)
+    fallback_success = fallback_to_real_notify_send(args)
+
+    if fallback_success:
+        return 0
+
+    # Both methods failed
+    print("Error: both qtile popup and notify-send fallback failed", file=sys.stderr)
+    print(f"Message was: {args.summary}: {args.body}", file=sys.stderr)
+    return 1
+
+
+if __name__ == "__main__":
+    try:
+        sys.exit(main())
+    except KeyboardInterrupt:
+        print("\nInterrupted", file=sys.stderr)
+        sys.exit(130)
+    except Exception as e:
+        print(f"Fatal error: {e}", file=sys.stderr)
+        sys.exit(1)

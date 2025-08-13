@@ -62,19 +62,9 @@ if [ -f ~/.Xresources ]; then
 	xrdb ~/.Xresources >/dev/null &
 fi
 
-# Generate dunst config (completely detached)
-if [ -x ~/bin/dunst_xrdb.sh ]; then
-	log "Generating dunst config"
-	~/bin/dunst_xrdb.sh &
-fi
 
-# Start dunst notification daemon
-if command -v dunst >/dev/null 2>&1; then
-	log "Starting dunst"
-	# Kill any existing dunst instances first
-	pkill -f dunst 2>/dev/null
-	dunst -conf ~/.config/dunst/dunstrc_xr_colors &
-fi
+
+
 
 # Set wallpaper
 if [ -f "${HOME}/.wallpaper" ]; then

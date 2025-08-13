@@ -526,6 +526,27 @@ class QtileConfig:
             "padding": scale_size(3),  # DPI-scaled padding
         }
 
+    # ===== NOTIFICATION SETTINGS =====
+
+    @property
+    def notification_settings(self) -> dict[str, Any]:
+        """
+        @brief Notification system configuration
+        @return Dictionary with notification behavior and appearance settings
+        """
+        return {
+            "enabled": True,  # Enable built-in notification system
+            "default_timeout": 5000,  # Default timeout in milliseconds
+            "default_timeout_low": 3000,  # Low priority timeout
+            "default_timeout_urgent": 0,  # Urgent notifications never timeout
+            "enable_sound": False,  # Disable notification sounds by default
+            "show_in_bar": False,  # Show notifications in status bar
+            "use_popups": True,  # Use standard bar notifications
+            "max_notification_length": 150,  # Maximum notification text length (longer for popups)
+            "enable_actions": True,  # Enable notification action buttons
+            "libnotify_compatible": True,  # Enable libnotify D-Bus compatibility
+        }
+
     # ===== HOTKEY DISPLAY SETTINGS - DPI AWARE =====
 
     @property

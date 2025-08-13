@@ -3,6 +3,8 @@
 Key binding definitions for qtile
 """
 
+from typing import Any
+
 from libqtile.config import Key
 from libqtile.lazy import lazy
 
@@ -10,7 +12,7 @@ from libqtile.lazy import lazy
 class KeyBindings:
     """Defines all keyboard bindings for qtile"""
 
-    def __init__(self, config, layout_commands, window_commands, system_commands):
+    def __init__(self, config: Any, layout_commands: Any, window_commands: Any, system_commands: Any):
         self.config = config
         self.layout_commands = layout_commands
         self.window_commands = window_commands
@@ -322,12 +324,31 @@ class KeyBindings:
                 lazy.function(self.system_commands.manual_retile_all),
                 desc="Force retile all windows",
             ),
+            # Notification system testing
+            Key(
+                [self.mod, "control"],
+                "n",
+                lazy.function(self.system_commands.test_notifications),
+                desc="Test notifications",
+            ),
+            Key(
+                [self.mod, "control", "shift"],
+                "n",
+                lazy.function(self.system_commands.test_urgent_notification),
+                desc="Test urgent notification",
+            ),
+            Key(
+                [self.mod, "control", "mod1"],
+                "n",
+                lazy.function(self.system_commands.notification_status),
+                desc="Show notification status",
+            ),
         ]
 
     def get_special_keys(self):
         """Get special function keys"""
 
-        def show_hotkeys_wrapper(qtile):
+        def show_hotkeys_wrapper(qtile: Any):
             # We need to pass the key manager to show_hotkeys
             # This will be set by the manager when it creates the bindings
             return self.system_commands.show_hotkeys(qtile, self.key_manager)
@@ -353,7 +374,7 @@ class KeyBindings:
             ),
         ]
 
-    def get_all_keys(self, key_manager=None):
+    def get_all_keys(self, key_manager: Any):
         """Get all keyboard bindings"""
         # Store reference to key manager for hotkey display
         self.key_manager = key_manager
@@ -369,7 +390,7 @@ class KeyBindings:
 
         return all_keys
 
-    def get_keys_by_category(self, key_manager=None):
+    def get_keys_by_category(self, key_manager: Any = None):
         """Get keys organized by category"""
         self.key_manager = key_manager
 

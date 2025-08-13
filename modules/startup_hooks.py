@@ -10,6 +10,7 @@ from typing import Any
 
 from libqtile import hook, qtile
 from libqtile.log_utils import logger
+from .notifications import notify_qtile_event
 
 
 class StartupHooks:
@@ -40,6 +41,13 @@ class StartupHooks:
             logger.info(
                 "Qtile startup completed - starting simplified color monitoring"
             )
+
+            # Initialize notification system
+            try:
+                notify_qtile_event("startup", "Notification system initialized")
+                logger.info("✅ Notification system initialized successfully")
+            except Exception as e:
+                logger.warning(f"❌ Failed to initialize notification system: {e}")
             try:
                 # Check if already monitoring
                 if self.color_manager.is_monitoring():

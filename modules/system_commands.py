@@ -7,6 +7,8 @@ import subprocess
 from typing import Any
 
 from libqtile.log_utils import logger
+from .notifications import send_qtile_notification
+from .simple_popup_notifications import show_popup_notification, get_popup_manager
 
 
 def run_system_command(
@@ -394,3 +396,203 @@ class SystemCommands:
             ["autorandr", "--change"],  # If using autorandr
         ]
         run_system_command(display_commands, "display toggle")
+
+    @staticmethod
+    def test_notifications(qtile: Any) -> None:
+        """Test notification system functionality with multiple fallbacks"""
+        logger.info("Testing notification system...")
+
+        # Try popup notification first
+        try:
+            show_popup_notification(
+                "Qtile Popup Test",
+                "Testing popup notification system - if you see this popup, it's working!",
+                "normal"
+            )
+            logger.info("✅ Popup notification test sent")
+        except Exception as e:
+            logger.debug(f"Popup notification failed: {e}")
+
+        # Try multiple notification methods
+        methods_tried = []
+        success = False
+
+        # Method 1: Try our notification manager
+        try:
+            send_qtile_notification(
+                "Qtile Notification Test",
+                "Testing notification system - if you see this, it's working!",
+                timeout=5000,
+                urgency="normal"
+            )
+            methods_tried.append("notification_manager: SUCCESS")
+            success = True
+            logger.info("✅ Notification test completed via notification manager")
+        except Exception as e:
+            methods_tried.append(f"notification_manager: FAILED ({e})")
+            logger.debug(f"Notification manager failed: {e}")
+
+        # Method 2: Try direct notify-send if first method failed
+        if not success:
+            try:
+                import subprocess
+                subprocess.run([
+                    "notify-send",
+                    "-t", "5000",
+                    "-u", "normal",
+                    "Qtile Notification Test (fallback)",
+                    "Testing via notify-send command"
+                ], check=True, timeout=5)
+                methods_tried.append("notify-send: SUCCESS")
+                success = True
+                logger.info("✅ Notification test completed via notify-send")
+            except Exception as e:
+                methods_tried.append(f"notify-send: FAILED ({e})")
+                logger.debug(f"notify-send failed: {e}")
+
+        # Report results
+        if success:
+            logger.info("Notification test successful!")
+        else:
+            logger.warning("All notification methods failed:")
+            for method in methods_tried:
+                logger.warning(f"  - {method}")
+
+    @staticmethod
+    def test_urgent_notification(qtile: Any) -> None:
+        """Test urgent notification with fallbacks"""
+        logger.info("Testing urgent notification...")
+
+        success = False
+
+        # Try our notification manager first
+        try:
+            send_qtile_notification(
+                "🚨 Urgent Notification Test",
+                "This is an urgent notification test - it should stay visible longer",
+                timeout=0,  # No timeout for urgent
+                urgency="critical"
+            )
+            success = True
+            logger.info("✅ Urgent notification test completed via notification manager")
+        except Exception as e:
+            logger.debug(f"Notification manager failed for urgent: {e}")
+
+            # Fallback to notify-send
+            try:
+                import subprocess
+                subprocess.run([
+                    "notify-send",
+                    "-t", "0",  # No timeout
+                    "-u", "critical",
+                    "🚨 Urgent Test (fallback)",
+                    "This urgent notification uses notify-send"
+                ], check=True, timeout=5)
+                success = True
+                logger.info("✅ Urgent notification test completed via notify-send")
+            except Exception as e2:
+                logger.warning(f"All urgent notification methods failed: {e}, {e2}")
+
+        if not success:
+            logger.error("Urgent notification test failed - no working notification method")
+
+    @staticmethod
+    def notification_status(qtile: Any) -> None:
+        """Show comprehensive notification system status"""
+        logger.info("Checking notification system status...")
+
+        # Check popup manager status
+        popup_manager = get_popup_manager()
+        popup_status = "Available" if popup_manager else "Not initialized"
+        active_popups = len(popup_manager.active_notifications) if popup_manager else 0
+
+        # Collect status information
+        status_info = {
+            "notification_manager": "Unknown",
+            "popup_manager": popup_status,
+            "active_popups": active_popups,
+            "qtile_builtin": "Unknown",
+            "qtile_builtin_working": "Unknown",
+            "notify_send": "Unknown",
+            "dbus": "Unknown"
+        }
+
+        # Test notification manager
+        try:
+            from .notifications import NotificationManager
+            # Try to get a color manager instance
+            try:
+                from .colors import color_manager
+                manager = NotificationManager(color_manager)
+                status = manager.get_notification_status()
+
+                status_info.update({
+                    "notification_manager": "Available",
+                    "qtile_builtin": "Yes" if status.get('qtile_builtin', False) else "No",
+                    "qtile_builtin_working": "Yes" if status.get('qtile_builtin_working', False) else "No",
+                    "notify_send": "Yes" if status.get('notify_send_available', False) else "No",
+                    "dbus": "Yes" if status.get('dbus_available', False) else "No"
+                })
+            except Exception as e:
+                status_info["notification_manager"] = f"Error: {str(e)[:50]}"
+        except ImportError:
+            status_info["notification_manager"] = "Not available"
+
+        # Test Notify widget availability
+        try:
+            from libqtile import widget
+            if hasattr(widget, 'Notify'):
+                status_info["notify_widget"] = "Available"
+            else:
+                status_info["notify_widget"] = "Not available"
+        except Exception:
+            status_info["notify_widget"] = "Error checking"
+
+        # Format status message
+        status_lines = [
+            "📊 Notification System Status:",
+            f"• Manager: {status_info['notification_manager']}",
+            f"• Qtile built-in: {status_info['qtile_builtin']}",
+            f"• Qtile working: {status_info['qtile_builtin_working']}",
+            f"• notify-send: {status_info['notify_send']}",
+            f"• D-Bus: {status_info['dbus']}",
+            f"• Notify widget: {status_info['notify_widget']}"
+        ]
+        status_msg = "\n".join(status_lines)
+
+        # Try to send the status notification
+        success = False
+        try:
+            send_qtile_notification(
+                "Notification System Status",
+                status_msg,
+                timeout=10000,
+                urgency="normal"
+            )
+            success = True
+            logger.info("✅ Notification status displayed successfully")
+        except Exception as e:
+            logger.warning(f"Could not send status via notification manager: {e}")
+
+            # Fallback to notify-send
+            try:
+                import subprocess
+                subprocess.run([
+                    "notify-send",
+                    "-t", "10000",
+                    "-u", "normal",
+                    "Notification Status (fallback)",
+                    status_msg
+                ], check=True, timeout=5)
+                success = True
+                logger.info("✅ Notification status displayed via notify-send")
+            except Exception as e2:
+                logger.error(f"All status notification methods failed: {e}, {e2}")
+
+        # Always log the status to console as well
+        logger.info("Notification System Status:")
+        for line in status_lines[1:]:  # Skip the header
+            logger.info(f"  {line}")
+
+        if not success:
+            logger.error("❌ Could not display status notification, but logged above")
