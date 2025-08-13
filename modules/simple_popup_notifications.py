@@ -198,9 +198,9 @@ class SimplePopupManager:
         @brief Show a popup notification using notification object
         @param notification: PopupNotification object with all details
         """
-        # Determine timeout
-        if notification.urgency == "critical":
-            timeout = 0.0  # Never timeout
+        # Determine timeout - notifications with actions should not auto-timeout
+        if notification.actions or notification.urgency == "critical":
+            timeout = 0.0  # Never timeout for interactive or critical notifications
         elif notification.urgency == "low":
             timeout = 3.0
         else:
@@ -351,7 +351,7 @@ class SimplePopupManager:
         except Exception as e:
             logger.error(f"Failed to open URL {url}: {e}")
 
-    def _calculate_text_height(self, text: str, width: int, message_font_size: int, has_title: bool, title_font_size: int | None = None) -> int:
+    def _calculate_text_height(self, text: str, width: int, message_font_size: int, has_title: bool, title_font_size: int | None = None, has_buttons: bool = False) -> int:
         """
         @brief Calculate required height for text content with proper word wrapping
         @param text: Text content to measure
@@ -359,6 +359,7 @@ class SimplePopupManager:
         @param message_font_size: DPI-scaled font size for message text
         @param has_title: Whether notification has a title
         @param title_font_size: DPI-scaled font size for title text
+        @param has_buttons: Whether notification has action buttons
         @return Required height in pixels
         """
         if not text:
@@ -417,7 +418,10 @@ class SimplePopupManager:
         top_padding = 15
         bottom_padding = 15
 
-        total_height = top_padding + title_height + text_height + bottom_padding
+        # Add button area to total height if buttons are present
+        button_area = max(45, int(scale_font(12) * 3)) + 20 if has_buttons else 0  # Button height + margins
+
+        total_height = top_padding + title_height + text_height + bottom_padding + button_area
 
         logger.debug(f"Height components: title={title_height}px, text={text_height}px, padding={top_padding + bottom_padding}px")
 
@@ -450,14 +454,9 @@ class SimplePopupManager:
             self.config["width"],
             scale_font(14),  # Message font size
             bool(notification.title),
-            scale_font(16)   # Title font size
+            scale_font(16),  # Title font size
+            has_buttons      # Whether buttons are present
         )
-
-        # Add extra height for buttons if present (scale with font size)
-        if has_buttons:
-            button_height = max(45, int(scale_font(12) * 3))  # More generous button area
-            popup_height += button_height
-            logger.debug(f"Added {button_height}px for buttons, total height: {popup_height}px")
         # Choose colors based on urgency using match statement
         match notification.urgency:
             case "critical":
@@ -703,6 +702,8 @@ class SimplePopupManager:
         if not _QTILE_EXTRAS_AVAILABLE:
             return None
         assert PopupRelativeLayout is not None
+        # Disable close_on_click for notifications with actions to prevent accidental dismissal
+        has_actions = bool(notification.actions)
         popup = PopupRelativeLayout(
             qtile,
             width=self.config["width"],
@@ -712,7 +713,7 @@ class SimplePopupManager:
             border=border_color,
             border_width=2,
             initial_focus=None,
-            close_on_click=True,
+            close_on_click=not has_actions,  # Don't allow click dismissal if there are action buttons
             opacity=0.95,
         )
 
