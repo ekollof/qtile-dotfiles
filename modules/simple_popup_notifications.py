@@ -466,9 +466,14 @@ class SimplePopupManager:
                     button_x = 0.05 + (current_button * (button_width + 0.05))
                     button_y = 0.75
 
-                    def make_url_handler(target_url=url):
-                        def handler(*args, **kwargs):
-                            self._open_url(target_url)
+                    def make_url_handler(target_url=url, mgr=self):
+                        def handler(popup_text=None, *args, **kwargs):
+                            logger.warning(f"🔗 URL button clicked: {target_url}")
+                            try:
+                                mgr._open_url(target_url)
+                                logger.info(f"Successfully opened URL: {target_url}")
+                            except Exception as e:
+                                logger.error(f"Failed to open URL {target_url}: {e}")
                             # Keep popup open for URL clicks
                         return handler
 
@@ -486,7 +491,7 @@ class SimplePopupManager:
                         v_align="middle",
                         markup=True,
                     )
-                    url_button.add_callbacks({"Button1": make_url_handler()})
+                    url_button.mouse_callbacks = {"Button1": make_url_handler()}
                     controls.append(url_button)
                     current_button += 1
 
@@ -503,13 +508,18 @@ class SimplePopupManager:
                     button_x = 0.05 + (current_button * (button_width + 0.05))
                     button_y = 0.75
 
-                    def make_action_handler(key=action_key, nid=notification.notification_id):
-                        def handler(*args, **kwargs):
-                            if notification.callback:
-                                notification.callback(nid, key)
-                            # Auto-close popup after action
-                            if notification.popup_layout:
-                                notification.popup_layout.hide()
+                    def make_action_handler(key=action_key, nid=notification.notification_id, mgr=self, notif=notification):
+                        def handler(popup_text=None, *args, **kwargs):
+                            logger.warning(f"🔘 Action button clicked: {key} (ID: {nid})")
+                            try:
+                                if notif.callback:
+                                    notif.callback(nid, key)
+                                    logger.info(f"Action callback completed: {key}")
+                                # Auto-close popup after action by removing from active notifications
+                                mgr._dismiss_notification(notif)
+                                logger.info("Popup dismissed after action")
+                            except Exception as e:
+                                logger.error(f"Action handler error: {e}")
                         return handler
 
                     action_button = PopupText(
@@ -526,7 +536,7 @@ class SimplePopupManager:
                         v_align="middle",
                         markup=True,
                     )
-                    action_button.add_callbacks({"Button1": make_action_handler()})
+                    action_button.mouse_callbacks = {"Button1": make_action_handler()}
                     controls.append(action_button)
                     current_button += 1
 
@@ -591,6 +601,16 @@ class SimplePopupManager:
         except Exception as e:
             logger.error(f"Position calculation error: {e}")
             return (-370, 60)
+
+    def _dismiss_notification(self, notification: PopupNotification) -> None:
+        """Dismiss a specific notification"""
+        try:
+            if notification.popup_layout:
+                notification.popup_layout.kill()
+            if notification in self.active_notifications:
+                self.active_notifications.remove(notification)
+        except Exception as e:
+            logger.debug(f"Error dismissing notification: {e}")
 
     def _dismiss_oldest(self) -> None:
         """Dismiss the oldest notification"""

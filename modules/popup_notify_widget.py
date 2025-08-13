@@ -159,25 +159,26 @@ class PopupNotifyWidget(widget.Notify):
 
     def _handle_action_callback(self, notification_id: int, action_key: str) -> None:
         """
-        @brief Handle action button click callback
+        @brief Handle action button click callback using qtile's notification service
         @param notification_id: D-Bus notification ID
         @param action_key: Action key that was clicked
         """
         try:
-            if DBUS_AVAILABLE:
-                # Send action response back to D-Bus notification server
-                bus = dbus.SessionBus()
-                notify_service = bus.get_object(
-                    'org.freedesktop.Notifications',
-                    '/org/freedesktop/Notifications'
-                )
-                notify_service.ActionInvoked(notification_id, action_key,
-                    dbus_interface='org.freedesktop.Notifications')
-                logger.info(f"Action callback sent: ID={notification_id}, action={action_key}")
+            # Use qtile's built-in notification service for proper D-Bus handling
+            from libqtile import notify
+            if hasattr(notify, 'notifier') and notify.notifier and hasattr(notify.notifier, '_service'):
+                # Send ActionInvoked signal first
+                notify.notifier._service.ActionInvoked(notification_id, action_key)
+                logger.info(f"Action invoked via qtile service: ID={notification_id}, action={action_key}")
+
+                # Send NotificationClosed signal to complete the D-Bus interaction
+                notify.notifier._service.NotificationClosed(notification_id, 2)  # 2 = dismissed by user action
+                logger.info(f"Notification closed via qtile service: ID={notification_id}")
             else:
-                logger.warning(f"D-Bus not available - cannot send action: {action_key}")
+                logger.warning("Qtile notification service not available")
+
         except Exception as e:
-            logger.error(f"Failed to send action callback: {e}")
+            logger.error(f"Failed to invoke action via qtile service: {e}")
 
     @base.expose_command()
     def test_popup_notification(self) -> None:
