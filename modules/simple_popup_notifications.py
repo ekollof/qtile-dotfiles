@@ -351,7 +351,15 @@ class SimplePopupManager:
         except Exception as e:
             logger.error(f"Failed to open URL {url}: {e}")
 
-    def _calculate_text_height(self, text: str, width: int, message_font_size: int, has_title: bool, title_font_size: int | None = None, has_buttons: bool = False) -> int:
+    def _calculate_text_height(
+        self,
+        text: str,
+        width: int,
+        message_font_size: int,
+        has_title: bool,
+        title_font_size: int | None = None,
+        has_buttons: bool = False,
+    ) -> int:
         """
         @brief Calculate required height for text content with proper word wrapping
         @param text: Text content to measure
@@ -369,18 +377,23 @@ class SimplePopupManager:
 
         # Remove HTML markup for length calculation
         import re
-        clean_text = re.sub(r'<[^>]+>', '', text)
+
+        clean_text = re.sub(r"<[^>]+>", "", text)
 
         # More conservative character width estimation
         # Account for proportional fonts being narrower on average
         avg_char_width = message_font_size * 0.45  # More conservative estimation
         text_area_width = width * 0.85  # Account for margins and padding
-        available_chars = max(20, int(text_area_width / avg_char_width))  # Minimum 20 chars per line
+        available_chars = max(
+            20, int(text_area_width / avg_char_width)
+        )  # Minimum 20 chars per line
 
-        logger.debug(f"Text calc: font={message_font_size}px, width={width}px, chars_per_line={available_chars}")
+        logger.debug(
+            f"Text calc: font={message_font_size}px, width={width}px, chars_per_line={available_chars}"
+        )
 
         # Split into paragraphs first
-        paragraphs = clean_text.split('\n')
+        paragraphs = clean_text.split("\n")
         total_lines = 0
 
         for paragraph in paragraphs:
@@ -400,30 +413,45 @@ class SimplePopupManager:
             for word in words:
                 word_length = len(word)
                 # Check if adding this word would exceed line length (including space)
-                if current_line_length > 0 and current_line_length + 1 + word_length > available_chars:
+                if (
+                    current_line_length > 0
+                    and current_line_length + 1 + word_length > available_chars
+                ):
                     lines_in_paragraph += 1
                     current_line_length = word_length
                 else:
-                    current_line_length += word_length + (1 if current_line_length > 0 else 0)
+                    current_line_length += word_length + (
+                        1 if current_line_length > 0 else 0
+                    )
 
             total_lines += lines_in_paragraph
 
-        logger.debug(f"Text lines calculated: {total_lines} lines for text: '{clean_text[:50]}...'")
+        logger.debug(
+            f"Text lines calculated: {total_lines} lines for text: '{clean_text[:50]}...'"
+        )
 
         # Calculate height components using DPI-scaled font sizes
         title_font = title_font_size or scale_font(16)
-        title_height = int(title_font * 1.8) + 10 if has_title else 0  # Extra padding for title
+        title_height = (
+            int(title_font * 1.8) + 10 if has_title else 0
+        )  # Extra padding for title
         line_height = int(message_font_size * 1.5)  # More generous line spacing
         text_height = total_lines * line_height
         top_padding = 15
         bottom_padding = 15
 
         # Add button area to total height if buttons are present
-        button_area = max(45, int(scale_font(12) * 3)) + 20 if has_buttons else 0  # Button height + margins
+        button_area = (
+            max(45, int(scale_font(12) * 3)) + 20 if has_buttons else 0
+        )  # Button height + margins
 
-        total_height = top_padding + title_height + text_height + bottom_padding + button_area
+        total_height = (
+            top_padding + title_height + text_height + bottom_padding + button_area
+        )
 
-        logger.debug(f"Height components: title={title_height}px, text={text_height}px, padding={top_padding + bottom_padding}px")
+        logger.debug(
+            f"Height components: title={title_height}px, text={text_height}px, padding={top_padding + bottom_padding}px"
+        )
 
         # Ensure reasonable bounds
         min_height = max(self.config["height"], 100)  # Higher minimum
@@ -449,16 +477,20 @@ class SimplePopupManager:
         has_buttons = total_buttons > 0
 
         # Calculate required height based on text content with DPI-scaled fonts
-        title_font_size = self.qtile_config.preferred_fontsize + 2 if self.qtile_config else 16
-        message_font_size = self.qtile_config.preferred_fontsize if self.qtile_config else 14
-        
+        title_font_size = (
+            self.qtile_config.preferred_fontsize + 2 if self.qtile_config else 16
+        )
+        message_font_size = (
+            self.qtile_config.preferred_fontsize if self.qtile_config else 14
+        )
+
         popup_height = self._calculate_text_height(
             sanitized_message,
             self.config["width"],
             scale_font(message_font_size),  # Message font size
             bool(notification.title),
-            scale_font(title_font_size),    # Title font size
-            has_buttons      # Whether buttons are present
+            scale_font(title_font_size),  # Title font size
+            has_buttons,  # Whether buttons are present
         )
         # Choose colors based on urgency using match statement
         match notification.urgency:
@@ -530,7 +562,9 @@ class SimplePopupManager:
         # Title (if present)
         if notification.title and _QTILE_EXTRAS_AVAILABLE:
             assert PopupText is not None
-            title_font_size = scale_font(self.qtile_config.preferred_fontsize + 2 if self.qtile_config else 16)
+            title_font_size = scale_font(
+                self.qtile_config.preferred_fontsize + 2 if self.qtile_config else 16
+            )
             title_height_px = int(title_font_size * 1.5)
             controls.append(
                 PopupText(
@@ -553,9 +587,27 @@ class SimplePopupManager:
         # Message text with URL extraction
         if notification.message:
             # Calculate message area positioning based on actual pixel heights
-            title_font_size = scale_font(self.qtile_config.preferred_fontsize + 2 if self.qtile_config else 16)
-            title_height_px = int(title_font_size * 1.8) + 10 if notification.title else 0
-            button_area_px = max(45, int(scale_font(self.qtile_config.preferred_fontsize if self.qtile_config else 12) * 3)) if has_buttons else 0
+            title_font_size = scale_font(
+                self.qtile_config.preferred_fontsize + 2 if self.qtile_config else 16
+            )
+            title_height_px = (
+                int(title_font_size * 1.8) + 10 if notification.title else 0
+            )
+            button_area_px = (
+                max(
+                    45,
+                    int(
+                        scale_font(
+                            self.qtile_config.preferred_fontsize
+                            if self.qtile_config
+                            else 12
+                        )
+                        * 3
+                    ),
+                )
+                if has_buttons
+                else 0
+            )
             top_margin = 15
             title_margin = 8 if notification.title else 0
             bottom_margin = 15
@@ -565,9 +617,13 @@ class SimplePopupManager:
             msg_height_px = popup_height - msg_y_px - button_area_px - bottom_margin
 
             msg_y = msg_y_px / popup_height
-            msg_height = max(0.15, msg_height_px / popup_height)  # Ensure reasonable minimum height
+            msg_height = max(
+                0.15, msg_height_px / popup_height
+            )  # Ensure reasonable minimum height
 
-            logger.debug(f"Message positioning: y={msg_y_px}px ({msg_y:.2%}), height={msg_height_px}px ({msg_height:.2%})")
+            logger.debug(
+                f"Message positioning: y={msg_y_px}px ({msg_y:.2%}), height={msg_height_px}px ({msg_height:.2%})"
+            )
 
             assert PopupText is not None
             controls.append(
@@ -577,7 +633,11 @@ class SimplePopupManager:
                     pos_y=msg_y,
                     width=message_width,
                     height=msg_height,
-                    fontsize=scale_font(self.qtile_config.preferred_fontsize if self.qtile_config else 14),
+                    fontsize=scale_font(
+                        self.qtile_config.preferred_fontsize
+                        if self.qtile_config
+                        else 14
+                    ),
                     foreground=fg_color,
                     font=font_family,
                     markup=True,
@@ -598,7 +658,9 @@ class SimplePopupManager:
                     # Position buttons at bottom with fixed margin
                     button_margin_bottom = 15
                     button_height_px = max(35, int(scale_font(11) * 2.5))
-                    button_y = 1.0 - ((button_height_px + button_margin_bottom) / popup_height)
+                    button_y = 1.0 - (
+                        (button_height_px + button_margin_bottom) / popup_height
+                    )
 
                     def make_url_handler(target_url: str = url, mgr: Any = self):
                         def handler(
@@ -621,8 +683,23 @@ class SimplePopupManager:
                             pos_x=button_x,
                             pos_y=button_y,
                             width=button_width,
-                            height=max(35, int(scale_font(self.qtile_config.preferred_fontsize - 1 if self.qtile_config else 11) * 2.5)) / popup_height,
-                            fontsize=scale_font(self.qtile_config.preferred_fontsize - 1 if self.qtile_config else 11),
+                            height=max(
+                                35,
+                                int(
+                                    scale_font(
+                                        self.qtile_config.preferred_fontsize - 1
+                                        if self.qtile_config
+                                        else 11
+                                    )
+                                    * 2.5
+                                ),
+                            )
+                            / popup_height,
+                            fontsize=scale_font(
+                                self.qtile_config.preferred_fontsize - 1
+                                if self.qtile_config
+                                else 11
+                            ),
                             foreground="#ffffff",
                             background="#0066cc",  # Blue button color
                             font=font_family,
@@ -648,7 +725,9 @@ class SimplePopupManager:
                     # Position buttons at bottom with fixed margin
                     button_margin_bottom = 15
                     button_height_px = max(35, int(scale_font(12) * 2.5))
-                    button_y = 1.0 - ((button_height_px + button_margin_bottom) / popup_height)
+                    button_y = 1.0 - (
+                        (button_height_px + button_margin_bottom) / popup_height
+                    )
 
                     def make_action_handler(
                         key: str = action_key,
@@ -681,8 +760,23 @@ class SimplePopupManager:
                             pos_x=button_x,
                             pos_y=button_y,
                             width=button_width,
-                            height=max(35, int(scale_font(self.qtile_config.preferred_fontsize if self.qtile_config else 12) * 2.5)) / popup_height,
-                            fontsize=scale_font(self.qtile_config.preferred_fontsize if self.qtile_config else 12),
+                            height=max(
+                                35,
+                                int(
+                                    scale_font(
+                                        self.qtile_config.preferred_fontsize
+                                        if self.qtile_config
+                                        else 12
+                                    )
+                                    * 2.5
+                                ),
+                            )
+                            / popup_height,
+                            fontsize=scale_font(
+                                self.qtile_config.preferred_fontsize
+                                if self.qtile_config
+                                else 12
+                            ),
                             foreground="#ffffff",
                             background="#28a745",  # Green button color
                             font=font_family,
