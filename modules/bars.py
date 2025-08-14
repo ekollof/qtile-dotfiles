@@ -656,13 +656,12 @@ class EnhancedBarManager:
 
     def _safe_script_call(self, script_path: str, fallback: str = "N/A"):
         """
-        @brief Create a safe script call function with error handling
+        @brief Create safe script call function with comprehensive error handling
         @param script_path: Path to script
-        @param fallback: Fallback value on error
-        @return Callable function for script execution
+        @param fallback: Fallback value on failure
+        @return Function that safely calls script
         """
-
-        def call_script():
+        def safe_call():
             try:
                 script_path_obj = Path(script_path).expanduser()
                 result = subprocess.run(
@@ -671,14 +670,37 @@ class EnhancedBarManager:
                     text=True,
                     timeout=10,
                 )
-                if result.returncode == 0:
-                    return result.stdout.strip()
+                
+                # Check if we got valid output regardless of return code
+                output = result.stdout.strip()
+                if output and output != "N/A" and len(output) > 0:
+                    # Script produced output - use it even if return code is non-zero
+                    logger.debug(f"Script {script_path} output: '{output}' (return code: {result.returncode})")
+                    return output
+                
+                # No valid output - check what went wrong
+                if result.returncode != 0:
+                    stderr = result.stderr.strip()
+                    if stderr:
+                        logger.warning(f"Script {script_path} failed with error: {stderr}")
+                    else:
+                        logger.warning(f"Script {script_path} failed with return code {result.returncode} but no error message")
                 else:
-                    return fallback
-            except Exception:
+                    logger.warning(f"Script {script_path} succeeded but returned empty output")
+                
+                return fallback
+                
+            except subprocess.TimeoutExpired:
+                logger.warning(f"Script {script_path} timed out")
+                return fallback
+            except FileNotFoundError:
+                logger.warning(f"Script {script_path} not found")
+                return fallback
+            except Exception as e:
+                logger.warning(f"Script {script_path} execution error: {e}")
                 return fallback
 
-        return call_script
+        return safe_call
 
     def _get_script_widgets(self, colordict: dict[str, Any]) -> list[Any]:
         """
