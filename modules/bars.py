@@ -748,6 +748,44 @@ class EnhancedBarManager:
 
         return widgets
 
+    def _create_safe_check_updates_widget(self, distro: str, colors: dict[str, str], special: dict[str, str]):
+        """
+        @brief Create CheckUpdates widget with proper error handling
+        @param distro: Distribution type for updates check
+        @param colors: Color dictionary
+        @param special: Special colors dictionary  
+        @return CheckUpdates widget instance with error handling
+        """
+        try:
+            # Create widget with safe configuration
+            updates_widget = widget.CheckUpdates(
+                **self._get_widget_defaults_excluding("background"),
+                foreground=colors.get("color5", "#ffffff"),
+                background=special.get("background", "#000000"),
+                update_interval=3600,
+                display_format="{updates}",
+                distro=distro,
+                no_update_string="0",
+                colour_have_updates=colors.get("color3", "#ffff00"),
+                colour_no_updates=colors.get("color5", "#ffffff"),
+                # Add error handling parameters
+                execute=None,  # Disable click action to prevent issues
+                mouse_callbacks={},  # Clear mouse callbacks
+            )
+            
+            logger.debug(f"Created CheckUpdates widget for {distro}")
+            return updates_widget
+            
+        except Exception as e:
+            logger.warning(f"Failed to create CheckUpdates widget for {distro}: {e}")
+            # Return a simple TextBox as fallback
+            return widget.TextBox(
+                text="0",
+                foreground=colors.get("color5", "#ffffff"),
+                background=special.get("background", "#000000"),
+                fontsize=scale_font(self.qtile_config.preferred_fontsize),
+            )
+
     def create_bar_config(self, screen_num: int) -> bar.Bar:
         """
         @brief Create bar configuration for a specific screen with dynamic SVG icons
@@ -803,31 +841,19 @@ class EnhancedBarManager:
         # System monitoring widgets with dynamic icons
         barconfig.extend(
             [
-                # Package updates
+                # Package updates with error handling
                 self._create_icon_widget("updates"),
-                widget.CheckUpdates(
-                    **self._get_widget_defaults_excluding("background"),
-                    foreground=colors.get("color5", "#ffffff"),
-                    background=special.get("background", "#000000"),
-                    update_interval=3600,
-                    display_format="{updates}",
+                self._create_safe_check_updates_widget(
                     distro="Arch_checkupdates",
-                    no_update_string="0",
-                    colour_have_updates=colors.get("color3", "#ffff00"),
-                    colour_no_updates=colors.get("color5", "#ffffff"),
+                    colors=colors,
+                    special=special
                 ),
-                # AUR updates
+                # AUR updates with error handling  
                 self._create_icon_widget("refresh"),
-                widget.CheckUpdates(
-                    **self._get_widget_defaults_excluding("background"),
-                    foreground=colors.get("color5", "#ffffff"),
-                    background=special.get("background", "#000000"),
-                    update_interval=3600,
-                    display_format="{updates}",
-                    distro="Arch_yay",
-                    no_update_string="0",
-                    colour_have_updates=colors.get("color3", "#ffff00"),
-                    colour_no_updates=colors.get("color5", "#ffffff"),
+                self._create_safe_check_updates_widget(
+                    distro="Arch_yay", 
+                    colors=colors,
+                    special=special
                 ),
                 # CPU usage with dynamic icon
                 self._create_icon_widget("cpu"),
