@@ -974,22 +974,40 @@ class EnhancedBarManager:
             except Exception as e:
                 logger.warning(f"Failed to add notification widget: {e}")
 
-        # Add systray only to primary screen with error handling
+        # Add system tray only to primary screen with error handling
         if screen_num == 0:
             try:
                 barconfig.append(
-                    widget.Systray(
+                    widget.StatusNotifier(
                         background=special.get("background", "#000000"),
                         icon_size=scale_size(20),
                         padding=scale_size(5),
-                        # Add defensive parameters for X11 stability
-                        fmt="{}",  # Ensure proper formatting
-                        update_interval=1.0,  # Refresh interval
+                        # StatusNotifier specific settings
+                        menu_width=200,
+                        menu_height=300,
+                        menu_border_width=1,
+                        menu_border_colour=colors.get("color5", "#ffffff"),
+                        menu_background=special.get("background", "#000000"),
+                        menu_foreground=colors.get("color15", "#ffffff"),
+                        menu_font=self.qtile_config.preferred_font,
+                        menu_fontsize=scale_font(self.qtile_config.preferred_fontsize),
                     )
                 )
             except Exception as e:
-                logger.warning(f"Failed to create systray widget: {e}")
-                # Continue without systray if there's an issue
+                logger.warning(f"Failed to create StatusNotifier widget: {e}")
+                # Fall back to regular systray if StatusNotifier fails
+                try:
+                    barconfig.append(
+                        widget.Systray(
+                            background=special.get("background", "#000000"),
+                            icon_size=scale_size(20),
+                            padding=scale_size(5),
+                        )
+                    )
+                    logger.info("Fell back to standard Systray widget")
+                except Exception as e2:
+                    logger.warning(f"Both StatusNotifier and Systray failed: {e2}")
+                    # Continue without system tray
 
         # Add current layout widget
         barconfig.extend(
