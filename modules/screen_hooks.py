@@ -5,6 +5,7 @@ Screen hooks for qtile
 
 import time
 import traceback
+from typing import Any
 
 from libqtile import hook, qtile
 from libqtile.log_utils import logger
@@ -115,7 +116,7 @@ class ScreenHooks:
             logger.error(f"Error reconfiguring screens: {e}")
             logger.error(traceback.format_exc())
 
-    def get_screen_status(self) -> dict:
+    def get_screen_status(self) -> dict[str, Any]:
         """Get current screen configuration status"""
         try:
             from modules.screens import get_screen_count

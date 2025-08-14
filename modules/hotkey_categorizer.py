@@ -3,13 +3,15 @@
 Hotkey categorization functionality
 """
 
+from typing import Any
+
 from .hotkey_formatter import KeyFormatter
 
 
 class HotkeyCategorizer:
     """Handles categorization and organization of hotkeys"""
 
-    def __init__(self):  # pyright: ignore[reportMissingSuperCall]
+    def __init__(self):
         self.categories = {
             "Window Management": [],
             "Layout Control": [],
@@ -25,7 +27,7 @@ class HotkeyCategorizer:
         for category in self.categories.values():
             category.clear()
 
-    def categorize_key(self, key) -> str:
+    def categorize_key(self, key: Any) -> str:
         """Determine the appropriate category for a key"""
         key_name = key.key
         description = KeyFormatter.infer_description(key).lower()
@@ -66,7 +68,7 @@ class HotkeyCategorizer:
             case _:
                 return "Other"
 
-    def add_key_to_category(self, key, category: str | None = None):
+    def add_key_to_category(self, key: Any, category: str | None = None):
         """Add a key to the appropriate category"""
         if category is None:
             category = self.categorize_key(key)
@@ -84,7 +86,7 @@ class HotkeyCategorizer:
         else:
             self.categories["Other"].append(hotkey_line)
 
-    def process_keys(self, keys: list) -> dict[str, list[str]]:
+    def process_keys(self, keys: list[Any]) -> dict[str, list[str]]:
         """Process a list of keys and categorize them"""
         self.clear_categories()
 

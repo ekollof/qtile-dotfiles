@@ -31,7 +31,7 @@ class HookManager:
     control and validation for qtile's event handling system.
     """
 
-    def __init__(self, color_manager: Any) -> None:  # pyright: ignore[reportMissingSuperCall]
+    def __init__(self, color_manager: Any) -> None: 
         self.color_manager = color_manager
         self.config = get_config()
 
@@ -103,7 +103,7 @@ class HookManager:
 
     def validate_configuration(self) -> dict[str, Any]:
         """Validate the entire hook configuration"""
-        validation = {
+        validation: dict[str, Any] = {
             "valid": True,
             "warnings": [],
             "errors": [],
@@ -133,7 +133,7 @@ class HookManager:
         try:
             from libqtile import qtile
 
-            diagnostics = {
+            diagnostics: dict[str, Any] = {
                 "hook_status": self.get_hook_status(),
                 "configuration_validation": self.validate_configuration(),
                 "qtile_available": qtile is not None,
