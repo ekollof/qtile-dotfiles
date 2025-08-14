@@ -33,7 +33,7 @@ class EnhancedBarManager:
     icon updates based on system state for qtile bars.
     """
 
-    def __init__(self, color_manager: Any, qtile_config: Any) -> None:  # pyright: ignore[reportMissingSuperCall]
+    def __init__(self, color_manager: Any, qtile_config: Any) -> None:
         """
         @brief Initialize enhanced bar manager
         @param color_manager: Color management instance

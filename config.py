@@ -24,7 +24,7 @@ from pathlib import Path
 # This prevents electron apps from floating due to has_fixed_size/has_fixed_ratio checks
 from libqtile import (
     layout,
-    qtile,  # type: ignore
+    qtile,
 )
 from libqtile.config import Click, Drag, Match
 from libqtile.lazy import lazy

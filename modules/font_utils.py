@@ -26,7 +26,7 @@ class FontManager:
     and maintains a cache for performance optimization.
     """
 
-    def __init__(self):  # pyright: ignore[reportMissingSuperCall]
+    def __init__(self):
         self.system = platform.system().lower()
         self._font_cache = {}
 
