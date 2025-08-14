@@ -449,12 +449,15 @@ class SimplePopupManager:
         has_buttons = total_buttons > 0
 
         # Calculate required height based on text content with DPI-scaled fonts
+        title_font_size = self.qtile_config.preferred_fontsize + 2 if self.qtile_config else 16
+        message_font_size = self.qtile_config.preferred_fontsize if self.qtile_config else 14
+        
         popup_height = self._calculate_text_height(
             sanitized_message,
             self.config["width"],
-            scale_font(14),  # Message font size
+            scale_font(message_font_size),  # Message font size
             bool(notification.title),
-            scale_font(16),  # Title font size
+            scale_font(title_font_size),    # Title font size
             has_buttons      # Whether buttons are present
         )
         # Choose colors based on urgency using match statement
@@ -527,7 +530,7 @@ class SimplePopupManager:
         # Title (if present)
         if notification.title and _QTILE_EXTRAS_AVAILABLE:
             assert PopupText is not None
-            title_font_size = scale_font(16)
+            title_font_size = scale_font(self.qtile_config.preferred_fontsize + 2 if self.qtile_config else 16)
             title_height_px = int(title_font_size * 1.5)
             controls.append(
                 PopupText(
@@ -550,9 +553,9 @@ class SimplePopupManager:
         # Message text with URL extraction
         if notification.message:
             # Calculate message area positioning based on actual pixel heights
-            title_font_size = scale_font(16)
+            title_font_size = scale_font(self.qtile_config.preferred_fontsize + 2 if self.qtile_config else 16)
             title_height_px = int(title_font_size * 1.8) + 10 if notification.title else 0
-            button_area_px = max(45, int(scale_font(12) * 3)) if has_buttons else 0
+            button_area_px = max(45, int(scale_font(self.qtile_config.preferred_fontsize if self.qtile_config else 12) * 3)) if has_buttons else 0
             top_margin = 15
             title_margin = 8 if notification.title else 0
             bottom_margin = 15
@@ -574,7 +577,7 @@ class SimplePopupManager:
                     pos_y=msg_y,
                     width=message_width,
                     height=msg_height,
-                    fontsize=scale_font(14),
+                    fontsize=scale_font(self.qtile_config.preferred_fontsize if self.qtile_config else 14),
                     foreground=fg_color,
                     font=font_family,
                     markup=True,
@@ -618,8 +621,8 @@ class SimplePopupManager:
                             pos_x=button_x,
                             pos_y=button_y,
                             width=button_width,
-                            height=max(35, int(scale_font(11) * 2.5)) / popup_height,
-                            fontsize=scale_font(11),
+                            height=max(35, int(scale_font(self.qtile_config.preferred_fontsize - 1 if self.qtile_config else 11) * 2.5)) / popup_height,
+                            fontsize=scale_font(self.qtile_config.preferred_fontsize - 1 if self.qtile_config else 11),
                             foreground="#ffffff",
                             background="#0066cc",  # Blue button color
                             font=font_family,
@@ -678,8 +681,8 @@ class SimplePopupManager:
                             pos_x=button_x,
                             pos_y=button_y,
                             width=button_width,
-                            height=max(35, int(scale_font(12) * 2.5)) / popup_height,
-                            fontsize=scale_font(12),
+                            height=max(35, int(scale_font(self.qtile_config.preferred_fontsize if self.qtile_config else 12) * 2.5)) / popup_height,
+                            fontsize=scale_font(self.qtile_config.preferred_fontsize if self.qtile_config else 12),
                             foreground="#ffffff",
                             background="#28a745",  # Green button color
                             font=font_family,
