@@ -795,12 +795,52 @@ class SimplePopupManager:
             except Exception as e:
                 logger.warning(f"Failed to add action buttons: {e}")
 
+        # Add dismiss button if there are actions or URLs (so notification can be closed)
+        if has_buttons:
+            try:
+                dismiss_width = 0.15  # Smaller dismiss button
+                dismiss_x = 0.8  # Position on the right
+                dismiss_y = 0.05  # Top right corner
+                
+                def make_dismiss_handler(mgr=self, notif: Any = notification):
+                    def handler(popup_text: Any = None, *args: Any, **kwargs: Any) -> None:
+                        logger.info("❌ Dismiss button clicked")
+                        try:
+                            mgr._dismiss_notification(notif)
+                            logger.info("Popup dismissed by user")
+                        except Exception as e:
+                            logger.error(f"Dismiss handler error: {e}")
+                    return handler
+
+                if _QTILE_EXTRAS_AVAILABLE:
+                    assert PopupText is not None
+                    dismiss_button = PopupText(
+                        text="✕",
+                        pos_x=dismiss_x,
+                        pos_y=dismiss_y,
+                        width=dismiss_width,
+                        height=0.15,  # Small square button
+                        fontsize=scale_font(self.qtile_config.preferred_fontsize + 2 if self.qtile_config else 14),
+                        foreground="#ffffff",
+                        background="#dc3545",  # Red dismiss button
+                        font=font_family,
+                        h_align="center",
+                        v_align="middle",
+                        markup=True,
+                    )
+                    dismiss_button.mouse_callbacks = {"Button1": make_dismiss_handler()}
+                    controls.append(dismiss_button)
+
+                logger.debug("Added dismiss button for interactive notification")
+
+            except Exception as e:
+                logger.warning(f"Failed to add dismiss button: {e}")
+
         # Create popup layout with adjusted height
         if not _QTILE_EXTRAS_AVAILABLE:
             return None
         assert PopupRelativeLayout is not None
-        # Disable close_on_click for notifications with actions to prevent accidental dismissal
-        has_actions = bool(notification.actions)
+        # Allow click dismissal for all notifications, but add dismiss button for ones with actions
         popup = PopupRelativeLayout(
             qtile,
             width=self.config["width"],
@@ -810,7 +850,7 @@ class SimplePopupManager:
             border=border_color,
             border_width=2,
             initial_focus=None,
-            close_on_click=not has_actions,  # Don't allow click dismissal if there are action buttons
+            close_on_click=True,  # Allow click dismissal for all notifications
             opacity=0.95,
         )
 
