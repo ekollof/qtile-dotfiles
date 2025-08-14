@@ -786,6 +786,138 @@ class EnhancedBarManager:
                 fontsize=scale_font(self.qtile_config.preferred_fontsize),
             )
 
+    def _detect_package_manager(self) -> list[str]:
+        """
+        @brief Detect available package managers and return appropriate distro strings
+        @return List of distro strings for CheckUpdates widget based on qtile-extras documentation
+        
+        Supported distros from qtile-extras CheckUpdates:
+        Arch, Arch_checkupdates, Arch_Sup, Arch_paru, Arch_paru_Sup, Arch_yay,
+        Debian, Gentoo_eix, Guix, Ubuntu, Fedora, FreeBSD, Mandriva, Void
+        """
+        available_distros = []
+        
+        # Check platform first
+        system = platform.system().lower()
+        logger.debug(f"Detected system: {system}")
+        
+        if system == "linux":
+            # Check for Arch Linux
+            if Path("/etc/arch-release").exists():
+                # Check for checkupdates command (official repos) - preferred method
+                if subprocess.run(["which", "checkupdates"], capture_output=True).returncode == 0:
+                    available_distros.append("Arch_checkupdates")
+                    logger.debug("Found checkupdates - adding Arch_checkupdates")
+                
+                # Check for paru (AUR helper) - preferred over yay
+                if subprocess.run(["which", "paru"], capture_output=True).returncode == 0:
+                    available_distros.append("Arch_paru")
+                    logger.debug("Found paru - adding Arch_paru")
+                # Check for yay (alternative AUR helper)
+                elif subprocess.run(["which", "yay"], capture_output=True).returncode == 0:
+                    available_distros.append("Arch_yay")
+                    logger.debug("Found yay - adding Arch_yay")
+                # Fallback to basic pacman
+                elif subprocess.run(["which", "pacman"], capture_output=True).returncode == 0:
+                    available_distros.append("Arch")
+                    logger.debug("Found pacman - adding Arch")
+                    
+            # Check for Ubuntu/Debian
+            elif Path("/etc/debian_version").exists():
+                try:
+                    with open("/etc/os-release", "r") as f:
+                        os_info = f.read().lower()
+                        if "ubuntu" in os_info:
+                            if subprocess.run(["which", "aptitude"], capture_output=True).returncode == 0:
+                                available_distros.append("Ubuntu")
+                                logger.debug("Found aptitude - adding Ubuntu")
+                        else:  # Debian or derivative
+                            if subprocess.run(["which", "apt-show-versions"], capture_output=True).returncode == 0:
+                                available_distros.append("Debian") 
+                                logger.debug("Found apt-show-versions - adding Debian")
+                except FileNotFoundError:
+                    # Fallback to generic check
+                    if subprocess.run(["which", "apt"], capture_output=True).returncode == 0:
+                        available_distros.append("Ubuntu")  # Use Ubuntu as fallback
+                        logger.debug("Found apt - adding Ubuntu (fallback)")
+                        
+            # Check for Fedora
+            elif Path("/etc/fedora-release").exists():
+                if subprocess.run(["which", "dnf"], capture_output=True).returncode == 0:
+                    available_distros.append("Fedora")
+                    logger.debug("Found dnf - adding Fedora")
+                    
+            # Check for Gentoo
+            elif Path("/etc/gentoo-release").exists():
+                if subprocess.run(["which", "eix"], capture_output=True).returncode == 0:
+                    available_distros.append("Gentoo_eix")
+                    logger.debug("Found eix - adding Gentoo_eix")
+                    
+            # Check for Void Linux
+            elif Path("/etc/os-release").exists():
+                try:
+                    with open("/etc/os-release", "r") as f:
+                        if "void" in f.read().lower():
+                            if subprocess.run(["which", "xbps-install"], capture_output=True).returncode == 0:
+                                available_distros.append("Void")
+                                logger.debug("Found xbps-install - adding Void")
+                except FileNotFoundError:
+                    pass
+                    
+        elif system == "freebsd":
+            if subprocess.run(["which", "pkg"], capture_output=True).returncode == 0:
+                available_distros.append("FreeBSD")
+                logger.debug("Found pkg - adding FreeBSD")
+                
+        # Note: OpenBSD is NOT supported by qtile-extras CheckUpdates widget
+        elif system == "openbsd":
+            logger.info("OpenBSD detected but not supported by CheckUpdates widget")
+            
+        elif system == "darwin":  # macOS
+            # Note: Homebrew is NOT in the supported list, but we could add it if needed
+            logger.info("macOS detected but Homebrew not in CheckUpdates supported distros")
+                
+        if not available_distros:
+            logger.info(f"No supported package managers detected on {system}")
+            logger.info("CheckUpdates widget supports: Arch variants, Debian, Ubuntu, Fedora, Gentoo, Void, FreeBSD")
+        else:
+            logger.info(f"Detected supported package managers: {available_distros}")
+            
+        return available_distros
+
+    def _create_update_widgets(self, colors: dict[str, str], special: dict[str, str]) -> list[Any]:
+        """
+        @brief Create update checking widgets based on detected package managers
+        @param colors: Color dictionary
+        @param special: Special colors dictionary
+        @return List of widgets for package update checking
+        """
+        widgets = []
+        distros = self._detect_package_manager()
+        
+        if not distros:
+            logger.info("No package managers detected - skipping update widgets")
+            return widgets
+            
+        # Create appropriate icons and widgets for each detected package manager
+        for i, distro in enumerate(distros):
+            # Add icon - use different icons for different types
+            if "arch" in distro.lower() or "aur" in distro.lower():
+                icon = "updates" if i == 0 else "refresh"
+            elif distro in ["Ubuntu", "Fedora", "RHEL", "openSUSE"]:
+                icon = "updates"
+            elif distro in ["OpenBSD", "FreeBSD"]:
+                icon = "package"  # Different icon for BSD systems
+            elif distro == "Homebrew":
+                icon = "package"
+            else:
+                icon = "updates"
+                
+            widgets.append(self._create_icon_widget(icon))
+            widgets.append(self._create_safe_check_updates_widget(distro, colors, special))
+            
+        return widgets
+
     def create_bar_config(self, screen_num: int) -> bar.Bar:
         """
         @brief Create bar configuration for a specific screen with dynamic SVG icons
@@ -840,21 +972,12 @@ class EnhancedBarManager:
 
         # System monitoring widgets with dynamic icons
         barconfig.extend(
+            # Package updates - auto-detect based on system
+            self._create_update_widgets(colors, special)
+        )
+        
+        barconfig.extend(
             [
-                # Package updates with error handling
-                self._create_icon_widget("updates"),
-                self._create_safe_check_updates_widget(
-                    distro="Arch_checkupdates",
-                    colors=colors,
-                    special=special
-                ),
-                # AUR updates with error handling  
-                self._create_icon_widget("refresh"),
-                self._create_safe_check_updates_widget(
-                    distro="Arch_yay", 
-                    colors=colors,
-                    special=special
-                ),
                 # CPU usage with dynamic icon
                 self._create_icon_widget("cpu"),
                 widget.CPU(
