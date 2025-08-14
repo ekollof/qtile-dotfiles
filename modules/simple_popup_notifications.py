@@ -438,7 +438,8 @@ class SimplePopupManager:
         line_height = int(message_font_size * 1.5)  # More generous line spacing
         text_height = total_lines * line_height
         top_padding = 15
-        bottom_padding = 15
+        # Match the bottom margin used in message positioning - more for notifications without buttons
+        bottom_padding = 15 if has_buttons else 25
 
         # Add button area to total height if buttons are present
         button_area = (
@@ -610,7 +611,8 @@ class SimplePopupManager:
             )
             top_margin = 15
             title_margin = 8 if notification.title else 0
-            bottom_margin = 15
+            # Increase bottom margin for notifications without buttons to prevent text creeping to border
+            bottom_margin = 15 if has_buttons else 25
 
             # Message starts after title (if present) plus margins
             msg_y_px = top_margin + title_height_px + title_margin
