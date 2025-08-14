@@ -14,7 +14,7 @@ from libqtile.log_utils import logger
 class ScreenHooks:
     """Handles screen-related hooks and monitor changes"""
 
-    def __init__(self, config, color_manager):
+    def __init__(self, config: Any, color_manager: Any) -> None:
         self.config = config
         self.color_manager = color_manager
 
@@ -23,20 +23,20 @@ class ScreenHooks:
         logger.debug("Setting up screen hooks")
 
         @hook.subscribe.screen_change
-        def handle_screen_change(*args, **kwargs):
+        def handle_screen_change(*args: Any, **kwargs: Any) -> None:
             """Handle screen configuration changes (monitor hotplug/unplug)"""
             # Some qtile versions don't pass event parameter
             event = args[0] if args else None
             self._handle_screen_change_event(event)
 
         @hook.subscribe.current_screen_change
-        def handle_current_screen_change(*args, **kwargs):
+        def handle_current_screen_change(*args: Any, **kwargs: Any) -> None:
             """Handle changes to the current screen focus"""
             # Some qtile versions don't pass event parameter
             event = args[0] if args else None
             self._handle_current_screen_change_event(event)
 
-    def _handle_screen_change_event(self, event=None):
+    def _handle_screen_change_event(self, event: Any = None) -> None:
         """Handle screen configuration changes with proper timing and validation"""
         # Add minimal delay to let the system settle
         time.sleep(self.config.screen_settings["detection_delay"])
@@ -63,7 +63,7 @@ class ScreenHooks:
         else:
             logger.info("Screen change detected but ignored (too soon after startup)")
 
-    def _handle_current_screen_change_event(self, event=None):
+    def _handle_current_screen_change_event(self, event: Any = None) -> None:
         """Handle changes to current screen focus"""
         try:
             if qtile and qtile.current_screen:
@@ -151,9 +151,9 @@ class ScreenHooks:
             logger.error(f"Error getting screen status: {e}")
             return {"error": str(e)}
 
-    def validate_screen_configuration(self) -> dict:
+    def validate_screen_configuration(self) -> dict[str, Any]:
         """Validate the screen configuration settings"""
-        validation = {"valid": True, "warnings": [], "errors": []}
+        validation: dict[str, Any] = {"valid": True, "warnings": [], "errors": []}
 
         try:
             # Check detection delay
@@ -200,13 +200,13 @@ class ScreenHooks:
         except Exception as e:
             logger.error(f"Error during forced screen refresh: {e}")
 
-    def get_screen_change_history(self) -> list:
+    def get_screen_change_history(self) -> list[Any]:
         """Get history of screen changes (placeholder for future implementation)"""
         # This could be implemented to track screen change events over time
         # Useful for debugging monitor hotplug issues
         return []
 
-    def _count_registered_hooks(self) -> dict:
+    def _count_registered_hooks(self) -> dict[str, int]:
         """Count registered screen hooks"""
         return {
             "screen_change": 1,  # handle_screen_change

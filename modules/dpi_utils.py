@@ -14,7 +14,7 @@ from libqtile.log_utils import logger
 class DPIManager:
     """Manages DPI detection and scaling calculations"""
 
-    def __init__(self):  # pyright: ignore[reportMissingSuperCall]
+    def __init__(self) -> None:
         self._dpi = None
         self._scale_factor = None
         self.detect_dpi()
