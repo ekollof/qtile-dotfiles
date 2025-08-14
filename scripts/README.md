@@ -4,7 +4,41 @@ This directory contains utility scripts for managing and customizing the qtile c
 
 ## Available Scripts
 
-### 🔤 `test_font_sizes.py`
+### � `qtile_log_monitor.py`
+**Monitor qtile logs with configurable log levels**
+
+```bash
+# Monitor with default settings (INFO level)
+python3 scripts/qtile_log_monitor.py
+
+# Set debug level and monitor
+python3 scripts/qtile_log_monitor.py --level debug
+
+# Show info about log configuration
+python3 scripts/qtile_log_monitor.py --info
+
+# Just tail log without changing level
+python3 scripts/qtile_log_monitor.py --no-set-level
+
+# Show specific number of lines without following
+python3 scripts/qtile_log_monitor.py --lines 100 --no-follow
+```
+
+**Features:**
+- Automatically finds qtile command and log file location
+- Sets qtile log level via CLI (DEBUG, INFO, WARNING, ERROR, CRITICAL)
+- Tails log file in real-time (like `tail -f`)
+- Cross-platform Python fallback if system `tail` not available
+- Shows log file information and current qtile status
+
+**Log Levels:**
+- `DEBUG`: Detailed diagnostic information
+- `INFO`: General information (default)
+- `WARNING`: Warning messages about potential issues
+- `ERROR`: Error messages about failures
+- `CRITICAL`: Critical errors that may cause qtile to stop
+
+### �🔤 `test_font_sizes.py`
 **Test different font sizes before applying changes**
 
 ```bash
