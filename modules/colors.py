@@ -14,34 +14,26 @@ This module provides a simplified interface to the color management system.
 from .simple_color_management import (
     ColorManager,
     color_manager,
-    get_color_file_status,
     get_color_manager,
     get_colors,
-    get_monitoring_performance_status,
     manual_color_reload,
-    optimize_color_monitoring,
     restart_color_monitoring,
     restart_color_monitoring_optimized,
     setup_color_monitoring,
     start_color_monitoring,
-    validate_current_colors,
 )
 
 # Maintain backward compatibility
 __all__ = [
     "ColorManager",
     "color_manager",
-    "get_color_file_status",
     "get_color_manager",
     "get_colors",
-    "get_monitoring_performance_status",
     "manual_color_reload",
-    "optimize_color_monitoring",
     "restart_color_monitoring",
     "restart_color_monitoring_optimized",
     "setup_color_monitoring",
     "start_color_monitoring",
-    "validate_current_colors",
 ]
 
 # Load initial colors (maintain original behavior)

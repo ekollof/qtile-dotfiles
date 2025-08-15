@@ -1,36 +1,32 @@
 # Modern Qtile Configuration
 
-A comprehensive, modular Qtile configuration with **centralized settings**, enhanced monitor detectio### Window Management
-| Key | Action |
-|-----|--------|
-| `Super+H/J/K/L` | Focus left/down/up/right |
-| `Super+Shift+H/J/K/L` | Move window left/down/up/right |
-| `Super+Ctrl+H/L` | **Smart resize** (shrink/grow, adapts to layout) |
-| `Super+Ctrl+J/K` | Resize window down/up |
-| `Super+F` | Toggle floating |
-| `Super+Shift+F` | Toggle fullscreen |t color management, and layout-aware key bindings.
+A comprehensive, modular Qtile configuration with **centralized settings**, enhanced monitor detection, robust color management, and layout-aware key bindings.
 
 ## ✨ Features
 
 ### 🎛️ **Centralized Configuration**
+
 - **Single Configuration File**: All settings in `qtile_config.py` for easy management
 - **Type Hints**: Better development experience with IDE autocompletion
 - **Logical Organization**: Settings grouped by function (layout, apps, colors, etc.)
 - **Easy Customization**: Change terminal, browser, layouts, or any setting in one place
 
 ### 🖥️ **Multi-Monitor Support**
+
 - **Automatic Detection**: Dynamic screen detection for X11 and Wayland
 - **Hotplug Support**: Automatically reconfigures when monitors are connected/disconnected
 - **Manual Control**: `Super+Ctrl+S` to manually reconfigure screens
 - **4+ Monitor Support**: Tested with complex multi-monitor setups
 
 ### 🎨 **Robust Color Management**
+
 - **Pywal/Wallust Integration**: Automatic color scheme loading with validation
 - **Backup System**: Multiple fallback levels (current → last good → backup → defaults)
 - **File Monitoring**: Real-time color updates with hash-based change detection
 - **Error Recovery**: Graceful handling of corrupted or missing color files
 
 ### ⌨️ **Layout-Aware Key Bindings**
+
 - **Universal Tiling**: All windows default to tiling (proper tiling WM behavior)
 - **Smart Resizing**: Grow/shrink commands adapt to current layout
 - **Universal Navigation**: Consistent focus and window movement across all layouts
@@ -39,12 +35,14 @@ A comprehensive, modular Qtile configuration with **centralized settings**, enha
 - **Post-Restart Consistency**: All windows automatically re-tile after `Super+Shift+R`
 
 ### 📋 **AwesomeWM-Style Hotkey Display**
+
 - **Visual Guide**: `Super+S` shows categorized list of all shortcuts
 - **Dynamic Theming**: Automatically matches current color scheme
 - **Smart Categorization**: Groups by function (Window Management, Layout, System, etc.)
 - **Multiple Backends**: Rofi (preferred) → dmenu → notifications
 
 ### 🪟 **Universal Window Management**
+
 - **Universal Tiling**: ALL windows default to tiling (proper tiling WM philosophy)
 - **Smart Floating Rules**: Only system dialogs, utilities, and transients float
 - **Post-Restart Consistency**: Windows automatically re-tile after qtile restart
@@ -53,6 +51,7 @@ A comprehensive, modular Qtile configuration with **centralized settings**, enha
 - **No App-Specific Code**: Works consistently for any application type
 
 ### 🏗️ **Modular Architecture**
+
 - **Clean Structure**: Organized modules for bars, colors, groups, keys, screens
 - **Easy Customization**: Modify individual components without touching core config
 - **Maintainable**: Clear separation of concerns and comprehensive documentation
@@ -60,6 +59,7 @@ A comprehensive, modular Qtile configuration with **centralized settings**, enha
 ## 🚀 Quick Start
 
 ### Prerequisites
+
 ```bash
 # Essential
 sudo pacman -S qtile python-psutil
@@ -69,6 +69,7 @@ sudo pacman -S rofi dmenu picom dunst unclutter xrandr
 ```
 
 ### Installation
+
 ```bash
 # Backup existing config (if any)
 mv ~/.config/qtile ~/.config/qtile.backup
@@ -85,6 +86,7 @@ qtile cmd-obj -o cmd -f restart
 All configuration is centralized in `qtile_config.py` - change any setting in one place!
 
 ### **Change Applications**
+
 ```python
 # Edit qtile_config.py
 @property
@@ -97,6 +99,7 @@ def browser(self) -> str:
 ```
 
 ### **Adjust Window Gaps**
+
 ```python
 @property
 def layout_defaults(self) -> Dict[str, Any]:
@@ -107,6 +110,7 @@ def layout_defaults(self) -> Dict[str, Any]:
 ```
 
 ### **Customize Workspaces**
+
 ```python
 @property
 def groups(self) -> List[tuple]:
@@ -119,6 +123,7 @@ def groups(self) -> List[tuple]:
 ```
 
 ### **Add Applications**
+
 ```python
 @property
 def applications(self) -> Dict[str, str]:
@@ -133,6 +138,7 @@ def applications(self) -> Dict[str, str]:
 ## ⌨️ Key Bindings
 
 ### Essential
+
 | Key | Action |
 |-----|--------|
 | `Super+Return` | Terminal |
@@ -142,6 +148,7 @@ def applications(self) -> Dict[str, str]:
 | `Super+S` | **Show hotkey guide** |
 
 ### Window Management
+
 | Key | Action |
 |-----|--------|
 | `Super+H/J/K/L` | Focus left/down/up/right |
@@ -153,6 +160,7 @@ def applications(self) -> Dict[str, str]:
 | `Super+Shift+F` | Toggle fullscreen |
 
 ### Layouts
+
 | Key | Action |
 |-----|--------|
 | `Super+Tab` | Next layout |
@@ -163,6 +171,7 @@ def applications(self) -> Dict[str, str]:
 | `Super+Ctrl+M` | Matrix layout |
 
 ### System
+
 | Key | Action |
 |-----|--------|
 | `Super+Shift+R` | Restart qtile |
@@ -176,13 +185,16 @@ def applications(self) -> Dict[str, str]:
 ## 🎨 Color Schemes
 
 ### Automatic Color Loading
+
 The configuration automatically loads colors from:
+
 1. `~/.cache/wal/colors.json` (pywal/wallust)
 2. `~/.cache/wal/last_good_colors.json` (backup)
 3. `~/.cache/wal/backups/` (timestamped backups)
 4. Built-in defaults (fallback)
 
 ### Manual Color Reload
+
 ```bash
 # After changing wallpaper/colors
 qtile cmd-obj -o cmd -f function -a manual_color_reload
@@ -192,11 +204,13 @@ qtile cmd-obj -o cmd -f function -a manual_color_reload
 ## 🖥️ Monitor Management
 
 ### Automatic Detection
+
 - Monitors are automatically detected on startup
 - Hotplug events trigger automatic reconfiguration
 - Supports both X11 and Wayland display protocols
 
 ### Manual Control
+
 ```bash
 # Reconfigure screens manually
 qtile cmd-obj -o cmd -f reconfigure_screens
@@ -208,7 +222,7 @@ python3 ~/.config/qtile/reconfigure_screens.py
 
 ## 📁 Project Structure
 
-```
+```text
 qtile/
 ├── qtile_config.py           # 🎛️ CENTRAL CONFIGURATION (edit this!)
 ├── config.py                 # Main qtile entry point
@@ -238,6 +252,7 @@ qtile/
 ## 🔧 Customization
 
 ### Easy Configuration Changes
+
 Everything is configured in `qtile_config.py` - no need to hunt through multiple files!
 
 ```bash
@@ -252,6 +267,7 @@ qtile cmd-obj -o cmd -f restart
 ```
 
 ### **Adding New Key Bindings**
+
 ```python
 # In qtile_config.py applications section:
 @property
@@ -265,6 +281,7 @@ def applications(self) -> Dict[str, str]:
 ```
 
 ### **Modifying Layouts**
+
 ```python
 # In qtile_config.py:
 @property
@@ -277,7 +294,9 @@ def tile_layout(self) -> Dict[str, Any]:
 ```
 
 ### **Changing Colors**
+
 The system automatically loads from pywal, but you can override defaults:
+
 ```python
 # In qtile_config.py:
 @property
@@ -292,6 +311,7 @@ def default_colors(self) -> Dict[str, Dict[str, str]]:
 ```
 
 ### **Adding Window Rules**
+
 ```python
 # In qtile_config.py:
 @property
@@ -318,6 +338,7 @@ def force_floating_apps(self) -> List[str]:
 ### Common Issues
 
 **Screen detection not working:**
+
 ```bash
 # Check xrandr output
 xrandr --query
@@ -330,15 +351,17 @@ qtile cmd-obj -o cmd -f reconfigure_screens
 ```
 
 **Color loading issues:**
-```bash
-# Check color file status
-python3 -c "from modules.colors import get_color_file_status; print(get_color_file_status())"
 
-# Validate current colors
-python3 -c "from modules.colors import validate_current_colors; validate_current_colors()"
+```bash
+# Test color loading
+python3 -c "from modules.colors import get_colors; print('Colors loaded:', len(get_colors().get('colors', {})), 'color entries')"
+
+# Manual color reload
+python3 -c "from modules.colors import manual_color_reload; manual_color_reload()"
 ```
 
 **Configuration problems:**
+
 ```bash
 # Test configuration syntax
 python3 -c "from qtile_config import get_config; print('Config loaded successfully')"
@@ -348,6 +371,7 @@ python3 -c "from qtile_config import get_config; c=get_config(); print(f'Termina
 ```
 
 **Window tiling not working after restart:**
+
 ```bash
 # Force retile all windows manually
 qtile cmd-obj -o cmd -f function -a manual_retile_all
@@ -358,18 +382,21 @@ python3 -c "from modules.hooks import create_hook_manager; from modules.colors i
 ```
 
 **Key bindings not working:**
+
 - Check qtile logs: `tail -f ~/.local/share/qtile/qtile.log`
 - Verify configuration: `python3 -c "from modules.keys import create_key_manager; print('Keys OK')"`
 - Use `Super+S` to see all configured shortcuts
 - Check for conflicts: No duplicates should exist (49 unique bindings)
 
 ### Log Files
+
 - **Qtile**: `~/.local/share/qtile/qtile.log`
 - **Autostart**: `~/.config/qtile/autostart.log`
 
 ## 🤝 Contributing
 
 This is a personal configuration, but feel free to:
+
 - Report issues or suggest improvements
 - Fork and adapt for your own use
 - Share interesting modifications
@@ -377,6 +404,7 @@ This is a personal configuration, but feel free to:
 ## 📚 Documentation
 
 Detailed documentation available in the `docs/` directory:
+
 - [**Centralized Configuration**](docs/CENTRALIZED_CONFIG.md) - Complete configuration guide
 - [Color Management](docs/COLOR_MANAGEMENT.md) - Advanced color system features
 - [Monitor Detection](docs/MONITOR_DETECTION.md) - Multi-monitor setup and troubleshooting
@@ -387,6 +415,7 @@ Detailed documentation available in the `docs/` directory:
 ## 🎯 Design Philosophy
 
 This configuration prioritizes:
+
 - **Centralized Management**: All settings in one place (`qtile_config.py`)
 - **Reliability**: Robust error handling and graceful degradation
 - **Consistency**: Layout-aware commands that work everywhere
@@ -397,6 +426,7 @@ This configuration prioritizes:
 ## 🆕 What's New
 
 ### **Recent Major Improvements**
+
 - ✅ **Centralized Configuration**: All settings now in `qtile_config.py`
 - ✅ **Universal Tiling**: ALL windows default to tiling (proper tiling WM behavior)
 - ✅ **Post-Restart Consistency**: Windows automatically re-tile after `Super+Shift+R`
@@ -407,6 +437,7 @@ This configuration prioritizes:
 - ✅ **No Key Conflicts**: 49 unique key bindings with no duplicates
 
 ### **Configuration Highlights**
+
 - **49 key bindings** with layout-aware smart commands (no conflicts)
 - **5 layouts** (Tile, MonadTall, BSP, Matrix, Max) with perfect ratios
 - **30 floating rules** for system utilities and dialogs

@@ -21,8 +21,8 @@ try:
 except ImportError:
     watchdog_available = False
     # Create dummy classes for type checking
-    Observer = None  # type: ignore
-    FileSystemEventHandler = None  # type: ignore
+    Observer = None
+    FileSystemEventHandler = None
     logger.warning("Watchdog not available, using polling fallback")
 
 
@@ -136,12 +136,12 @@ class SimpleColorManager:
             logger.warning("Watchdog not available, file monitoring disabled")
             return
 
-        class ColorChangeHandler(FileSystemEventHandler):  # type: ignore
+        class ColorChangeHandler(FileSystemEventHandler):
             def __init__(self, manager: Any) -> None:
                 super().__init__()
                 self.manager = manager
 
-            def on_modified(self, event: Any) -> None:  # type: ignore[override]
+            def on_modified(self, event: Any) -> None:
                 if not event.is_directory and event.src_path == str(
                     self.manager.colors_file
                 ):
@@ -150,12 +150,12 @@ class SimpleColorManager:
                     self.manager._handle_color_change()
 
         try:
-            self._observer = Observer()  # type: ignore
+            self._observer = Observer()
             handler = ColorChangeHandler(self)
             watch_dir = self.colors_file.parent
             watch_dir.mkdir(parents=True, exist_ok=True)
-            self._observer.schedule(handler, str(watch_dir), recursive=False)  # type: ignore
-            self._observer.start()  # type: ignore
+            self._observer.schedule(handler, str(watch_dir), recursive=False)
+            self._observer.start()
             logger.debug(f"Started watching {watch_dir} for color changes")
         except Exception as e:
             logger.warning(f"Failed to start watchdog monitoring: {e}")
@@ -342,8 +342,8 @@ class SimpleColorManager:
         self._shutdown_event.set()
 
         if self._observer and hasattr(self._observer, "stop"):
-            self._observer.stop()  # type: ignore
-            self._observer.join()  # type: ignore
+            self._observer.stop()
+            self._observer.join()
 
         if self._polling_thread:
             self._polling_thread.join(timeout=2)
@@ -398,24 +398,8 @@ def force_start_color_monitoring():
     return color_manager.force_start_monitoring()
 
 
-# Stub functions for compatibility (not needed in simple version)
-def validate_current_colors():
-    return True
-
-
-def get_color_file_status():
-    return {"exists": True, "readable": True}
-
-
-def get_monitoring_performance_status():
-    return {"optimized": True}
-
-
-def optimize_color_monitoring():
-    pass
-
-
 def restart_color_monitoring_optimized():
+    """Optimized restart - delegates to standard restart"""
     color_manager.restart_monitoring()
 
 
