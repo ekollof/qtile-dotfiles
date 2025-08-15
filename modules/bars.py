@@ -1177,10 +1177,9 @@ class EnhancedBarManager:
                 openbsd_widget = widget.GenPollText(
                     func=self._get_openbsd_update_count,
                     update_interval=3600,
-                    **self._get_widget_defaults_excluding("background"),
+                    **self._get_widget_defaults_excluding("background", "font"),
                     foreground=colors.get("color5", "#ffffff"),
                     background=special.get("background", "#000000"),
-                    format="{updates}",
                     font=get_available_font(self.qtile_config.preferred_font),
                 )
                 widgets.append(openbsd_widget)
