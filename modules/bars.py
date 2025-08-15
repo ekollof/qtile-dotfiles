@@ -857,10 +857,10 @@ class EnhancedBarManager:
                 return 1 if self.p > other.p else -1 if self.p < other.p else 0
             return self.dewey.compare(other.dewey)
 
-    def _get_openbsd_update_count(self) -> int:
+    def _get_openbsd_update_count(self) -> str:
         """
         @brief Count available OpenBSD package updates
-        @return Number of packages with available updates
+        @return String representation of number of packages with available updates
         @throws Exception if update checking fails
         """
         try:
@@ -912,7 +912,7 @@ class EnhancedBarManager:
                     index_data = response.read().decode()
             except Exception as e:
                 logger.warning(f"Failed to fetch OpenBSD package index: {e}")
-                return 0
+                return "0"
 
             # Load available packages
             available = {}
@@ -942,7 +942,7 @@ class EnhancedBarManager:
             pkg_db = Path('/var/db/pkg')
             if not pkg_db.exists():
                 logger.warning("OpenBSD package database not found")
-                return 0
+                return "0"
 
             installed = [entry.name for entry in pkg_db.iterdir()
                         if entry.is_dir() and (entry / '+CONTENTS').is_file()]
@@ -989,11 +989,11 @@ class EnhancedBarManager:
                 if v_cand.compare(v_inst) > 0:
                     count += 1
 
-            return count
+            return str(count)
 
         except Exception as e:
             logger.error(f"OpenBSD update check failed: {e}")
-            return 0
+            return "0"
 
     def _create_safe_check_updates_widget(self, distro: str, colors: dict[str, str], special: dict[str, str]):
         """
