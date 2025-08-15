@@ -1,11 +1,13 @@
-import re
+import argparse
 import subprocess
+import re
 import urllib.request
 from pathlib import Path
 
 multi_version_stems: dict[str, bool] = {
     'lua': True, 'python': True, 'ruby': True, 'php': True, 'perl': True,
-    'postgresql': True, 'mariadb': True, 'node': True, 'tcl': True, 'tk': True
+    'postgresql': True, 'mariadb': True, 'node': True, 'tcl': True, 'tk': True,
+    'llvm': True, 'autoconf': True, 'jdk': True, 'automake': True
 }
 
 class Dewey:
@@ -125,6 +127,11 @@ def get_version_prefix(v: str) -> str:
             break
     return '.'.join(numeric)
 
+# Parse command-line arguments
+parser = argparse.ArgumentParser(description='Count or list updateable packages.')
+parser.add_argument('--list', action='store_true', help='List the available updates instead of counting them.')
+args = parser.parse_args()
+
 # Determine mirror
 mirror: str = 'https://cdn.openbsd.org/pub/OpenBSD'
 installurl_path = Path('/etc/installurl')
@@ -177,8 +184,8 @@ for line in index_data.splitlines():
 pkg_db: Path = Path('/var/db/pkg')
 installed: list[str] = [entry.name for entry in pkg_db.iterdir() if (entry / '+CONTENTS').is_file()]
 
-# Count updates
-count: int = 0
+# Collect updates
+updates: list[str] = []
 for inst in installed:
     if inst.startswith('quirks-'):
         continue
@@ -212,6 +219,10 @@ for inst in installed:
     v_inst: Version = Version(version)
     v_cand: Version = Version(version_c)
     if v_cand.compare(v_inst) > 0:
-        count += 1
+        updates.append(f"{inst} -> {cand}")
 
-print(count)
+if args.list:
+    for update in updates:
+        print(update)
+else:
+    print(len(updates))

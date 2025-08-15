@@ -867,7 +867,7 @@ class EnhancedBarManager:
             # Multi-version package stems (packages that can have multiple versions)
             multi_version_stems = {
                 'lua', 'python', 'ruby', 'php', 'perl', 'postgresql',
-                'mariadb', 'node', 'tcl', 'tk'
+                'mariadb', 'node', 'tcl', 'tk', 'autoconf', 'jdk', 'automake',
             }
 
             def get_version_prefix(v: str) -> str:
