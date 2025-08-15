@@ -10,9 +10,12 @@ Integrates SVG utilities for theme-aware, scalable icon generation
 import contextlib
 import os
 import platform
+import re
 import socket
 import subprocess
+import threading
 import traceback
+import urllib.request
 from pathlib import Path
 from typing import Any
 
@@ -245,7 +248,6 @@ class EnhancedBarManager:
                 )
 
         # Try to refresh icons after a short delay
-        import threading
 
         threading.Timer(2.0, refresh_icons).start()
 
@@ -670,14 +672,14 @@ class EnhancedBarManager:
                     text=True,
                     timeout=10,
                 )
-                
+
                 # Check if we got valid output regardless of return code
                 output = result.stdout.strip()
                 if output and output != "N/A" and len(output) > 0:
                     # Script produced output - use it even if return code is non-zero
                     logger.debug(f"Script {script_path} output: '{output}' (return code: {result.returncode})")
                     return output
-                
+
                 # No valid output - check what went wrong
                 if result.returncode != 0:
                     stderr = result.stderr.strip()
@@ -687,9 +689,9 @@ class EnhancedBarManager:
                         logger.warning(f"Script {script_path} failed with return code {result.returncode} but no error message")
                 else:
                     logger.warning(f"Script {script_path} succeeded but returned empty output")
-                
+
                 return fallback
-                
+
             except subprocess.TimeoutExpired:
                 logger.warning(f"Script {script_path} timed out")
                 return fallback
@@ -770,12 +772,235 @@ class EnhancedBarManager:
 
         return widgets
 
+    class _OpenBSDDewey:
+        """@brief OpenBSD version comparison using Dewey decimal system"""
+
+        def __init__(self, string: str) -> None:
+            """@param string Version string to parse"""
+            self.deweys = string.split('.')
+            self.suffix = ''
+            self.suffix_value = 0
+            if self.deweys:
+                last = self.deweys[-1]
+                m = re.match(r'^(\d+)(rc|alpha|beta|pre|pl)(\d*)$', last)
+                if m:
+                    self.deweys[-1] = m.group(1)
+                    self.suffix = m.group(2)
+                    self.suffix_value = int(m.group(3) or '0')
+
+        def to_string(self) -> str:
+            """@return String representation of version"""
+            r = '.'.join(self.deweys)
+            if self.suffix:
+                r += self.suffix + (str(self.suffix_value) if self.suffix_value else '')
+            return r
+
+        def compare(self, other: 'EnhancedBarManager._OpenBSDDewey') -> int:
+            """@param other Other version to compare @return -1, 0, or 1"""
+            deweys1 = self.deweys
+            deweys2 = other.deweys
+            min_len = min(len(deweys1), len(deweys2))
+            for i in range(min_len):
+                r = self._dewey_part_compare(deweys1[i], deweys2[i])
+                if r != 0:
+                    return r
+            r = len(deweys1) - len(deweys2)
+            if r != 0:
+                return 1 if r > 0 else -1
+            return self._suffix_compare(other)
+
+        def _dewey_part_compare(self, a: str, b: str) -> int:
+            """@brief Compare individual dewey parts"""
+            if a.isdigit() and b.isdigit():
+                ia = int(a)
+                ib = int(b)
+                return 1 if ia > ib else -1 if ia < ib else 0
+            return 1 if a > b else -1 if a < b else 0
+
+        def _suffix_compare(self, other: 'EnhancedBarManager._OpenBSDDewey') -> int:
+            """@brief Compare version suffixes (rc, alpha, beta, etc.)"""
+            if self.suffix == other.suffix:
+                return 1 if self.suffix_value > other.suffix_value else -1 if self.suffix_value < other.suffix_value else 0
+            if self.suffix == 'pl':
+                return 1
+            if other.suffix == 'pl':
+                return -1
+            if self.suffix == '':
+                return 1
+            if self.suffix in ['alpha', 'beta']:
+                return -1
+            return 0
+
+    class _OpenBSDVersion:
+        """@brief OpenBSD package version with v and p handling"""
+
+        def __init__(self, string: str) -> None:
+            """@param string Version string to parse"""
+            self.original_string = string
+            self.v = 0
+            m = re.match(r'(.*)v(\d+)$', string)
+            if m:
+                self.v = int(m.group(2))
+                string = m.group(1)
+            self.p = -1
+            m = re.match(r'(.*)p(\d+)$', string)
+            if m:
+                self.p = int(m.group(2))
+                string = m.group(1)
+            self.dewey = EnhancedBarManager._OpenBSDDewey(string)
+
+        def compare(self, other: 'EnhancedBarManager._OpenBSDVersion') -> int:
+            """@param other Other version to compare @return -1, 0, or 1"""
+            if self.v != other.v:
+                return 1 if self.v > other.v else -1
+            if self.dewey.to_string() == other.dewey.to_string():
+                return 1 if self.p > other.p else -1 if self.p < other.p else 0
+            return self.dewey.compare(other.dewey)
+
+    def _get_openbsd_update_count(self) -> int:
+        """
+        @brief Count available OpenBSD package updates
+        @return Number of packages with available updates
+        @throws Exception if update checking fails
+        """
+        try:
+            # Multi-version package stems (packages that can have multiple versions)
+            multi_version_stems = {
+                'lua', 'python', 'ruby', 'php', 'perl', 'postgresql',
+                'mariadb', 'node', 'tcl', 'tk'
+            }
+
+            def get_version_prefix(v: str) -> str:
+                """Get major.minor version prefix"""
+                parts = v.split('.')
+                numeric = []
+                for p in parts:
+                    m = re.match(r'^\d+', p)
+                    if not m:
+                        break
+                    numeric.append(m.group(0))
+                    if len(numeric) >= 2:
+                        break
+                return '.'.join(numeric)
+
+            # Determine mirror
+            mirror = 'https://cdn.openbsd.org/pub/OpenBSD'
+            installurl_path = Path('/etc/installurl')
+            if installurl_path.exists():
+                with installurl_path.open('r') as f:
+                    mirror = f.readline().strip()
+
+            # Determine if -current
+            is_current = False
+            try:
+                sysctl_output = subprocess.check_output(['sysctl', 'kern.version']).decode()
+                if '-current' in sysctl_output:
+                    is_current = True
+            except subprocess.CalledProcessError:
+                pass
+
+            # Determine release and arch
+            release = 'snapshots' if is_current else subprocess.check_output(['uname', '-r']).decode().strip()
+            arch = subprocess.check_output(['machine']).decode().strip()
+
+            # Construct URL
+            url = f"{mirror}/{release}/packages/{arch}/index.txt"
+
+            # Fetch index.txt with timeout
+            try:
+                with urllib.request.urlopen(url, timeout=30) as response:
+                    index_data = response.read().decode()
+            except Exception as e:
+                logger.warning(f"Failed to fetch OpenBSD package index: {e}")
+                return 0
+
+            # Load available packages
+            available = {}
+            for line in index_data.splitlines():
+                fields = line.split()
+                if not fields:
+                    continue
+                file = fields[-1]
+                if not file.endswith('.tgz'):
+                    continue
+                file = file[:-4]
+                m = re.match(r'^(.*?)-(\d.*)$', file)
+                if m:
+                    stem = m.group(1)
+                    rest = m.group(2)
+                    parts = rest.split('-')
+                    version = parts[0]
+                    flavor = '-'.join(parts[1:]) if len(parts) > 1 else ''
+                else:
+                    stem = file
+                    version = ''
+                    flavor = ''
+                key = stem + ('-' + flavor if flavor else '')
+                available[key] = file
+
+            # Get all installed packages
+            pkg_db = Path('/var/db/pkg')
+            if not pkg_db.exists():
+                logger.warning("OpenBSD package database not found")
+                return 0
+
+            installed = [entry.name for entry in pkg_db.iterdir()
+                        if entry.is_dir() and (entry / '+CONTENTS').is_file()]
+
+            # Count updates
+            count = 0
+            for inst in installed:
+                if inst.startswith('quirks-'):
+                    continue
+
+                m = re.match(r'^(.*?)-(\d.*)$', inst)
+                if m:
+                    stem = m.group(1)
+                    rest = m.group(2)
+                    parts = rest.split('-')
+                    version = parts[0]
+                    flavor = '-'.join(parts[1:]) if len(parts) > 1 else ''
+                else:
+                    stem = inst
+                    version = ''
+                    flavor = ''
+
+                key = stem + ('-' + flavor if flavor else '')
+                if key not in available:
+                    continue
+
+                cand = available[key]
+                m = re.match(r'^(.*?)-(\d.*)$', cand)
+                if m:
+                    rest_c = m.group(2)
+                    parts_c = rest_c.split('-')
+                    version_c = parts_c[0]
+                else:
+                    continue
+
+                if stem in multi_version_stems:
+                    prefix = get_version_prefix(version)
+                    prefix_c = get_version_prefix(version_c)
+                    if prefix != prefix_c:
+                        continue
+
+                v_inst = EnhancedBarManager._OpenBSDVersion(version)
+                v_cand = EnhancedBarManager._OpenBSDVersion(version_c)
+                if v_cand.compare(v_inst) > 0:
+                    count += 1
+
+            return count
+
+        except Exception as e:
+            logger.error(f"OpenBSD update check failed: {e}")
+            return 0
+
     def _create_safe_check_updates_widget(self, distro: str, colors: dict[str, str], special: dict[str, str]):
         """
         @brief Create CheckUpdates widget with proper error handling
         @param distro: Distribution type for updates check
         @param colors: Color dictionary
-        @param special: Special colors dictionary  
+        @param special: Special colors dictionary
         @return CheckUpdates widget instance with error handling
         """
         try:
@@ -794,10 +1019,10 @@ class EnhancedBarManager:
                 execute=None,  # Disable click action to prevent issues
                 mouse_callbacks={},  # Clear mouse callbacks
             )
-            
+
             logger.debug(f"Created CheckUpdates widget for {distro}")
             return updates_widget
-            
+
         except Exception as e:
             logger.warning(f"Failed to create CheckUpdates widget for {distro}: {e}")
             # Return a simple TextBox as fallback
@@ -812,17 +1037,17 @@ class EnhancedBarManager:
         """
         @brief Detect available package managers and return appropriate distro strings
         @return List of distro strings for CheckUpdates widget based on qtile-extras documentation
-        
+
         Supported distros from qtile-extras CheckUpdates:
         Arch, Arch_checkupdates, Arch_Sup, Arch_paru, Arch_paru_Sup, Arch_yay,
         Debian, Gentoo_eix, Guix, Ubuntu, Fedora, FreeBSD, Mandriva, Void
         """
         available_distros = []
-        
+
         # Check platform first
         system = platform.system().lower()
         logger.debug(f"Detected system: {system}")
-        
+
         if system == "linux":
             # Check for Arch Linux
             if Path("/etc/arch-release").exists():
@@ -830,7 +1055,7 @@ class EnhancedBarManager:
                 if subprocess.run(["which", "checkupdates"], capture_output=True).returncode == 0:
                     available_distros.append("Arch_checkupdates")
                     logger.debug("Found checkupdates - adding Arch_checkupdates")
-                
+
                 # Check for paru (AUR helper) - preferred over yay
                 if subprocess.run(["which", "paru"], capture_output=True).returncode == 0:
                     available_distros.append("Arch_paru")
@@ -843,11 +1068,11 @@ class EnhancedBarManager:
                 elif subprocess.run(["which", "pacman"], capture_output=True).returncode == 0:
                     available_distros.append("Arch")
                     logger.debug("Found pacman - adding Arch")
-                    
+
             # Check for Ubuntu/Debian
             elif Path("/etc/debian_version").exists():
                 try:
-                    with open("/etc/os-release", "r") as f:
+                    with open("/etc/os-release") as f:
                         os_info = f.read().lower()
                         if "ubuntu" in os_info:
                             if subprocess.run(["which", "aptitude"], capture_output=True).returncode == 0:
@@ -855,56 +1080,64 @@ class EnhancedBarManager:
                                 logger.debug("Found aptitude - adding Ubuntu")
                         else:  # Debian or derivative
                             if subprocess.run(["which", "apt-show-versions"], capture_output=True).returncode == 0:
-                                available_distros.append("Debian") 
+                                available_distros.append("Debian")
                                 logger.debug("Found apt-show-versions - adding Debian")
                 except FileNotFoundError:
                     # Fallback to generic check
                     if subprocess.run(["which", "apt"], capture_output=True).returncode == 0:
                         available_distros.append("Ubuntu")  # Use Ubuntu as fallback
                         logger.debug("Found apt - adding Ubuntu (fallback)")
-                        
+
             # Check for Fedora
             elif Path("/etc/fedora-release").exists():
                 if subprocess.run(["which", "dnf"], capture_output=True).returncode == 0:
                     available_distros.append("Fedora")
                     logger.debug("Found dnf - adding Fedora")
-                    
+
             # Check for Gentoo
             elif Path("/etc/gentoo-release").exists():
                 if subprocess.run(["which", "eix"], capture_output=True).returncode == 0:
                     available_distros.append("Gentoo_eix")
                     logger.debug("Found eix - adding Gentoo_eix")
-                    
+
             # Check for Void Linux
             elif Path("/etc/os-release").exists():
                 try:
-                    with open("/etc/os-release", "r") as f:
-                        if "void" in f.read().lower():
-                            if subprocess.run(["which", "xbps-install"], capture_output=True).returncode == 0:
-                                available_distros.append("Void")
-                                logger.debug("Found xbps-install - adding Void")
+                    with open("/etc/os-release") as f:
+                        if "void" in f.read().lower() and subprocess.run(["which", "xbps-install"], capture_output=True).returncode == 0:
+                            available_distros.append("Void")
+                            logger.debug("Found xbps-install - adding Void")
                 except FileNotFoundError:
                     pass
-                    
+
         elif system == "freebsd":
             if subprocess.run(["which", "pkg"], capture_output=True).returncode == 0:
                 available_distros.append("FreeBSD")
                 logger.debug("Found pkg - adding FreeBSD")
-                
-        # Note: OpenBSD is NOT supported by qtile-extras CheckUpdates widget
+
         elif system == "openbsd":
-            logger.info("OpenBSD detected but not supported by CheckUpdates widget")
-            
+            # OpenBSD support via custom implementation - double check with uname
+            if Path("/usr/sbin/pkg_add").exists():
+                try:
+                    uname_output = subprocess.check_output(['uname']).decode().strip().lower()
+                    if uname_output == "openbsd":
+                        available_distros.append("OpenBSD")
+                        logger.debug("OpenBSD confirmed via uname and pkg_add - adding OpenBSD")
+                    else:
+                        logger.warning(f"pkg_add found but uname reports '{uname_output}', not OpenBSD")
+                except subprocess.CalledProcessError:
+                    logger.warning("pkg_add found but uname command failed - skipping OpenBSD")
+
         elif system == "darwin":  # macOS
             # Note: Homebrew is NOT in the supported list, but we could add it if needed
             logger.info("macOS detected but Homebrew not in CheckUpdates supported distros")
-                
+
         if not available_distros:
             logger.info(f"No supported package managers detected on {system}")
-            logger.info("CheckUpdates widget supports: Arch variants, Debian, Ubuntu, Fedora, Gentoo, Void, FreeBSD")
+            logger.info("Update widgets support: Arch variants, Debian, Ubuntu, Fedora, Gentoo, Void, FreeBSD, OpenBSD")
         else:
             logger.info(f"Detected supported package managers: {available_distros}")
-            
+
         return available_distros
 
     def _create_update_widgets(self, colors: dict[str, str], special: dict[str, str]) -> list[Any]:
@@ -916,11 +1149,11 @@ class EnhancedBarManager:
         """
         widgets = []
         distros = self._detect_package_manager()
-        
+
         if not distros:
             logger.info("No package managers detected - skipping update widgets")
             return widgets
-            
+
         # Create appropriate icons and widgets for each detected package manager
         for i, distro in enumerate(distros):
             # Add icon - use different icons for different types
@@ -929,15 +1162,32 @@ class EnhancedBarManager:
             elif distro in ["Ubuntu", "Fedora", "RHEL", "openSUSE"]:
                 icon = "updates"
             elif distro in ["OpenBSD", "FreeBSD"]:
-                icon = "package"  # Different icon for BSD systems
+                icon = "updates"  # Use updates icon for BSD systems
             elif distro == "Homebrew":
-                icon = "package"
+                icon = "updates"
             else:
                 icon = "updates"
-                
+
             widgets.append(self._create_icon_widget(icon))
-            widgets.append(self._create_safe_check_updates_widget(distro, colors, special))
-            
+
+            # Handle OpenBSD with custom widget since CheckUpdates doesn't support it
+            if distro == "OpenBSD":
+                from modules.font_utils import get_available_font
+
+                openbsd_widget = widget.GenPollText(
+                    func=self._get_openbsd_update_count,
+                    update_interval=3600,
+                    **self._get_widget_defaults_excluding("background"),
+                    foreground=colors.get("color5", "#ffffff"),
+                    background=special.get("background", "#000000"),
+                    format="{updates}",
+                    font=get_available_font(self.qtile_config.preferred_font),
+                )
+                widgets.append(openbsd_widget)
+                logger.debug("Created GenPollText widget for OpenBSD updates")
+            else:
+                widgets.append(self._create_safe_check_updates_widget(distro, colors, special))
+
         return widgets
 
     def create_bar_config(self, screen_num: int) -> bar.Bar:
@@ -997,7 +1247,7 @@ class EnhancedBarManager:
             # Package updates - auto-detect based on system
             self._create_update_widgets(colors, special)
         )
-        
+
         barconfig.extend(
             [
                 # CPU usage with dynamic icon
