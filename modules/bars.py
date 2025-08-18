@@ -995,6 +995,68 @@ class EnhancedBarManager:
             logger.error(f"OpenBSD update check failed: {e}")
             return "0"
 
+    def _get_openbsd_battery_info(self) -> str:
+        """
+        @brief Get OpenBSD battery information using apm command
+        @return Formatted battery string with percentage and status
+        @throws Exception if battery reading fails
+        """
+        try:
+            # Use apm command to get battery info
+            result = subprocess.run(
+                ["apm", "-l", "-b"], capture_output=True, text=True, timeout=5
+            )
+
+            if result.returncode != 0:
+                logger.debug("apm command failed, returning N/A")
+                return "N/A"
+
+            lines = result.stdout.strip().split('\n')
+            if len(lines) < 2:
+                logger.debug("apm output format unexpected")
+                return "N/A"
+
+            # apm -l gives battery percentage (0-100 or 255 for unknown)
+            # apm -b gives battery status (0=high, 1=low, 2=critical, 3=charging, 4=absent, 255=unknown)
+            try:
+                percent = int(lines[0].strip())
+                status = int(lines[1].strip())
+
+                if percent == 255 or status == 4:  # Unknown or absent
+                    return "N/A"
+
+                # Format percentage
+                percent_str = f"{percent}%"
+
+                # Add status indicator
+                match status:
+                    case 0:  # High
+                        status_char = "="
+                    case 1:  # Low
+                        status_char = "↓"
+                    case 2:  # Critical
+                        status_char = "!"
+                    case 3:  # Charging
+                        status_char = "↑"
+                    case _:  # Unknown
+                        status_char = "?"
+
+                return f"{percent_str} {status_char}"
+
+            except (ValueError, IndexError) as e:
+                logger.debug(f"Failed to parse apm output: {e}")
+                return "N/A"
+
+        except subprocess.TimeoutExpired:
+            logger.debug("apm command timed out")
+            return "N/A"
+        except subprocess.CalledProcessError as e:
+            logger.debug(f"apm command error: {e}")
+            return "N/A"
+        except Exception as e:
+            logger.error(f"OpenBSD battery check failed: {e}")
+            return "N/A"
+
     def _create_safe_check_updates_widget(self, distro: str, colors: dict[str, str], special: dict[str, str]):
         """
         @brief Create CheckUpdates widget with proper error handling
@@ -1294,25 +1356,40 @@ class EnhancedBarManager:
 
         if battery_supported:
             try:
-                barconfig.extend(
-                    [
-                        self._create_icon_widget("battery"),
-                        widget.Battery(
-                            **self._get_widget_defaults_excluding("background"),
-                            foreground=colors.get("color5", "#ffffff"),
-                            background=special.get("background", "#000000"),
-                            format="{percent:2.0%}",
-                            update_interval=30,
-                            low_percentage=0.20,
-                            low_foreground=colors.get("color1", "#ff0000"),
-                            charge_char="↑",
-                            discharge_char="↓",
-                            full_char="=",
-                            unknown_char="?",
-                        ),
-                    ]
-                )
-                logger.info("Successfully added Battery widget with dynamic icon")
+                barconfig.append(self._create_icon_widget("battery"))
+
+                # Check if we're on OpenBSD and use custom battery widget
+                system = platform.system().lower()
+                if system == "openbsd":
+                    from modules.font_utils import get_available_font
+
+                    openbsd_battery_widget = widget.GenPollText(
+                        func=self._get_openbsd_battery_info,
+                        update_interval=30,
+                        **self._get_widget_defaults_excluding("background", "font"),
+                        foreground=colors.get("color5", "#ffffff"),
+                        background=special.get("background", "#000000"),
+                        font=get_available_font(self.qtile_config.preferred_font),
+                    )
+                    barconfig.append(openbsd_battery_widget)
+                    logger.info("Successfully added OpenBSD custom battery widget")
+                else:
+                    # Use standard qtile Battery widget for other platforms
+                    battery_widget = widget.Battery(
+                        **self._get_widget_defaults_excluding("background"),
+                        foreground=colors.get("color5", "#ffffff"),
+                        background=special.get("background", "#000000"),
+                        format="{percent:2.0%}",
+                        update_interval=30,
+                        low_percentage=0.20,
+                        low_foreground=colors.get("color1", "#ff0000"),
+                        charge_char="↑",
+                        discharge_char="↓",
+                        full_char="=",
+                        unknown_char="?",
+                    )
+                    barconfig.append(battery_widget)
+                    logger.info("Successfully added standard Battery widget with dynamic icon")
             except RuntimeError as e:
                 if "Unknown platform" in str(e):
                     logger.warning(
