@@ -58,6 +58,8 @@ A comprehensive, modular Qtile configuration with **centralized settings**, enha
 
 ### 🐡 **OpenBSD Support**
 
+> **Note**: Official qtile packages are not yet available in OpenBSD ports. Use custom ports from [ekollof/openbsd-ports](https://github.com/ekollof/openbsd-ports).
+
 - **Native Package Updates**: Custom update widget using OpenBSD's sophisticated package version comparison (Dewey decimal system)
 - **Battery Monitoring**: Custom battery widget using `apm` command with status indicators (charging ↑, discharging ↓, critical !, full =)
 - **Multi-Version Packages**: Proper handling of packages with multiple concurrent versions (lua, python, ruby, etc.)
@@ -83,8 +85,13 @@ sudo pacman -S rofi dmenu picom dunst unclutter xrandr
 **OpenBSD:**
 
 ```bash
-# Essential
-doas pkg_add qtile py3-psutil
+# NOTE: Official qtile packages are not yet available in OpenBSD ports
+# Use custom ports from: https://github.com/ekollof/openbsd-ports
+
+# Install custom qtile and qtile-extras ports first, then:
+
+# Essential dependencies
+doas pkg_add py3-psutil
 
 # Recommended for full functionality  
 doas pkg_add rofi dmenu picom dunst unclutter
@@ -417,6 +424,11 @@ python3 -c "from modules.hooks import create_hook_manager; from modules.colors i
 **OpenBSD-specific issues:**
 
 ```bash
+# Install qtile using custom ports (required as of August 2025)
+# 1. Clone the ports repository:
+git clone https://github.com/ekollof/openbsd-ports.git
+# 2. Follow the build instructions in the repository
+
 # Check package update widget
 python3 -c "from modules.bars import EnhancedBarManager; print('OpenBSD update check:', EnhancedBarManager(None, None)._get_openbsd_update_count())"
 
