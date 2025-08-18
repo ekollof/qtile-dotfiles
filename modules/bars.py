@@ -573,10 +573,9 @@ class EnhancedBarManager:
 
                 logger.debug(f"OpenBSD battery detection result: {has_battery}")
 
-                # If apm suggests battery exists, test actual widget compatibility
-                if has_battery:
-                    return self._test_battery_widget_compatibility()
-                return False
+                # For OpenBSD, we use our custom battery implementation, so skip
+                # the standard widget compatibility test and just return the apm result
+                return has_battery
             else:
                 logger.debug(f"Checking {system} battery with 'acpiconf' command")
                 result = subprocess.run(
