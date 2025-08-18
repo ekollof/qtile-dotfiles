@@ -56,9 +56,21 @@ A comprehensive, modular Qtile configuration with **centralized settings**, enha
 - **Easy Customization**: Modify individual components without touching core config
 - **Maintainable**: Clear separation of concerns and comprehensive documentation
 
+### 🐡 **OpenBSD Support**
+
+- **Native Package Updates**: Custom update widget using OpenBSD's sophisticated package version comparison (Dewey decimal system)
+- **Battery Monitoring**: Custom battery widget using `apm` command with status indicators (charging ↑, discharging ↓, critical !, full =)
+- **Multi-Version Packages**: Proper handling of packages with multiple concurrent versions (lua, python, ruby, etc.)
+- **Mirror Detection**: Automatic detection of package mirror from `/etc/installurl` or fallback to CDN
+- **Current vs Release**: Supports both OpenBSD-current (snapshots) and release versions
+- **Robust Error Handling**: Graceful fallback when OpenBSD-specific commands are unavailable
+- **Platform Detection**: Dual verification (platform + uname + tool existence) prevents false positives
+
 ## 🚀 Quick Start
 
 ### Prerequisites
+
+**Arch Linux:**
 
 ```bash
 # Essential
@@ -66,6 +78,20 @@ sudo pacman -S qtile python-psutil
 
 # Recommended for full functionality
 sudo pacman -S rofi dmenu picom dunst unclutter xrandr
+```
+
+**OpenBSD:**
+
+```bash
+# Essential
+doas pkg_add qtile py3-psutil
+
+# Recommended for full functionality  
+doas pkg_add rofi dmenu picom dunst unclutter
+
+# Battery and package monitoring (usually included)
+# apm - for battery monitoring
+# pkg_add - for package update checking
 ```
 
 ### Installation
@@ -388,6 +414,26 @@ python3 -c "from modules.hooks import create_hook_manager; from modules.colors i
 - Use `Super+S` to see all configured shortcuts
 - Check for conflicts: No duplicates should exist (49 unique bindings)
 
+**OpenBSD-specific issues:**
+
+```bash
+# Check package update widget
+python3 -c "from modules.bars import EnhancedBarManager; print('OpenBSD update check:', EnhancedBarManager(None, None)._get_openbsd_update_count())"
+
+# Test battery monitoring
+apm -l  # Should show percentage (0-100)
+apm -b  # Should show status (0=high, 1=low, 2=critical, 3=charging, 4=absent)
+
+# Check package mirror
+cat /etc/installurl  # Should show your package mirror
+
+# Verify OpenBSD platform detection
+python3 -c "import platform; print('Platform:', platform.system()); import subprocess; print('uname:', subprocess.check_output(['uname']).decode().strip())"
+
+# Check qtile logs for OpenBSD widget debug info
+tail -f ~/.local/share/qtile/qtile.log | grep -i "openbsd\|apm\|battery"
+```
+
 ### Log Files
 
 - **Qtile**: `~/.local/share/qtile/qtile.log`
@@ -435,6 +481,7 @@ This configuration prioritizes:
 - ✅ **Layout-Aware Commands**: Resize and normalize work perfectly in all layouts
 - ✅ **Improved Hotkey Display**: Descriptive labels (not just "Spawn")
 - ✅ **No Key Conflicts**: 49 unique key bindings with no duplicates
+- ✅ **OpenBSD Support**: Native package updates and battery monitoring with custom widgets
 
 ### **Configuration Highlights**
 
