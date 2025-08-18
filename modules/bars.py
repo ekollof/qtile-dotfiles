@@ -1001,32 +1001,36 @@ class EnhancedBarManager:
         @throws Exception if battery reading fails
         """
         try:
-            # Use apm command to get battery info
-            result = subprocess.run(
-                ["apm", "-l", "-b"], capture_output=True, text=True, timeout=5
+            # First try to get battery percentage with apm -l
+            percent_result = subprocess.run(
+                ["apm", "-l"], capture_output=True, text=True, timeout=5
             )
-
-            if result.returncode != 0:
+            
+            # Then try to get battery status with apm -b  
+            status_result = subprocess.run(
+                ["apm", "-b"], capture_output=True, text=True, timeout=5
+            )
+            
+            if percent_result.returncode != 0 or status_result.returncode != 0:
                 logger.debug("apm command failed, returning N/A")
                 return "N/A"
-
-            lines = result.stdout.strip().split('\n')
-            if len(lines) < 2:
-                logger.debug("apm output format unexpected")
-                return "N/A"
-
-            # apm -l gives battery percentage (0-100 or 255 for unknown)
-            # apm -b gives battery status (0=high, 1=low, 2=critical, 3=charging, 4=absent, 255=unknown)
+            
+            # Parse percentage
             try:
-                percent = int(lines[0].strip())
-                status = int(lines[1].strip())
-
+                percent_str = percent_result.stdout.strip()
+                status_str = status_result.stdout.strip()
+                
+                percent = int(percent_str)
+                status = int(status_str)
+                
+                logger.debug(f"apm output: percent='{percent_str}' ({percent}), status='{status_str}' ({status})")
+                
                 if percent == 255 or status == 4:  # Unknown or absent
                     return "N/A"
-
+                
                 # Format percentage
-                percent_str = f"{percent}%"
-
+                percent_display = f"{percent}%"
+                
                 # Add status indicator
                 match status:
                     case 0:  # High
@@ -1039,13 +1043,15 @@ class EnhancedBarManager:
                         status_char = "↑"
                     case _:  # Unknown
                         status_char = "?"
-
-                return f"{percent_str} {status_char}"
-
+                
+                result = f"{percent_display} {status_char}"
+                logger.debug(f"Battery widget result: '{result}'")
+                return result
+                
             except (ValueError, IndexError) as e:
-                logger.debug(f"Failed to parse apm output: {e}")
+                logger.debug(f"Failed to parse apm output: percent='{percent_result.stdout}', status='{status_result.stdout}', error={e}")
                 return "N/A"
-
+                
         except subprocess.TimeoutExpired:
             logger.debug("apm command timed out")
             return "N/A"
