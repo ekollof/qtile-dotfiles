@@ -1,7 +1,7 @@
 var classmodules_1_1simple__color__management_1_1SimpleColorManager =
 [
-    [ "__init__", "classmodules_1_1simple__color__management_1_1SimpleColorManager.html#a0db35660663da96f7d79fb5de3e25a2b", null ],
-    [ "_detect_color_changes", "classmodules_1_1simple__color__management_1_1SimpleColorManager.html#a8cdf36896d3ffed9740b3d6a69721be5", null ],
+    [ "__init__", "classmodules_1_1simple__color__management_1_1SimpleColorManager.html#a13d05e16bae8df954dbed90b013808a5", null ],
+    [ "_detect_color_changes", "classmodules_1_1simple__color__management_1_1SimpleColorManager.html#a590cf4d746b84fbc42ae7e3557aeb64d", null ],
     [ "_get_fallback_colors", "classmodules_1_1simple__color__management_1_1SimpleColorManager.html#ab1f6e1118596087876af31815291985f", null ],
     [ "_handle_color_change", "classmodules_1_1simple__color__management_1_1SimpleColorManager.html#ae87962866cd52255fdcd493e90335bf0", null ],
     [ "_load_colors", "classmodules_1_1simple__color__management_1_1SimpleColorManager.html#a7b82a1c4ed732827ab7ab44fb44eb787", null ],

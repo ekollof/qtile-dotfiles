@@ -6,7 +6,7 @@ var searchData=
   ['scale_5fsize_3',['scale_size',['../namespacemodules_1_1dpi__utils.html#abbc40da38a9a3cf84e8d45f21c41999a',1,'modules::dpi_utils']]],
   ['scratchpads_4',['scratchpads',['../classqtile__config_1_1QtileConfig.html#aacaad901fa856dd1e36f200a37cf2a76',1,'qtile_config::QtileConfig']]],
   ['screen_5fsettings_5',['screen_settings',['../classqtile__config_1_1QtileConfig.html#a529c96fb6e24e6aa28b18295055bbcab',1,'qtile_config::QtileConfig']]],
-  ['script_5fconfigs_6',['script_configs',['../classqtile__config_1_1QtileConfig.html#a14a70384bc4abc6efc4b23628d31d137',1,'qtile_config::QtileConfig']]],
+  ['script_5fconfigs_6',['script_configs',['../classqtile__config_1_1QtileConfig.html#af666f5eb4c1fa02ff56a2a4b56b2b81b',1,'qtile_config::QtileConfig']]],
   ['setup_5fcolor_5fmonitoring_7',['setup_color_monitoring',['../namespacemodules_1_1simple__color__management.html#aa1ccdc035e7ed50eb6205a2ec6eec35c',1,'modules::simple_color_management']]],
   ['start_5fcolor_5fmonitoring_8',['start_color_monitoring',['../namespacemodules_1_1simple__color__management.html#adcb32688c57f7adecfe26433b5bcdc51',1,'modules::simple_color_management']]],
   ['start_5fmonitoring_9',['start_monitoring',['../classmodules_1_1simple__color__management_1_1SimpleColorManager.html#a6be80b71ce29277524d2559f38ffda91',1,'modules::simple_color_management::SimpleColorManager']]],

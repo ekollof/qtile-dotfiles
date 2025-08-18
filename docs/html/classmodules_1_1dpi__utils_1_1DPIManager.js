@@ -1,6 +1,6 @@
 var classmodules_1_1dpi__utils_1_1DPIManager =
 [
-    [ "__init__", "classmodules_1_1dpi__utils_1_1DPIManager.html#a8045b485cd97fe0f60e0d446465edd69", null ],
+    [ "__init__", "classmodules_1_1dpi__utils_1_1DPIManager.html#a5213f6edb8b79bddb666b55763964bd6", null ],
     [ "_detect_with_fallbacks", "classmodules_1_1dpi__utils_1_1DPIManager.html#a38a97914acb7cf381ce663ecb90eef2c", null ],
     [ "_get_dpi_category", "classmodules_1_1dpi__utils_1_1DPIManager.html#a8081022b4d78a9c53a60ad401038ba1a", null ],
     [ "_get_recommended_base_font", "classmodules_1_1dpi__utils_1_1DPIManager.html#af00f28d7c2a6b62e93a49aea3a1d865a", null ],

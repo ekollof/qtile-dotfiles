@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['validate_5fcurrent_5fcolors_0',['validate_current_colors',['../namespacemodules_1_1simple__color__management.html#ab16eb9e5ec7e1a1e945b8b518161975f',1,'modules::simple_color_management']]]
+  ['widget_5fdefaults_0',['widget_defaults',['../classqtile__config_1_1QtileConfig.html#a8f2583ae1fd8bf693c10c403e8031f76',1,'qtile_config::QtileConfig']]]
 ];

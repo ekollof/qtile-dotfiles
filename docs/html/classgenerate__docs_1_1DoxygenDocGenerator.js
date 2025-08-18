@@ -13,7 +13,7 @@ var classgenerate__docs_1_1DoxygenDocGenerator =
     [ "docs_dir", "classgenerate__docs_1_1DoxygenDocGenerator.html#a0fb595c034d3d38fd28a436df84c43a2", null ],
     [ "doxyfile_path", "classgenerate__docs_1_1DoxygenDocGenerator.html#ae6ce24b190fa6b50c5264035fe8fda1b", null ],
     [ "html_dir", "classgenerate__docs_1_1DoxygenDocGenerator.html#acbfc2643dce10d0268ceffd6bedfedbf", null ],
-    [ "project_brief", "classgenerate__docs_1_1DoxygenDocGenerator.html#a787d328d890bc7cf8da69f7ef24ba3c0", null ],
+    [ "project_brief", "classgenerate__docs_1_1DoxygenDocGenerator.html#aedfa62c0a9142444bc3671682ea445ce", null ],
     [ "project_name", "classgenerate__docs_1_1DoxygenDocGenerator.html#a28f52d9269c0be9f50f82974c82f13c8", null ],
     [ "project_root", "classgenerate__docs_1_1DoxygenDocGenerator.html#ab8cda2441c308cdf9da3b8a9f7184f8b", null ],
     [ "project_version", "classgenerate__docs_1_1DoxygenDocGenerator.html#a99c332f432156e59afdacacdb89e1b5c", null ]

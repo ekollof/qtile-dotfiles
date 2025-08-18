@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['preferred_5ffont_0',['preferred_font',['../classqtile__config_1_1QtileConfig.html#a27e5d4f325494f386f6066f3f0f00cb4',1,'qtile_config::QtileConfig']]]
+  ['notification_5fsettings_0',['notification_settings',['../classqtile__config_1_1QtileConfig.html#a8d3084d79b2c890d1ed0784b6e8e6323',1,'qtile_config::QtileConfig']]]
 ];

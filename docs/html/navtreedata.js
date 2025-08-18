@@ -45,14 +45,15 @@ var NAVTREE =
     ] ],
     [ "Files", "files.html", [
       [ "File List", "files.html", "files_dup" ]
-    ] ]
+    ] ],
+    [ "Examples", "examples.html", "examples" ]
   ] ]
 ];
 
 var NAVTREEINDEX =
 [
-"annotated.html",
-"classqtile__config_1_1QtileConfig.html#ab7c2162956672979d3c67acbb0bc5e84"
+"For-example.html",
+"classqtile__config_1_1QtileConfig.html#aa0a5ce6489d1382fd8854a5efd9f178c"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronization';

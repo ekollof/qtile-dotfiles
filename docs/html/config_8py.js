@@ -8,12 +8,14 @@ var config_8py =
     [ "config.bar_manager", "namespaceconfig.html#a04450f4a792189f3fcb323b5d116d00e", null ],
     [ "config.bring_front_click", "namespaceconfig.html#a6fd56ead8b1ee19f6b22e60c258af728", null ],
     [ "config.cursor_warp", "namespaceconfig.html#aea68e556f708249d779992facfbc4814", null ],
+    [ "config.default_float_rules", "namespaceconfig.html#a6ef53f871f36dad7ddcb0124dd9428ec", null ],
     [ "config.dgroups_app_rules", "namespaceconfig.html#a0a43e5181e26a3de3f32823494ea5a7e", null ],
     [ "config.dgroups_key_binder", "namespaceconfig.html#af3c6996fc1791d354910cec07fa04cf6", null ],
     [ "config.extension_defaults", "namespaceconfig.html#ad3808b30d7c594d0cb8a88d6161c7dd5", null ],
     [ "config.floating_layout", "namespaceconfig.html#a5d2b9b67b386a741da5ec6a2f6114f28", null ],
     [ "config.focus_on_window_activation", "namespaceconfig.html#aa5be00bea8b603e1dbae45f2975852c7", null ],
     [ "config.follow_mouse_focus", "namespaceconfig.html#a29775c78d04776d9985c3e113cb2c1b3", null ],
+    [ "config.func", "namespaceconfig.html#a99a02afa0cee2d9f0d12789761c90f93", null ],
     [ "config.group_manager", "namespaceconfig.html#a6bf285c78a486371d7f21dbfbfa78cc8", null ],
     [ "config.groups", "namespaceconfig.html#a79d7802f38819a160e453c807f1e30d3", null ],
     [ "config.homedir", "namespaceconfig.html#af1b7fc5a074ae31ab66caa9e7269cb8f", null ],
@@ -31,5 +33,7 @@ var config_8py =
     [ "config.screens", "namespaceconfig.html#a64f46d56b874fe263c68ac1786d236ed", null ],
     [ "config.terminal", "namespaceconfig.html#a2340f8cbbcc9a0db1590870660ef2a36", null ],
     [ "config.widget_defaults", "namespaceconfig.html#a83ace575dad56df3ff840a706ab255aa", null ],
+    [ "config.wm_class", "namespaceconfig.html#a6d6ab01f1aed34cf1d8dc807da8d2a64", null ],
+    [ "config.wm_type", "namespaceconfig.html#ad54c4c3a577561fca2705c13ab247253", null ],
     [ "config.wmname", "namespaceconfig.html#a190f0e37c6d823b39821f87a9164553a", null ]
 ];
