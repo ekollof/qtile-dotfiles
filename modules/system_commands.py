@@ -607,3 +607,60 @@ class SystemCommands:
 
         if not success:
             logger.error("❌ Could not display status notification, but logged above")
+
+    def toggle_compositor(self, qtile: object) -> None:
+        """Toggle compositor on/off"""
+        try:
+            from modules.hooks import create_hook_manager
+            
+            hook_manager = create_hook_manager(self.color_manager)
+            if hasattr(hook_manager, 'compositor_hooks'):
+                result = hook_manager.compositor_hooks.toggle_compositor()
+                status = "started" if result else "stopped"
+                logger.info(f"Compositor {status} successfully")
+            else:
+                logger.error("Compositor hooks not available")
+                
+        except Exception as e:
+            logger.error(f"Failed to toggle compositor: {e}")
+
+    def reload_compositor_config(self, qtile: object) -> None:
+        """Reload compositor configuration"""
+        try:
+            from modules.hooks import create_hook_manager
+            
+            hook_manager = create_hook_manager(self.color_manager)
+            if hasattr(hook_manager, 'compositor_hooks'):
+                hook_manager.compositor_hooks.reload_compositor_config()
+                logger.info("Compositor configuration reloaded successfully")
+            else:
+                logger.error("Compositor hooks not available")
+                
+        except Exception as e:
+            logger.error(f"Failed to reload compositor configuration: {e}")
+
+    def get_compositor_status(self, qtile: object) -> None:
+        """Display compositor status information"""
+        try:
+            from modules.hooks import create_hook_manager
+            
+            hook_manager = create_hook_manager(self.color_manager)
+            if hasattr(hook_manager, 'compositor_hooks'):
+                status = hook_manager.compositor_hooks.get_compositor_status()
+                logger.info(f"Compositor Status: {status['status']}")
+                logger.info(f"Running: {status['running']}")
+                logger.info(f"Enabled: {status['enabled']}")
+                
+                try:
+                    show_popup_notification(
+                        "Compositor Status", 
+                        f"Status: {status['status']}", 
+                        "normal"
+                    )
+                except Exception:
+                    pass
+            else:
+                logger.error("Compositor hooks not available")
+                
+        except Exception as e:
+            logger.error(f"Failed to get compositor status: {e}")

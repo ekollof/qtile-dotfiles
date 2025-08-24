@@ -396,6 +396,48 @@ class QtileConfig:
             },
         ]
 
+    # ===== COMPOSITOR SETTINGS =====
+
+    @property
+    def compositor_settings(self) -> dict[str, bool | dict[str, bool | list[dict[str, str | float]]]]:
+        """
+        @brief Simple compositor configuration for transparency effects
+        @return Dictionary containing compositor settings and transparency rules
+        """
+        return {
+            "enabled": True,
+            "transparency": {
+                "enabled": True,
+                "rules": [
+                    # Terminal applications - slightly transparent for aesthetics
+                    {"wm_class": "Alacritty", "opacity": 0.95},
+                    {"wm_class": "st", "opacity": 0.95},
+                    {"wm_class": "kitty", "opacity": 0.95},
+                    {"wm_class": "konsole", "opacity": 0.95},
+                    {"wm_class": "xterm", "opacity": 0.95},
+                    {"wm_class": "gnome-terminal", "opacity": 0.95},
+                    
+                    # Launchers and menus - mostly opaque for readability
+                    {"wm_class": "rofi", "opacity": 0.98},
+                    {"wm_class": "dmenu", "opacity": 0.98},
+                    
+                    # Notifications - translucent for non-interference
+                    {"wm_class": "dunst", "opacity": 0.90},
+                    {"wm_class": "notify-osd", "opacity": 0.90},
+                    
+                    # System utilities - semi-transparent
+                    {"wm_class": "pavucontrol", "opacity": 0.93},
+                    {"wm_class": "nm-connection-editor", "opacity": 0.93},
+                    {"wm_class": "blueman-manager", "opacity": 0.93},
+                    
+                    # Development tools - nearly opaque for clarity
+                    {"wm_class": "code", "opacity": 0.98},
+                    {"wm_class": "sublime_text", "opacity": 0.98},
+                    {"wm_class": "atom", "opacity": 0.98},
+                ],
+            },
+        }
+
     # ===== COLOR MANAGEMENT =====
 
     @property

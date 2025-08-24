@@ -343,6 +343,19 @@ class KeyBindings:
                 lazy.function(self.system_commands.test_urgent_notification),
                 desc="Test urgent notification",
             ),
+            # Compositor controls
+            Key(
+                [self.mod, "control"],
+                "t",
+                lazy.function(self.system_commands.toggle_compositor),
+                desc="Toggle compositor",
+            ),
+            Key(
+                [self.mod, "control", "shift"],
+                "t",
+                lazy.function(self.system_commands.reload_compositor_config),
+                desc="Reload compositor config",
+            ),
             Key(
                 [self.mod, "control", "mod1"],
                 "n",

@@ -17,6 +17,7 @@ from libqtile.log_utils import logger
 from qtile_config import get_config
 
 from .client_hooks import ClientHooks
+from .compositor_hooks import CompositorHooks
 from .screen_hooks import ScreenHooks
 from .startup_hooks import StartupHooks
 from .window_manager import WindowManager
@@ -42,6 +43,7 @@ class HookManager:
         )
         self.client_hooks = ClientHooks(self.config, self.window_manager)
         self.screen_hooks = ScreenHooks(self.config, color_manager)
+        self.compositor_hooks = CompositorHooks(self.config)
 
     def setup_hooks(self) -> None:
         """
@@ -52,6 +54,7 @@ class HookManager:
         self.startup_hooks.setup_startup_hooks()
         self.client_hooks.setup_client_hooks()
         self.screen_hooks.setup_screen_hooks()
+        self.compositor_hooks.setup_compositor_hooks()
         logger.info("All qtile hooks configured successfully")
 
     def force_retile_all_windows(self, qtile: Any) -> int:

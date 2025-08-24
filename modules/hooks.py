@@ -6,6 +6,7 @@ Refactored for better maintainability while preserving backward compatibility
 """
 
 from .client_hooks import ClientHooks
+from .compositor_hooks import CompositorHooks
 
 # Import all functionality from the new modular structure
 from .hook_manager import HookManager, create_hook_manager
@@ -16,6 +17,7 @@ from .window_manager import WindowManager
 # Maintain backward compatibility by exposing the same interface
 __all__ = [
     "ClientHooks",
+    "CompositorHooks",
     "HookManager",
     "ScreenHooks",
     "StartupHooks",
