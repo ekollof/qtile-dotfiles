@@ -31,7 +31,7 @@ class HookManager:
     control and validation for qtile's event handling system.
     """
 
-    def __init__(self, color_manager: Any) -> None: 
+    def __init__(self, color_manager: Any) -> None:
         self.color_manager = color_manager
         self.config = get_config()
 

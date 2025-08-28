@@ -803,7 +803,7 @@ class SimplePopupManager:
                 dismiss_width = 0.15  # Smaller dismiss button
                 dismiss_x = 0.8  # Position on the right
                 dismiss_y = 0.05  # Top right corner
-                
+
                 def make_dismiss_handler(mgr=self, notif: Any = notification):
                     def handler(popup_text: Any = None, *args: Any, **kwargs: Any) -> None:
                         logger.info("❌ Dismiss button clicked")

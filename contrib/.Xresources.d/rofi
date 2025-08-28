@@ -1,4 +1,0 @@
-rofi.separator-style : solid
-rofi.font            : Terminus (TTF) 9
-rofi.lines           : 10
-rofi.width           : 800

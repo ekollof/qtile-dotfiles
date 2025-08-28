@@ -1005,32 +1005,32 @@ class EnhancedBarManager:
             percent_result = subprocess.run(
                 ["apm", "-l"], capture_output=True, text=True, timeout=5
             )
-            
-            # Then try to get battery status with apm -b  
+
+            # Then try to get battery status with apm -b
             status_result = subprocess.run(
                 ["apm", "-b"], capture_output=True, text=True, timeout=5
             )
-            
+
             if percent_result.returncode != 0 or status_result.returncode != 0:
                 logger.debug("apm command failed, returning N/A")
                 return "N/A"
-            
+
             # Parse percentage
             try:
                 percent_str = percent_result.stdout.strip()
                 status_str = status_result.stdout.strip()
-                
+
                 percent = int(percent_str)
                 status = int(status_str)
-                
+
                 logger.debug(f"apm output: percent='{percent_str}' ({percent}), status='{status_str}' ({status})")
-                
+
                 if percent == 255 or status == 4:  # Unknown or absent
                     return "N/A"
-                
+
                 # Format percentage
                 percent_display = f"{percent}%"
-                
+
                 # Add status indicator
                 match status:
                     case 0:  # High
@@ -1043,15 +1043,15 @@ class EnhancedBarManager:
                         status_char = "↑"
                     case _:  # Unknown
                         status_char = "?"
-                
+
                 result = f"{percent_display} {status_char}"
                 logger.debug(f"Battery widget result: '{result}'")
                 return result
-                
+
             except (ValueError, IndexError) as e:
                 logger.debug(f"Failed to parse apm output: percent='{percent_result.stdout}', status='{status_result.stdout}', error={e}")
                 return "N/A"
-                
+
         except subprocess.TimeoutExpired:
             logger.debug("apm command timed out")
             return "N/A"
