@@ -396,11 +396,11 @@ class PopupManager:
 
         # More conservative character width estimation
         # Account for proportional fonts being narrower on average
-        avg_char_width = message_font_size * 0.45  # More conservative estimation
-        text_area_width = width * 0.85  # Account for margins and padding
+        avg_char_width = message_font_size * 0.35  # More generous estimation for better wrapping
+        text_area_width = width * 0.9  # Give more space for text (90% instead of 85%)
         available_chars = max(
-            20, int(text_area_width / avg_char_width)
-        )  # Minimum 20 chars per line
+            25, int(text_area_width / avg_char_width)
+        )  # Minimum 25 chars per line, increased from 20
 
         logger.debug(
             f"Text calc: font={message_font_size}px, width={width}px, chars_per_line={available_chars}"
@@ -444,12 +444,18 @@ class PopupManager:
             f"Text lines calculated: {total_lines} lines for text: '{clean_text[:50]}...'"
         )
 
+        # Log detailed text calculation info
+        logger.debug(
+            f"Text calculation details: width={width}px, text_area={text_area_width:.1f}px, "
+            f"chars_per_line={available_chars}, total_chars={len(clean_text)}"
+        )
+
         # Calculate height components using DPI-scaled font sizes
         title_font = title_font_size or scale_font(16)
         title_height = (
             int(title_font * 1.8) + 10 if has_title else 0
         )  # Extra padding for title
-        line_height = int(message_font_size * 1.5)  # More generous line spacing
+        line_height = int(message_font_size * 1.6)  # More generous line spacing (1.6x instead of 1.5)
         text_height = total_lines * line_height
         top_padding = 15
         # Match the bottom margin used in message positioning - more for notifications without buttons
@@ -457,8 +463,8 @@ class PopupManager:
 
         # Add button area to total height if buttons are present
         button_area = (
-            max(45, int(scale_font(12) * 3)) + 20 if has_buttons else 0
-        )  # Button height + margins
+            max(50, int(scale_font(12) * 3.5)) + 25 if has_buttons else 0
+        )  # Increased button height and margins
 
         total_height = (
             top_padding + title_height + text_height + bottom_padding + button_area
@@ -468,12 +474,12 @@ class PopupManager:
             f"Height components: title={title_height}px, text={text_height}px, padding={top_padding + bottom_padding}px"
         )
 
-        # Ensure reasonable bounds
-        min_height = max(self.config["height"], 100)  # Higher minimum
-        max_height = 600  # Higher maximum for very long messages
+        # Ensure reasonable bounds - increased max height significantly
+        min_height = max(self.config["height"], 120)  # Higher minimum (120px instead of 100)
+        max_height = 1200  # Much higher maximum (1200px instead of 600) for very long messages
 
         final_height = max(min_height, min(max_height, int(total_height)))
-        logger.debug(f"Final calculated height: {final_height}px")
+        logger.debug(f"Final calculated height: {final_height}px (max allowed: {max_height}px)")
 
         return final_height
 
@@ -550,7 +556,7 @@ class PopupManager:
         title_x = 0.25 if has_icon else 0.05
         title_width = 0.7 if has_icon else 0.9
         message_x = 0.25 if has_icon else 0.05
-        message_width = 0.7 if has_icon else 0.9
+        message_width = 0.7 if has_icon else 0.9  # Increased from 0.9 to give more text space
 
         # Add icon if present
         if has_icon and icon_path:
@@ -594,6 +600,7 @@ class PopupManager:
                     markup=True,
                     h_align="left",
                     v_align="top",
+                    wrap=True,  # Ensure title wraps if needed
                 )
             )
 
@@ -610,35 +617,45 @@ class PopupManager:
             )
             button_area_px = (
                 max(
-                    45,
+                    50,
                     int(
                         scale_font(
                             self.qtile_config.preferred_fontsize
                             if self.qtile_config
                             else 12
                         )
-                        * 3
+                        * 3.5
                     ),
                 )
+                + 25
                 if has_buttons
                 else 0
             )
             top_margin = 15
             title_margin = 8 if notification.title else 0
             # Increase bottom margin for notifications without buttons to prevent text creeping to border
-            bottom_margin = 15 if has_buttons else 25
+            bottom_margin = 20 if has_buttons else 30  # Increased margins
 
             # Message starts after title (if present) plus margins
             msg_y_px = top_margin + title_height_px + title_margin
-            msg_height_px = popup_height - msg_y_px - button_area_px - bottom_margin
+            # Available height for message: total popup height minus all other elements
+            available_height_px = popup_height - msg_y_px - button_area_px - bottom_margin
+            msg_height_px = max(available_height_px, 40)  # Minimum 40px for message area
 
             msg_y = msg_y_px / popup_height
-            msg_height = max(
-                0.15, msg_height_px / popup_height
-            )  # Ensure reasonable minimum height
+            msg_height = msg_height_px / popup_height
 
             logger.debug(
                 f"Message positioning: y={msg_y_px}px ({msg_y:.2%}), height={msg_height_px}px ({msg_height:.2%})"
+            )
+            logger.debug(
+                f"Space allocation: popup={popup_height}px, title={title_height_px}px, buttons={button_area_px}px, margins={top_margin + bottom_margin}px"
+            )
+            logger.debug(
+                f"Available message space: {available_height_px}px (minimum 40px enforced)"
+            )
+            logger.debug(
+                f"Space allocation: popup={popup_height}px, title={title_height_px}px, buttons={button_area_px}px, margins={top_margin + bottom_margin}px"
             )
 
             assert PopupText is not None
@@ -649,6 +666,13 @@ class PopupManager:
                     pos_y=msg_y,
                     width=message_width,
                     height=msg_height,
+                    fontsize=scale_font(message_font_size),
+                    foreground=fg_color,
+                    font=font_family,
+                    markup=True,
+                    h_align="left",
+                    v_align="top",
+                    wrap=True,  # Ensure text wraps instead of truncating
                 )
             )
 
@@ -661,8 +685,8 @@ class PopupManager:
                     button_width = 0.4 if total_buttons <= 2 else 0.3
                     button_x = 0.05 + (current_button * (button_width + 0.05))
                     # Position buttons at bottom with fixed margin
-                    button_margin_bottom = 15
-                    button_height_px = max(35, int(scale_font(11) * 2.5))
+                    button_margin_bottom = 20  # Increased from 15
+                    button_height_px = max(40, int(scale_font(11) * 2.8))  # Increased from 2.5
                     button_y = 1.0 - (
                         (button_height_px + button_margin_bottom) / popup_height
                     )
@@ -689,14 +713,14 @@ class PopupManager:
                             pos_y=button_y,
                             width=button_width,
                             height=max(
-                                35,
+                                40,
                                 int(
                                     scale_font(
                                         self.qtile_config.preferred_fontsize - 1
                                         if self.qtile_config
                                         else 11
                                     )
-                                    * 2.5
+                                    * 2.8
                                 ),
                             )
                             / popup_height,
@@ -711,6 +735,7 @@ class PopupManager:
                             h_align="center",
                             v_align="middle",
                             markup=True,
+                            wrap=True,  # Ensure button text wraps
                         )
                         url_button.mouse_callbacks = {"Button1": make_url_handler()}
                         controls.append(url_button)
@@ -728,8 +753,8 @@ class PopupManager:
                     button_width = 0.4 if total_buttons <= 2 else 0.3
                     button_x = 0.05 + (current_button * (button_width + 0.05))
                     # Position buttons at bottom with fixed margin
-                    button_margin_bottom = 15
-                    button_height_px = max(35, int(scale_font(12) * 2.5))
+                    button_margin_bottom = 20  # Increased from 15
+                    button_height_px = max(40, int(scale_font(12) * 2.8))  # Increased from 2.5
                     button_y = 1.0 - (
                         (button_height_px + button_margin_bottom) / popup_height
                     )
@@ -766,14 +791,14 @@ class PopupManager:
                             pos_y=button_y,
                             width=button_width,
                             height=max(
-                                35,
+                                40,
                                 int(
                                     scale_font(
                                         self.qtile_config.preferred_fontsize
                                         if self.qtile_config
                                         else 12
                                     )
-                                    * 2.5
+                                    * 2.8
                                 ),
                             )
                             / popup_height,
@@ -788,6 +813,7 @@ class PopupManager:
                             h_align="center",
                             v_align="middle",
                             markup=True,
+                            wrap=True,  # Ensure button text wraps
                         )
                         action_button.mouse_callbacks = {
                             "Button1": make_action_handler()
@@ -839,6 +865,7 @@ class PopupManager:
                         h_align="center",
                         v_align="middle",
                         markup=True,
+                        wrap=True,  # Ensure dismiss button text wraps
                     )
                     dismiss_button.mouse_callbacks = {"Button1": make_dismiss_handler()}
                     controls.append(dismiss_button)
