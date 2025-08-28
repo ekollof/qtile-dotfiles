@@ -1,0 +1,10 @@
+var namespacemodules_1_1svg__utils =
+[
+    [ "IconGenerator", "classmodules_1_1svg__utils_1_1IconGenerator.html", "classmodules_1_1svg__utils_1_1IconGenerator" ],
+    [ "SVGBuilder", "classmodules_1_1svg__utils_1_1SVGBuilder.html", "classmodules_1_1svg__utils_1_1SVGBuilder" ],
+    [ "SVGIcon", "classmodules_1_1svg__utils_1_1SVGIcon.html", "classmodules_1_1svg__utils_1_1SVGIcon" ],
+    [ "SVGManipulator", "classmodules_1_1svg__utils_1_1SVGManipulator.html", "classmodules_1_1svg__utils_1_1SVGManipulator" ],
+    [ "create_themed_icon_cache", "namespacemodules_1_1svg__utils.html#a0814d13e8991d19a7012817c12e35fdc", null ],
+    [ "get_svg_utils", "namespacemodules_1_1svg__utils.html#aeafa44259e39fdb4d7720e69de718aa2", null ],
+    [ "logger", "namespacemodules_1_1svg__utils.html#a6e8aa3f3af74e9b828e1ef7e16984a64", null ]
+];

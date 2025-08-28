@@ -1,7 +1,7 @@
 var searchData=
 [
-  ['main_0',['main',['../namespaceconfig.html#a749b34080aa2383a87664ee243c4c87e',1,'config']]],
-  ['manager_1',['manager',['../classmodules_1_1simple__color__management_1_1SimpleColorManager.html#a3ebb54a1980db6e939196143ef55b276',1,'modules::simple_color_management::SimpleColorManager']]],
-  ['mod_2',['mod',['../namespaceconfig.html#a08490296713d905498bff5156febe557',1,'config']]],
-  ['mouse_3',['mouse',['../namespaceconfig.html#a30b9aa5b9796c9ba561d3356ec4f1cb6',1,'config']]]
+  ['layout_5fcommands_0',['layout_commands',['../classmodules_1_1key__bindings_1_1KeyBindings.html#a0d5033ee1e66c1a1ead4e4c3dda5804b',1,'modules.key_bindings.KeyBindings.layout_commands'],['../classmodules_1_1key__manager_1_1KeyManager.html#a71e36be420dacc0e6d0a562da75a087e',1,'modules.key_manager.KeyManager.layout_commands']]],
+  ['layouts_1',['layouts',['../namespaceconfig.html#a0d96a2e7546a5f3a30c0748328119f4b',1,'config']]],
+  ['lifecycle_5fhooks_2',['lifecycle_hooks',['../classmodules_1_1hook__manager_1_1HookManager.html#a688fc1421cc214c0ce1fd14a95bab31b',1,'modules::hook_manager::HookManager']]],
+  ['logger_3',['logger',['../namespacemodules_1_1platform.html#a5b9aa413894ec76268b23d26ec374fcc',1,'modules.platform.logger'],['../namespacemodules_1_1svg__utils.html#a6e8aa3f3af74e9b828e1ef7e16984a64',1,'modules.svg_utils.logger']]]
 ];

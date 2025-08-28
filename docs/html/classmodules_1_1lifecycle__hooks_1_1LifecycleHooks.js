@@ -1,0 +1,25 @@
+var classmodules_1_1lifecycle__hooks_1_1LifecycleHooks =
+[
+    [ "__init__", "classmodules_1_1lifecycle__hooks_1_1LifecycleHooks.html#a5a17c34312e105359b22189458c53dd3", null ],
+    [ "_count_registered_hooks", "classmodules_1_1lifecycle__hooks_1_1LifecycleHooks.html#a21cd11bd17469446317894401988ab99", null ],
+    [ "_handle_current_screen_change_event", "classmodules_1_1lifecycle__hooks_1_1LifecycleHooks.html#a8e8a254628e0f9f52b91374b286b245d", null ],
+    [ "_handle_screen_change_event", "classmodules_1_1lifecycle__hooks_1_1LifecycleHooks.html#a262e66104c2e1586277ab994dc535b94", null ],
+    [ "_reconfigure_screens", "classmodules_1_1lifecycle__hooks_1_1LifecycleHooks.html#a95ec6da29a1d3c8dc7a081ccaf94311c", null ],
+    [ "_refresh_and_check_screens", "classmodules_1_1lifecycle__hooks_1_1LifecycleHooks.html#a619066192b704abadad7ab3fa344aa82", null ],
+    [ "_safe_execute", "classmodules_1_1lifecycle__hooks_1_1LifecycleHooks.html#aea638cb2448f833b5a1349f2efba367e", null ],
+    [ "_schedule_window_retiling", "classmodules_1_1lifecycle__hooks_1_1LifecycleHooks.html#ad32e838fc9316f72b3a23d2dae1d81ea", null ],
+    [ "_setup_screen_hooks", "classmodules_1_1lifecycle__hooks_1_1LifecycleHooks.html#a2ecac6af9defd276e77e455dde19ecf3", null ],
+    [ "_setup_startup_hooks", "classmodules_1_1lifecycle__hooks_1_1LifecycleHooks.html#a044b9811469e59a91c478eb25f1381ba", null ],
+    [ "_validate_setting", "classmodules_1_1lifecycle__hooks_1_1LifecycleHooks.html#a71872fad30e015562a96e41cd080d5fd", null ],
+    [ "force_screen_refresh", "classmodules_1_1lifecycle__hooks_1_1LifecycleHooks.html#a686b9d5acf978c7c1f62ce33b7b8b59a", null ],
+    [ "get_lifecycle_status", "classmodules_1_1lifecycle__hooks_1_1LifecycleHooks.html#a7c05f009cfd187ce2c0a1493995dcbe5", null ],
+    [ "get_screen_change_history", "classmodules_1_1lifecycle__hooks_1_1LifecycleHooks.html#a3895f0e97b7cae61ed29f9f9a8a34740", null ],
+    [ "get_screen_status", "classmodules_1_1lifecycle__hooks_1_1LifecycleHooks.html#a3144cec727905d1a8ebd8564d858d988", null ],
+    [ "run_autostart_script", "classmodules_1_1lifecycle__hooks_1_1LifecycleHooks.html#aa416d604c13bc947bcc2ff04f86c0a4b", null ],
+    [ "setup_all_hooks", "classmodules_1_1lifecycle__hooks_1_1LifecycleHooks.html#ab2aaf61fa2ed2fc4c0c2f48e2c0e34ce", null ],
+    [ "validate_autostart_script", "classmodules_1_1lifecycle__hooks_1_1LifecycleHooks.html#a80cd1042a97d9c8543282f89a512a577", null ],
+    [ "validate_screen_configuration", "classmodules_1_1lifecycle__hooks_1_1LifecycleHooks.html#ab689871a7916cb13a2fcb5e9cf208b92", null ],
+    [ "color_manager", "classmodules_1_1lifecycle__hooks_1_1LifecycleHooks.html#adf48593579ba360998c28e870ce38952", null ],
+    [ "config", "classmodules_1_1lifecycle__hooks_1_1LifecycleHooks.html#afc954b280e29335140766e7a4b9e7641", null ],
+    [ "window_manager", "classmodules_1_1lifecycle__hooks_1_1LifecycleHooks.html#af27a93939c5693e9560d188549aeb4f7", null ]
+];

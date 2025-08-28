@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['terminal_0',['terminal',['../namespaceconfig.html#a2340f8cbbcc9a0db1590870660ef2a36',1,'config']]]
+  ['reconfigure_5fscreens_5fsetting_0',['reconfigure_screens_setting',['../namespaceconfig.html#a1b0c8c3603e6001b0a3e52295e1d5407',1,'config']]]
 ];

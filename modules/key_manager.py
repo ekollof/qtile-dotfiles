@@ -10,10 +10,8 @@ from libqtile.config import Key
 
 from qtile_config import get_config
 
+from .commands import LayoutAwareCommands, SystemCommands, WindowCommands
 from .key_bindings import KeyBindings
-from .layout_aware import LayoutAwareCommands
-from .system_commands import SystemCommands
-from .window_commands import WindowCommands
 
 
 class KeyManager:

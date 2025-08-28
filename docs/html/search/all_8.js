@@ -1,9 +1,19 @@
 var searchData=
 [
-  ['home_0',['home',['../classqtile__config_1_1QtileConfig.html#a8df0c0359a697586e66aab42e36c3579',1,'qtile_config::QtileConfig']]],
-  ['homedir_1',['homedir',['../namespaceconfig.html#af1b7fc5a074ae31ab66caa9e7269cb8f',1,'config']]],
-  ['hook_5fmanager_2',['hook_manager',['../namespaceconfig.html#a498f230bbfbf0cc02ac79ec8531385a6',1,'config']]],
-  ['hostname_3',['hostname',['../namespaceconfig.html#a6b6a77cdc060bbc5a128804bacb26c92',1,'config']]],
-  ['hotkey_5fdisplay_4',['hotkey_display',['../classqtile__config_1_1QtileConfig.html#a0f46c7ff845beda078f60d0e3ce2f89c',1,'qtile_config.QtileConfig.hotkey_display'],['../classqtile__config_1_1QtileConfig.html#ad405063535cf23f43a336b7aed485641',1,'qtile_config.QtileConfig.hotkey_display(self)']]],
-  ['html_5fdir_5',['html_dir',['../classgenerate__docs_1_1DoxygenDocGenerator.html#acbfc2643dce10d0268ceffd6bedfedbf',1,'generate_docs::DoxygenDocGenerator']]]
+  ['handle_5ftransient_5fwindow_0',['handle_transient_window',['../classmodules_1_1window__manager_1_1WindowManager.html#a97a52435a582d00d4bc84d9a1cf7ed1b',1,'modules::window_manager::WindowManager']]],
+  ['has_5fcommand_1',['has_command',['../classmodules_1_1platform_1_1PlatformInfo.html#a2dbb4fcf597db47a23b330d32a521bd1',1,'modules::platform::PlatformInfo']]],
+  ['height_2',['height',['../classmodules_1_1svg__utils_1_1SVGBuilder.html#adcbd57c7dddb55f437e0173ae1950ada',1,'modules::svg_utils::SVGBuilder']]],
+  ['home_3',['home',['../classqtile__config_1_1QtileConfig.html#a8df0c0359a697586e66aab42e36c3579',1,'qtile_config::QtileConfig']]],
+  ['homedir_4',['homedir',['../classmodules_1_1bars_1_1EnhancedBarManager.html#a8cb7b074c57f0f01b8b9079ce16fcd40',1,'modules.bars.EnhancedBarManager.homedir'],['../classmodules_1_1key__manager_1_1KeyManager.html#a01adc02508fad42c56d62426104790f2',1,'modules.key_manager.KeyManager.homedir'],['../namespaceconfig.html#af1b7fc5a074ae31ab66caa9e7269cb8f',1,'config.homedir']]],
+  ['hook_5fmanager_5',['hook_manager',['../namespaceconfig.html#a498f230bbfbf0cc02ac79ec8531385a6',1,'config']]],
+  ['hook_5fmanager_2epy_6',['hook_manager.py',['../hook__manager_8py.html',1,'']]],
+  ['hookmanager_7',['HookManager',['../classmodules_1_1hook__manager_1_1HookManager.html',1,'modules::hook_manager']]],
+  ['hooks_2epy_8',['hooks.py',['../hooks_8py.html',1,'']]],
+  ['hostname_9',['hostname',['../classmodules_1_1bars_1_1EnhancedBarManager.html#ac6985c22ccb20c8dd5541dab074e7cb0',1,'modules.bars.EnhancedBarManager.hostname'],['../namespaceconfig.html#a6b6a77cdc060bbc5a128804bacb26c92',1,'config.hostname']]],
+  ['hotkey_5fdisplay_10',['hotkey_display',['../classqtile__config_1_1QtileConfig.html#a0f46c7ff845beda078f60d0e3ce2f89c',1,'qtile_config.QtileConfig.hotkey_display'],['../classqtile__config_1_1QtileConfig.html#ad405063535cf23f43a336b7aed485641',1,'qtile_config.QtileConfig.hotkey_display(self)']]],
+  ['hotkey_5fsystem_2epy_11',['hotkey_system.py',['../hotkey__system_8py.html',1,'']]],
+  ['hotkeycategorizer_12',['HotkeyCategorizer',['../classmodules_1_1hotkey__system_1_1HotkeyCategorizer.html',1,'modules::hotkey_system']]],
+  ['hotkeydisplay_13',['HotkeyDisplay',['../classmodules_1_1hotkey__system_1_1HotkeyDisplay.html',1,'modules::hotkey_system']]],
+  ['hotkeys_2epy_14',['hotkeys.py',['../hotkeys_8py.html',1,'']]],
+  ['html_5fdir_15',['html_dir',['../classgenerate__docs_1_1DoxygenDocGenerator.html#acbfc2643dce10d0268ceffd6bedfedbf',1,'generate_docs::DoxygenDocGenerator']]]
 ];

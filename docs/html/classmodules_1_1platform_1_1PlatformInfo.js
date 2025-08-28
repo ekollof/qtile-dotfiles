@@ -1,0 +1,27 @@
+var classmodules_1_1platform_1_1PlatformInfo =
+[
+    [ "__init__", "classmodules_1_1platform_1_1PlatformInfo.html#a330ab154366c4e24c6df68d093e84a67", null ],
+    [ "find_command", "classmodules_1_1platform_1_1PlatformInfo.html#a39d92890db27335547fc06c8b40ccef3", null ],
+    [ "get_preferred_application", "classmodules_1_1platform_1_1PlatformInfo.html#ac047fa540cae8fcd3eec260127fd2456", null ],
+    [ "has_command", "classmodules_1_1platform_1_1PlatformInfo.html#a2dbb4fcf597db47a23b330d32a521bd1", null ],
+    [ "is_bsd", "classmodules_1_1platform_1_1PlatformInfo.html#a501dd21a32a97bae9c720b8321f53be2", null ],
+    [ "is_freebsd", "classmodules_1_1platform_1_1PlatformInfo.html#a3b05ac351b32bbcbfd866aba7b4f178c", null ],
+    [ "is_linux", "classmodules_1_1platform_1_1PlatformInfo.html#a4cf6cc04a0c606b0bf677c5a316eee8e", null ],
+    [ "is_netbsd", "classmodules_1_1platform_1_1PlatformInfo.html#a7231ef5d8ac6253591b5d0f5a18b16ff", null ],
+    [ "is_openbsd", "classmodules_1_1platform_1_1PlatformInfo.html#a4e57a95c3f9e424a996a6c7243ae7502", null ],
+    [ "machine", "classmodules_1_1platform_1_1PlatformInfo.html#a30558e13e5cec0b329858c024f0efe1c", null ],
+    [ "release", "classmodules_1_1platform_1_1PlatformInfo.html#a2cee4cb2b92f9577726e1d866c4d899e", null ],
+    [ "system", "classmodules_1_1platform_1_1PlatformInfo.html#a35ed8ef136206992cbd94d306941d635", null ],
+    [ "_cached_commands", "classmodules_1_1platform_1_1PlatformInfo.html#af8eae723ff1aa8f7a713f6e047ab01fc", null ],
+    [ "_machine", "classmodules_1_1platform_1_1PlatformInfo.html#abb8aaeace6f6e1336a3b51cefba6f918", null ],
+    [ "_release", "classmodules_1_1platform_1_1PlatformInfo.html#a7c3de868e489011af11b22a9d4e721ba", null ],
+    [ "_system", "classmodules_1_1platform_1_1PlatformInfo.html#aa040a178a02bc93e5209a115b50b597d", null ],
+    [ "is_bsd", "classmodules_1_1platform_1_1PlatformInfo.html#a6d2a19b2fdee9beafb1936874c9af978", null ],
+    [ "is_freebsd", "classmodules_1_1platform_1_1PlatformInfo.html#aeb68f47cf3dcd341deddc715bc02a728", null ],
+    [ "is_linux", "classmodules_1_1platform_1_1PlatformInfo.html#a378315694a7eb9a56339b287a871f3da", null ],
+    [ "is_netbsd", "classmodules_1_1platform_1_1PlatformInfo.html#a9e317dad754aed0c7aa63eab6a2114f8", null ],
+    [ "is_openbsd", "classmodules_1_1platform_1_1PlatformInfo.html#adf38788a5141f68af249878cee4edc00", null ],
+    [ "machine", "classmodules_1_1platform_1_1PlatformInfo.html#a8612dd9e7f4f20db1443791b5ec99b8d", null ],
+    [ "release", "classmodules_1_1platform_1_1PlatformInfo.html#a42bf17c29ade193f35f219dcae3cc7d1", null ],
+    [ "system", "classmodules_1_1platform_1_1PlatformInfo.html#ab3e4b8ed19e91a50593001d4586be28d", null ]
+];

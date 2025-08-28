@@ -1,61 +1,62 @@
 {
-  "emoticon_replacements": {
-    "🐍": {
-      "name": "python",
-      "svg_file": "python.svg",
-      "png_file": "python.png"
+  "dynamic_svg_system": {
+    "description": "Dynamic SVG icon system - generates icons based on system state and color themes",
+    "features": [
+      "Dynamic theming based on color schemes",
+      "State-aware icons (battery levels, network status, etc.)",
+      "Platform-specific mascots (Tux, Puffy, Beastie, etc.)",
+      "Automatic color updates when themes change",
+      "Scalable vector graphics for all DPI settings"
+    ],
+    "supported_icons": {
+      "platform": "Platform-specific mascot (Tux/Puffy/Beastie/etc.)",
+      "cpu": "CPU usage indicator",
+      "memory": "Memory usage indicator",
+      "network": "Network activity indicator",
+      "volume": "Audio volume indicator",
+      "battery": "Battery status indicator",
+      "updates": "Package update counter",
+      "mail": "Email/IMAP checker",
+      "ticket": "Support ticket counter",
+      "thermometer": "Temperature monitor",
+      "python": "Python logo",
+      "arrow-up": "Up arrow indicator",
+      "refresh": "Refresh/sync indicator",
+      "clock": "Clock/time indicator",
+      "monitor": "Display/monitor indicator",
+      "activity": "System activity indicator",
+      "wifi": "WiFi/network indicator",
+      "zap": "Power/energy indicator",
+      "battery-low": "Low battery warning"
     },
-    "🔼": {
-      "name": "arrow-up",
-      "svg_file": "arrow-up.svg",
-      "png_file": "arrow-up.png"
+    "usage_examples": {
+      "qtile_widget": "widget.TextBox(text=\"\", font=\"monospace\", fontsize=16)",
+      "dynamic_svg": "Icons are automatically generated and themed",
+      "color_theming": "Icons automatically match current color scheme"
     },
-    "🔄": {
-      "name": "refresh",
-      "svg_file": "refresh.svg",
-      "png_file": "refresh.png"
-    },
-    "📭": {
-      "name": "mail",
-      "svg_file": "mail.svg",
-      "png_file": "mail.png"
-    },
-    "🎫": {
-      "name": "ticket",
-      "svg_file": "ticket.svg",
-      "png_file": "ticket.png"
-    },
-    "🌡": {
-      "name": "thermometer",
-      "svg_file": "thermometer.svg",
-      "png_file": "thermometer.png"
-    },
-    "🔋": {
-      "name": "battery",
-      "svg_file": "battery.svg",
-      "png_file": "battery.png"
-    },
-    "⚡": {
-      "name": "zap",
-      "svg_file": "zap.svg",
-      "png_file": "zap.png"
-    },
-    "🪫": {
-      "name": "battery-low",
-      "svg_file": "battery-low.svg",
-      "png_file": "battery-low.png"
+    "file_structure": {
+      "base_icons": "*.svg - Original SVG templates",
+      "color_backups": "*.svg.colorbackup - Original color data",
+      "dynamic_icons": "dynamic/*.svg - Generated themed icons",
+      "reference": "icon_reference.json - This file"
     }
   },
-  "additional_icons": [
-    "clock",
-    "monitor",
-    "cpu",
-    "activity",
-    "wifi",
-    "volume"
-  ],
-  "usage_examples": {
-    "qtile_widget": "widget.TextBox(text=\"\", font=\"monospace\", fontsize=16)",
-    "image_widget": "widget.Image(filename=\"~/.config/qtile/icons/python.png\")"
+  "system_info": {
+    "default_method": "svg_dynamic",
+    "supported_methods": ["svg_dynamic"],
+    "removed_methods": [
+      "svg_static (redundant with dynamic)",
+      "svg (redundant with dynamic)",
+      "image (PNG files removed)",
+      "nerd_font (text-based, less flexible)",
+      "text (emoji fallbacks removed)"
+    ],
+    "benefits": [
+      "Consistent theming across all icons",
+      "State-aware icon representations",
+      "Perfect scaling at all DPI levels",
+      "Platform-specific visual identity",
+      "Automatic theme synchronization"
+    ]
   }
 }

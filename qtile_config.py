@@ -11,7 +11,7 @@ compatibility for both X11 and Wayland environments.
 
 Key features:
 - Automatic DPI detection and scaling
-- Platform-specific application preferences
+- Platform-specific defaults
 - Font fallback management
 - Cross-platform portability
 """
@@ -21,7 +21,7 @@ from typing import Any
 
 from modules.dpi_utils import get_dpi_manager, scale_font, scale_size
 from modules.font_utils import get_available_font
-from modules.platform_utils import get_platform_config, get_platform_info
+from modules.platform import get_platform_config, get_platform_info
 
 
 class QtileConfig:
@@ -464,17 +464,12 @@ class QtileConfig:
         """
         @brief Icon rendering method for the bar manager
 
-        Controls how icons are rendered in the bar manager:
-        - "svg_dynamic": Generate icons dynamically based on system state (default)
-        - "svg_static": Use pre-generated themed static icons
-        - "svg": Use existing SVG files with theme recoloring
-        - "image": Fall back to PNG images
-        - "nerd_font": Use Nerd Font icons
-        - "text": Use text/emoji fallbacks
+        The dynamic SVG system is the only supported method:
+        - "svg_dynamic": Generate icons dynamically based on system state (default and only option)
 
-        @return Icon method string
+        @return Icon method string (always "svg_dynamic")
         """
-        return "svg_dynamic"
+        return "svg_dynamic"  # Only dynamic SVG system is supported
 
     @property
     def svg_icon_size(self) -> int:

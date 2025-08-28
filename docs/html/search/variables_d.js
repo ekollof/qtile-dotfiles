@@ -1,9 +1,6 @@
 var searchData=
 [
-  ['platform_5fconfig_0',['platform_config',['../classqtile__config_1_1QtileConfig.html#a0964ea491b8be7ce9735744b6481f46b',1,'qtile_config::QtileConfig']]],
-  ['platform_5finfo_1',['platform_info',['../classqtile__config_1_1QtileConfig.html#a798578119d784debad7570e34a1cb75e',1,'qtile_config::QtileConfig']]],
-  ['project_5fbrief_2',['project_brief',['../classgenerate__docs_1_1DoxygenDocGenerator.html#aedfa62c0a9142444bc3671682ea445ce',1,'generate_docs::DoxygenDocGenerator']]],
-  ['project_5fname_3',['project_name',['../classgenerate__docs_1_1DoxygenDocGenerator.html#a28f52d9269c0be9f50f82974c82f13c8',1,'generate_docs::DoxygenDocGenerator']]],
-  ['project_5froot_4',['project_root',['../classgenerate__docs_1_1DoxygenDocGenerator.html#ab8cda2441c308cdf9da3b8a9f7184f8b',1,'generate_docs::DoxygenDocGenerator']]],
-  ['project_5fversion_5',['project_version',['../classgenerate__docs_1_1DoxygenDocGenerator.html#a99c332f432156e59afdacacdb89e1b5c',1,'generate_docs::DoxygenDocGenerator']]]
+  ['notification_5fid_0',['notification_id',['../classmodules_1_1notifications_1_1PopupNotification.html#a59a46ca47b74a41db13ae0e383e415be',1,'modules::notifications::PopupNotification']]],
+  ['notify_5favailable_1',['NOTIFY_AVAILABLE',['../namespacemodules_1_1notifications.html#aabff2926d1aaeb7fc290697179a6827d',1,'modules::notifications']]],
+  ['num_5fscreens_2',['num_screens',['../classmodules_1_1screens_1_1ScreenManager.html#ae1993579d09ebdc3db545c0b5c2527d9',1,'modules::screens::ScreenManager']]]
 ];

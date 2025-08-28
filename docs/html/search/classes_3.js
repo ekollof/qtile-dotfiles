@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['simplecolormanager_0',['SimpleColorManager',['../classmodules_1_1simple__color__management_1_1SimpleColorManager.html',1,'modules::simple_color_management']]]
+  ['doxygendocgenerator_0',['DoxygenDocGenerator',['../classgenerate__docs_1_1DoxygenDocGenerator.html',1,'generate_docs']]],
+  ['dpimanager_1',['DPIManager',['../classmodules_1_1dpi__utils_1_1DPIManager.html',1,'modules::dpi_utils']]]
 ];

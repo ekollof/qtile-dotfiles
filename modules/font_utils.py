@@ -232,12 +232,6 @@ class FontManager:
             "cache_size": len(self._font_cache),
         }
 
-    def clear_cache(self) -> None:
-        """
-        @brief Clear the font cache (useful for testing)
-        """
-        self._font_cache.clear()
-
 
 # Global font manager instance
 _font_manager = FontManager()

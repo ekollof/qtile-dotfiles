@@ -10,8 +10,8 @@ This module provides a simplified interface to the color management system.
 @note This module follows Python 3.10+ standards and project guidelines
 """
 
-# Import simplified color management
-from .simple_color_management import (
+# Import from consolidated color system
+from .color_management import (
     ColorManager,
     color_manager,
     get_color_manager,

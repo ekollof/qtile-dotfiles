@@ -55,7 +55,7 @@ layout.Floating.default_float_rules = [
 ]
 
 # Import our custom modules
-from modules.bar_factory import create_bar_manager
+from modules.bars import create_bar_manager
 from modules.colors import color_manager
 from modules.groups import create_group_manager
 from modules.hooks import create_hook_manager

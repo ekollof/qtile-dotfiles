@@ -1,10 +1,8 @@
 var searchData=
 [
-  ['main_0',['main',['../namespacegenerate__docs.html#abdcc6aa1e5be8088b43b0adafdbb03e5',1,'generate_docs']]],
-  ['manual_5fcolor_5freload_1',['manual_color_reload',['../namespacemodules_1_1simple__color__management.html#a2f314952db7c089c577e803bb56879ab',1,'modules::simple_color_management']]],
-  ['manual_5freload_5fcolors_2',['manual_reload_colors',['../classmodules_1_1simple__color__management_1_1SimpleColorManager.html#adfd8ff0eebc2eec7e0be6ad49f025a99',1,'modules::simple_color_management::SimpleColorManager']]],
-  ['manually_5freconfigure_5fscreens_3',['manually_reconfigure_screens',['../namespaceconfig.html#a32e88a9154315874ac774e88a077d616',1,'config']]],
-  ['mod_5fkey_4',['mod_key',['../classqtile__config_1_1QtileConfig.html#ad059fa0c60e67891ae32d448bd248ba9',1,'qtile_config::QtileConfig']]],
-  ['monad_5ftall_5flayout_5',['monad_tall_layout',['../classqtile__config_1_1QtileConfig.html#a4c23f825e407b5cb3e8c9f5602e5b12b',1,'qtile_config::QtileConfig']]],
-  ['mouse_5fwarp_5ffocus_6',['mouse_warp_focus',['../classqtile__config_1_1QtileConfig.html#a58461c3b3d7341e72f276dfab8236a6d',1,'qtile_config::QtileConfig']]]
+  ['layout_5fdefaults_0',['layout_defaults',['../classqtile__config_1_1QtileConfig.html#a8f31ac9cd07fbfdf80f9f41ff466f96c',1,'qtile_config::QtileConfig']]],
+  ['layout_5fsafe_5fcommand_1',['layout_safe_command',['../classmodules_1_1commands_1_1LayoutAwareCommands.html#a6d5d7075e1e429a05de6a3a9a030c3e8',1,'modules::commands::LayoutAwareCommands']]],
+  ['list_5ffloating_5fwindows_2',['list_floating_windows',['../classmodules_1_1window__manager_1_1WindowManager.html#a5f0c1e70d022005f9b820bcf81ff84ff',1,'modules::window_manager::WindowManager']]],
+  ['load_5fcolors_3',['load_colors',['../classmodules_1_1color__management_1_1ColorManager.html#a23e8416fccb5860b09f85a8153680b60',1,'modules::color_management::ColorManager']]],
+  ['load_5fsvg_4',['load_svg',['../classmodules_1_1svg__utils_1_1SVGManipulator.html#a8beeee1ebdb95b6d00498fbac8e48045',1,'modules::svg_utils::SVGManipulator']]]
 ];

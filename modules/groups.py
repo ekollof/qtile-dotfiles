@@ -13,19 +13,15 @@ from libqtile.lazy import lazy
 from qtile_config import get_config
 
 if TYPE_CHECKING:
-    from modules.simple_color_management import SimpleColorManager
-
-    ColorManager = SimpleColorManager
+    from modules.color_management import ColorManager
 else:
-    from modules.simple_color_management import SimpleColorManager
-
-    ColorManager = SimpleColorManager
+    from modules.color_management import ColorManager
 
 
 class GroupManager:
     """Manages workspace groups and layouts"""
 
-    def __init__(self, color_manager: ColorManager) -> None:  # pyright: ignore[reportMissingSuperCall]
+    def __init__(self, color_manager: "ColorManager") -> None:
         self.color_manager = color_manager
         self.config = get_config()
         self.mod = self.config.mod_key
@@ -124,6 +120,6 @@ class GroupManager:
         return keys
 
 
-def create_group_manager(color_manager: ColorManager) -> GroupManager:
+def create_group_manager(color_manager: "ColorManager") -> GroupManager:
     """Create and return a group manager instance"""
     return GroupManager(color_manager)

@@ -1,5 +1,18 @@
 var searchData=
 [
-  ['terminal_0',['terminal',['../classqtile__config_1_1QtileConfig.html#a7e644e837f08203a3782392abd1a0e3c',1,'qtile_config::QtileConfig']]],
-  ['tile_5flayout_1',['tile_layout',['../classqtile__config_1_1QtileConfig.html#a5a7442cfd10b25854674de21b0b23ba0',1,'qtile_config::QtileConfig']]]
+  ['recolor_5fexisting_5ficon_0',['recolor_existing_icon',['../classmodules_1_1bars_1_1EnhancedBarManager.html#ac9ff5d939e9c57fd7d0ba058f21c313d',1,'modules::bars::EnhancedBarManager']]],
+  ['recolor_5fsvg_1',['recolor_svg',['../classmodules_1_1svg__utils_1_1SVGManipulator.html#a5c30b157e13bd764d9fe8bf6775a4a22',1,'modules::svg_utils::SVGManipulator']]],
+  ['refresh_5ficon_2',['refresh_icon',['../classmodules_1_1svg__utils_1_1IconGenerator.html#a521aaeb20c8ab35d2cc5a59759823815',1,'modules::svg_utils::IconGenerator']]],
+  ['refresh_5fscreens_3',['refresh_screens',['../classmodules_1_1screens_1_1ScreenManager.html#ac7ae25eb5b7ac952138df03647a0cc79',1,'modules.screens.ScreenManager.refresh_screens()'],['../namespacemodules_1_1screens.html#ab2dcf9e34f1259203f798e50e9052031',1,'modules.screens.refresh_screens()']]],
+  ['refresh_5fthemed_5ficons_4',['refresh_themed_icons',['../classmodules_1_1bars_1_1EnhancedBarManager.html#a95a0a10b36aba990d2a5d30b994f5f62',1,'modules::bars::EnhancedBarManager']]],
+  ['release_5',['release',['../classmodules_1_1platform_1_1PlatformInfo.html#a2cee4cb2b92f9577726e1d866c4d899e',1,'modules::platform::PlatformInfo']]],
+  ['reload_6',['reload',['../namespaceconfig.html#abc2bea9bae102c6c91d48c5e24ac05c3',1,'config']]],
+  ['remapkeys_7',['remapkeys',['../namespaceconfig.html#a98f0ad659a63ade8209707915076eb38',1,'config']]],
+  ['remove_5fold_5fdocs_8',['remove_old_docs',['../classgenerate__docs_1_1DoxygenDocGenerator.html#a9b1fa036a236da4196aa761b0769549b',1,'generate_docs::DoxygenDocGenerator']]],
+  ['restart_5fcolor_5fmonitoring_9',['restart_color_monitoring',['../namespacemodules_1_1color__management.html#a5d0b83ee483776e260419a6819073aab',1,'modules::color_management']]],
+  ['restart_5fcolor_5fmonitoring_5foptimized_10',['restart_color_monitoring_optimized',['../namespacemodules_1_1color__management.html#a1848068dea8321839c0ccd50db497292',1,'modules::color_management']]],
+  ['restart_5fmonitoring_11',['restart_monitoring',['../classmodules_1_1color__management_1_1ColorManager.html#a503ea098947579d57619915c5ebaec9f',1,'modules::color_management::ColorManager']]],
+  ['retile_5fwindows_5fafter_5fstartup_12',['retile_windows_after_startup',['../classmodules_1_1window__manager_1_1WindowManager.html#acbaa298de508cd8778c9959074450255',1,'modules::window_manager::WindowManager']]],
+  ['run_13',['run',['../classgenerate__docs_1_1DoxygenDocGenerator.html#a3310d9fd9e3d1e1c84027db31fdeaabc',1,'generate_docs::DoxygenDocGenerator']]],
+  ['run_5fautostart_5fscript_14',['run_autostart_script',['../classmodules_1_1lifecycle__hooks_1_1LifecycleHooks.html#aa416d604c13bc947bcc2ff04f86c0a4b',1,'modules::lifecycle_hooks::LifecycleHooks']]]
 ];

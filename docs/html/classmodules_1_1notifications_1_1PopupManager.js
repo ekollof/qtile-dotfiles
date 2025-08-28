@@ -1,0 +1,28 @@
+var classmodules_1_1notifications_1_1PopupManager =
+[
+    [ "__init__", "classmodules_1_1notifications_1_1PopupManager.html#a97f4f58e625838b6661654f3fd03e039", null ],
+    [ "_calculate_position", "classmodules_1_1notifications_1_1PopupManager.html#a4a630e22f2be26d652ff0f843fc865a1", null ],
+    [ "_calculate_text_height", "classmodules_1_1notifications_1_1PopupManager.html#af80f5a970537051d7270c5ceab3830ee", null ],
+    [ "_cleanup_expired", "classmodules_1_1notifications_1_1PopupManager.html#a0e6f9b1aa0a448758d8afe5cbf5b8c13", null ],
+    [ "_create_popup", "classmodules_1_1notifications_1_1PopupManager.html#a946606060f8368a72294ed682d56d13b", null ],
+    [ "_dismiss_notification", "classmodules_1_1notifications_1_1PopupManager.html#a33f00a8a21ef344cbda35ad63cee87c6", null ],
+    [ "_dismiss_oldest", "classmodules_1_1notifications_1_1PopupManager.html#a8c8121eb3e7b16f1010063e8e620ef8e", null ],
+    [ "_open_url", "classmodules_1_1notifications_1_1PopupManager.html#aaa865152d82aa30b3ce73617fa2da33f", null ],
+    [ "_reposition_notifications", "classmodules_1_1notifications_1_1PopupManager.html#a893229e34b4fb73353532cc3ca962124", null ],
+    [ "_sanitize_markup", "classmodules_1_1notifications_1_1PopupManager.html#a253f9178c15ffe454a4aaa476e34402b", null ],
+    [ "_schedule_cleanup", "classmodules_1_1notifications_1_1PopupManager.html#a3bf7a586af20ca70f82259c9e5f81900", null ],
+    [ "_show_notification_object", "classmodules_1_1notifications_1_1PopupManager.html#a9f65db67c3d606371bfd6964705d2e36", null ],
+    [ "adjust_positioning", "classmodules_1_1notifications_1_1PopupManager.html#a9bdafb1a0b622b03ae2384628920865b", null ],
+    [ "dismiss_all", "classmodules_1_1notifications_1_1PopupManager.html#a94a6d20fa4e1b2e366f8b3b74e61c5ff", null ],
+    [ "show_notification", "classmodules_1_1notifications_1_1PopupManager.html#a242525c9a80db5f9e50fb066a19c701a", null ],
+    [ "update_colors", "classmodules_1_1notifications_1_1PopupManager.html#a517acccd9cb2e3899166d8bbc3ca9789", null ],
+    [ "_cleanup_expired", "classmodules_1_1notifications_1_1PopupManager.html#a755169be98787210634d8544126cdd15", null ],
+    [ "_popup_manager", "classmodules_1_1notifications_1_1PopupManager.html#a48e8ee3d80b61d064af349703686c1c1", null ],
+    [ "active_notifications", "classmodules_1_1notifications_1_1PopupManager.html#ab9e36c04357aa04adbe5c9f0d82b93c3", null ],
+    [ "cleanup_scheduled", "classmodules_1_1notifications_1_1PopupManager.html#aa82086e8730586ea02f1ef11a2f088ff", null ],
+    [ "color_manager", "classmodules_1_1notifications_1_1PopupManager.html#ae8aadc3e9683a49db4ce31225c0cfb4f", null ],
+    [ "colors", "classmodules_1_1notifications_1_1PopupManager.html#a0e950cb41e546f6ea4ff853d7db8b3d1", null ],
+    [ "config", "classmodules_1_1notifications_1_1PopupManager.html#af30ff56f78e47b1dd64843e022d48a47", null ],
+    [ "max_notifications", "classmodules_1_1notifications_1_1PopupManager.html#a4d955ec9ddb66f56e5f8d23a65ba568c", null ],
+    [ "qtile_config", "classmodules_1_1notifications_1_1PopupManager.html#aa3565ca2dab923a6933b1efabe49cbf7", null ]
+];

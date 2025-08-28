@@ -9,16 +9,13 @@ from .client_hooks import ClientHooks
 
 # Import all functionality from the new modular structure
 from .hook_manager import HookManager, create_hook_manager
-from .screen_hooks import ScreenHooks
-from .startup_hooks import StartupHooks
-from .window_manager import WindowManager
+from .lifecycle_hooks import LifecycleHooks, create_lifecycle_hooks
 
 # Maintain backward compatibility by exposing the same interface
 __all__ = [
     "ClientHooks",
     "HookManager",
-    "ScreenHooks",
-    "StartupHooks",
-    "WindowManager",
+    "LifecycleHooks",
     "create_hook_manager",
+    "create_lifecycle_hooks",
 ]

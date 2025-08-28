@@ -1,7 +1,26 @@
 var dir_e05d7e2b1ecd646af5bb94391405f3b5 =
 [
+    [ "bars.py", "bars_8py.html", "bars_8py" ],
+    [ "client_hooks.py", "client__hooks_8py.html", "client__hooks_8py" ],
+    [ "color_management.py", "color__management_8py.html", "color__management_8py" ],
     [ "colors.py", "colors_8py.html", "colors_8py" ],
+    [ "commands.py", "commands_8py.html", "commands_8py" ],
+    [ "config_validator.py", "config__validator_8py.html", "config__validator_8py" ],
+    [ "dependency_container.py", "dependency__container_8py.html", "dependency__container_8py" ],
     [ "dpi_utils.py", "dpi__utils_8py.html", "dpi__utils_8py" ],
     [ "font_utils.py", "font__utils_8py.html", "font__utils_8py" ],
-    [ "simple_color_management.py", "simple__color__management_8py.html", "simple__color__management_8py" ]
+    [ "groups.py", "groups_8py.html", "groups_8py" ],
+    [ "hook_manager.py", "hook__manager_8py.html", "hook__manager_8py" ],
+    [ "hooks.py", "hooks_8py.html", "hooks_8py" ],
+    [ "hotkey_system.py", "hotkey__system_8py.html", "hotkey__system_8py" ],
+    [ "hotkeys.py", "hotkeys_8py.html", "hotkeys_8py" ],
+    [ "key_bindings.py", "key__bindings_8py.html", "key__bindings_8py" ],
+    [ "key_manager.py", "key__manager_8py.html", "key__manager_8py" ],
+    [ "keys.py", "keys_8py.html", "keys_8py" ],
+    [ "lifecycle_hooks.py", "lifecycle__hooks_8py.html", "lifecycle__hooks_8py" ],
+    [ "notifications.py", "notifications_8py.html", "notifications_8py" ],
+    [ "platform.py", "platform_8py.html", "platform_8py" ],
+    [ "screens.py", "screens_8py.html", "screens_8py" ],
+    [ "svg_utils.py", "svg__utils_8py.html", "svg__utils_8py" ],
+    [ "window_manager.py", "window__manager_8py.html", "window__manager_8py" ]
 ];

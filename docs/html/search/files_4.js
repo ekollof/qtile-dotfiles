@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['qtile_5fconfig_2epy_0',['qtile_config.py',['../qtile__config_8py.html',1,'']]]
+  ['generate_5fdocs_2epy_0',['generate_docs.py',['../generate__docs_8py.html',1,'']]],
+  ['groups_2epy_1',['groups.py',['../groups_8py.html',1,'']]]
 ];

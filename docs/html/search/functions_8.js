@@ -1,7 +1,6 @@
 var searchData=
 [
-  ['icon_5fmethod_0',['icon_method',['../classqtile__config_1_1QtileConfig.html#a1fad6c4ba19cdf243596bfe47ce8df93',1,'qtile_config::QtileConfig']]],
-  ['is_5fbsd_5fsystem_1',['is_bsd_system',['../namespaceqtile__config.html#a849f1ef3e7c07d4585685f070f26c7be',1,'qtile_config']]],
-  ['is_5flinux_5fsystem_2',['is_linux_system',['../namespaceqtile__config.html#abb5f8f34a9b71242d30a4f8ad5e2a5ce',1,'qtile_config']]],
-  ['is_5fmonitoring_3',['is_monitoring',['../classmodules_1_1simple__color__management_1_1SimpleColorManager.html#aeb013d4e18b0c942a24da20a516fd636',1,'modules::simple_color_management::SimpleColorManager']]]
+  ['handle_5ftransient_5fwindow_0',['handle_transient_window',['../classmodules_1_1window__manager_1_1WindowManager.html#a97a52435a582d00d4bc84d9a1cf7ed1b',1,'modules::window_manager::WindowManager']]],
+  ['has_5fcommand_1',['has_command',['../classmodules_1_1platform_1_1PlatformInfo.html#a2dbb4fcf597db47a23b330d32a521bd1',1,'modules::platform::PlatformInfo']]],
+  ['hotkey_5fdisplay_2',['hotkey_display',['../classqtile__config_1_1QtileConfig.html#ad405063535cf23f43a336b7aed485641',1,'qtile_config::QtileConfig']]]
 ];

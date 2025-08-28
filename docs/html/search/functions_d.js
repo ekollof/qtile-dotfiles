@@ -1,10 +1,11 @@
 var searchData=
 [
-  ['reload_0',['reload',['../namespaceconfig.html#abc2bea9bae102c6c91d48c5e24ac05c3',1,'config']]],
-  ['remapkeys_1',['remapkeys',['../namespaceconfig.html#a98f0ad659a63ade8209707915076eb38',1,'config']]],
-  ['remove_5fold_5fdocs_2',['remove_old_docs',['../classgenerate__docs_1_1DoxygenDocGenerator.html#a9b1fa036a236da4196aa761b0769549b',1,'generate_docs::DoxygenDocGenerator']]],
-  ['restart_5fcolor_5fmonitoring_3',['restart_color_monitoring',['../namespacemodules_1_1simple__color__management.html#a58eebcb87f050e458964704de7feb978',1,'modules::simple_color_management']]],
-  ['restart_5fcolor_5fmonitoring_5foptimized_4',['restart_color_monitoring_optimized',['../namespacemodules_1_1simple__color__management.html#ae1ea7465171c0cf266d2dfb8cb6d279a',1,'modules::simple_color_management']]],
-  ['restart_5fmonitoring_5',['restart_monitoring',['../classmodules_1_1simple__color__management_1_1SimpleColorManager.html#af7da02a395cb36c575382b0f86a2cad9',1,'modules::simple_color_management::SimpleColorManager']]],
-  ['run_6',['run',['../classgenerate__docs_1_1DoxygenDocGenerator.html#a3310d9fd9e3d1e1c84027db31fdeaabc',1,'generate_docs::DoxygenDocGenerator']]]
+  ['platform_5fmascot_5ficon_0',['platform_mascot_icon',['../classmodules_1_1svg__utils_1_1IconGenerator.html#a2e0bab048ed11dbb57b082d802961990',1,'modules::svg_utils::IconGenerator']]],
+  ['preferred_5fbar_5fheight_1',['preferred_bar_height',['../classqtile__config_1_1QtileConfig.html#a3220086550a9f1a9a26d553266a1dba0',1,'qtile_config::QtileConfig']]],
+  ['preferred_5ffont_2',['preferred_font',['../classqtile__config_1_1QtileConfig.html#a1cf92ffb606f2d094704ec04129946db',1,'qtile_config::QtileConfig']]],
+  ['preferred_5ffontsize_3',['preferred_fontsize',['../classqtile__config_1_1QtileConfig.html#a2b32432712fb925b23e8030c7110625b',1,'qtile_config::QtileConfig']]],
+  ['preferred_5ficon_5ffontsize_4',['preferred_icon_fontsize',['../classqtile__config_1_1QtileConfig.html#acae3c5c8a3300e93f29cd8e51db7503b',1,'qtile_config::QtileConfig']]],
+  ['print_5fsummary_5',['print_summary',['../classgenerate__docs_1_1DoxygenDocGenerator.html#ad30661cfa83c2db756864816ef21946f',1,'generate_docs::DoxygenDocGenerator']]],
+  ['process_5fkeys_6',['process_keys',['../classmodules_1_1hotkey__system_1_1HotkeyCategorizer.html#a0129dd741c31299b084c97ca25df3970',1,'modules::hotkey_system::HotkeyCategorizer']]],
+  ['python_5ficon_7',['python_icon',['../classmodules_1_1svg__utils_1_1IconGenerator.html#ae4463f8f73ac20e1dfa4592506807c82',1,'modules::svg_utils::IconGenerator']]]
 ];

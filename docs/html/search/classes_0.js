@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['doxygendocgenerator_0',['DoxygenDocGenerator',['../classgenerate__docs_1_1DoxygenDocGenerator.html',1,'generate_docs']]],
-  ['dpimanager_1',['DPIManager',['../classmodules_1_1dpi__utils_1_1DPIManager.html',1,'modules::dpi_utils']]]
+  ['_5fopenbsddewey_0',['_OpenBSDDewey',['../classmodules_1_1bars_1_1EnhancedBarManager_1_1__OpenBSDDewey.html',1,'modules::bars::EnhancedBarManager']]],
+  ['_5fopenbsdversion_1',['_OpenBSDVersion',['../classmodules_1_1bars_1_1EnhancedBarManager_1_1__OpenBSDVersion.html',1,'modules::bars::EnhancedBarManager']]]
 ];

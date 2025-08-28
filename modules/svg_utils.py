@@ -141,35 +141,6 @@ class SVGBuilder:
         self.elements.append(path)
         return self
 
-    def add_text(
-        self,
-        text: str,
-        x: float,
-        y: float,
-        font_size: int = 12,
-        fill: str = "#ffffff",
-        font_family: str = "sans-serif",
-        text_anchor: str = "start",
-    ) -> "SVGBuilder":
-        """
-        @brief Add text element to the SVG
-        @param text: Text content
-        @param x: X coordinate
-        @param y: Y coordinate
-        @param font_size: Font size
-        @param fill: Text color
-        @param font_family: Font family
-        @param text_anchor: Text anchor (start, middle, end)
-        @return Self for method chaining
-        """
-        text_elem = (
-            f'<text x="{x}" y="{y}" font-size="{font_size}" '
-            f'fill="{fill}" font-family="{font_family}" '
-            f'text-anchor="{text_anchor}">{text}</text>'
-        )
-        self.elements.append(text_elem)
-        return self
-
     def add_polygon(
         self,
         points: list[tuple[float, float]],
@@ -191,22 +162,6 @@ class SVGBuilder:
             polygon += f' stroke="{stroke}" stroke-width="{stroke_width}"'
         polygon += "/>"
         self.elements.append(polygon)
-        return self
-
-    def add_gradient(
-        self, gradient_id: str, stops: list[tuple[str, str]]
-    ) -> "SVGBuilder":
-        """
-        @brief Add linear gradient definition
-        @param gradient_id: Unique ID for the gradient
-        @param stops: List of (offset, color) tuples
-        @return Self for method chaining
-        """
-        gradient = [f'<linearGradient id="{gradient_id}">']
-        for offset, color in stops:
-            gradient.append(f'  <stop offset="{offset}" stop-color="{color}"/>')
-        gradient.append("</linearGradient>")
-        self.defs.extend(gradient)
         return self
 
     def build(self, viewbox: str | None = None) -> str:
@@ -330,28 +285,6 @@ class SVGManipulator:
             content=content,
             width=svg_icon.width,
             height=svg_icon.height,
-            viewbox=svg_icon.viewbox,
-        )
-
-    def scale_svg(self, svg_icon: SVGIcon, scale_factor: float) -> SVGIcon:
-        """
-        @brief Scale SVG dimensions by factor
-        @param svg_icon: SVGIcon to scale
-        @param scale_factor: Scaling factor (1.0 = no change)
-        @return Scaled SVGIcon
-        """
-        new_width = int(svg_icon.width * scale_factor)
-        new_height = int(svg_icon.height * scale_factor)
-
-        # Update width and height attributes
-        content = svg_icon.content
-        content = re.sub(r'width="[^"]*"', f'width="{new_width}"', content)
-        content = re.sub(r'height="[^"]*"', f'height="{new_height}"', content)
-
-        return SVGIcon(
-            content=content,
-            width=new_width,
-            height=new_height,
             viewbox=svg_icon.viewbox,
         )
 
@@ -764,7 +697,7 @@ class IconGenerator:
         @return SVG string for current platform's mascot
         """
         try:
-            from modules.platform_icons import get_platform_mascot_icon
+            from modules.platform import get_platform_mascot_icon
 
             return get_platform_mascot_icon(self.color_manager, self.size)
         except ImportError:

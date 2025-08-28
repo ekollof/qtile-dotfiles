@@ -24,7 +24,7 @@ from libqtile.log_utils import logger
 from qtile_extras import widget
 
 from modules.dpi_utils import scale_font, scale_size
-from modules.popup_notify_widget import create_popup_notify_widget
+from modules.notifications import create_notify_widget
 from modules.svg_utils import create_themed_icon_cache, get_svg_utils
 
 
@@ -92,9 +92,9 @@ class EnhancedBarManager:
                 / 1000.0,
                 "timeout_critical": 0.0,
             }
-            from modules.simple_popup_notifications import setup_popup_notifications
+            from modules.notifications import setup_notifications
 
-            setup_popup_notifications(color_manager, self.qtile_config, popup_config)
+            setup_notifications(color_manager, self.qtile_config, popup_config)
             logger.info("Simple popup notifications configured and enabled")
 
         # Schedule icon cache refresh after color manager is fully initialized
@@ -390,9 +390,12 @@ class EnhancedBarManager:
         icon_color = color or colors.get("color5", "#ffffff")
         bg_color = special.get("background", "#000000")
 
+        icon_color = color or colors.get("color5", "#ffffff")
+        bg_color = special.get("background", "#000000")
+
         match self.icon_method:
             case "svg_dynamic":
-                # Use dynamic SVG generation
+                # Use dynamic SVG generation - the primary and only method
                 icon_path = self.create_dynamic_icon(icon_key, **dynamic_kwargs)
                 if icon_path and Path(icon_path).exists():
                     try:
@@ -405,80 +408,15 @@ class EnhancedBarManager:
                         logger.warning(
                             f"Failed to load dynamic SVG icon {icon_path}: {e}"
                         )
+                else:
+                    logger.debug(
+                        f"Dynamic icon not available for {icon_key}, using text fallback"
+                    )
 
-                # Fall back to themed static icon
-                themed_path = self.themed_icons.get(icon_key)
-                if themed_path and Path(themed_path).exists():
-                    try:
-                        return widget.Image(
-                            filename=themed_path,
-                            background=bg_color,
-                            margin=scale_size(2),
-                        )
-                    except Exception as e:
-                        logger.warning(f"Failed to load themed icon {themed_path}: {e}")
-
-            case "svg_static":
-                # Use static themed icons
-                themed_path = self.themed_icons.get(icon_key)
-                if themed_path and Path(themed_path).exists():
-                    try:
-                        return widget.Image(
-                            filename=themed_path,
-                            background=bg_color,
-                            margin=scale_size(2),
-                        )
-                    except Exception as e:
-                        logger.warning(f"Failed to load themed icon {themed_path}: {e}")
-
-            case "svg":
-                # Use original SVG files with recoloring
-                icon_path = self.icons["svg"].get(icon_key)
-                if icon_path and Path(icon_path).exists():
-                    themed_path = self.recolor_existing_icon(icon_path)
-                    try:
-                        return widget.Image(
-                            filename=themed_path,
-                            background=bg_color,
-                            margin=scale_size(2),
-                        )
-                    except Exception as e:
-                        logger.warning(f"Failed to load SVG icon {themed_path}: {e}")
-
-            case "image":
-                # Use PNG images
-                icon_path = self.icons["image"].get(icon_key)
-                if icon_path and Path(icon_path).exists():
-                    try:
-                        return widget.Image(
-                            filename=icon_path,
-                            background=bg_color,
-                            margin=scale_size(2),
-                        )
-                    except Exception as e:
-                        logger.warning(f"Failed to load PNG icon {icon_path}: {e}")
-
-            case "nerd_font":
-                # Use Nerd Font icons
-                from modules.font_utils import get_available_font
-
-                return widget.TextBox(
-                    text=self.icons["nerd_font"].get(icon_key, text_fallback),
-                    foreground=icon_color,
-                    background=bg_color,
-                    font=get_available_font(self.qtile_config.preferred_font),
-                    fontsize=scale_font(self.qtile_config.preferred_icon_fontsize),
-                    padding=scale_size(3),
-                )
-
-            case _:  # "text" or fallback
-                # Use text/emoji icons
-                return widget.TextBox(
-                    text=self.icons["text"].get(icon_key, text_fallback),
-                    foreground=icon_color,
-                    background=bg_color,
-                    fontsize=scale_font(self.qtile_config.preferred_icon_fontsize),
-                    padding=scale_size(3),
+            case _:
+                # Any other method falls back to text
+                logger.debug(
+                    f"Unsupported icon method '{self.icon_method}', using text fallback"
                 )
 
         # Final fallback to text
@@ -662,6 +600,7 @@ class EnhancedBarManager:
         @param fallback: Fallback value on failure
         @return Function that safely calls script
         """
+
         def safe_call():
             try:
                 script_path_obj = Path(script_path).expanduser()
@@ -676,18 +615,26 @@ class EnhancedBarManager:
                 output = result.stdout.strip()
                 if output and output != "N/A" and len(output) > 0:
                     # Script produced output - use it even if return code is non-zero
-                    logger.debug(f"Script {script_path} output: '{output}' (return code: {result.returncode})")
+                    logger.debug(
+                        f"Script {script_path} output: '{output}' (return code: {result.returncode})"
+                    )
                     return output
 
                 # No valid output - check what went wrong
                 if result.returncode != 0:
                     stderr = result.stderr.strip()
                     if stderr:
-                        logger.warning(f"Script {script_path} failed with error: {stderr}")
+                        logger.warning(
+                            f"Script {script_path} failed with error: {stderr}"
+                        )
                     else:
-                        logger.warning(f"Script {script_path} failed with return code {result.returncode} but no error message")
+                        logger.warning(
+                            f"Script {script_path} failed with return code {result.returncode} but no error message"
+                        )
                 else:
-                    logger.warning(f"Script {script_path} succeeded but returned empty output")
+                    logger.warning(
+                        f"Script {script_path} succeeded but returned empty output"
+                    )
 
                 return fallback
 
@@ -776,25 +723,25 @@ class EnhancedBarManager:
 
         def __init__(self, string: str) -> None:
             """@param string Version string to parse"""
-            self.deweys = string.split('.')
-            self.suffix = ''
+            self.deweys = string.split(".")
+            self.suffix = ""
             self.suffix_value = 0
             if self.deweys:
                 last = self.deweys[-1]
-                m = re.match(r'^(\d+)(rc|alpha|beta|pre|pl)(\d*)$', last)
+                m = re.match(r"^(\d+)(rc|alpha|beta|pre|pl)(\d*)$", last)
                 if m:
                     self.deweys[-1] = m.group(1)
                     self.suffix = m.group(2)
-                    self.suffix_value = int(m.group(3) or '0')
+                    self.suffix_value = int(m.group(3) or "0")
 
         def to_string(self) -> str:
             """@return String representation of version"""
-            r = '.'.join(self.deweys)
+            r = ".".join(self.deweys)
             if self.suffix:
-                r += self.suffix + (str(self.suffix_value) if self.suffix_value else '')
+                r += self.suffix + (str(self.suffix_value) if self.suffix_value else "")
             return r
 
-        def compare(self, other: 'EnhancedBarManager._OpenBSDDewey') -> int:
+        def compare(self, other: "EnhancedBarManager._OpenBSDDewey") -> int:
             """@param other Other version to compare @return -1, 0, or 1"""
             deweys1 = self.deweys
             deweys2 = other.deweys
@@ -816,17 +763,23 @@ class EnhancedBarManager:
                 return 1 if ia > ib else -1 if ia < ib else 0
             return 1 if a > b else -1 if a < b else 0
 
-        def _suffix_compare(self, other: 'EnhancedBarManager._OpenBSDDewey') -> int:
+        def _suffix_compare(self, other: "EnhancedBarManager._OpenBSDDewey") -> int:
             """@brief Compare version suffixes (rc, alpha, beta, etc.)"""
             if self.suffix == other.suffix:
-                return 1 if self.suffix_value > other.suffix_value else -1 if self.suffix_value < other.suffix_value else 0
-            if self.suffix == 'pl':
+                return (
+                    1
+                    if self.suffix_value > other.suffix_value
+                    else -1
+                    if self.suffix_value < other.suffix_value
+                    else 0
+                )
+            if self.suffix == "pl":
                 return 1
-            if other.suffix == 'pl':
+            if other.suffix == "pl":
                 return -1
-            if self.suffix == '':
+            if self.suffix == "":
                 return 1
-            if self.suffix in ['alpha', 'beta']:
+            if self.suffix in ["alpha", "beta"]:
                 return -1
             return 0
 
@@ -837,18 +790,18 @@ class EnhancedBarManager:
             """@param string Version string to parse"""
             self.original_string = string
             self.v = 0
-            m = re.match(r'(.*)v(\d+)$', string)
+            m = re.match(r"(.*)v(\d+)$", string)
             if m:
                 self.v = int(m.group(2))
                 string = m.group(1)
             self.p = -1
-            m = re.match(r'(.*)p(\d+)$', string)
+            m = re.match(r"(.*)p(\d+)$", string)
             if m:
                 self.p = int(m.group(2))
                 string = m.group(1)
             self.dewey = EnhancedBarManager._OpenBSDDewey(string)
 
-        def compare(self, other: 'EnhancedBarManager._OpenBSDVersion') -> int:
+        def compare(self, other: "EnhancedBarManager._OpenBSDVersion") -> int:
             """@param other Other version to compare @return -1, 0, or 1"""
             if self.v != other.v:
                 return 1 if self.v > other.v else -1
@@ -865,42 +818,59 @@ class EnhancedBarManager:
         try:
             # Multi-version package stems (packages that can have multiple versions)
             multi_version_stems = {
-                'lua', 'python', 'ruby', 'php', 'perl', 'postgresql',
-                'mariadb', 'node', 'tcl', 'tk', 'autoconf', 'jdk', 'automake',
+                "lua",
+                "python",
+                "ruby",
+                "php",
+                "perl",
+                "postgresql",
+                "mariadb",
+                "node",
+                "tcl",
+                "tk",
+                "autoconf",
+                "jdk",
+                "automake",
             }
 
             def get_version_prefix(v: str) -> str:
                 """Get major.minor version prefix"""
-                parts = v.split('.')
+                parts = v.split(".")
                 numeric = []
                 for p in parts:
-                    m = re.match(r'^\d+', p)
+                    m = re.match(r"^\d+", p)
                     if not m:
                         break
                     numeric.append(m.group(0))
                     if len(numeric) >= 2:
                         break
-                return '.'.join(numeric)
+                return ".".join(numeric)
 
             # Determine mirror
-            mirror = 'https://cdn.openbsd.org/pub/OpenBSD'
-            installurl_path = Path('/etc/installurl')
+            mirror = "https://cdn.openbsd.org/pub/OpenBSD"
+            installurl_path = Path("/etc/installurl")
             if installurl_path.exists():
-                with installurl_path.open('r') as f:
+                with installurl_path.open("r") as f:
                     mirror = f.readline().strip()
 
             # Determine if -current
             is_current = False
             try:
-                sysctl_output = subprocess.check_output(['sysctl', 'kern.version']).decode()
-                if '-current' in sysctl_output:
+                sysctl_output = subprocess.check_output(
+                    ["sysctl", "kern.version"]
+                ).decode()
+                if "-current" in sysctl_output:
                     is_current = True
             except subprocess.CalledProcessError:
                 pass
 
             # Determine release and arch
-            release = 'snapshots' if is_current else subprocess.check_output(['uname', '-r']).decode().strip()
-            arch = subprocess.check_output(['machine']).decode().strip()
+            release = (
+                "snapshots"
+                if is_current
+                else subprocess.check_output(["uname", "-r"]).decode().strip()
+            )
+            arch = subprocess.check_output(["machine"]).decode().strip()
 
             # Construct URL
             url = f"{mirror}/{release}/packages/{arch}/index.txt"
@@ -920,59 +890,62 @@ class EnhancedBarManager:
                 if not fields:
                     continue
                 file = fields[-1]
-                if not file.endswith('.tgz'):
+                if not file.endswith(".tgz"):
                     continue
                 file = file[:-4]
-                m = re.match(r'^(.*?)-(\d.*)$', file)
+                m = re.match(r"^(.*?)-(\d.*)$", file)
                 if m:
                     stem = m.group(1)
                     rest = m.group(2)
-                    parts = rest.split('-')
+                    parts = rest.split("-")
                     version = parts[0]
-                    flavor = '-'.join(parts[1:]) if len(parts) > 1 else ''
+                    flavor = "-".join(parts[1:]) if len(parts) > 1 else ""
                 else:
                     stem = file
-                    version = ''
-                    flavor = ''
-                key = stem + ('-' + flavor if flavor else '')
+                    version = ""
+                    flavor = ""
+                key = stem + ("-" + flavor if flavor else "")
                 available[key] = file
 
             # Get all installed packages
-            pkg_db = Path('/var/db/pkg')
+            pkg_db = Path("/var/db/pkg")
             if not pkg_db.exists():
                 logger.warning("OpenBSD package database not found")
                 return "0"
 
-            installed = [entry.name for entry in pkg_db.iterdir()
-                        if entry.is_dir() and (entry / '+CONTENTS').is_file()]
+            installed = [
+                entry.name
+                for entry in pkg_db.iterdir()
+                if entry.is_dir() and (entry / "+CONTENTS").is_file()
+            ]
 
             # Count updates
             count = 0
             for inst in installed:
-                if inst.startswith('quirks-'):
+                if inst.startswith("quirks-"):
                     continue
 
-                m = re.match(r'^(.*?)-(\d.*)$', inst)
+                m = re.match(r"^(.*?)-(\d.*)$", inst)
                 if m:
                     stem = m.group(1)
                     rest = m.group(2)
-                    parts = rest.split('-')
+                    parts = rest.split("-")
                     version = parts[0]
-                    flavor = '-'.join(parts[1:]) if len(parts) > 1 else ''
+                    flavor = "-".join(parts[1:]) if len(parts) > 1 else ""
                 else:
                     stem = inst
-                    version = ''
-                    flavor = ''
+                    version = ""
+                    flavor = ""
 
-                key = stem + ('-' + flavor if flavor else '')
+                key = stem + ("-" + flavor if flavor else "")
                 if key not in available:
                     continue
 
                 cand = available[key]
-                m = re.match(r'^(.*?)-(\d.*)$', cand)
+                m = re.match(r"^(.*?)-(\d.*)$", cand)
                 if m:
                     rest_c = m.group(2)
-                    parts_c = rest_c.split('-')
+                    parts_c = rest_c.split("-")
                     version_c = parts_c[0]
                 else:
                     continue
@@ -1023,7 +996,9 @@ class EnhancedBarManager:
                 percent = int(percent_str)
                 status = int(status_str)
 
-                logger.debug(f"apm output: percent='{percent_str}' ({percent}), status='{status_str}' ({status})")
+                logger.debug(
+                    f"apm output: percent='{percent_str}' ({percent}), status='{status_str}' ({status})"
+                )
 
                 if percent == 255 or status == 4:  # Unknown or absent
                     return "N/A"
@@ -1049,7 +1024,9 @@ class EnhancedBarManager:
                 return result
 
             except (ValueError, IndexError) as e:
-                logger.debug(f"Failed to parse apm output: percent='{percent_result.stdout}', status='{status_result.stdout}', error={e}")
+                logger.debug(
+                    f"Failed to parse apm output: percent='{percent_result.stdout}', status='{status_result.stdout}', error={e}"
+                )
                 return "N/A"
 
         except subprocess.TimeoutExpired:
@@ -1062,7 +1039,9 @@ class EnhancedBarManager:
             logger.error(f"OpenBSD battery check failed: {e}")
             return "N/A"
 
-    def _create_safe_check_updates_widget(self, distro: str, colors: dict[str, str], special: dict[str, str]):
+    def _create_safe_check_updates_widget(
+        self, distro: str, colors: dict[str, str], special: dict[str, str]
+    ):
         """
         @brief Create CheckUpdates widget with proper error handling
         @param distro: Distribution type for updates check
@@ -1119,20 +1098,34 @@ class EnhancedBarManager:
             # Check for Arch Linux
             if Path("/etc/arch-release").exists():
                 # Check for checkupdates command (official repos) - preferred method
-                if subprocess.run(["which", "checkupdates"], capture_output=True).returncode == 0:
+                if (
+                    subprocess.run(
+                        ["which", "checkupdates"], capture_output=True
+                    ).returncode
+                    == 0
+                ):
                     available_distros.append("Arch_checkupdates")
                     logger.debug("Found checkupdates - adding Arch_checkupdates")
 
                 # Check for paru (AUR helper) - preferred over yay
-                if subprocess.run(["which", "paru"], capture_output=True).returncode == 0:
+                if (
+                    subprocess.run(["which", "paru"], capture_output=True).returncode
+                    == 0
+                ):
                     available_distros.append("Arch_paru")
                     logger.debug("Found paru - adding Arch_paru")
                 # Check for yay (alternative AUR helper)
-                elif subprocess.run(["which", "yay"], capture_output=True).returncode == 0:
+                elif (
+                    subprocess.run(["which", "yay"], capture_output=True).returncode
+                    == 0
+                ):
                     available_distros.append("Arch_yay")
                     logger.debug("Found yay - adding Arch_yay")
                 # Fallback to basic pacman
-                elif subprocess.run(["which", "pacman"], capture_output=True).returncode == 0:
+                elif (
+                    subprocess.run(["which", "pacman"], capture_output=True).returncode
+                    == 0
+                ):
                     available_distros.append("Arch")
                     logger.debug("Found pacman - adding Arch")
 
@@ -1142,28 +1135,47 @@ class EnhancedBarManager:
                     with open("/etc/os-release") as f:
                         os_info = f.read().lower()
                         if "ubuntu" in os_info:
-                            if subprocess.run(["which", "aptitude"], capture_output=True).returncode == 0:
+                            if (
+                                subprocess.run(
+                                    ["which", "aptitude"], capture_output=True
+                                ).returncode
+                                == 0
+                            ):
                                 available_distros.append("Ubuntu")
                                 logger.debug("Found aptitude - adding Ubuntu")
                         else:  # Debian or derivative
-                            if subprocess.run(["which", "apt-show-versions"], capture_output=True).returncode == 0:
+                            if (
+                                subprocess.run(
+                                    ["which", "apt-show-versions"], capture_output=True
+                                ).returncode
+                                == 0
+                            ):
                                 available_distros.append("Debian")
                                 logger.debug("Found apt-show-versions - adding Debian")
                 except FileNotFoundError:
                     # Fallback to generic check
-                    if subprocess.run(["which", "apt"], capture_output=True).returncode == 0:
+                    if (
+                        subprocess.run(["which", "apt"], capture_output=True).returncode
+                        == 0
+                    ):
                         available_distros.append("Ubuntu")  # Use Ubuntu as fallback
                         logger.debug("Found apt - adding Ubuntu (fallback)")
 
             # Check for Fedora
             elif Path("/etc/fedora-release").exists():
-                if subprocess.run(["which", "dnf"], capture_output=True).returncode == 0:
+                if (
+                    subprocess.run(["which", "dnf"], capture_output=True).returncode
+                    == 0
+                ):
                     available_distros.append("Fedora")
                     logger.debug("Found dnf - adding Fedora")
 
             # Check for Gentoo
             elif Path("/etc/gentoo-release").exists():
-                if subprocess.run(["which", "eix"], capture_output=True).returncode == 0:
+                if (
+                    subprocess.run(["which", "eix"], capture_output=True).returncode
+                    == 0
+                ):
                     available_distros.append("Gentoo_eix")
                     logger.debug("Found eix - adding Gentoo_eix")
 
@@ -1171,7 +1183,13 @@ class EnhancedBarManager:
             elif Path("/etc/os-release").exists():
                 try:
                     with open("/etc/os-release") as f:
-                        if "void" in f.read().lower() and subprocess.run(["which", "xbps-install"], capture_output=True).returncode == 0:
+                        if (
+                            "void" in f.read().lower()
+                            and subprocess.run(
+                                ["which", "xbps-install"], capture_output=True
+                            ).returncode
+                            == 0
+                        ):
                             available_distros.append("Void")
                             logger.debug("Found xbps-install - adding Void")
                 except FileNotFoundError:
@@ -1186,28 +1204,42 @@ class EnhancedBarManager:
             # OpenBSD support via custom implementation - double check with uname
             if Path("/usr/sbin/pkg_add").exists():
                 try:
-                    uname_output = subprocess.check_output(['uname']).decode().strip().lower()
+                    uname_output = (
+                        subprocess.check_output(["uname"]).decode().strip().lower()
+                    )
                     if uname_output == "openbsd":
                         available_distros.append("OpenBSD")
-                        logger.debug("OpenBSD confirmed via uname and pkg_add - adding OpenBSD")
+                        logger.debug(
+                            "OpenBSD confirmed via uname and pkg_add - adding OpenBSD"
+                        )
                     else:
-                        logger.warning(f"pkg_add found but uname reports '{uname_output}', not OpenBSD")
+                        logger.warning(
+                            f"pkg_add found but uname reports '{uname_output}', not OpenBSD"
+                        )
                 except subprocess.CalledProcessError:
-                    logger.warning("pkg_add found but uname command failed - skipping OpenBSD")
+                    logger.warning(
+                        "pkg_add found but uname command failed - skipping OpenBSD"
+                    )
 
         elif system == "darwin":  # macOS
             # Note: Homebrew is NOT in the supported list, but we could add it if needed
-            logger.info("macOS detected but Homebrew not in CheckUpdates supported distros")
+            logger.info(
+                "macOS detected but Homebrew not in CheckUpdates supported distros"
+            )
 
         if not available_distros:
             logger.info(f"No supported package managers detected on {system}")
-            logger.info("Update widgets support: Arch variants, Debian, Ubuntu, Fedora, Gentoo, Void, FreeBSD, OpenBSD")
+            logger.info(
+                "Update widgets support: Arch variants, Debian, Ubuntu, Fedora, Gentoo, Void, FreeBSD, OpenBSD"
+            )
         else:
             logger.info(f"Detected supported package managers: {available_distros}")
 
         return available_distros
 
-    def _create_update_widgets(self, colors: dict[str, str], special: dict[str, str]) -> list[Any]:
+    def _create_update_widgets(
+        self, colors: dict[str, str], special: dict[str, str]
+    ) -> list[Any]:
         """
         @brief Create update checking widgets based on detected package managers
         @param colors: Color dictionary
@@ -1252,7 +1284,9 @@ class EnhancedBarManager:
                 widgets.append(openbsd_widget)
                 logger.debug("Created GenPollText widget for OpenBSD updates")
             else:
-                widgets.append(self._create_safe_check_updates_widget(distro, colors, special))
+                widgets.append(
+                    self._create_safe_check_updates_widget(distro, colors, special)
+                )
 
         return widgets
 
@@ -1394,7 +1428,9 @@ class EnhancedBarManager:
                         unknown_char="?",
                     )
                     barconfig.append(battery_widget)
-                    logger.info("Successfully added standard Battery widget with dynamic icon")
+                    logger.info(
+                        "Successfully added standard Battery widget with dynamic icon"
+                    )
             except RuntimeError as e:
                 if "Unknown platform" in str(e):
                     logger.warning(
@@ -1436,7 +1472,7 @@ class EnhancedBarManager:
                     show_in_bar = notification_settings.get("show_in_bar", True)
 
                     # Create popup notification widget
-                    notification_widget = create_popup_notify_widget(
+                    notification_widget = create_notify_widget(
                         **self._get_widget_defaults_excluding("background"),
                         foreground=special.get("foreground", "#ffffff"),
                         background=special.get("background", "#000000"),
@@ -1602,3 +1638,178 @@ def create_enhanced_bar_manager(
     @return Configured EnhancedBarManager instance
     """
     return EnhancedBarManager(color_manager, qtile_config)
+
+
+class BarManagerFactory:
+    """
+    @brief Simplified factory for creating enhanced SVG bar manager instances
+
+    Provides the enhanced SVG bar manager with dynamic icon generation,
+    theme-aware coloring, and real-time system state updates.
+    """
+
+    def __init__(self) -> None:
+        """
+        @brief Initialize bar manager factory with SVG support
+        """
+        self._svg_available = self._check_svg_support()
+
+    def _check_svg_support(self) -> bool:
+        """
+        @brief Check if SVG support dependencies are available
+        @return True if SVG support is available
+        """
+        try:
+            # Test essential SVG dependencies
+            from modules.dpi_utils import scale_size
+            from modules.svg_utils import IconGenerator, SVGBuilder
+
+            # Verify imports are usable
+            assert (
+                callable(SVGBuilder)
+                and callable(IconGenerator)
+                and callable(scale_size)
+            )
+            return True
+        except ImportError as e:
+            logger.warning(f"SVG support dependencies missing: {e}")
+            return False
+
+    def is_svg_available(self) -> bool:
+        """
+        @brief Check if SVG support is available
+        @return True if SVG dependencies are available
+        """
+        return self._svg_available
+
+    def create_bar_manager(
+        self, color_manager: Any, qtile_config: Any
+    ) -> EnhancedBarManager:
+        """
+        @brief Create enhanced SVG bar manager instance
+        @param color_manager: Color management instance
+        @param qtile_config: Qtile configuration instance
+        @return Enhanced SVG bar manager instance
+        @throws Exception if SVG support is not available
+        """
+        if not self._svg_available:
+            raise RuntimeError(
+                "SVG support not available. Please install required dependencies: "
+                "xml.etree.ElementTree, pathlib, and ensure all SVG utility modules are present."
+            )
+
+        try:
+            logger.info("Creating enhanced SVG bar manager")
+            manager = create_enhanced_bar_manager(color_manager, qtile_config)
+
+            # Set icon method if specified in config
+            if hasattr(qtile_config, "icon_method"):
+                manager.icon_method = qtile_config.icon_method
+                logger.debug(f"Set icon method to: {qtile_config.icon_method}")
+
+            return manager
+
+        except Exception as e:
+            logger.error(f"Failed to create enhanced SVG bar manager: {e}")
+            raise RuntimeError(f"Could not initialize enhanced bar manager: {e}") from e
+
+    def get_bar_manager_info(self, qtile_config: Any) -> dict[str, Any]:
+        """
+        @brief Get information about the bar manager
+        @param qtile_config: Qtile configuration instance
+        @return Dictionary with bar manager information
+        """
+        return {
+            "type": "enhanced_svg",
+            "svg_support_available": self._svg_available,
+            "icon_method": getattr(qtile_config, "icon_method", "svg_dynamic"),
+            "features": [
+                "dynamic_icon_generation",
+                "theme_aware_coloring",
+                "real_time_updates",
+                "high_dpi_support",
+                "platform_compatibility",
+            ],
+        }
+
+
+# Global factory instance
+_bar_factory: BarManagerFactory | None = None
+
+
+def get_bar_factory() -> BarManagerFactory:
+    """
+    @brief Get the global bar manager factory instance
+    @return Singleton BarManagerFactory instance
+    """
+    global _bar_factory
+    if _bar_factory is None:
+        _bar_factory = BarManagerFactory()
+    return _bar_factory
+
+
+def create_bar_manager(color_manager: Any, qtile_config: Any) -> EnhancedBarManager:
+    """
+    @brief Unified factory function for creating the enhanced SVG bar manager
+    @param color_manager: Color management instance
+    @param qtile_config: Qtile configuration instance
+    @return Enhanced SVG bar manager instance
+    @throws Exception if SVG support is not available
+    """
+    factory = get_bar_factory()
+    return factory.create_bar_manager(color_manager, qtile_config)
+
+
+def get_bar_manager_status(
+    qtile_config: Any,
+) -> dict[str, Any]:
+    """
+    @brief Get bar manager status and capabilities
+    @param qtile_config: Qtile configuration instance
+    @return Dictionary with status information
+    """
+    factory = get_bar_factory()
+    info = factory.get_bar_manager_info(qtile_config)
+
+    # Add runtime status
+    info.update(
+        {
+            "factory_initialized": True,
+            "svg_dependencies_ok": factory.is_svg_available(),
+            "ready": factory.is_svg_available(),
+        }
+    )
+
+    return info
+
+
+def update_bar_manager_icons(bar_manager: EnhancedBarManager) -> None:
+    """
+    @brief Update bar manager icons for theme changes
+    @param bar_manager: Enhanced bar manager instance to update
+    """
+    try:
+        bar_manager.update_dynamic_icons()
+        logger.info("Updated dynamic icons for enhanced bar manager")
+    except Exception as e:
+        logger.warning(f"Failed to update dynamic icons: {e}")
+
+
+def get_icon_system_status(
+    bar_manager: EnhancedBarManager,
+) -> dict[str, Any]:
+    """
+    @brief Get icon system status information
+    @param bar_manager: Enhanced bar manager instance
+    @return Dictionary with icon system status
+    """
+    try:
+        return bar_manager.get_icon_status()
+    except Exception as e:
+        logger.warning(f"Failed to get icon status: {e}")
+        return {"error": str(e), "type": "enhanced_svg", "status": "error"}
+
+
+# Compatibility aliases for any existing code
+EnhancedBarFactory = BarManagerFactory
+get_enhanced_bar_manager = create_bar_manager

@@ -1,6 +1,4 @@
 var searchData=
 [
-  ['screen_5fcount_0',['screen_count',['../namespaceconfig.html#affc50bc841ecf947e9a3d0583a50560d',1,'config']]],
-  ['screens_1',['screens',['../namespaceconfig.html#a64f46d56b874fe263c68ac1786d236ed',1,'config']]],
-  ['system_2',['system',['../classmodules_1_1font__utils_1_1FontManager.html#a8de709c711d6601fdfc64a31162d6b4b',1,'modules::font_utils::FontManager']]]
+  ['qtile_5fconfig_0',['qtile_config',['../classmodules_1_1bars_1_1EnhancedBarManager.html#ab4dcb834462d67600d350c610baf6ecd',1,'modules.bars.EnhancedBarManager.qtile_config'],['../classmodules_1_1commands_1_1WindowCommands.html#af8d190387fd5938b4fa796239d73ff74',1,'modules.commands.WindowCommands.qtile_config'],['../classmodules_1_1notifications_1_1PopupManager.html#aa3565ca2dab923a6933b1efabe49cbf7',1,'modules.notifications.PopupManager.qtile_config'],['../namespaceconfig.html#afb81f624c375fa7a96f7c9e543ff8a28',1,'config.qtile_config']]]
 ];

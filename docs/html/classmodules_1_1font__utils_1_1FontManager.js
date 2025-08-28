@@ -5,7 +5,6 @@ var classmodules_1_1font__utils_1_1FontManager =
     [ "_check_font_linux", "classmodules_1_1font__utils_1_1FontManager.html#a3efab57ed15d7f3bee8abd0f6b008ca6", null ],
     [ "_check_font_macos", "classmodules_1_1font__utils_1_1FontManager.html#afae5d3c37d1b86684bb399ade66a92f3", null ],
     [ "_is_font_available", "classmodules_1_1font__utils_1_1FontManager.html#ad1149b5f97261c399b48c0965040933a", null ],
-    [ "clear_cache", "classmodules_1_1font__utils_1_1FontManager.html#a88b2de33bf2d9bffecd3ec596866874c", null ],
     [ "get_available_font", "classmodules_1_1font__utils_1_1FontManager.html#a321c1001aebf884574d5d142e8da31a0", null ],
     [ "get_font_info", "classmodules_1_1font__utils_1_1FontManager.html#a87fa450dfa364b2f19eb51b25e7b2081", null ],
     [ "_font_cache", "classmodules_1_1font__utils_1_1FontManager.html#adfc8298c4ae1f426e3341aad9373a2b2", null ],

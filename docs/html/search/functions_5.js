@@ -1,7 +1,6 @@
 var searchData=
 [
-  ['floating_5frules_0',['floating_rules',['../classqtile__config_1_1QtileConfig.html#a2dbb6531975abfb95132a1046a28ad19',1,'qtile_config::QtileConfig']]],
-  ['force_5ffloating_5fapps_1',['force_floating_apps',['../classqtile__config_1_1QtileConfig.html#afc122fc2729589a8c51ddd9f1cff3e84',1,'qtile_config::QtileConfig']]],
-  ['force_5fstart_5fcolor_5fmonitoring_2',['force_start_color_monitoring',['../namespacemodules_1_1simple__color__management.html#ab0a4ef631709d61bf4878b544332ae85',1,'modules::simple_color_management']]],
-  ['force_5fstart_5fmonitoring_3',['force_start_monitoring',['../classmodules_1_1simple__color__management_1_1SimpleColorManager.html#a3b304fe6e2753c5bbf5fd4e0fc89947b',1,'modules::simple_color_management::SimpleColorManager']]]
+  ['enforce_5fwindow_5ftiling_0',['enforce_window_tiling',['../classmodules_1_1window__manager_1_1WindowManager.html#ae5d7880a1bc5406332fb802ee636b65b',1,'modules::window_manager::WindowManager']]],
+  ['export_5fkey_5fbindings_1',['export_key_bindings',['../classmodules_1_1key__manager_1_1KeyManager.html#a6f1e1e267705329bf412d65424b55156',1,'modules::key_manager::KeyManager']]],
+  ['extract_5fkey_5fcombination_2',['extract_key_combination',['../classmodules_1_1hotkey__system_1_1KeyFormatter.html#a11c7fa78fd3421c8f1c96de419f561d8',1,'modules::hotkey_system::KeyFormatter']]]
 ];

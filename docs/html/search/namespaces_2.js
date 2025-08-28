@@ -1,8 +1,27 @@
 var searchData=
 [
   ['modules_0',['modules',['../namespacemodules.html',1,'']]],
-  ['modules_3a_3acolors_1',['colors',['../namespacemodules_1_1colors.html',1,'modules']]],
-  ['modules_3a_3adpi_5futils_2',['dpi_utils',['../namespacemodules_1_1dpi__utils.html',1,'modules']]],
-  ['modules_3a_3afont_5futils_3',['font_utils',['../namespacemodules_1_1font__utils.html',1,'modules']]],
-  ['modules_3a_3asimple_5fcolor_5fmanagement_4',['simple_color_management',['../namespacemodules_1_1simple__color__management.html',1,'modules']]]
+  ['modules_3a_3abars_1',['bars',['../namespacemodules_1_1bars.html',1,'modules']]],
+  ['modules_3a_3aclient_5fhooks_2',['client_hooks',['../namespacemodules_1_1client__hooks.html',1,'modules']]],
+  ['modules_3a_3acolor_5fmanagement_3',['color_management',['../namespacemodules_1_1color__management.html',1,'modules']]],
+  ['modules_3a_3acolors_4',['colors',['../namespacemodules_1_1colors.html',1,'modules']]],
+  ['modules_3a_3acommands_5',['commands',['../namespacemodules_1_1commands.html',1,'modules']]],
+  ['modules_3a_3aconfig_5fvalidator_6',['config_validator',['../namespacemodules_1_1config__validator.html',1,'modules']]],
+  ['modules_3a_3adependency_5fcontainer_7',['dependency_container',['../namespacemodules_1_1dependency__container.html',1,'modules']]],
+  ['modules_3a_3adpi_5futils_8',['dpi_utils',['../namespacemodules_1_1dpi__utils.html',1,'modules']]],
+  ['modules_3a_3afont_5futils_9',['font_utils',['../namespacemodules_1_1font__utils.html',1,'modules']]],
+  ['modules_3a_3agroups_10',['groups',['../namespacemodules_1_1groups.html',1,'modules']]],
+  ['modules_3a_3ahook_5fmanager_11',['hook_manager',['../namespacemodules_1_1hook__manager.html',1,'modules']]],
+  ['modules_3a_3ahooks_12',['hooks',['../namespacemodules_1_1hooks.html',1,'modules']]],
+  ['modules_3a_3ahotkey_5fsystem_13',['hotkey_system',['../namespacemodules_1_1hotkey__system.html',1,'modules']]],
+  ['modules_3a_3ahotkeys_14',['hotkeys',['../namespacemodules_1_1hotkeys.html',1,'modules']]],
+  ['modules_3a_3akey_5fbindings_15',['key_bindings',['../namespacemodules_1_1key__bindings.html',1,'modules']]],
+  ['modules_3a_3akey_5fmanager_16',['key_manager',['../namespacemodules_1_1key__manager.html',1,'modules']]],
+  ['modules_3a_3akeys_17',['keys',['../namespacemodules_1_1keys.html',1,'modules']]],
+  ['modules_3a_3alifecycle_5fhooks_18',['lifecycle_hooks',['../namespacemodules_1_1lifecycle__hooks.html',1,'modules']]],
+  ['modules_3a_3anotifications_19',['notifications',['../namespacemodules_1_1notifications.html',1,'modules']]],
+  ['modules_3a_3aplatform_20',['platform',['../namespacemodules_1_1platform.html',1,'modules']]],
+  ['modules_3a_3ascreens_21',['screens',['../namespacemodules_1_1screens.html',1,'modules']]],
+  ['modules_3a_3asvg_5futils_22',['svg_utils',['../namespacemodules_1_1svg__utils.html',1,'modules']]],
+  ['modules_3a_3awindow_5fmanager_23',['window_manager',['../namespacemodules_1_1window__manager.html',1,'modules']]]
 ];

@@ -248,10 +248,29 @@ WARN_LOGFILE           =
 #---------------------------------------------------------------------------
 # Configuration options related to the input files - Python Optimized
 #---------------------------------------------------------------------------
-INPUT                  = modules/simple_color_management.py \\
-                         modules/font_utils.py \\
-                         modules/dpi_utils.py \\
+INPUT                  = modules/bars.py \\
+                         modules/client_hooks.py \\
+                         modules/color_management.py \\
                          modules/colors.py \\
+                         modules/commands.py \\
+                         modules/config_validator.py \\
+                         modules/dependency_container.py \\
+                         modules/dpi_utils.py \\
+                         modules/font_utils.py \\
+                         modules/groups.py \\
+                         modules/hook_manager.py \\
+                         modules/hooks.py \\
+                         modules/hotkey_system.py \\
+                         modules/hotkeys.py \\
+                         modules/key_bindings.py \\
+                         modules/key_manager.py \\
+                         modules/keys.py \\
+                         modules/lifecycle_hooks.py \\
+                         modules/notifications.py \\
+                         modules/platform.py \\
+                         modules/screens.py \\
+                         modules/svg_utils.py \\
+                         modules/window_manager.py \\
                          scripts/generate_docs.py \\
                          qtile_config.py \\
                          config.py

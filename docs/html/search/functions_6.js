@@ -1,16 +1,19 @@
 var searchData=
 [
-  ['generate_5fdocs_0',['generate_docs',['../classgenerate__docs_1_1DoxygenDocGenerator.html#a9a01f2963a656f07756194812b9c63e9',1,'generate_docs::DoxygenDocGenerator']]],
-  ['get_5favailable_5ffont_1',['get_available_font',['../classmodules_1_1font__utils_1_1FontManager.html#a321c1001aebf884574d5d142e8da31a0',1,'modules.font_utils.FontManager.get_available_font()'],['../namespacemodules_1_1font__utils.html#a826036c588fa4dd4ef15333c1f7a11b3',1,'modules.font_utils.get_available_font()']]],
-  ['get_5fbsd_5fspecific_5foverrides_2',['get_bsd_specific_overrides',['../classqtile__config_1_1QtileConfig.html#af96ff305a48fc2f2460723f93cbb5e95',1,'qtile_config::QtileConfig']]],
-  ['get_5fcolor_5fmanager_3',['get_color_manager',['../namespacemodules_1_1simple__color__management.html#ad22cc9538c3d49ac764b3b4d301420f9',1,'modules::simple_color_management']]],
-  ['get_5fcolors_4',['get_colors',['../classmodules_1_1simple__color__management_1_1SimpleColorManager.html#a93e755af17a7613aeea6ecb894f1975c',1,'modules.simple_color_management.SimpleColorManager.get_colors()'],['../namespacemodules_1_1simple__color__management.html#afb9e0d4d2875157015b9e56584e8779d',1,'modules.simple_color_management.get_colors()']]],
-  ['get_5fconfig_5',['get_config',['../namespaceqtile__config.html#a0b6fb79a6216dad1da5f73f3183b9ee8',1,'qtile_config']]],
-  ['get_5fdpi_6',['get_dpi',['../namespacemodules_1_1dpi__utils.html#a21f093af2546627f55293f06ca28e737',1,'modules::dpi_utils']]],
-  ['get_5fdpi_5fmanager_7',['get_dpi_manager',['../namespacemodules_1_1dpi__utils.html#a135a2b03aaf4fdf05a4447584de0df1a',1,'modules::dpi_utils']]],
-  ['get_5ffont_5finfo_8',['get_font_info',['../classmodules_1_1font__utils_1_1FontManager.html#a87fa450dfa364b2f19eb51b25e7b2081',1,'modules.font_utils.FontManager.get_font_info()'],['../namespacemodules_1_1font__utils.html#a67bcdc2df35eede20eecedbc3a6ca5f2',1,'modules.font_utils.get_font_info()']]],
-  ['get_5fplatform_5foverrides_9',['get_platform_overrides',['../namespaceqtile__config.html#a0d2b8c5566065d1c7a68823d798c8928',1,'qtile_config']]],
-  ['get_5fscale_5ffactor_10',['get_scale_factor',['../namespacemodules_1_1dpi__utils.html#adea5465d8705c02e296bbc76d05d43be',1,'modules::dpi_utils']]],
-  ['get_5fscaling_5finfo_11',['get_scaling_info',['../classmodules_1_1dpi__utils_1_1DPIManager.html#adba09593c31c94091096ed71a1002b9e',1,'modules::dpi_utils::DPIManager']]],
-  ['groups_12',['groups',['../classqtile__config_1_1QtileConfig.html#a195269424cc8e75c50b814a28e73b8ea',1,'qtile_config::QtileConfig']]]
+  ['find_5fcommand_0',['find_command',['../classmodules_1_1platform_1_1PlatformInfo.html#a39d92890db27335547fc06c8b40ccef3',1,'modules::platform::PlatformInfo']]],
+  ['find_5fkey_5fconflicts_1',['find_key_conflicts',['../classmodules_1_1key__manager_1_1KeyManager.html#a12db1ba46ad851d5034d040e0523ae89',1,'modules::key_manager::KeyManager']]],
+  ['floating_5frules_2',['floating_rules',['../classqtile__config_1_1QtileConfig.html#a2dbb6531975abfb95132a1046a28ad19',1,'qtile_config::QtileConfig']]],
+  ['focus_5fdown_5fwith_5fwarp_3',['focus_down_with_warp',['../classmodules_1_1commands_1_1WindowCommands.html#ac3b41fdabbb2bf659cc32fa8a5c884e1',1,'modules::commands::WindowCommands']]],
+  ['focus_5fleft_5fwith_5fwarp_4',['focus_left_with_warp',['../classmodules_1_1commands_1_1WindowCommands.html#a3ee81470a0289763a24f607e5a378bae',1,'modules::commands::WindowCommands']]],
+  ['focus_5fnext_5fscreen_5fwith_5fwarp_5',['focus_next_screen_with_warp',['../classmodules_1_1commands_1_1WindowCommands.html#a519c03df56e0fb374a7a974876dfe4ce',1,'modules::commands::WindowCommands']]],
+  ['focus_5fprev_5fscreen_5fwith_5fwarp_6',['focus_prev_screen_with_warp',['../classmodules_1_1commands_1_1WindowCommands.html#a3be8a6651e226a2e55e21156b27aa34d',1,'modules::commands::WindowCommands']]],
+  ['focus_5fright_5fwith_5fwarp_7',['focus_right_with_warp',['../classmodules_1_1commands_1_1WindowCommands.html#a4b154a6ff85056a9c37113a04d08c39f',1,'modules::commands::WindowCommands']]],
+  ['focus_5fup_5fwith_5fwarp_8',['focus_up_with_warp',['../classmodules_1_1commands_1_1WindowCommands.html#a00aa583bc1e1762fe66d26352d98c986',1,'modules::commands::WindowCommands']]],
+  ['force_5ffloating_5fapps_9',['force_floating_apps',['../classqtile__config_1_1QtileConfig.html#afc122fc2729589a8c51ddd9f1cff3e84',1,'qtile_config::QtileConfig']]],
+  ['force_5fretile_5fall_5fwindows_10',['force_retile_all_windows',['../classmodules_1_1hook__manager_1_1HookManager.html#a744305a6f8a689210f6f2b4f8de006cb',1,'modules.hook_manager.HookManager.force_retile_all_windows()'],['../classmodules_1_1window__manager_1_1WindowManager.html#aa7b06cf463415c229082aa7c8771abdd',1,'modules.window_manager.WindowManager.force_retile_all_windows()']]],
+  ['force_5fscreen_5frefresh_11',['force_screen_refresh',['../classmodules_1_1lifecycle__hooks_1_1LifecycleHooks.html#a686b9d5acf978c7c1f62ce33b7b8b59a',1,'modules::lifecycle_hooks::LifecycleHooks']]],
+  ['force_5fstart_5fcolor_5fmonitoring_12',['force_start_color_monitoring',['../namespacemodules_1_1color__management.html#a7401792f7239fc0513d875e9ce4c6361',1,'modules::color_management']]],
+  ['force_5fstart_5fmonitoring_13',['force_start_monitoring',['../classmodules_1_1color__management_1_1ColorManager.html#a7f95974b3e01b5603900c21f43b761e6',1,'modules::color_management::ColorManager']]],
+  ['format_5fhotkey_5fline_14',['format_hotkey_line',['../classmodules_1_1hotkey__system_1_1KeyFormatter.html#ae5016eee146f1c19bc763d83e1875392',1,'modules::hotkey_system::KeyFormatter']]],
+  ['format_5fkey_5fcombination_15',['format_key_combination',['../classmodules_1_1hotkey__system_1_1KeyFormatter.html#a80e6ca0b0414f563c87d2e54eff34305',1,'modules::hotkey_system::KeyFormatter']]]
 ];
