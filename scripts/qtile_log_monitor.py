@@ -138,8 +138,22 @@ class QtileLogMonitor:
         print(f"🔧 Setting qtile log level to: {level}")
 
         try:
+            # Map string level to logging constant
+            level_map = {
+                "DEBUG": 10,
+                "INFO": 20,
+                "WARNING": 30,
+                "ERROR": 40,
+                "CRITICAL": 50
+            }
+            level_num = level_map[level]
+
             # Try different qtile CLI approaches to set log level
             commands_to_try = [
+                f"{self.qtile_cmd} shell -c \"import logging; logging.getLogger('libqtile').setLevel({level_num}); print('Set libqtile logger to', {level_num})\"",
+                f"{self.qtile_cmd} shell -c \"import logging; logging.getLogger('qtile').setLevel({level_num}); print('Set qtile logger to', {level_num})\"",
+                f"{self.qtile_cmd} shell -c \"import logging; logging.getLogger().setLevel({level_num}); print('Set root logger to', {level_num})\"",
+                f"{self.qtile_cmd} shell -c \"from libqtile.log_utils import logger; logger.setLevel({level_num}); print('Set log_utils logger to', {level_num})\"",
                 f"{self.qtile_cmd} cmd-obj -o core -f set_log_level -a {level}",
                 f"{self.qtile_cmd} shell -c \"qtile.core.set_log_level('{level}')\"",
                 f"{self.qtile_cmd} cmd-obj -o cmd -f set_log_level -a {level}",
@@ -156,15 +170,17 @@ class QtileLogMonitor:
                         timeout=10
                     )
 
+                    print(f"📤 Return code: {result.returncode}")
+                    if result.stdout.strip():
+                        print(f"📤 Output: {result.stdout.strip()}")
+                    if result.stderr.strip():
+                        print(f"� Error: {result.stderr.strip()}")
+
                     if result.returncode == 0:
                         print(f"✅ Successfully set log level to {level}")
-                        if result.stdout.strip():
-                            print(f"📤 Output: {result.stdout.strip()}")
                         return True
                     else:
                         print(f"⚠️  Command failed with return code {result.returncode}")
-                        if result.stderr.strip():
-                            print(f"📥 Error: {result.stderr.strip()}")
 
                 except subprocess.TimeoutExpired:
                     print(f"⏰ Command timed out: {cmd}")

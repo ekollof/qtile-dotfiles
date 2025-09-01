@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Color management for qtile
-Provides color loading and file watching functionality
+@brief Color management for qtile
+@details Provides color loading and file watching functionality with enhanced monitoring capabilities
 """
 
 import json
@@ -27,7 +27,10 @@ except ImportError:
 
 
 class ColorManager:
-    """Color manager with enhanced functionality"""
+    """
+    @brief Color manager with enhanced functionality
+    @details Manages color schemes from pywal files with automatic file watching and qtile integration
+    """
 
     def __init__(self, colors_file: str = "~/.cache/wal/colors.json") -> None:
         self.colors_file = Path(colors_file).expanduser()
@@ -110,7 +113,7 @@ class ColorManager:
 
         return self.colordict
 
-    def start_monitoring(self):
+    def start_monitoring(self) -> None:
         """
         @brief Start color file monitoring using watchdog or polling fallback
         @throws Exception if monitoring setup fails completely
@@ -128,7 +131,7 @@ class ColorManager:
 
         logger.info("Started color monitoring")
 
-    def _start_watchdog(self):
+    def _start_watchdog(self) -> None:
         """
         @brief Start watchdog-based file monitoring for color changes
         @throws Exception if watchdog setup fails
@@ -164,7 +167,7 @@ class ColorManager:
             logger.error(f"Watchdog failed: {e}, falling back to polling")
             self._start_polling()
 
-    def _start_polling(self):
+    def _start_polling(self) -> None:
         """
         @brief Start polling-based monitoring as fallback when watchdog unavailable
         """
@@ -251,7 +254,7 @@ class ColorManager:
         else:
             logger.warning("qtile instance not available or restart method missing")
 
-    def _handle_color_change(self):
+    def _handle_color_change(self) -> None:
         """
         @brief Handle color file changes by reloading colors and restarting qtile
         @throws Exception if color reload or qtile restart fails
@@ -287,7 +290,7 @@ class ColorManager:
             logger.error(f"Error handling color change: {e}")
             # Don't restart qtile if we can't load colors properly
 
-    def manual_reload_colors(self):
+    def manual_reload_colors(self) -> bool:
         """
         @brief Manually reload colors without automatic restart
         @return True if successful, False otherwise
@@ -308,7 +311,7 @@ class ColorManager:
             logger.error(f"Manual color reload failed: {e}")
             return False
 
-    def force_start_monitoring(self):
+    def force_start_monitoring(self) -> bool:
         """
         @brief Force start monitoring with better error handling
         @return True if successful, False otherwise
@@ -330,12 +333,15 @@ class ColorManager:
             logger.error(f"Failed to force start color monitoring: {e}")
             return False
 
-    def restart_monitoring(self):
+    def restart_monitoring(self) -> None:
+        """
+        @brief Restart color monitoring by stopping and starting again
+        """
         self.stop_monitoring()
         time.sleep(0.5)
         self.start_monitoring()
 
-    def stop_monitoring(self):
+    def stop_monitoring(self) -> None:
         """
         @brief Stop all monitoring threads and observers
         """
@@ -377,30 +383,47 @@ def get_colors() -> dict[str, Any]:
     return color_manager.get_colors()
 
 
-def start_color_monitoring():
+def start_color_monitoring() -> None:
+    """
+    @brief Start color monitoring for the global color manager instance
+    """
     color_manager.start_monitoring()
 
 
-def setup_color_monitoring():
+def setup_color_monitoring() -> None:
+    """
+    @brief Setup color monitoring for the global color manager instance
+    """
     color_manager.start_monitoring()
 
 
-def restart_color_monitoring():
+def restart_color_monitoring() -> None:
+    """
+    @brief Restart color monitoring for the global color manager instance
+    """
     color_manager.restart_monitoring()
 
 
-def manual_color_reload():
-    """Manual color reload function for keybindings"""
+def manual_color_reload() -> bool:
+    """
+    @brief Manual color reload function for keybindings
+    @return True if successful, False otherwise
+    """
     return color_manager.manual_reload_colors()
 
 
-def force_start_color_monitoring():
-    """Force start color monitoring with better error handling"""
+def force_start_color_monitoring() -> bool:
+    """
+    @brief Force start color monitoring with better error handling
+    @return True if successful, False otherwise
+    """
     return color_manager.force_start_monitoring()
 
 
-def restart_color_monitoring_optimized():
-    """Optimized restart - delegates to standard restart"""
+def restart_color_monitoring_optimized() -> None:
+    """
+    @brief Optimized restart - delegates to standard restart
+    """
     color_manager.restart_monitoring()
 
 

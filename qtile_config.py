@@ -206,7 +206,7 @@ class QtileConfig:
                 "clipboard_manager", "clipmenu"
             ),
             "wallpaper_picker": f"{self.home}/bin/pickwall.sh",
-            "wallpaper_random": f"{self.home}/bin/wallpaper.ksh -r",
+            "wallpaper_random": f"ksh -xv {self.home}/bin/wallpaper.ksh -r",
             "lock_session": self.platform_config.get_command(
                 "lock_session", "loginctl lock-session"
             ),
@@ -497,7 +497,8 @@ class QtileConfig:
     ) -> dict[str, int | float | list[int]]:  # Complex operation
         """
         @brief Status bar configuration - DPI scaled
-        @return Dictionary with height, opacity, and margin settings for the status bar
+        @return Dictionary with height, opacity, and margin settings
+        for the status bar
         """
         return {
             "height": scale_size(
@@ -679,7 +680,8 @@ def get_config() -> QtileConfig:
 def get_platform_overrides() -> dict[str, str]:
     """
     @brief Get platform-specific configuration overrides
-    @return Dictionary of platform-specific settings for current OS  # Complex operation
+    @return Dictionary of platform-specific settings for current OS
+    # Complex operation
     """
     return config.platform_config.get_config_overrides()
 

@@ -166,11 +166,26 @@ class FontManager:
 
         # Fallback: check common font directories
         font_dirs = [
-            Path("/usr/X11R6/lib/X11/fonts"),
-            Path("/usr/local/share/fonts"),
-            Path("/usr/share/fonts"),
-            Path("~/.fonts").expanduser(),
+            Path.home() / ".fonts",  # User fonts
         ]
+
+        # Add system font directories based on platform
+        if self.system == "linux":
+            font_dirs.extend([
+                Path("/usr/share/fonts"),
+                Path("/usr/local/share/fonts"),
+            ])
+        elif self.system in ["freebsd", "openbsd", "netbsd", "dragonfly"]:
+            font_dirs.extend([
+                Path("/usr/local/share/fonts"),
+                Path("/usr/share/fonts"),
+            ])
+        elif self.system == "darwin":
+            font_dirs.extend([
+                Path("/Library/Fonts"),
+                Path("/System/Library/Fonts"),
+                Path.home() / "Library/Fonts",
+            ])
 
         for font_dir in font_dirs:
             if font_dir.exists():
