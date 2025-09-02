@@ -59,10 +59,19 @@ class QtileConfig:
         # Check if ~/.profile exists
         if os.path.exists(profile_path):
             try:
+                # Find an appropriate shell to source the profile
+                shell_cmd = self._find_suitable_shell()
+                if not shell_cmd:
+                    # No suitable shell found, use fallback
+                    self._setup_path_fallback()
+                    return
+                
                 # Source ~/.profile and capture the resulting environment
                 # This mimics what shells do when they start
+                source_cmd = self._get_source_command(shell_cmd, profile_path)
+                
                 result = subprocess.run(
-                    ['/bin/bash', '-c', f'source {profile_path} && env'],
+                    source_cmd,
                     capture_output=True,
                     text=True,
                     timeout=5  # Prevent hanging
@@ -74,12 +83,67 @@ class QtileConfig:
                         if '=' in line:
                             key, value = line.split('=', 1)
                             os.environ[key] = value
+                else:
+                    # Sourcing failed, use fallback
+                    self._setup_path_fallback()
             except (subprocess.TimeoutExpired, subprocess.SubprocessError):
                 # If sourcing fails, fall back to manual PATH setup
                 self._setup_path_fallback()
         else:
             # No ~/.profile, use fallback
             self._setup_path_fallback()
+    
+    def _find_suitable_shell(self) -> str | None:
+        """Find a suitable shell for sourcing environment files"""
+        import shutil
+        
+        # Preferred shells in order of preference
+        shell_candidates = [
+            'bash',      # Most common and feature-rich
+            'zsh',       # Modern alternative to bash
+            'ksh',       # Available on most Unix systems
+            'dash',      # Debian/Ubuntu default sh
+            'sh',        # POSIX shell (always available)
+        ]
+        
+        # Try to find the first available shell
+        for shell in shell_candidates:
+            shell_path = shutil.which(shell)
+            if shell_path:
+                return shell_path
+        
+        # Last resort: try common shell paths
+        fallback_paths = [
+            '/bin/bash',
+            '/usr/bin/bash',
+            '/usr/local/bin/bash',
+            '/bin/sh',
+            '/usr/bin/sh',
+        ]
+        
+        import os
+        for path in fallback_paths:
+            if os.path.exists(path) and os.access(path, os.X_OK):
+                return path
+        
+        return None
+    
+    def _get_source_command(self, shell_path: str, profile_path: str) -> list[str]:
+        """Get the appropriate source command for the given shell"""
+        import os
+        
+        shell_name = os.path.basename(shell_path)
+        
+        # Different shells have different syntax for sourcing files
+        if shell_name in ['bash', 'zsh', 'ksh']:
+            # These shells support the 'source' command
+            return [shell_path, '-c', f'source "{profile_path}" && env']
+        elif shell_name in ['dash', 'sh']:
+            # POSIX shells use '.' instead of 'source'
+            return [shell_path, '-c', f'. "{profile_path}" && env']
+        else:
+            # Default to POSIX syntax for unknown shells
+            return [shell_path, '-c', f'. "{profile_path}" && env']
     
     def _setup_path_fallback(self):
         """Fallback PATH setup if ~/.profile sourcing fails"""
