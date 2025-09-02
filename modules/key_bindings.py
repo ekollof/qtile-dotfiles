@@ -3,7 +3,8 @@
 Key binding definitions for qtile
 """
 
-from typing import Any
+import shlex
+from typing import Any, Union, List
 
 from libqtile.config import Key
 from libqtile.lazy import lazy
@@ -29,6 +30,33 @@ class KeyBindings:
         self.alt = config.alt_key
         self.terminal = config.terminal
         self.apps = config.applications
+
+    def smart_spawn(self, command: Union[str, List[str]], **kwargs) -> Any:
+        """
+        Smart spawn wrapper that handles both string and list commands.
+        
+        For backwards compatibility:
+        - If command is already a list, pass it through unchanged
+        - If command is a string, split it using shell-like parsing
+        
+        Args:
+            command: Command to spawn (string or list)
+            **kwargs: Additional arguments to pass to lazy.spawn
+            
+        Returns:
+            lazy.spawn command ready for keybinding
+        """
+        if isinstance(command, str):
+            # Use shlex to properly split the command while handling quotes, etc.
+            try:
+                command_list = shlex.split(command)
+            except ValueError:
+                # If shlex fails (e.g., unmatched quotes), fall back to simple split
+                command_list = command.split()
+            return lazy.spawn(command_list, **kwargs)
+        else:
+            # Already a list or other iterable, pass through unchanged
+            return lazy.spawn(command, **kwargs)
 
     def get_movement_keys(self):
         """Get window movement and focus keys"""
@@ -233,13 +261,13 @@ class KeyBindings:
             Key(
                 [self.mod],
                 "Return",
-                lazy.spawn(self.terminal),
+                self.smart_spawn(self.terminal),
                 desc="Launch terminal",
             ),
             Key(
                 [self.mod],
                 "w",
-                lazy.spawn(self.config.browser),
+                self.smart_spawn(self.config.browser),
                 desc="Start browser",
             ),
             Key(
@@ -252,44 +280,44 @@ class KeyBindings:
             Key(
                 [self.mod],
                 "p",
-                lazy.spawn(self.apps["launcher"]),
+                self.smart_spawn(self.apps["launcher"]),
                 desc="Launch application launcher",
             ),
             Key(
                 [self.mod, "shift"],
                 "p",
-                lazy.spawn(self.apps["password_manager"]),
+                self.smart_spawn(self.apps["password_manager"]),
                 desc="Launch password manager",
             ),
             Key(
                 [self.mod, "shift"],
                 "o",
-                lazy.spawn(self.apps["totp_manager"]),
+                self.smart_spawn(self.apps["totp_manager"]),
                 desc="Launch TOTP manager",
             ),
             Key(
                 [self.mod, "shift"],
                 "c",
-                lazy.spawn(self.apps["clipboard"]),
+                self.smart_spawn(self.apps["clipboard"]),
                 desc="Launch clipboard manager",
             ),
             # Utility applications
             Key(
                 [self.mod, "control"],
                 "w",
-                lazy.spawn(self.apps["wallpaper_picker"]),
+                self.smart_spawn(self.apps["wallpaper_picker"]),
                 desc="Pick wallpaper",
             ),
             Key(
                 [self.alt, "control"],
                 "l",
-                lazy.spawn(self.apps["lock_session"]),
+                self.smart_spawn(self.apps["lock_session"]),
                 desc="Lock session",
             ),
             Key(
                 [self.alt, "control"],
                 "w",
-                lazy.spawn(self.apps["wallpaper_random"]),
+                self.smart_spawn(self.apps["wallpaper_random"]),
                 desc="Set random wallpaper",
             ),
         ]

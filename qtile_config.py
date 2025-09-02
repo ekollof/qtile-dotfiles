@@ -5,7 +5,10 @@ Centralized configuration for qtile - DPI AWARE VERSION
 @brief Centralized qtile configuration with automatic DPI scaling support
 @author qtile configuration system
 
-All user-configurable settings in one place with automatic DPI scaling.
+All user-conf            "wallpaper_picker": f"{self.home}/bin/pick            "wallpaper_picker": f"{self.home}/bin/pickwall.sh",
+            "wallpaper_random": f"{self.home}/bin/wallpaper.ksh -r",
+            "lock_session": self.platform_config.get_command(l.sh",
+            "wallpaper_random": f"{self.home}/bin/wallpaper.ksh -r",rable settings in one place with automatic DPI scaling.
 Provides platform-aware defaults, font management, and cross-platform
 compatibility for both X11 and Wayland environments.
 
@@ -42,6 +45,59 @@ class QtileConfig:
         self.dpi_manager = get_dpi_manager()
         self.platform_info = get_platform_info()
         self.platform_config = get_platform_config()
+        
+        # Fix PATH for spawned processes to include user directories
+        self._setup_environment()
+        
+    def _setup_environment(self):
+        """Setup environment variables for spawned processes by sourcing ~/.profile"""
+        import os
+        import subprocess
+        
+        profile_path = f"{self.home}/.profile"
+        
+        # Check if ~/.profile exists
+        if os.path.exists(profile_path):
+            try:
+                # Source ~/.profile and capture the resulting environment
+                # This mimics what shells do when they start
+                result = subprocess.run(
+                    ['/bin/bash', '-c', f'source {profile_path} && env'],
+                    capture_output=True,
+                    text=True,
+                    timeout=5  # Prevent hanging
+                )
+                
+                if result.returncode == 0:
+                    # Parse the environment output and update os.environ
+                    for line in result.stdout.strip().split('\n'):
+                        if '=' in line:
+                            key, value = line.split('=', 1)
+                            os.environ[key] = value
+            except (subprocess.TimeoutExpired, subprocess.SubprocessError):
+                # If sourcing fails, fall back to manual PATH setup
+                self._setup_path_fallback()
+        else:
+            # No ~/.profile, use fallback
+            self._setup_path_fallback()
+    
+    def _setup_path_fallback(self):
+        """Fallback PATH setup if ~/.profile sourcing fails"""
+        import os
+        
+        user_paths = [
+            f"{self.home}/bin",
+            f"{self.home}/.local/bin"
+        ]
+        
+        current_path = os.environ.get('PATH', '')
+        path_entries = current_path.split(':')
+        
+        for user_path in user_paths:
+            if user_path not in path_entries:
+                current_path = f"{user_path}:{current_path}"
+        
+        os.environ['PATH'] = current_path
 
     # ===== FONT SETTINGS =====
     #
@@ -206,7 +262,7 @@ class QtileConfig:
                 "clipboard_manager", "clipmenu"
             ),
             "wallpaper_picker": f"{self.home}/bin/pickwall.sh",
-            "wallpaper_random": f"ksh -xv {self.home}/bin/wallpaper.ksh -r",
+           "wallpaper_random": f"{self.home}/bin/wallpaper_debug.sh -r",
             "lock_session": self.platform_config.get_command(
                 "lock_session", "loginctl lock-session"
             ),
