@@ -31,7 +31,7 @@ class KeyBindings:
         self.terminal = config.terminal
         self.apps = config.applications
 
-    def smart_spawn(self, command: str | list[str], **kwargs) -> Any:
+    def smart_spawn(self, command: str | list[str], **kwargs: Any) -> Any:
         """
         Smart spawn wrapper that handles both string and list commands.
         
