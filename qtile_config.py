@@ -262,7 +262,7 @@ class QtileConfig:
                 "clipboard_manager", "clipmenu"
             ),
             "wallpaper_picker": f"{self.home}/bin/pickwall.sh",
-           "wallpaper_random": f"{self.home}/bin/wallpaper_debug.sh -r",
+           "wallpaper_random": f"{self.home}/bin/wallpaper.ksh -r",
             "lock_session": self.platform_config.get_command(
                 "lock_session", "loginctl lock-session"
             ),
