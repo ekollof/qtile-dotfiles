@@ -135,15 +135,16 @@ class QtileConfig:
         shell_name = os.path.basename(shell_path)
         
         # Different shells have different syntax for sourcing files
-        if shell_name in ['bash', 'zsh', 'ksh']:
-            # These shells support the 'source' command
-            return [shell_path, '-c', f'source "{profile_path}" && env']
-        elif shell_name in ['dash', 'sh']:
-            # POSIX shells use '.' instead of 'source'
-            return [shell_path, '-c', f'. "{profile_path}" && env']
-        else:
-            # Default to POSIX syntax for unknown shells
-            return [shell_path, '-c', f'. "{profile_path}" && env']
+        match shell_name:
+            case "bash" | "zsh" | "ksh":
+                # These shells support the 'source' command
+                return [shell_path, '-c', f'source "{profile_path}" && env']
+            case "dash" | "sh":
+                # POSIX shells use '.' instead of 'source'
+                return [shell_path, '-c', f'. "{profile_path}" && env']
+            case _:
+                # Default to POSIX syntax for unknown shells
+                return [shell_path, '-c', f'. "{profile_path}" && env']
     
     def _setup_path_fallback(self):
         """Fallback PATH setup if ~/.profile sourcing fails"""

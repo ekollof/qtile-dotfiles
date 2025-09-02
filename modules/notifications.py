@@ -213,12 +213,16 @@ class PopupManager:
         @param notification: PopupNotification object with all details
         """
         # Determine timeout - notifications with actions should not auto-timeout
-        if notification.actions or notification.urgency == "critical":
-            timeout = 0.0  # Never timeout for interactive or critical notifications
-        elif notification.urgency == "low":
-            timeout = 3.0
+        if notification.actions:
+            timeout = 0.0  # Never timeout for interactive notifications
         else:
-            timeout = 5.0
+            match notification.urgency:
+                case "critical":
+                    timeout = 0.0  # Never timeout for critical notifications
+                case "low":
+                    timeout = 3.0
+                case _:  # normal or unknown urgency
+                    timeout = 5.0
 
         # Dismiss oldest if we have too many
         while len(self.active_notifications) >= self.max_notifications:

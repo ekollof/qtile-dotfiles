@@ -4,7 +4,7 @@ Key binding definitions for qtile
 """
 
 import shlex
-from typing import Any, Union, List
+from typing import Any
 
 from libqtile.config import Key
 from libqtile.lazy import lazy
@@ -31,7 +31,7 @@ class KeyBindings:
         self.terminal = config.terminal
         self.apps = config.applications
 
-    def smart_spawn(self, command: Union[str, List[str]], **kwargs) -> Any:
+    def smart_spawn(self, command: str | list[str], **kwargs) -> Any:
         """
         Smart spawn wrapper that handles both string and list commands.
         

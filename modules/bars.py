@@ -1094,138 +1094,142 @@ class EnhancedBarManager:
         system = platform.system().lower()
         logger.debug(f"Detected system: {system}")
 
-        if system == "linux":
-            # Check for Arch Linux
-            if Path("/etc/arch-release").exists():
-                # Check for checkupdates command (official repos) - preferred method
-                if (
-                    subprocess.run(
-                        ["which", "checkupdates"], capture_output=True
-                    ).returncode
-                    == 0
-                ):
-                    available_distros.append("Arch_checkupdates")
-                    logger.debug("Found checkupdates - adding Arch_checkupdates")
-
-                # Check for paru (AUR helper) - preferred over yay
-                if (
-                    subprocess.run(["which", "paru"], capture_output=True).returncode
-                    == 0
-                ):
-                    available_distros.append("Arch_paru")
-                    logger.debug("Found paru - adding Arch_paru")
-                # Check for yay (alternative AUR helper)
-                elif (
-                    subprocess.run(["which", "yay"], capture_output=True).returncode
-                    == 0
-                ):
-                    available_distros.append("Arch_yay")
-                    logger.debug("Found yay - adding Arch_yay")
-                # Fallback to basic pacman
-                elif (
-                    subprocess.run(["which", "pacman"], capture_output=True).returncode
-                    == 0
-                ):
-                    available_distros.append("Arch")
-                    logger.debug("Found pacman - adding Arch")
-
-            # Check for Ubuntu/Debian
-            elif Path("/etc/debian_version").exists():
-                try:
-                    with open("/etc/os-release") as f:
-                        os_info = f.read().lower()
-                        if "ubuntu" in os_info:
-                            if (
-                                subprocess.run(
-                                    ["which", "aptitude"], capture_output=True
-                                ).returncode
-                                == 0
-                            ):
-                                available_distros.append("Ubuntu")
-                                logger.debug("Found aptitude - adding Ubuntu")
-                        else:  # Debian or derivative
-                            if (
-                                subprocess.run(
-                                    ["which", "apt-show-versions"], capture_output=True
-                                ).returncode
-                                == 0
-                            ):
-                                available_distros.append("Debian")
-                                logger.debug("Found apt-show-versions - adding Debian")
-                except FileNotFoundError:
-                    # Fallback to generic check
+        match system:
+            case "linux":
+                # Check for Arch Linux
+                if Path("/etc/arch-release").exists():
+                    # Check for checkupdates command (official repos) - preferred method
                     if (
-                        subprocess.run(["which", "apt"], capture_output=True).returncode
+                        subprocess.run(
+                            ["which", "checkupdates"], capture_output=True
+                        ).returncode
                         == 0
                     ):
-                        available_distros.append("Ubuntu")  # Use Ubuntu as fallback
-                        logger.debug("Found apt - adding Ubuntu (fallback)")
+                        available_distros.append("Arch_checkupdates")
+                        logger.debug("Found checkupdates - adding Arch_checkupdates")
 
-            # Check for Fedora
-            elif Path("/etc/fedora-release").exists():
-                if (
-                    subprocess.run(["which", "dnf"], capture_output=True).returncode
-                    == 0
-                ):
-                    available_distros.append("Fedora")
-                    logger.debug("Found dnf - adding Fedora")
+                    # Check for paru (AUR helper) - preferred over yay
+                    if (
+                        subprocess.run(["which", "paru"], capture_output=True).returncode
+                        == 0
+                    ):
+                        available_distros.append("Arch_paru")
+                        logger.debug("Found paru - adding Arch_paru")
+                    # Check for yay (alternative AUR helper)
+                    elif (
+                        subprocess.run(["which", "yay"], capture_output=True).returncode
+                        == 0
+                    ):
+                        available_distros.append("Arch_yay")
+                        logger.debug("Found yay - adding Arch_yay")
+                    # Fallback to basic pacman
+                    elif (
+                        subprocess.run(["which", "pacman"], capture_output=True).returncode
+                        == 0
+                    ):
+                        available_distros.append("Arch")
+                        logger.debug("Found pacman - adding Arch")
 
-            # Check for Gentoo
-            elif Path("/etc/gentoo-release").exists():
-                if (
-                    subprocess.run(["which", "eix"], capture_output=True).returncode
-                    == 0
-                ):
-                    available_distros.append("Gentoo_eix")
-                    logger.debug("Found eix - adding Gentoo_eix")
-
-            # Check for Void Linux
-            elif Path("/etc/os-release").exists():
-                try:
-                    with open("/etc/os-release") as f:
+                # Check for Ubuntu/Debian
+                elif Path("/etc/debian_version").exists():
+                    try:
+                        with open("/etc/os-release") as f:
+                            os_info = f.read().lower()
+                            if "ubuntu" in os_info:
+                                if (
+                                    subprocess.run(
+                                        ["which", "aptitude"], capture_output=True
+                                    ).returncode
+                                    == 0
+                                ):
+                                    available_distros.append("Ubuntu")
+                                    logger.debug("Found aptitude - adding Ubuntu")
+                            else:  # Debian or derivative
+                                if (
+                                    subprocess.run(
+                                        ["which", "apt-show-versions"], capture_output=True
+                                    ).returncode
+                                    == 0
+                                ):
+                                    available_distros.append("Debian")
+                                    logger.debug("Found apt-show-versions - adding Debian")
+                    except FileNotFoundError:
+                        # Fallback to generic check
                         if (
-                            "void" in f.read().lower()
-                            and subprocess.run(
-                                ["which", "xbps-install"], capture_output=True
-                            ).returncode
+                            subprocess.run(["which", "apt"], capture_output=True).returncode
                             == 0
                         ):
-                            available_distros.append("Void")
-                            logger.debug("Found xbps-install - adding Void")
-                except FileNotFoundError:
-                    pass
+                            available_distros.append("Ubuntu")  # Use Ubuntu as fallback
+                            logger.debug("Found apt - adding Ubuntu (fallback)")
 
-        elif system == "freebsd":
-            if subprocess.run(["which", "pkg"], capture_output=True).returncode == 0:
-                available_distros.append("FreeBSD")
-                logger.debug("Found pkg - adding FreeBSD")
+                # Check for Fedora
+                elif Path("/etc/fedora-release").exists():
+                    if (
+                        subprocess.run(["which", "dnf"], capture_output=True).returncode
+                        == 0
+                    ):
+                        available_distros.append("Fedora")
+                        logger.debug("Found dnf - adding Fedora")
 
-        elif system == "openbsd":
-            # OpenBSD support via custom implementation - double check with uname
-            if Path("/usr/sbin/pkg_add").exists():
-                try:
-                    uname_output = (
-                        subprocess.check_output(["uname"]).decode().strip().lower()
-                    )
-                    if uname_output == "openbsd":
-                        available_distros.append("OpenBSD")
-                        logger.debug(
-                            "OpenBSD confirmed via uname and pkg_add - adding OpenBSD"
+                # Check for Gentoo
+                elif Path("/etc/gentoo-release").exists():
+                    if (
+                        subprocess.run(["which", "eix"], capture_output=True).returncode
+                        == 0
+                    ):
+                        available_distros.append("Gentoo_eix")
+                        logger.debug("Found eix - adding Gentoo_eix")
+
+                # Check for Void Linux
+                elif Path("/etc/os-release").exists():
+                    try:
+                        with open("/etc/os-release") as f:
+                            if (
+                                "void" in f.read().lower()
+                                and subprocess.run(
+                                    ["which", "xbps-install"], capture_output=True
+                                ).returncode
+                                == 0
+                            ):
+                                available_distros.append("Void")
+                                logger.debug("Found xbps-install - adding Void")
+                    except FileNotFoundError:
+                        pass
+
+            case "freebsd":
+                if subprocess.run(["which", "pkg"], capture_output=True).returncode == 0:
+                    available_distros.append("FreeBSD")
+                    logger.debug("Found pkg - adding FreeBSD")
+
+            case "openbsd":
+                # OpenBSD support via custom implementation - double check with uname
+                if Path("/usr/sbin/pkg_add").exists():
+                    try:
+                        uname_output = (
+                            subprocess.check_output(["uname"]).decode().strip().lower()
                         )
-                    else:
+                        if uname_output == "openbsd":
+                            available_distros.append("OpenBSD")
+                            logger.debug(
+                                "OpenBSD confirmed via uname and pkg_add - adding OpenBSD"
+                            )
+                        else:
+                            logger.warning(
+                                f"pkg_add found but uname reports '{uname_output}', not OpenBSD"
+                            )
+                    except subprocess.CalledProcessError:
                         logger.warning(
-                            f"pkg_add found but uname reports '{uname_output}', not OpenBSD"
+                            "pkg_add found but uname command failed - skipping OpenBSD"
                         )
-                except subprocess.CalledProcessError:
-                    logger.warning(
-                        "pkg_add found but uname command failed - skipping OpenBSD"
-                    )
 
-        elif system == "darwin":  # macOS
-            # Note: Homebrew is NOT in the supported list, but we could add it if needed
-            logger.info(
-                "macOS detected but Homebrew not in CheckUpdates supported distros"
-            )
+            case "darwin":  # macOS
+                # Note: Homebrew is NOT in the supported list, but we could add it if needed
+                logger.info(
+                    "macOS detected but Homebrew not in CheckUpdates supported distros"
+                )
+
+            case _:  # Unknown systems
+                logger.debug(f"Unsupported system for package manager detection: {system}")
 
         if not available_distros:
             logger.info(f"No supported package managers detected on {system}")
