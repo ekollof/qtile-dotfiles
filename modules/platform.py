@@ -501,7 +501,7 @@ class PlatformMascotGenerator:
         orange = colors["orange"]  # Beak and feet
         eye_highlight = colors["highlight"]  # Eye highlights
 
-        return f'''<svg width="{size}" height="{size}" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        return f"""<svg width="{size}" height="{size}" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
             <!-- Tux the Penguin - Linux Mascot (Enhanced) -->
             <!-- Main body with better shape -->
             <ellipse cx="12" cy="16.5" rx="6.5" ry="5.2" fill="{black}"/>
@@ -534,7 +534,7 @@ class PlatformMascotGenerator:
 
             <!-- Add subtle shadow for depth -->
             <ellipse cx="12" cy="21" rx="5" ry="0.8" fill="{colors["background"]}" opacity="0.3"/>
-        </svg>'''
+        </svg>"""
 
     def _puffy_pufferfish(self, size: int, colors: dict[str, str]) -> str:
         """
@@ -551,7 +551,7 @@ class PlatformMascotGenerator:
         fin_color = colors["secondary"]  # Fins and tail
         eye_highlight = colors["highlight"]  # Eye highlights
 
-        return f'''<svg width="{size}" height="{size}" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        return f"""<svg width="{size}" height="{size}" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
             <!-- Puffy the Pufferfish - OpenBSD Mascot (Enhanced) -->
             <!-- Main body with better shape -->
             <ellipse cx="12" cy="12" rx="7.5" ry="6.5" fill="{body_color}"/>
@@ -599,7 +599,7 @@ class PlatformMascotGenerator:
 
             <!-- Add subtle body texture/shadow -->
             <ellipse cx="12" cy="12.5" rx="6" ry="5" fill="{colors["dark"]}" opacity="0.1"/>
-        </svg>'''
+        </svg>"""
 
     def _beastie_daemon(self, size: int, colors: dict[str, str]) -> str:
         """
@@ -617,7 +617,7 @@ class PlatformMascotGenerator:
         smile_color = colors["orange"]  # Smile (warm)
         eye_highlight = colors["highlight"]  # Eye highlights
 
-        return f'''<svg width="{size}" height="{size}" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        return f"""<svg width="{size}" height="{size}" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
             <!-- Beastie the BSD Daemon - FreeBSD Mascot (Enhanced) -->
             <!-- Head with better shape and details -->
             <ellipse cx="12" cy="10.5" rx="5.2" ry="4.8" fill="{body_color}"/>
@@ -660,7 +660,7 @@ class PlatformMascotGenerator:
 
             <!-- Add subtle body shadow for depth -->
             <ellipse cx="12" cy="18" rx="3.5" ry="4" fill="{colors["dark"]}" opacity="0.1"/>
-        </svg>'''
+        </svg>"""
 
     def _netbsd_flag(self, size: int, colors: dict[str, str]) -> str:
         """
@@ -676,7 +676,7 @@ class PlatformMascotGenerator:
         flag_highlight = colors["white"]  # Flag highlights
         flag_shadow = colors["background"]  # Shadow effects
 
-        return f'''<svg width="{size}" height="{size}" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        return f"""<svg width="{size}" height="{size}" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
             <!-- NetBSD Flag Logo (Enhanced) -->
             <!-- Flagpole with better design -->
             <rect x="3.5" y="3" width="2" height="18" fill="{pole_color}" rx="0.5"/>
@@ -712,7 +712,7 @@ class PlatformMascotGenerator:
             <path d="M 6 4 Q 8 3.5 10 4" stroke="{flag_highlight}" stroke-width="0.3" fill="none" opacity="0.4"/>
             <path d="M 6 6 Q 9 5.5 12 6" stroke="{flag_highlight}" stroke-width="0.3" fill="none" opacity="0.3"/>
             <path d="M 6 8 Q 10 7.5 14 8" stroke="{flag_highlight}" stroke-width="0.3" fill="none" opacity="0.2"/>
-        </svg>'''
+        </svg>"""
 
     def _apple_logo(self, size: int, colors: dict[str, str]) -> str:
         """
@@ -729,7 +729,7 @@ class PlatformMascotGenerator:
         apple_stem = colors["dark"]  # Stem
         apple_shadow = colors["background"]  # Shadow effects
 
-        return f'''<svg width="{size}" height="{size}" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        return f"""<svg width="{size}" height="{size}" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
             <!-- Apple Logo - macOS (Enhanced) -->
             <!-- Apple body with better shape and gradient effect -->
             <path d="M 12 20.5 C 8.5 20.5 6.5 17.5 6.5 14.5 C 6.5 11.5 8.5 9.5 12 9.5 C 12.8 9.5 13.5 9.7 14.2 10 C 14.5 9.7 15 9.5 15.5 9.5 C 18.5 9.5 20.5 11.5 20.5 14.5 C 20.5 17.5 18.5 20.5 15.5 20.5 C 14.8 20.5 14.2 20.3 13.5 20 C 13.2 20.3 12.8 20.5 12 20.5 Z" fill="{apple_body}"/>
@@ -757,7 +757,7 @@ class PlatformMascotGenerator:
 
             <!-- Apple body shadow for depth -->
             <ellipse cx="12.5" cy="15" rx="5" ry="4" fill="{apple_shadow}" opacity="0.15"/>
-        </svg>'''
+        </svg>"""
 
     def _windows_logo(self, size: int, colors: dict[str, str]) -> str:
         """
@@ -774,7 +774,7 @@ class PlatformMascotGenerator:
         pane_highlight = colors["highlight"]  # Pane highlights
         pane_shadow = colors["background"]  # Pane shadows
 
-        return f'''<svg width="{size}" height="{size}" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        return f"""<svg width="{size}" height="{size}" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
             <!-- Windows Logo - Classic Four Panes (Enhanced) -->
             <!-- Top-left pane (blue) with depth -->
             <rect x="4.5" y="4.5" width="7" height="7" fill="{blue_pane}"/>
@@ -811,7 +811,7 @@ class PlatformMascotGenerator:
             <path d="M 14 7 L 15.5 10 L 17 7 M 17 7 L 18.5 10 L 20 7" stroke="{pane_highlight}" stroke-width="0.8" fill="none" opacity="0.4"/>
             <path d="M 6 15 L 7.5 18 L 9 15 M 9 15 L 10.5 18 L 12 15" stroke="{pane_highlight}" stroke-width="0.8" fill="none" opacity="0.4"/>
             <path d="M 14 15 L 15.5 18 L 17 15 M 17 15 L 18.5 18 L 20 15" stroke="{pane_highlight}" stroke-width="0.8" fill="none" opacity="0.4"/>
-        </svg>'''
+        </svg>"""
 
     def _generic_computer(self, size: int, colors: dict[str, str]) -> str:
         """
@@ -829,7 +829,7 @@ class PlatformMascotGenerator:
         keyboard_color = colors["background"]  # Keyboard
         screen_highlight = colors["white"]  # Screen highlights
 
-        return f'''<svg width="{size}" height="{size}" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        return f"""<svg width="{size}" height="{size}" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
             <!-- Generic Computer Monitor (Enhanced) -->
             <!-- Monitor frame with better design -->
             <rect x="3" y="5" width="18" height="12" rx="1.5" fill="{monitor_frame}"/>
@@ -874,7 +874,7 @@ class PlatformMascotGenerator:
 
             <!-- Screen reflection/glare -->
             <polygon points="4,6 8,6 6,10 4,10" fill="{screen_highlight}" opacity="0.15"/>
-        </svg>'''
+        </svg>"""
 
 
 # Global platform detection instances

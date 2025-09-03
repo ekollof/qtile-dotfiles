@@ -769,9 +769,7 @@ class EnhancedBarManager:
                 return (
                     1
                     if self.suffix_value > other.suffix_value
-                    else -1
-                    if self.suffix_value < other.suffix_value
-                    else 0
+                    else -1 if self.suffix_value < other.suffix_value else 0
                 )
             if self.suffix == "pl":
                 return 1
@@ -1110,7 +1108,9 @@ class EnhancedBarManager:
 
                     # Check for paru (AUR helper) - preferred over yay
                     if (
-                        subprocess.run(["which", "paru"], capture_output=True).returncode
+                        subprocess.run(
+                            ["which", "paru"], capture_output=True
+                        ).returncode
                         == 0
                     ):
                         available_distros.append("Arch_paru")
@@ -1124,7 +1124,9 @@ class EnhancedBarManager:
                         logger.debug("Found yay - adding Arch_yay")
                     # Fallback to basic pacman
                     elif (
-                        subprocess.run(["which", "pacman"], capture_output=True).returncode
+                        subprocess.run(
+                            ["which", "pacman"], capture_output=True
+                        ).returncode
                         == 0
                     ):
                         available_distros.append("Arch")
@@ -1147,16 +1149,21 @@ class EnhancedBarManager:
                             else:  # Debian or derivative
                                 if (
                                     subprocess.run(
-                                        ["which", "apt-show-versions"], capture_output=True
+                                        ["which", "apt-show-versions"],
+                                        capture_output=True,
                                     ).returncode
                                     == 0
                                 ):
                                     available_distros.append("Debian")
-                                    logger.debug("Found apt-show-versions - adding Debian")
+                                    logger.debug(
+                                        "Found apt-show-versions - adding Debian"
+                                    )
                     except FileNotFoundError:
                         # Fallback to generic check
                         if (
-                            subprocess.run(["which", "apt"], capture_output=True).returncode
+                            subprocess.run(
+                                ["which", "apt"], capture_output=True
+                            ).returncode
                             == 0
                         ):
                             available_distros.append("Ubuntu")  # Use Ubuntu as fallback
@@ -1197,7 +1204,10 @@ class EnhancedBarManager:
                         pass
 
             case "freebsd":
-                if subprocess.run(["which", "pkg"], capture_output=True).returncode == 0:
+                if (
+                    subprocess.run(["which", "pkg"], capture_output=True).returncode
+                    == 0
+                ):
                     available_distros.append("FreeBSD")
                     logger.debug("Found pkg - adding FreeBSD")
 
@@ -1229,7 +1239,9 @@ class EnhancedBarManager:
                 )
 
             case _:  # Unknown systems
-                logger.debug(f"Unsupported system for package manager detection: {system}")
+                logger.debug(
+                    f"Unsupported system for package manager detection: {system}"
+                )
 
         if not available_distros:
             logger.info(f"No supported package managers detected on {system}")
@@ -1488,16 +1500,19 @@ class EnhancedBarManager:
                             "default_timeout_low", 3000
                         )
                         // 1000,
-                        default_timeout_urgent=notification_settings.get(
-                            "default_timeout_urgent", 0
-                        )
-                        // 1000
-                        if notification_settings.get("default_timeout_urgent", 0) > 0
-                        else None,
+                        default_timeout_urgent=(
+                            notification_settings.get("default_timeout_urgent", 0)
+                            // 1000
+                            if notification_settings.get("default_timeout_urgent", 0)
+                            > 0
+                            else None
+                        ),
                         action=notification_settings.get("enable_actions", True),
-                        audiofile=None
-                        if not notification_settings.get("enable_sound", False)
-                        else notification_settings.get("sound_file"),
+                        audiofile=(
+                            None
+                            if not notification_settings.get("enable_sound", False)
+                            else notification_settings.get("sound_file")
+                        ),
                         show_in_bar=show_in_bar,
                         show_popups=use_popups,
                     )

@@ -50,7 +50,7 @@ class SVGBuilder:
     with proper scaling and coloring for qtile widgets.
     """
 
-    def __init__(self, width: int = 24, height: int = 24) -> None:  # pyright: ignore[reportMissingSuperCall]
+    def __init__(self, width: int = 24, height: int = 24) -> None:
         """
         @brief Initialize SVG builder with dimensions
         @param width: SVG width in pixels
@@ -197,7 +197,7 @@ class SVGManipulator:
     dynamic coloring and scaling capabilities.
     """
 
-    def __init__(self, color_manager: Any = None) -> None:  # pyright: ignore[reportMissingSuperCall]
+    def __init__(self, color_manager: Any = None) -> None:
         """
         @brief Initialize SVG manipulator
         @param color_manager: Optional color manager for theme integration
@@ -351,7 +351,7 @@ class IconGenerator:
     styling and theme integration.
     """
 
-    def __init__(self, color_manager: Any = None, size: int = 24) -> None:  # pyright: ignore[reportMissingSuperCall]
+    def __init__(self, color_manager: Any = None, size: int = 24) -> None:
         """
         @brief Initialize icon generator
         @param color_manager: Optional color manager for theming

@@ -1,0 +1,22 @@
+# Qtile Configuration Requirements
+# This file lists all Python packages required for the Qtile window manager configuration
+
+# Core Qtile dependencies
+libqtile>=0.22.0
+qtile-extras>=0.22.0
+
+# Optional dependencies for enhanced functionality
+watchdog>=2.0.0          # File monitoring for automatic color reloading
+dbus-python>=1.2.0       # D-Bus integration for notifications (Linux/BSD)
+
+# Development and testing dependencies (optional)
+# pytest>=7.0.0           # For running tests
+# black>=22.0.0           # Code formatting
+# mypy>=1.0.0             # Type checking
+# ruff>=0.1.0             # Linting and formatting
+
+# System monitoring (if not using Qtile's built-in widgets)
+psutil>=5.9.0          # System and process utilities (optional)
+
+# Note: All other dependencies are part of Python's standard library
+# and do not need to be installed separately.

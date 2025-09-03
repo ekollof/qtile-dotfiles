@@ -38,7 +38,7 @@ class ClientHooks:
         """
         logger.debug("Setting up client hooks")
 
-        @hook.subscribe.client_new  # pyright: ignore[reportUnknownMemberType]
+        @hook.subscribe.client_new
         def enforce_tiling_behavior(window: Any) -> None:
             """Enforce consistent tiling behavior for all windows"""
             self.window_manager.enforce_window_tiling(window)
@@ -46,33 +46,33 @@ class ClientHooks:
         # Store reference to make function accessible
         self._enforce_tiling_behavior = enforce_tiling_behavior
 
-        @hook.subscribe.client_new  # pyright: ignore[reportUnknownMemberType]
-        def handle_transient_window(window: Any) -> None:  # pyright: ignore[reportUnusedFunction]
+        @hook.subscribe.client_new
+        def handle_transient_window(window: Any) -> None:
             """Handle WM hints for transient windows"""
             self.window_manager.handle_transient_window(window)
 
-        @hook.subscribe.client_new  # pyright: ignore[reportUnknownMemberType]
-        def set_floating_by_class(window: Any) -> None:  # pyright: ignore[reportUnusedFunction]
+        @hook.subscribe.client_new
+        def set_floating_by_class(window: Any) -> None:
             """Set specific windows to floating based on WM class"""
             self._set_floating_by_class(window)
 
-        @hook.subscribe.client_new  # pyright: ignore[reportUnknownMemberType]
-        def set_parent_for_transient(window: Any) -> None:  # pyright: ignore[reportUnusedFunction]
+        @hook.subscribe.client_new
+        def set_parent_for_transient(window: Any) -> None:
             """Set parent for transient windows"""
             self.window_manager.set_parent_for_transient(window)
 
-        @hook.subscribe.client_new  # pyright: ignore[reportUnknownMemberType]
-        def handle_swallow(window: Any) -> None:  # pyright: ignore[reportUnusedFunction]
+        @hook.subscribe.client_new
+        def handle_swallow(window: Any) -> None:
             """Handle terminal window swallowing"""
             self._handle_swallow(window)
 
-        @hook.subscribe.client_killed  # pyright: ignore[reportUnknownMemberType]
-        def handle_unswallow(window: Any) -> None:  # pyright: ignore[reportUnusedFunction]
+        @hook.subscribe.client_killed
+        def handle_unswallow(window: Any) -> None:
             """Handle terminal window unswallowing"""
             self._handle_unswallow(window)
 
-        @hook.subscribe.client_focus  # pyright: ignore[reportUnknownMemberType]
-        def log_window_focus(window: Any) -> None:  # pyright: ignore[reportUnusedFunction]
+        @hook.subscribe.client_focus
+        def log_window_focus(window: Any) -> None:
             """Log window focus events for debugging"""
             if (
                 hasattr(self.config, "debug_window_focus")
@@ -81,10 +81,10 @@ class ClientHooks:
                 window_name = self.window_manager._get_window_name(window)
                 logger.debug(f"Window focused: {window_name}")
 
-        @hook.subscribe.client_urgent_hint_changed  # pyright: ignore[reportUnknownMemberType]
-        def handle_urgent_hint(window: Any) -> None:  # pyright: ignore[reportUnusedFunction]
+        @hook.subscribe.client_urgent_hint_changed
+        def handle_urgent_hint(window: Any) -> None:
             """Handle urgent hint changes"""
-            if hasattr(window, "urgent") and window.urgent:  # pyright: ignore[reportUnknownArgumentType,reportUnknownMemberType]
+            if hasattr(window, "urgent") and window.urgent:
                 window_name = self.window_manager._get_window_name(window)
                 logger.info(f"Window marked urgent: {window_name}")
 

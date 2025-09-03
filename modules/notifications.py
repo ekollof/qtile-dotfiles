@@ -400,7 +400,9 @@ class PopupManager:
 
         # More conservative character width estimation
         # Account for proportional fonts being narrower on average
-        avg_char_width = message_font_size * 0.35  # More generous estimation for better wrapping
+        avg_char_width = (
+            message_font_size * 0.35
+        )  # More generous estimation for better wrapping
         text_area_width = width * 0.9  # Give more space for text (90% instead of 85%)
         available_chars = max(
             25, int(text_area_width / avg_char_width)
@@ -459,7 +461,9 @@ class PopupManager:
         title_height = (
             int(title_font * 1.8) + 10 if has_title else 0
         )  # Extra padding for title
-        line_height = int(message_font_size * 1.6)  # More generous line spacing (1.6x instead of 1.5)
+        line_height = int(
+            message_font_size * 1.6
+        )  # More generous line spacing (1.6x instead of 1.5)
         text_height = total_lines * line_height
         top_padding = 15
         # Match the bottom margin used in message positioning - more for notifications without buttons
@@ -479,11 +483,17 @@ class PopupManager:
         )
 
         # Ensure reasonable bounds - increased max height significantly
-        min_height = max(self.config["height"], 120)  # Higher minimum (120px instead of 100)
-        max_height = 1200  # Much higher maximum (1200px instead of 600) for very long messages
+        min_height = max(
+            self.config["height"], 120
+        )  # Higher minimum (120px instead of 100)
+        max_height = (
+            1200  # Much higher maximum (1200px instead of 600) for very long messages
+        )
 
         final_height = max(min_height, min(max_height, int(total_height)))
-        logger.debug(f"Final calculated height: {final_height}px (max allowed: {max_height}px)")
+        logger.debug(
+            f"Final calculated height: {final_height}px (max allowed: {max_height}px)"
+        )
 
         return final_height
 
@@ -560,7 +570,9 @@ class PopupManager:
         title_x = 0.25 if has_icon else 0.05
         title_width = 0.7 if has_icon else 0.9
         message_x = 0.25 if has_icon else 0.05
-        message_width = 0.7 if has_icon else 0.9  # Increased from 0.9 to give more text space
+        message_width = (
+            0.7 if has_icon else 0.9
+        )  # Increased from 0.9 to give more text space
 
         # Add icon if present
         if has_icon and icon_path:
@@ -643,8 +655,12 @@ class PopupManager:
             # Message starts after title (if present) plus margins
             msg_y_px = top_margin + title_height_px + title_margin
             # Available height for message: total popup height minus all other elements
-            available_height_px = popup_height - msg_y_px - button_area_px - bottom_margin
-            msg_height_px = max(available_height_px, 40)  # Minimum 40px for message area
+            available_height_px = (
+                popup_height - msg_y_px - button_area_px - bottom_margin
+            )
+            msg_height_px = max(
+                available_height_px, 40
+            )  # Minimum 40px for message area
 
             msg_y = msg_y_px / popup_height
             msg_height = msg_height_px / popup_height
@@ -690,7 +706,9 @@ class PopupManager:
                     button_x = 0.05 + (current_button * (button_width + 0.05))
                     # Position buttons at bottom with fixed margin
                     button_margin_bottom = 20  # Increased from 15
-                    button_height_px = max(40, int(scale_font(11) * 2.8))  # Increased from 2.5
+                    button_height_px = max(
+                        40, int(scale_font(11) * 2.8)
+                    )  # Increased from 2.5
                     button_y = 1.0 - (
                         (button_height_px + button_margin_bottom) / popup_height
                     )
@@ -758,7 +776,9 @@ class PopupManager:
                     button_x = 0.05 + (current_button * (button_width + 0.05))
                     # Position buttons at bottom with fixed margin
                     button_margin_bottom = 20  # Increased from 15
-                    button_height_px = max(40, int(scale_font(12) * 2.8))  # Increased from 2.5
+                    button_height_px = max(
+                        40, int(scale_font(12) * 2.8)
+                    )  # Increased from 2.5
                     button_y = 1.0 - (
                         (button_height_px + button_margin_bottom) / popup_height
                     )

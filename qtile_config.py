@@ -45,17 +45,17 @@ class QtileConfig:
         self.dpi_manager = get_dpi_manager()
         self.platform_info = get_platform_info()
         self.platform_config = get_platform_config()
-        
+
         # Fix PATH for spawned processes to include user directories
         self._setup_environment()
-        
+
     def _setup_environment(self):
         """Setup environment variables for spawned processes by sourcing ~/.profile"""
         import os
         import subprocess
-        
+
         profile_path = f"{self.home}/.profile"
-        
+
         # Check if ~/.profile exists
         if os.path.exists(profile_path):
             try:
@@ -65,23 +65,23 @@ class QtileConfig:
                     # No suitable shell found, use fallback
                     self._setup_path_fallback()
                     return
-                
+
                 # Source ~/.profile and capture the resulting environment
                 # This mimics what shells do when they start
                 source_cmd = self._get_source_command(shell_cmd, profile_path)
-                
+
                 result = subprocess.run(
                     source_cmd,
                     capture_output=True,
                     text=True,
-                    timeout=5  # Prevent hanging
+                    timeout=5,  # Prevent hanging
                 )
-                
+
                 if result.returncode == 0:
                     # Parse the environment output and update os.environ
-                    for line in result.stdout.strip().split('\n'):
-                        if '=' in line:
-                            key, value = line.split('=', 1)
+                    for line in result.stdout.strip().split("\n"):
+                        if "=" in line:
+                            key, value = line.split("=", 1)
                             os.environ[key] = value
                 else:
                     # Sourcing failed, use fallback
@@ -92,77 +92,75 @@ class QtileConfig:
         else:
             # No ~/.profile, use fallback
             self._setup_path_fallback()
-    
+
     def _find_suitable_shell(self) -> str | None:
         """Find a suitable shell for sourcing environment files"""
         import shutil
-        
+
         # Preferred shells in order of preference
         shell_candidates = [
-            'bash',      # Most common and feature-rich
-            'zsh',       # Modern alternative to bash
-            'ksh',       # Available on most Unix systems
-            'dash',      # Debian/Ubuntu default sh
-            'sh',        # POSIX shell (always available)
+            "bash",  # Most common and feature-rich
+            "zsh",  # Modern alternative to bash
+            "ksh",  # Available on most Unix systems
+            "dash",  # Debian/Ubuntu default sh
+            "sh",  # POSIX shell (always available)
         ]
-        
+
         # Try to find the first available shell
         for shell in shell_candidates:
             shell_path = shutil.which(shell)
             if shell_path:
                 return shell_path
-        
+
         # Last resort: try common shell paths
         fallback_paths = [
-            '/bin/bash',
-            '/usr/bin/bash',
-            '/usr/local/bin/bash',
-            '/bin/sh',
-            '/usr/bin/sh',
+            "/bin/bash",
+            "/usr/bin/bash",
+            "/usr/local/bin/bash",
+            "/bin/sh",
+            "/usr/bin/sh",
         ]
-        
+
         import os
+
         for path in fallback_paths:
             if os.path.exists(path) and os.access(path, os.X_OK):
                 return path
-        
+
         return None
-    
+
     def _get_source_command(self, shell_path: str, profile_path: str) -> list[str]:
         """Get the appropriate source command for the given shell"""
         import os
-        
+
         shell_name = os.path.basename(shell_path)
-        
+
         # Different shells have different syntax for sourcing files
         match shell_name:
             case "bash" | "zsh" | "ksh":
                 # These shells support the 'source' command
-                return [shell_path, '-c', f'source "{profile_path}" && env']
+                return [shell_path, "-c", f'source "{profile_path}" && env']
             case "dash" | "sh":
                 # POSIX shells use '.' instead of 'source'
-                return [shell_path, '-c', f'. "{profile_path}" && env']
+                return [shell_path, "-c", f'. "{profile_path}" && env']
             case _:
                 # Default to POSIX syntax for unknown shells
-                return [shell_path, '-c', f'. "{profile_path}" && env']
-    
+                return [shell_path, "-c", f'. "{profile_path}" && env']
+
     def _setup_path_fallback(self):
         """Fallback PATH setup if ~/.profile sourcing fails"""
         import os
-        
-        user_paths = [
-            f"{self.home}/bin",
-            f"{self.home}/.local/bin"
-        ]
-        
-        current_path = os.environ.get('PATH', '')
-        path_entries = current_path.split(':')
-        
+
+        user_paths = [f"{self.home}/bin", f"{self.home}/.local/bin"]
+
+        current_path = os.environ.get("PATH", "")
+        path_entries = current_path.split(":")
+
         for user_path in user_paths:
             if user_path not in path_entries:
                 current_path = f"{user_path}:{current_path}"
-        
-        os.environ['PATH'] = current_path
+
+        os.environ["PATH"] = current_path
 
     # ===== FONT SETTINGS =====
     #
@@ -327,7 +325,7 @@ class QtileConfig:
                 "clipboard_manager", "clipmenu"
             ),
             "wallpaper_picker": f"{self.home}/bin/pickwall.sh",
-           "wallpaper_random": f"{self.home}/bin/wallpaper.ksh -r",
+            "wallpaper_random": f"{self.home}/bin/wallpaper.ksh -r",
             "lock_session": self.platform_config.get_command(
                 "lock_session", "loginctl lock-session"
             ),

@@ -17,7 +17,7 @@ class DPIManager:
     def __init__(self) -> None:
         self._dpi = None
         self._scale_factor = None
-        self.detect_dpi()
+        # Don't call detect_dpi() in __init__ to make testing easier
 
     def detect_dpi(self) -> float:
         """
@@ -116,15 +116,23 @@ class DPIManager:
         mm_part = None
 
         # Find resolution part (e.g., "1920x1080+0+0" -> "1920x1080")
-        for i, part in enumerate(parts):
+        for _i, part in enumerate(parts):
             if (
                 "x" in part
                 and part.replace("x", "").replace("+", "").replace("-", "").isdigit()
             ):
                 resolution_part = part.split("+")[0]  # Get resolution before position
-            # Find physical dimensions (e.g., "597mm x 336mm")
-            if part.endswith("mm"):
-                mm_part = parts[i - 2 : i + 1]  # Get "597mm x 336mm"
+                break
+
+        # Find physical dimensions (e.g., "597mm x 336mm")
+        for i, part in enumerate(parts):
+            if (
+                part.endswith("mm")
+                and i + 2 < len(parts)
+                and parts[i + 1] == "x"
+                and parts[i + 2].endswith("mm")
+            ):
+                mm_part = [parts[i], parts[i + 1], parts[i + 2]]
                 break
 
         if resolution_part and mm_part and len(mm_part) >= 3:
@@ -146,9 +154,12 @@ class DPIManager:
                 with open(xresources_path) as f:
                     for line in f:
                         if line.strip().startswith("Xft.dpi:"):
-                            dpi = float(line.split(":")[1].strip())
-                            logger.info(f"Detected DPI via .Xresources: {dpi}")
-                            return dpi
+                            parts = line.split(":")
+                            if len(parts) >= 2:
+                                dpi_str = parts[1].strip()
+                                dpi = float(dpi_str)
+                                logger.info(f"Detected DPI via .Xresources: {dpi}")
+                                return dpi
         except (FileNotFoundError, ValueError, IndexError):
             pass
         return None

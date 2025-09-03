@@ -479,9 +479,9 @@ class SystemCommands:
             status_info.update(
                 {
                     "notification_system": "SimplePopup",
-                    "popup_manager": "Available"
-                    if popup_manager
-                    else "Not initialized",
+                    "popup_manager": (
+                        "Available" if popup_manager else "Not initialized"
+                    ),
                     "qtile_extras": "Available",
                     "dbus_integration": "Yes",
                 }

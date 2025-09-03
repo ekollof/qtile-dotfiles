@@ -13,17 +13,17 @@ This script provides functionality to:
 
 Usage:
     python3 scripts/qtile_log_monitor.py [OPTIONS]
-    
+
 Examples:
     # Monitor with default settings
     python3 scripts/qtile_log_monitor.py
-    
+
     # Set debug level and monitor
     python3 scripts/qtile_log_monitor.py --level debug
-    
+
     # Only tail log without changing level
     python3 scripts/qtile_log_monitor.py --no-set-level
-    
+
     # Monitor specific number of lines
     python3 scripts/qtile_log_monitor.py --lines 100
 """
@@ -39,7 +39,7 @@ from pathlib import Path
 class QtileLogMonitor:
     """
     @brief Monitor and manage qtile log output
-    
+
     Provides functionality to set log levels via qtile CLI and monitor
     log files in real-time with various filtering and display options.
     """
@@ -66,7 +66,7 @@ class QtileLogMonitor:
                     shell=True,
                     capture_output=True,
                     text=True,
-                    timeout=10
+                    timeout=10,
                 )
                 if result.returncode == 0:
                     print(f"✅ Found qtile command: {cmd}")
@@ -87,12 +87,10 @@ class QtileLogMonitor:
             # XDG standard locations
             Path.home() / ".cache" / "qtile" / "qtile.log",
             Path.home() / ".local" / "share" / "qtile" / "qtile.log",
-
             # Legacy/alternative locations
             Path.home() / ".qtile" / "qtile.log",
             Path("/tmp") / f"qtile-{os.getuid()}" / "qtile.log",
             Path("/var/log") / "qtile" / "qtile.log",
-
             # Check if qtile is running and has a log
             Path("/tmp") / "qtile.log",
         ]
@@ -104,7 +102,7 @@ class QtileLogMonitor:
                 shell=True,
                 capture_output=True,
                 text=True,
-                timeout=5
+                timeout=5,
             )
             if result.returncode == 0 and "log" in result.stdout.lower():
                 print(f"📋 Qtile info: {result.stdout.strip()}")
@@ -144,7 +142,7 @@ class QtileLogMonitor:
                 "INFO": 20,
                 "WARNING": 30,
                 "ERROR": 40,
-                "CRITICAL": 50
+                "CRITICAL": 50,
             }
             level_num = level_map[level]
 
@@ -163,11 +161,7 @@ class QtileLogMonitor:
                 try:
                     print(f"⚙️  Trying command: {cmd}")
                     result = subprocess.run(
-                        cmd,
-                        shell=True,
-                        capture_output=True,
-                        text=True,
-                        timeout=10
+                        cmd, shell=True, capture_output=True, text=True, timeout=10
                     )
 
                     print(f"📤 Return code: {result.returncode}")
@@ -237,7 +231,7 @@ class QtileLogMonitor:
             return
 
         try:
-            with open(self.log_path, encoding='utf-8', errors='ignore') as f:
+            with open(self.log_path, encoding="utf-8", errors="ignore") as f:
                 # Read initial lines
                 all_lines = f.readlines()
                 if len(all_lines) > lines:
@@ -285,12 +279,12 @@ class QtileLogMonitor:
                 shell=True,
                 capture_output=True,
                 text=True,
-                timeout=5
+                timeout=5,
             )
             if result.returncode == 0:
                 print("🎯 Current qtile status:")
                 print(result.stdout.strip())
-        except:
+        except (subprocess.TimeoutExpired, subprocess.SubprocessError):
             print("⚠️  Could not get current qtile status")
 
 
@@ -302,43 +296,47 @@ def main() -> None:
         epilog="""
 Examples:
   %(prog)s                          # Monitor with default settings
-  %(prog)s --level debug            # Set debug level and monitor  
+  %(prog)s --level debug            # Set debug level and monitor
   %(prog)s --no-set-level           # Only tail without changing level
   %(prog)s --lines 100 --no-follow  # Show 100 lines without following
   %(prog)s --info                   # Show log configuration info
-        """
+        """,
     )
 
     parser.add_argument(
-        "--level", "-l",
+        "--level",
+        "-l",
         choices=["debug", "info", "warning", "error", "critical"],
         default="info",
-        help="Set qtile log level (default: info)"
+        help="Set qtile log level (default: info)",
     )
 
     parser.add_argument(
-        "--lines", "-n",
+        "--lines",
+        "-n",
         type=int,
         default=50,
-        help="Number of initial log lines to show (default: 50)"
+        help="Number of initial log lines to show (default: 50)",
     )
 
     parser.add_argument(
-        "--no-follow", "-f",
+        "--no-follow",
+        "-f",
         action="store_true",
-        help="Don't follow log file for new entries"
+        help="Don't follow log file for new entries",
     )
 
     parser.add_argument(
         "--no-set-level",
         action="store_true",
-        help="Don't attempt to set log level, just monitor"
+        help="Don't attempt to set log level, just monitor",
     )
 
     parser.add_argument(
-        "--info", "-i",
+        "--info",
+        "-i",
         action="store_true",
-        help="Show qtile log configuration info and exit"
+        help="Show qtile log configuration info and exit",
     )
 
     args = parser.parse_args()
@@ -352,9 +350,8 @@ Examples:
         return
 
     # Set log level unless disabled
-    if not args.no_set_level:
-        if not monitor.set_log_level(args.level):
-            print("⚠️  Continuing with log monitoring despite level setting failure...")
+    if not args.no_set_level and not monitor.set_log_level(args.level):
+        print("⚠️  Continuing with log monitoring despite level setting failure...")
 
     # Monitor the log
     try:

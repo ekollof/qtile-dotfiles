@@ -34,15 +34,15 @@ class KeyBindings:
     def smart_spawn(self, command: str | list[str], **kwargs: Any) -> Any:
         """
         Smart spawn wrapper that handles both string and list commands.
-        
+
         For backwards compatibility:
         - If command is already a list, pass it through unchanged
         - If command is a string, split it using shell-like parsing
-        
+
         Args:
             command: Command to spawn (string or list)
             **kwargs: Additional arguments to pass to lazy.spawn
-            
+
         Returns:
             lazy.spawn command ready for keybinding
         """

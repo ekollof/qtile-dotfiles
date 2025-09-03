@@ -1,6 +1,6 @@
 # GitHub Copilot Instructions
 
-## Python Version Requirements
+## Python Version Requirements (IMPORTANT)
 - Use Python 3.10+ features only where possible
 - Prefer modern syntax and features (match statements, union types with |, etc.)
 - Avoid deprecated or legacy Python patterns
@@ -26,3 +26,13 @@
 - Keep functions small and focused
 - Handle errors gracefully with appropriate exception handling
 - Avoid creating summaries and lists
+- All tests must pass before committing code
+- Don't change tests to pass code; fix the code instead
+- Don't run multiline code in the shell; use a script or a here-document. Make sure to clean up after yourself.
+
+## Releasing/committing/pushing code
+- The shell might not handle multiline commit messages well; use a single line summary followed by a detailed description in the body, or use a here-document for multiline messages.
+- Ensure commit messages are clear and descriptive
+- Avoid emojis and em-dashes in commit messages
+- Use present tense in commit messages
+- Reference relevant issue numbers in commit messages

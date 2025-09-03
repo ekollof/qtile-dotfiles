@@ -172,27 +172,35 @@ class FontManager:
         # Add system font directories based on platform
         match self.system:
             case "linux":
-                font_dirs.extend([
-                    Path("/usr/share/fonts"),
-                    Path("/usr/local/share/fonts"),
-                ])
+                font_dirs.extend(
+                    [
+                        Path("/usr/share/fonts"),
+                        Path("/usr/local/share/fonts"),
+                    ]
+                )
             case "freebsd" | "openbsd" | "netbsd" | "dragonfly":
-                font_dirs.extend([
-                    Path("/usr/local/share/fonts"),
-                    Path("/usr/share/fonts"),
-                ])
+                font_dirs.extend(
+                    [
+                        Path("/usr/local/share/fonts"),
+                        Path("/usr/share/fonts"),
+                    ]
+                )
             case "darwin":
-                font_dirs.extend([
-                    Path("/Library/Fonts"),
-                    Path("/System/Library/Fonts"),
-                    Path.home() / "Library/Fonts",
-                ])
+                font_dirs.extend(
+                    [
+                        Path("/Library/Fonts"),
+                        Path("/System/Library/Fonts"),
+                        Path.home() / "Library/Fonts",
+                    ]
+                )
             case _:
                 # Unknown system, try common paths
-                font_dirs.extend([
-                    Path("/usr/share/fonts"),
-                    Path("/usr/local/share/fonts"),
-                ])
+                font_dirs.extend(
+                    [
+                        Path("/usr/share/fonts"),
+                        Path("/usr/local/share/fonts"),
+                    ]
+                )
 
         for font_dir in font_dirs:
             if font_dir.exists():
