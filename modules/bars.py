@@ -28,6 +28,37 @@ from modules.notifications import create_notify_widget
 from modules.svg_utils import create_themed_icon_cache, get_svg_utils
 
 
+# Workaround for qtile-extras decoration wrapper bug
+# The inject_decorations wrapper tries to access widget.length before initialization
+# This monkey-patches the property to handle the edge case
+def _patch_qtile_extras_widgets():
+    """Apply workaround for qtile-extras widget.length AttributeError"""
+    try:
+        from qtile_extras.widget.decorations import inject_decorations
+        from libqtile.widget.base import _Widget
+        
+        # Store original property
+        original_length = _Widget.length
+        
+        def safe_length_getter(self):
+            """Safe length property that handles uninitialized state"""
+            try:
+                return original_length.fget(self)
+            except AttributeError:
+                # Widget not fully initialized yet
+                return getattr(self, '_length', 0)
+        
+        # Replace the property with a safe version
+        _Widget.length = property(safe_length_getter)
+        logger.info("Applied qtile-extras widget.length workaround")
+    except Exception as e:
+        logger.warning(f"Could not apply qtile-extras workaround: {e}")
+
+
+# Apply the patch when this module is imported
+_patch_qtile_extras_widgets()
+
+
 class EnhancedBarManager:
     """
     @brief Enhanced bar manager with dynamic SVG icon capabilities
