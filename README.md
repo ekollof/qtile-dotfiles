@@ -113,7 +113,37 @@ A comprehensive, **DPI-aware** qtile configuration with **centralized settings**
 
 ## 🚀 Quick Start
 
-### Prerequisites
+### Automated Installation (Recommended)
+
+The easiest way to install qtile and all dependencies is using the provided install script:
+
+```bash
+# Clone this configuration
+git clone https://github.com/ekollof/qtile-dotfiles.git ~/.config/qtile
+
+# Run the automated install script
+cd ~/.config/qtile
+./install.sh
+```
+
+The install script will:
+- ✅ Detect your OS (Linux, OpenBSD, FreeBSD, NetBSD)
+- ✅ Install all required system dependencies
+- ✅ Install qtile and qtile-extras via pipx
+- ✅ Set up desktop session entry
+- ✅ Verify the installation
+
+**Supported systems:**
+- **Linux**: Ubuntu, Debian, Linux Mint, Arch, Manjaro, Fedora, RHEL/CentOS
+- **BSD**: OpenBSD, FreeBSD, NetBSD
+
+**Note**: The script uses `pipx` to install qtile, which is the recommended method for distributions without qtile packages (Ubuntu, Mint, etc.).
+
+### Manual Installation
+
+If you prefer to install manually or need to customize the installation:
+
+#### Prerequisites
 
 **Arch Linux:**
 
@@ -122,10 +152,47 @@ A comprehensive, **DPI-aware** qtile configuration with **centralized settings**
 sudo pacman -S qtile python-psutil
 
 # Recommended for full functionality
-sudo pacman -S rofi dmenu picom dunst unclutter xrandr
+sudo pacman -S rofi dmenu picom unclutter xrandr xscreensaver feh
 
 # Optional: High-DPI support tools
 sudo pacman -S xorg-xdpyinfo xorg-xrandr
+```
+
+**Ubuntu/Debian/Linux Mint (using pipx):**
+
+```bash
+# System dependencies
+sudo apt-get install python3 python3-pip python3-venv pipx \
+    python3-dev libpangocairo-1.0-0 python3-cairocffi python3-xcffib \
+    libxcb-cursor0 libxcb-render0-dev libffi-dev libcairo2 libpango-1.0-0 \
+    xterm feh picom xscreensaver rofi unclutter xsettingsd autorandr \
+    flameshot network-manager-gnome pavucontrol
+
+# Install qtile and qtile-extras via pipx
+pipx install qtile --include-deps
+pipx inject qtile qtile-extras
+pipx inject qtile watchdog psutil
+
+# Ensure pipx bin is in PATH
+pipx ensurepath
+```
+
+**Fedora/RHEL/CentOS (using pipx):**
+
+```bash
+# System dependencies
+sudo dnf install python3 python3-pip pipx python3-devel cairo cairo-devel \
+    pango pango-devel gdk-pixbuf2 libffi-devel xcb-util-cursor \
+    xterm feh picom xscreensaver rofi unclutter xsettingsd autorandr \
+    flameshot NetworkManager-applet pavucontrol
+
+# Install qtile and qtile-extras via pipx
+pipx install qtile --include-deps
+pipx inject qtile qtile-extras
+pipx inject qtile watchdog psutil
+
+# Ensure pipx bin is in PATH
+pipx ensurepath
 ```
 
 **OpenBSD:**
@@ -170,14 +237,8 @@ pkgin install qtile py39-psutil
 pkgin install rofi dmenu picom dunst unclutter
 ```
 
-### Installation
-
-```bash
-# Backup existing config (if any)
-mv ~/.config/qtile ~/.config/qtile.backup
-
-# Clone this configuration
-git clone https://github.com/ekollof/qtile-dotfiles.git ~/.config/qtile
+# Test configuration
+qtile check
 
 # Test DPI detection (optional)
 python3 ~/.config/qtile/scripts/show_dpi_info.py
