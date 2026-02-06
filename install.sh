@@ -192,8 +192,8 @@ install_linux_dependencies() {
             log_warn "Unknown Linux distribution: $OS_ID"
             log_warn "You may need to install dependencies manually"
             log_info "Required: python3, python3-pip, pipx, cairo, pango, xcb libraries"
-            read -p "Continue anyway? (y/N) " -n 1 -r
-            echo
+            printf "Continue anyway? (y/N) "
+            read REPLY
             if [ "$REPLY" != "y" ] && [ "$REPLY" != "Y" ]; then
                 exit 1
             fi
@@ -319,8 +319,8 @@ install_qtile() {
     # Check if qtile is already installed
     if pipx list | grep -q "package qtile"; then
         log_warn "qtile is already installed via pipx"
-        read -p "Reinstall? (y/N) " -n 1 -r
-        echo
+        printf "Reinstall? (y/N) "
+        read REPLY
         if [ "$REPLY" = "y" ] || [ "$REPLY" = "Y" ]; then
             log_info "Reinstalling qtile..."
             pipx uninstall qtile
