@@ -44,10 +44,10 @@ log() {
 
 log "Starting autostart script"
 
-# Configure displays (completely detached)
+# Configure displays (run in background to not block startup)
 if command -v autorandr >/dev/null 2>&1; then
-	log "Running autorandr"
-	autorandr -c
+	log "Running autorandr (background)"
+	(autorandr -c 2>/dev/null && log "autorandr completed") &
 fi
 
 # Start compositor

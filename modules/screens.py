@@ -14,13 +14,18 @@ from libqtile.log_utils import logger
 class ScreenManager:
     """Manages screen detection and configuration"""
 
+    _instance = None
+
     def __init__(self) -> None:
         self.display_override: int = 0  # Set to 0 for auto-detection
         self.num_screens: int = 1
-        self.detect_screens()
+        self._detected: bool = False  # Track if detection has run
 
     def detect_screens(self):
         """Detect number of screens using system tools"""
+        # Mark as detected to avoid redundant calls
+        self._detected = True
+        
         if self.display_override == 0:
             try:
                 if self._is_xephyr_environment():
@@ -54,7 +59,9 @@ class ScreenManager:
         return False
 
     def get_screen_count(self) -> int:
-        """Get detected screen count"""
+        """Get detected screen count (triggers detection on first call)"""
+        if not self._detected:
+            self.detect_screens()
         return self.num_screens
 
     def set_override(self, count: int) -> None:
@@ -145,20 +152,28 @@ class ScreenManager:
             raise Exception("xrandr --listmonitors failed")
 
 
-# Global screen manager instance
-screen_manager = ScreenManager()
+# Global screen manager instance (singleton)
+_screen_manager = None
+
+
+def _get_screen_manager() -> ScreenManager:
+    """Get or create the singleton screen manager instance"""
+    global _screen_manager
+    if _screen_manager is None:
+        _screen_manager = ScreenManager()
+    return _screen_manager
 
 
 def refresh_screens():
     """Refresh screen detection"""
-    return screen_manager.refresh_screens()
+    return _get_screen_manager().refresh_screens()
 
 
 def get_screen_count() -> int:
-    """Get the number of screens"""
-    return screen_manager.get_screen_count()
+    """Get the number of screens (triggers detection on first call)"""
+    return _get_screen_manager().get_screen_count()
 
 
 def set_screen_override(count: int) -> None:
     """Set manual screen count override"""
-    screen_manager.set_override(count)
+    _get_screen_manager().set_override(count)
