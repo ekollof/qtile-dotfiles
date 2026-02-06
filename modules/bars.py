@@ -1565,9 +1565,13 @@ class EnhancedBarManager:
         # Add system tray only to primary screen with error handling
         if screen_num == 0:
             try:
+                # Use a lighter background for systray to ensure dark icons are visible
+                # Many apps use dark-themed icons which don't show on dark backgrounds
+                # Priority: special.systray_background > color15 (lightest) > fallback light gray
+                systray_bg = special.get("systray_background") or colors.get("color15", "#E0E0E0")
                 barconfig.append(
                     widget.Systray(
-                        background=special.get("background", "#000000"),
+                        background=systray_bg,
                         icon_size=scale_size(20),
                         padding=scale_size(5),
                     )
