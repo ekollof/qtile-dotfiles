@@ -234,7 +234,7 @@ class QtileConfig:
         @return Font name string for use in qtile widgets
         @example To use JetBrains Mono: return "JetBrains Mono Nerd Font"
         """
-        return "BerkeleyMono Nerd Font Mono"
+        return "BerkeleyMono Nerd Font"
 
     @property
     def preferred_fontsize(self) -> int:
