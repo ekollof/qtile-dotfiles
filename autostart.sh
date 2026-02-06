@@ -101,6 +101,12 @@ if command -v autocutsel >/dev/null 2>&1; then
 	nohup autocutsel -selection PRIMARY -fork >/dev/null 2>&1 &
 fi
 
+# Start xscreensaver daemon for screen locking
+if command -v xscreensaver >/dev/null 2>&1; then
+	log "Starting xscreensaver"
+	xscreensaver -no-splash &
+fi
+
 # Start autostart services
 if [ -z ${TESTMODE+1} ]; then
 	(lxsession -e dwm || dex -a -e dwm || ~/bin/xdg-autostart.py dwm || ~/bin/autostart.sh) &

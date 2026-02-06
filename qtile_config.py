@@ -93,6 +93,9 @@ class QtileConfig:
             # No ~/.profile, use fallback
             self._setup_path_fallback()
 
+        # Setup D-Bus session bus address if not already set
+        self._setup_dbus_environment()
+
     def _find_suitable_shell(self) -> str | None:
         """Find a suitable shell for sourcing environment files"""
         import shutil
@@ -161,6 +164,59 @@ class QtileConfig:
                 current_path = f"{user_path}:{current_path}"
 
         os.environ["PATH"] = current_path
+
+    def _setup_dbus_environment(self):
+        """
+        Setup D-Bus session bus address for notification support
+        
+        Sets DBUS_SESSION_BUS_ADDRESS if not already set, trying common locations.
+        This is needed for qtile's notification system to work properly.
+        """
+        import os
+
+        # If already set, nothing to do
+        if os.environ.get("DBUS_SESSION_BUS_ADDRESS"):
+            return
+
+        # Try to find D-Bus session socket in common locations
+        uid = os.getuid()
+        dbus_candidates = [
+            f"unix:path=/run/user/{uid}/bus",  # Modern systemd location
+            f"unix:path=/var/run/user/{uid}/bus",  # Alternative location
+        ]
+
+        # Check if any of the candidate sockets exist
+        for addr in dbus_candidates:
+            # Extract path from unix:path=<path> format
+            if addr.startswith("unix:path="):
+                socket_path = addr[10:]  # Remove "unix:path=" prefix
+                if os.path.exists(socket_path):
+                    os.environ["DBUS_SESSION_BUS_ADDRESS"] = addr
+                    return
+
+        # If no socket found, try reading from machine-id based file
+        # This is the old D-Bus location
+        try:
+            import glob
+
+            dbus_dir = f"{self.home}/.dbus/session-bus"
+            if os.path.exists(dbus_dir):
+                # Find the most recent session file
+                session_files = glob.glob(f"{dbus_dir}/*")
+                if session_files:
+                    # Read the address from the file
+                    with open(session_files[0]) as f:
+                        for line in f:
+                            if line.startswith("DBUS_SESSION_BUS_ADDRESS="):
+                                addr = line.strip().split("=", 1)[1]
+                                # Remove quotes if present
+                                addr = addr.strip("'\"")
+                                os.environ["DBUS_SESSION_BUS_ADDRESS"] = addr
+                                return
+        except Exception:
+            # If all else fails, just continue without D-Bus
+            # The notification system will log a warning but qtile will still work
+            pass
 
     # ===== FONT SETTINGS =====
     #
@@ -326,9 +382,7 @@ class QtileConfig:
             ),
             "wallpaper_picker": f"{self.home}/bin/pickwall.sh",
             "wallpaper_random": f"{self.home}/bin/wallpaper.ksh -r",
-            "lock_session": self.platform_config.get_command(
-                "lock_session", "loginctl lock-session"
-            ),
+            "lock_session": "xscreensaver-command -lock",
             "screenshot": self.platform_config.get_command(
                 "screenshot", "flameshot gui"
             ),
