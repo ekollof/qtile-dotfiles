@@ -164,6 +164,47 @@ class EnhancedBarManager:
             defaults.pop(param, None)
         return defaults
 
+    def _calculate_icon_background(self, bg_color: str, fg_color: str) -> str:
+        """
+        @brief Calculate appropriate icon background color for systray visibility
+        
+        Automatically determines a suitable background color for systray icons
+        based on the bar's background color luminance. For dark backgrounds,
+        returns a lighter mid-tone color for better icon visibility.
+        
+        @param bg_color: Background color (hex string, e.g., '#000000')
+        @param fg_color: Foreground color (hex string, e.g., '#ffffff')
+        @return Appropriate icon background color (hex string)
+        """
+        # Remove '#' prefix if present
+        bg = bg_color.lstrip('#')
+        fg = fg_color.lstrip('#')
+        
+        # Calculate relative luminance using sRGB formula
+        # https://www.w3.org/TR/WCAG20/#relativeluminancedef
+        def get_luminance(hex_color: str) -> float:
+            """Calculate relative luminance of a hex color"""
+            r, g, b = int(hex_color[0:2], 16), int(hex_color[2:4], 16), int(hex_color[4:6], 16)
+            r, g, b = r / 255.0, g / 255.0, b / 255.0
+            
+            # Apply sRGB gamma correction
+            def adjust(c):
+                return c / 12.92 if c <= 0.03928 else ((c + 0.055) / 1.055) ** 2.4
+            
+            r, g, b = adjust(r), adjust(g), adjust(b)
+            return 0.2126 * r + 0.7152 * g + 0.0722 * b
+        
+        bg_luminance = get_luminance(bg)
+        
+        # For dark backgrounds (luminance < 0.5), use a medium gray
+        # This provides good contrast for dark icons without being too bright
+        if bg_luminance < 0.5:
+            # Use a medium gray (around 60% brightness) for dark themes
+            return "#999999"
+        else:
+            # For light backgrounds, use a slightly darker gray
+            return "#666666"
+
     def _initialize_icon_mappings(self) -> dict[str, dict[str, str]]:
         """
         @brief Initialize icon mappings for different methods
@@ -1565,13 +1606,16 @@ class EnhancedBarManager:
         # Add system tray only to primary screen with error handling
         if screen_num == 0:
             try:
-                # Use medium-gray background for systray as a compromise
-                # Dark-themed apps use dark icons which need lighter background
-                # Using color8 (#A09D9B) - visible but not jarring
-                systray_bg = special.get("systray_background", colors.get("color8", "#808080"))
+                # Use enhanced Systray with auto-calculated icon background
+                # Automatically determines appropriate background color based on theme
+                icon_bg = self._calculate_icon_background(
+                    special.get("background", "#000000"),
+                    special.get("foreground", "#ffffff")
+                )
                 barconfig.append(
                     widget.Systray(
-                        background=systray_bg,
+                        background=special.get("background", "#000000"),
+                        icon_background=icon_bg,
                         icon_size=scale_size(20),
                         padding=scale_size(5),
                     )

@@ -3,7 +3,7 @@
 
 # Core Qtile dependencies
 libqtile>=0.22.0
-qtile-extras>=0.22.0
+# qtile-extras>=0.22.0  # Now using local fork in qtile_extras/
 
 # Optional dependencies for enhanced functionality
 watchdog>=2.0.0          # File monitoring for automatic color reloading
