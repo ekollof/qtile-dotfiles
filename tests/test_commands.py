@@ -126,6 +126,27 @@ class TestWindowCommands:
         window_commands.smart_maximize(mock_qtile)
 
 
+    def test_focus_prev_screen_uses_qtile_command(self, window_commands: WindowCommands) -> None:
+        """Screen focus must call prev_screen (cmd_ prefix removed in qtile 0.35)."""
+        mock_qtile = MagicMock()
+        mock_qtile.current_screen.group.windows = []
+
+        window_commands.focus_prev_screen_with_warp(mock_qtile)
+
+        mock_qtile.prev_screen.assert_called_once()
+        mock_qtile.cmd_prev_screen.assert_not_called()
+
+    def test_focus_next_screen_uses_qtile_command(self, window_commands: WindowCommands) -> None:
+        """Screen focus must call next_screen (cmd_ prefix removed in qtile 0.35)."""
+        mock_qtile = MagicMock()
+        mock_qtile.current_screen.group.windows = []
+
+        window_commands.focus_next_screen_with_warp(mock_qtile)
+
+        mock_qtile.next_screen.assert_called_once()
+        mock_qtile.cmd_next_screen.assert_not_called()
+
+
 class TestSystemCommands:
     """Test SystemCommands functionality"""
 

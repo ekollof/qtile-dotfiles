@@ -21,35 +21,45 @@ from typing import Any
 
 from libqtile import bar
 from libqtile.log_utils import logger
-from qtile_extras import widget
 
 from modules.dpi_utils import scale_font, scale_size
 from modules.notifications import create_notify_widget
-from modules.svg_utils import create_themed_icon_cache, get_svg_utils
+from modules.svg_utils import (
+    create_themed_icon_cache,
+    get_svg_utils,
+    rasterize_svg_to_png,
+)
+from qtile_extras import widget
 
 
-# Workaround for qtile-extras decoration wrapper bug
-# The inject_decorations wrapper tries to access widget.length before initialization
-# This monkey-patches the property to handle the edge case
-def _patch_qtile_extras_widgets():
-    """Apply workaround for qtile-extras widget.length AttributeError"""
+# Qtile 0.37+ treats a finalized widget's length as 0 and still assigns
+# length during __init__. A getter-only override breaks Notify and friends
+# ("property has no setter"). Keep both accessors and swallow pre-init reads.
+def _patch_qtile_extras_widgets() -> None:
+    """
+    @brief Guard widget.length for extras decorations and qtile 0.37 reload
+    """
     try:
-        from qtile_extras.widget.decorations import inject_decorations
         from libqtile.widget.base import _Widget
-        
-        # Store original property
+
         original_length = _Widget.length
-        
-        def safe_length_getter(self):
-            """Safe length property that handles uninitialized state"""
+
+        def safe_length_getter(self: Any) -> int:
+            if getattr(self, "finalized", False):
+                return 0
             try:
                 return original_length.fget(self)
-            except AttributeError:
-                # Widget not fully initialized yet
-                return getattr(self, '_length', 0)
-        
-        # Replace the property with a safe version
-        _Widget.length = property(safe_length_getter)
+            except (AttributeError, TypeError):
+                return int(getattr(self, "_length", 0) or 0)
+
+        def safe_length_setter(self: Any, value: int) -> None:
+            setter = getattr(original_length, "fset", None)
+            if setter is not None:
+                setter(self, value)
+            else:
+                self._length = value
+
+        _Widget.length = property(safe_length_getter, safe_length_setter)
         logger.info("Applied qtile-extras widget.length workaround")
     except Exception as e:
         logger.warning(f"Could not apply qtile-extras workaround: {e}")
@@ -471,8 +481,18 @@ class EnhancedBarManager:
                 icon_path = self.create_dynamic_icon(icon_key, **dynamic_kwargs)
                 if icon_path and Path(icon_path).exists():
                     try:
+                        image_path = icon_path
+                        if str(icon_path).lower().endswith(".svg"):
+                            png_path = rasterize_svg_to_png(
+                                icon_path, size=max(scale_size(24), 16)
+                            )
+                            if png_path is None:
+                                raise RuntimeError(
+                                    f"gdk-pixbuf cannot load SVG: {icon_path}"
+                                )
+                            image_path = str(png_path)
                         return widget.Image(
-                            filename=icon_path,
+                            filename=image_path,
                             background=bg_color,
                             margin=scale_size(2),
                         )
@@ -1603,26 +1623,29 @@ class EnhancedBarManager:
             except Exception as e:
                 logger.warning(f"Failed to add notification widget: {e}")
 
-        # Add system tray only to primary screen with error handling
+        # Add system tray only to primary screen. Qtile allows one Systray
+        # process-wide; a second _configure() raises ConfigError.
         if screen_num == 0:
             try:
-                # Use enhanced Systray with auto-calculated icon background
-                # Automatically determines appropriate background color based on theme
-                icon_bg = self._calculate_icon_background(
-                    special.get("background", "#000000"),
-                    special.get("foreground", "#ffffff")
-                )
-                barconfig.append(
-                    widget.Systray(
-                        background=special.get("background", "#000000"),
-                        icon_background=icon_bg,
-                        icon_size=scale_size(20),
-                        padding=scale_size(5),
+                from libqtile.widget.systray import Systray as _CoreSystray
+
+                if getattr(_CoreSystray, "_instances", 0) > 0:
+                    logger.info("Systray already exists; skipping duplicate")
+                else:
+                    icon_bg = self._calculate_icon_background(
+                        special.get("background", "#000000"),
+                        special.get("foreground", "#ffffff"),
                     )
-                )
+                    barconfig.append(
+                        widget.Systray(
+                            background=special.get("background", "#000000"),
+                            icon_background=icon_bg,
+                            icon_size=scale_size(20),
+                            padding=scale_size(5),
+                        )
+                    )
             except Exception as e:
                 logger.warning(f"Failed to create Systray widget: {e}")
-                # Continue without system tray
 
         # Add current layout widget
         barconfig.extend(

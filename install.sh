@@ -571,26 +571,99 @@ install_python_dependencies() {
     log_success "Python dependencies installed for qtile's interpreter"
 }
 
-# Create/update desktop entry
+# Write a session .desktop that starts qtile directly.
+# Qtile 0.37's packaged xsessions file runs `systemctl --user start --wait
+# qtile.service`. That fails at the login manager unless graphical-session.target
+# is already up. SDDM also ignores ~/.local/share/xsessions (it only scans
+# /usr/local/share/xsessions then /usr/share/xsessions).
+write_session_desktop() {
+    _dest=$1
+    _name=$2
+    _comment=$3
+    _exec=$4
+    _try=$5
+
+    _dir=$(dirname "$_dest")
+    if [ ! -d "$_dir" ]; then
+        if mkdir -p "$_dir" 2>/dev/null; then
+            :
+        elif [ -n "$PRIV_CMD" ]; then
+            $PRIV_CMD mkdir -p "$_dir" || return 1
+        else
+            return 1
+        fi
+    fi
+
+    _body=$(printf '%s\n' \
+        "[Desktop Entry]" \
+        "Name=${_name}" \
+        "Comment=${_comment}" \
+        "TryExec=${_try}" \
+        "Exec=${_exec}" \
+        "Type=Application" \
+        "DesktopNames=qtile" \
+        "Keywords=wm;tiling")
+
+    if printf '%s\n' "$_body" > "$_dest" 2>/dev/null; then
+        :
+    elif [ -n "$PRIV_CMD" ]; then
+        printf '%s\n' "$_body" | $PRIV_CMD tee "$_dest" >/dev/null || return 1
+    else
+        return 1
+    fi
+    log_success "Session entry: $_dest"
+    return 0
+}
+
 create_desktop_entry() {
-    log_info "Creating desktop session entry..."
+    log_info "Creating desktop session entries..."
 
-    DESKTOP_DIR="${HOME}/.local/share/xsessions"
-    DESKTOP_FILE="$DESKTOP_DIR/qtile.desktop"
-    _exec_qtile=${QTILE_BIN:-${HOME}/.local/bin/qtile}
+    _exec_qtile=${QTILE_BIN:-}
+    if [ -z "$_exec_qtile" ] || [ ! -x "$_exec_qtile" ]; then
+        _exec_qtile=$(command -v qtile 2>/dev/null || true)
+    fi
+    if [ -z "$_exec_qtile" ]; then
+        _exec_qtile=/usr/bin/qtile
+    fi
 
-    mkdir -p "$DESKTOP_DIR"
+    _x11_exec="${_exec_qtile} start"
+    _wl_exec="${_exec_qtile} start -b wayland"
 
-    cat > "$DESKTOP_FILE" << EOF
-[Desktop Entry]
-Name=Qtile
-Comment=Qtile Session
-Exec=$_exec_qtile start
-Type=Application
-Keywords=wm;tiling
-EOF
+    # User XDG dirs: used by GDM and some others, not by SDDM.
+    write_session_desktop \
+        "${HOME}/.local/share/xsessions/qtile.desktop" \
+        "Qtile" "Qtile X11 session" "$_x11_exec" "$_exec_qtile" || \
+        log_warn "Could not write ~/.local/share/xsessions/qtile.desktop"
 
-    log_success "Desktop entry created at $DESKTOP_FILE (Exec=$_exec_qtile start)"
+    write_session_desktop \
+        "${HOME}/.local/share/wayland-sessions/qtile.desktop" \
+        "Qtile (Wayland)" "Qtile Wayland session" "$_wl_exec" "$_exec_qtile" || \
+        log_warn "Could not write ~/.local/share/wayland-sessions/qtile.desktop"
+
+    # SDDM scans /usr/local/share/xsessions then /usr/share/xsessions (not
+    # ~/.local/share). Qtile 0.37's packaged file runs
+    # `systemctl --user start --wait qtile.service`, which hangs at the greeter
+    # because graphical-session.target is not up yet. Overwrite both system
+    # locations so every "Qtile" entry starts qtile directly.
+    if [ -n "$PRIV_CMD" ]; then
+        write_session_desktop \
+            /usr/local/share/xsessions/qtile.desktop \
+            "Qtile" "Qtile X11 session" "$_x11_exec" "$_exec_qtile" || \
+            log_warn "Could not write /usr/local/share/xsessions/qtile.desktop"
+
+        write_session_desktop \
+            /usr/share/xsessions/qtile.desktop \
+            "Qtile" "Qtile X11 session" "$_x11_exec" "$_exec_qtile" || \
+            log_warn "Could not write /usr/share/xsessions/qtile.desktop"
+
+        write_session_desktop \
+            /usr/local/share/wayland-sessions/qtile.desktop \
+            "Qtile (Wayland)" "Qtile Wayland session" "$_wl_exec" "$_exec_qtile" || \
+            log_warn "Could not write /usr/local/share/wayland-sessions/qtile.desktop"
+    else
+        log_warn "No sudo/doas: SDDM will keep using /usr/share/xsessions/qtile.desktop"
+        log_warn "That file starts qtile via systemd user service and hangs at login"
+    fi
 }
 
 # Confirm a module imports with qtile's interpreter (not some other Python).

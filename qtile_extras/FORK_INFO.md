@@ -18,6 +18,8 @@ The vendored tree already matched this tag. After the copy, these local patches 
 
 - `widget/systray.py`: `icon_background` so dark tray icons stay visible on dark bars (used by `modules/bars.py`)
 - `widget/statusnotifier.py`: Wayland HiDPI icon scaling via the bar window scale factor
+- `widget/decorations.py`: `length_get` matches qtile 0.37 (skip finalized widgets, catch pre-init AttributeError)
+- `widget/image.py`: do not crash the bar when pixbuf cannot decode the file (e.g. SVG without a loader)
 
 Do not drop those two files when copying from upstream.
 

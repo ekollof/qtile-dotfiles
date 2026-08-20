@@ -73,19 +73,27 @@ class Image(QtileImage):
 
             img = img_class.from_path(self.filename)
 
+        if img is None:
+            logger.warning("Failed to create image from %s", self.filename)
+            return
+
         if self.mask:
             img.attach_drawer(self.drawer)
 
-        self.img = img
-        img.theta = self.rotate
-        if not self.scale:
-            return
-        if self.bar.horizontal:
-            new_height = self.bar.height - (self.margin_y * 2)
-            img.resize(height=new_height)
-        else:
-            new_width = self.bar.width - (self.margin_x * 2)
-            img.resize(width=new_width)
+        try:
+            self.img = img
+            img.theta = self.rotate
+            if not self.scale:
+                return
+            if self.bar.horizontal:
+                new_height = self.bar.height - (self.margin_y * 2)
+                img.resize(height=new_height)
+            else:
+                new_width = self.bar.width - (self.margin_x * 2)
+                img.resize(width=new_width)
+        except Exception:
+            logger.exception("Failed to load image %s", self.filename)
+            self.img = None
 
     def draw(self):
         if self.img is None:

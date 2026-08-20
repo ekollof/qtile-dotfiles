@@ -119,16 +119,22 @@ mouse = [
     Click([mod], "Button2", lazy.window.bring_to_front()),
 ]
 
-# Additional qtile settings
+# Additional qtile settings (names must match libqtile.confreader.Config)
 dgroups_key_binder = None
 dgroups_app_rules = []
-main = None  # WARNING: this is deprecated and will be removed soon
 follow_mouse_focus = True
-bring_front_click = "focus_and_warp"
+# Valid values: True | False | "floating_only" (qtile 0.26+)
+bring_front_click = True
 cursor_warp = True
 auto_fullscreen = True
 focus_on_window_activation = "focus"
-reconfigure_screens_setting = True
+reconfigure_screens = True
+# Qtile 0.37+ coalesces randr/wayland output events before screen_change
+screen_change_debounce_timeout = qtile_config.screen_settings["detection_delay"]
+
+# Do not also define generate_screens(). That rebuilds Screen/widget objects on
+# every reconfigure; Systray is a singleton and the second copy raises
+# ConfigError ("Only one Systray can be used.").
 
 # Java app compatibility
 wmname = "qtile"

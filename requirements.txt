@@ -2,7 +2,7 @@
 # This file lists all Python packages required for the Qtile window manager configuration
 
 # Core Qtile dependencies
-libqtile>=0.22.0
+libqtile>=0.37.0
 # qtile-extras>=0.22.0  # Now using local fork in qtile_extras/
 
 # Optional dependencies for enhanced functionality

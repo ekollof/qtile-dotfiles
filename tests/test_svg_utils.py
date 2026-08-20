@@ -14,6 +14,7 @@ from modules.svg_utils import (
     SVGManipulator,
     create_themed_icon_cache,
     get_svg_utils,
+    rasterize_svg_to_png,
 )
 
 
@@ -549,3 +550,23 @@ class TestIntegration:
         # Generate an icon and verify it uses the custom colors
         svg: str = generator.battery_icon(50)
         assert '#00ff00' in svg  # Should contain the custom foreground color
+
+
+class TestRasterizeSvg:
+    """gdk-pixbuf SVG workaround"""
+
+    def test_missing_file_returns_none(self) -> None:
+        assert rasterize_svg_to_png("/no/such/icon.svg") is None
+
+    def test_converts_svg_when_tool_present(self, tmp_path: Path) -> None:
+        svg = tmp_path / "dot.svg"
+        svg.write_text(
+            '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24">'
+            '<circle cx="12" cy="12" r="10" fill="#fff"/></svg>',
+            encoding="utf-8",
+        )
+        with patch("modules.svg_utils.Path.home", return_value=tmp_path):
+            png = rasterize_svg_to_png(svg, size=16)
+        assert png is not None
+        assert png.is_file()
+        assert png.read_bytes()[:8] == b"\x89PNG\r\n\x1a\n"

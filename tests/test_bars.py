@@ -267,7 +267,11 @@ class TestEnhancedBarManager:
 
                 # Mock Path.exists specifically
                 with patch('pathlib.Path.exists', return_value=True):
-                    result = bar_manager._create_icon_widget("test_icon")  # type: ignore
+                    with patch(
+                        'modules.bars.rasterize_svg_to_png',
+                        return_value=Path('/tmp/dynamic.png'),
+                    ):
+                        result = bar_manager._create_icon_widget("test_icon")  # type: ignore
 
                     # Verify Image widget was created and returned
                     mock_image.assert_called_once()

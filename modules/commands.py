@@ -232,7 +232,7 @@ class WindowCommands:
         """Focus previous screen, focus first window in stack, and warp mouse"""
         try:
             # Execute the previous screen focus command
-            qtile.cmd_prev_screen()
+            qtile.prev_screen()
 
             # Focus the first window in the stack on the new screen
             self._focus_first_window_in_stack(qtile)
@@ -250,7 +250,7 @@ class WindowCommands:
         """Focus next screen, focus first window in stack, and warp mouse"""
         try:
             # Execute the next screen focus command
-            qtile.cmd_next_screen()
+            qtile.next_screen()
 
             # Focus the first window in the stack on the new screen
             self._focus_first_window_in_stack(qtile)

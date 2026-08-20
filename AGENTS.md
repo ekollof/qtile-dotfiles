@@ -27,9 +27,9 @@ Runtime Python dependencies this config actually imports: `libqtile`, local `qti
 
 ### Python
 
-- Target **Python 3.10+**. Use `match`/`case`, `list[str] | None`, `Path`, `from __future__` only if a file still needs it.
+- Target **Python 3.12+** (qtile 0.34 dropped 3.11; extras requires 3.12). Use `match`/`case`, `list[str] | None`, `Path`.
 - Prefer modern typing (`X | Y`, `list[T]`, `dict[K, V]`). Do not add `typing.List` / `Optional` / `Union` in new code.
-- Type-hint public functions and methods. `ruff.toml` is `target-version = "py310"`, line length 88.
+- Type-hint public functions and methods. `ruff.toml` is `target-version = "py312"`, line length 88.
 - `pyrightconfig.json` is strict with several `reportUnknown*` rules disabled because Qtile APIs are loosely typed. Do not “fix” that by sprinkling `Any` everywhere; type what we own.
 - Do not use deprecated stdlib or Python 2 patterns.
 
@@ -106,6 +106,7 @@ Must remain a **POSIX `#!/bin/sh`** script that runs on dash, OpenBSD pdksh/ksh,
 - Optional packages that may be missing from a repo must not sit in the same `pkg_add`/`pacman`/`pkgin` transaction as required packages (one missing name fails the whole set).
 - Skip D-Bus Python packages on OpenBSD.
 - Desktop `Exec=` must be a real path (`.desktop` files do not expand `$HOME`).
+- Login managers: SDDM only reads `/usr/local/share/xsessions` then `/usr/share/xsessions` (not `~/.local/share/xsessions`). Qtile 0.37's packaged `qtile.desktop` starts a systemd user service that usually fails at the greeter; install a file that runs `qtile start` into `/usr/local/share/xsessions` so it wins. Do not copy the packaged systemd Exec line.
 
 `setup_pipx` / inject paths are Linux-and-pipx-oriented. BSD with a ports qtile should not be forced through pipx.
 

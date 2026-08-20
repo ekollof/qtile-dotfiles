@@ -1,7 +1,7 @@
 # Ruff configuration for Python 3.10+ compliance and modern syntax
 # This configuration enforces modern Python patterns while being practical for qtile
 
-target-version = "py310"
+target-version = "py312"
 line-length = 88
 indent-width = 4
 

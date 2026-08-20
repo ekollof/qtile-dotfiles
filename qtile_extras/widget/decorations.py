@@ -1133,10 +1133,20 @@ def inject_decorations(classdef):
         self.configure_decorations()
 
     def length_get(self):
-        if self.length_type == bar.CALCULATED:
-            length = int(self.calculate_length())
-        else:
-            length = self._length
+        # Match libqtile 0.37: do not draw/measure widgets after reload/finalize.
+        if getattr(self, "finalized", False):
+            return 0
+
+        try:
+            if self.length_type == bar.CALCULATED:
+                length = int(self.calculate_length())
+            else:
+                length = self._length
+        except AttributeError:
+            return int(getattr(self, "_length", 0) or 0)
+        except Exception:
+            logger.exception("error when calculating widget %s length", getattr(self, "name", "?"))
+            return 0
 
         if length:
             # Get the largest extra space required by a decoration

@@ -7,7 +7,10 @@ Provides tools to create, modify, scale, and color SVG icons programmatically
 @author qtile configuration system
 """
 
+import hashlib
 import re
+import shutil
+import subprocess
 import xml.etree.ElementTree as ET
 from dataclasses import dataclass
 from pathlib import Path
@@ -22,6 +25,60 @@ except ImportError:
     import logging
 
     logger = logging.getLogger(__name__)
+
+
+def rasterize_svg_to_png(svg_path: str | Path, size: int = 24) -> Path | None:
+    """
+    @brief Convert an SVG file to a PNG that gdk-pixbuf can load
+    @param svg_path: Source SVG path
+    @param size: Output width and height in pixels
+    @return Path to the cached PNG, or None if conversion failed
+
+    Qtile's Image widget decodes via cairocffi.pixbuf. On gdk-pixbuf2-noglycin
+    (and similar builds) there is no SVG pixbuf loader, so SVGs crash the bar.
+    PNG loaders remain built-in.
+    """
+    src = Path(svg_path)
+    if not src.is_file():
+        return None
+
+    try:
+        digest = hashlib.sha1(
+            f"{src.resolve()}:{src.stat().st_mtime_ns}:{size}".encode()
+        ).hexdigest()[:16]
+    except OSError:
+        return None
+
+    cache_dir = Path.home() / ".cache" / "qtile" / "icons"
+    dest = cache_dir / f"{src.stem}-{digest}.png"
+    if dest.is_file():
+        return dest
+
+    try:
+        cache_dir.mkdir(parents=True, exist_ok=True)
+    except OSError as e:
+        logger.warning(f"Cannot create icon cache {cache_dir}: {e}")
+        return None
+
+    size_s = str(max(int(size), 1))
+    converters: list[list[str]] = []
+    rsvg = shutil.which("rsvg-convert")
+    if rsvg:
+        converters.append([rsvg, "-w", size_s, "-h", size_s, "-o", str(dest), str(src)])
+    resvg = shutil.which("resvg")
+    if resvg:
+        converters.append([resvg, "-w", size_s, "-h", size_s, str(src), str(dest)])
+
+    for cmd in converters:
+        try:
+            subprocess.run(cmd, check=True, capture_output=True, timeout=5)
+            if dest.is_file() and dest.stat().st_size > 0:
+                return dest
+        except (subprocess.SubprocessError, OSError) as e:
+            logger.debug(f"SVG rasterize failed ({cmd[0]}): {e}")
+
+    logger.warning(f"Could not rasterize SVG icon {src}")
+    return None
 
 
 @dataclass

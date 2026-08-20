@@ -832,7 +832,7 @@ When contributing, please test on:
 ### Code Standards
 
 - Follow the [project guidelines](AGENTS.md)
-- Use Python 3.10+ features and type hints
+- Use Python 3.12+ features and type hints (required by qtile 0.37)
 - Document functions with doxygen-compatible docstrings
 - Ensure cross-platform compatibility
 - Test DPI scaling on different displays
