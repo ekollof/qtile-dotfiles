@@ -831,7 +831,7 @@ When contributing, please test on:
 
 ### Code Standards
 
-- Follow the [project guidelines](/.github/copilot-instructions.md)
+- Follow the [project guidelines](AGENTS.md)
 - Use Python 3.10+ features and type hints
 - Document functions with doxygen-compatible docstrings
 - Ensure cross-platform compatibility

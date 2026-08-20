@@ -2,7 +2,7 @@
 """
 Compliance audit script for qtile configuration project
 
-Checks code compliance against project rules defined in .github/copilot-instructions.md:
+Checks code compliance against project rules defined in AGENTS.md:
 - Python 3.10+ features and modern syntax
 - Doxygen-compatible documentation standards
 - Cross-platform portability requirements
