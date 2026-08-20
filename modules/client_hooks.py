@@ -106,8 +106,7 @@ class ClientHooks:
         try:
             if getattr(group, "name", None) != "scratch":
                 return
-            dropdowns = getattr(group, "dropdowns", {}) or {}
-            if any(getattr(dd, "window", None) is window for dd in dropdowns.values()):
+            if self.window_manager.is_scratchpad_dropdown(window):
                 return
             qtile = getattr(window, "qtile", None)
             dest = getattr(qtile, "current_group", None) if qtile else None

@@ -14,9 +14,56 @@ class WindowManager:
     def __init__(self, config: Any) -> None:
         self.config = config
 
+    def is_scratchpad_dropdown(self, window: Any) -> bool:
+        """
+        @brief True if this client is an active or pending ScratchPad dropdown
+        @param window Qtile window
+        @return Whether the window is owned by a dropdown (not a stray on scratch)
+        """
+        wid = getattr(window, "wid", None)
+        groups: list[Any] = []
+        group = getattr(window, "group", None)
+        if group is not None:
+            groups.append(group)
+        qtile = getattr(window, "qtile", None)
+        if qtile is not None:
+            groups.extend(getattr(qtile, "groups", []))
+
+        seen: set[int] = set()
+        for grp in groups:
+            gid = id(grp)
+            if gid in seen:
+                continue
+            seen.add(gid)
+            for dd in (getattr(grp, "dropdowns", None) or {}).values():
+                dd_win = getattr(dd, "window", None)
+                if dd_win is window:
+                    return True
+                if wid is not None and getattr(dd_win, "wid", None) == wid:
+                    return True
+            for match in (getattr(grp, "_spawned", None) or {}).values():
+                try:
+                    if match.compare(window):
+                        return True
+                except Exception:
+                    continue
+        return False
+
+    def is_scratchpad_window(self, window: Any) -> bool:
+        """
+        @brief True if tiling must not run (dropdown, or already on the pad)
+        @param window Qtile window
+        """
+        group = getattr(window, "group", None)
+        if getattr(group, "name", None) == "scratch":
+            return True
+        return self.is_scratchpad_dropdown(window)
+
     def should_window_float(self, window: Any) -> bool:
         """Determine if a window should be floating based on floating rules"""
         try:
+            if self.is_scratchpad_window(window):
+                return True
             wm_class = window.window.get_wm_class()
 
             if wm_class and len(wm_class) > 0:
@@ -82,6 +129,8 @@ class WindowManager:
     def enforce_window_tiling(self, window: Any) -> None:
         """Enforce consistent tiling behavior for a window"""
         try:
+            if self.is_scratchpad_window(window):
+                return
             # Determine if this window should float based on our rules
             should_float = self.should_window_float(window)
 
@@ -106,6 +155,8 @@ class WindowManager:
             for window in qtile.windows_map.values():
                 if hasattr(window, "window") and hasattr(window, "floating"):
                     try:
+                        if self.is_scratchpad_window(window):
+                            continue
                         should_float = self.should_window_float(window)
 
                         if not should_float and window.floating:
@@ -132,6 +183,8 @@ class WindowManager:
             for window in qtile.windows_map.values():
                 if hasattr(window, "window") and hasattr(window, "floating"):
                     try:
+                        if self.is_scratchpad_window(window):
+                            continue
                         # Check if this window should be floating based on our rules
                         should_float = self.should_window_float(window)
 
