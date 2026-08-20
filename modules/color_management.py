@@ -5,6 +5,7 @@
 """
 
 import json
+import shutil
 import threading
 import time
 from pathlib import Path
@@ -34,6 +35,12 @@ class ColorManager:
 
     def __init__(self, colors_file: str = "~/.cache/wal/colors.json") -> None:
         self.colors_file = Path(colors_file).expanduser()
+        self.last_good_file = self.colors_file.with_name(
+            f"{self.colors_file.stem}.last-good{self.colors_file.suffix}"
+        )
+        self.backup_file = self.last_good_file.with_name(
+            f"{self.last_good_file.name}.backup"
+        )
         self.colordict = self._load_colors()
         self._observer = None
         self._polling_thread = None
@@ -43,20 +50,60 @@ class ColorManager:
 
     def _load_colors(self) -> dict[str, Any]:
         """
-        @brief Load colors from pywal file with fallback
+        @brief Load colors using current, cached, and default fallbacks
         @return Dictionary containing color configuration with 'special' and 'colors' keys
-        @throws FileNotFoundError when color file doesn't exist
-        @throws json.JSONDecodeError when color file is corrupted
-        @throws KeyError when color file has invalid structure
+        """
+        candidates = (
+            (self.colors_file, "current"),
+            (self.last_good_file, "last-good"),
+            (self.backup_file, "backup"),
+        )
+        for path, label in candidates:
+            try:
+                colors = self._read_color_file(path)
+            except (OSError, TypeError, ValueError) as error:
+                logger.warning(f"Could not load {label} colors from {path}: {error}")
+                continue
+
+            logger.info(f"Loaded {label} colors from {path}")
+            if path == self.colors_file:
+                self._save_last_good(colors)
+            return colors
+
+        logger.warning("No usable color file found; using built-in defaults")
+        return self._get_fallback_colors()
+
+    def _read_color_file(self, path: Path) -> dict[str, Any]:
+        """
+        @brief Read and validate one color file
+        @param path Candidate JSON file
+        @return Validated color dictionary
+        @throws OSError when the file cannot be read
+        @throws ValueError when JSON or its structure is invalid
+        """
+        with path.open(encoding="utf-8") as file:
+            colors = json.load(file)
+        if (
+            not isinstance(colors, dict)
+            or not isinstance(colors.get("special"), dict)
+            or not isinstance(colors.get("colors"), dict)
+        ):
+            raise ValueError("color file must contain special and colors objects")
+        return colors
+
+    def _save_last_good(self, colors: dict[str, Any]) -> None:
+        """
+        @brief Persist the newest valid colors without disrupting Qtile startup
+        @param colors Validated color dictionary
         """
         try:
-            with open(self.colors_file) as f:
-                colors = json.load(f)
-                logger.info(f"Loaded colors from {self.colors_file}")
-                return colors
-        except (FileNotFoundError, json.JSONDecodeError, KeyError) as e:
-            logger.warning(f"Could not load colors from {self.colors_file}: {e}")
-            return self._get_fallback_colors()
+            if self.last_good_file.exists():
+                shutil.copyfile(self.last_good_file, self.backup_file)
+            self.last_good_file.write_text(
+                json.dumps(colors, indent=2) + "\n", encoding="utf-8"
+            )
+        except OSError as error:
+            logger.warning(f"Could not save last-good colors: {error}")
 
     def _get_fallback_colors(self) -> dict[str, dict[str, str]]:
         """

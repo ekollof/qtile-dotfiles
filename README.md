@@ -129,7 +129,7 @@ cd ~/.config/qtile
 The install script will:
 - ✅ Detect your OS (Linux, OpenBSD, FreeBSD, NetBSD)
 - ✅ Install all required system dependencies
-- ✅ Install qtile and qtile-extras via pipx
+- ✅ Install Qtile and its Python dependencies for the detected runtime
 - ✅ Set up desktop session entry
 - ✅ Verify the installation
 
@@ -137,7 +137,7 @@ The install script will:
 - **Linux**: Ubuntu, Debian, Linux Mint, Arch, Manjaro, Fedora, RHEL/CentOS
 - **BSD**: OpenBSD, FreeBSD, NetBSD
 
-**Note**: The script uses `pipx` to install qtile, which is the recommended method for distributions without qtile packages (Ubuntu, Mint, etc.).
+**Note**: The installer prefers a system or ports Qtile package. It uses pipx only when no suitable system Qtile is available. The repository's local `qtile_extras/` fork is used automatically.
 
 ### Manual Installation
 
@@ -168,9 +168,8 @@ sudo apt-get install python3 python3-pip python3-venv pipx \
     xterm feh picom xscreensaver rofi unclutter xsettingsd autorandr \
     flameshot network-manager-gnome pavucontrol
 
-# Install qtile and qtile-extras via pipx
+# Install Qtile in an isolated environment when no distro package is available
 pipx install qtile --include-deps
-pipx inject qtile qtile-extras
 pipx inject qtile watchdog psutil
 
 # Ensure pipx bin is in PATH
@@ -186,9 +185,8 @@ sudo dnf install python3 python3-pip pipx python3-devel cairo cairo-devel \
     xterm feh picom xscreensaver rofi unclutter xsettingsd autorandr \
     flameshot NetworkManager-applet pavucontrol
 
-# Install qtile and qtile-extras via pipx
+# Install Qtile in an isolated environment when no distro package is available
 pipx install qtile --include-deps
-pipx inject qtile qtile-extras
 pipx inject qtile watchdog psutil
 
 # Ensure pipx bin is in PATH
@@ -220,8 +218,9 @@ doas pkg_add xrandr xdpyinfo
 **FreeBSD:**
 
 ```bash
-# Essential packages
-pkg install qtile py39-psutil
+# Essential package
+pkg install qtile
+# Install psutil for the Python interpreter used by Qtile.
 
 # Recommended for full functionality
 pkg install rofi dmenu picom dunst unclutter xrandr
@@ -230,8 +229,9 @@ pkg install rofi dmenu picom dunst unclutter xrandr
 **NetBSD:**
 
 ```bash
-# Essential packages
-pkgin install qtile py39-psutil
+# Essential package
+pkgin install qtile
+# Install psutil for the Python interpreter used by Qtile.
 
 # Recommended for full functionality
 pkgin install rofi dmenu picom dunst unclutter
@@ -899,8 +899,8 @@ This configuration prioritizes:
 - **Error Recovery**: Comprehensive fallback systems for all components
 - **Performance**: Efficient caching and lazy loading
 - **Documentation**: Complete API documentation with Doxygen
-- **Testing**: Utility scripts for configuration validation
-- **Compatibility**: Support for Python 3.10+ features
+- **Testing**: Pytest, Ruff, and Qtile's configuration checker
+- **Compatibility**: Support for Python 3.12+ features
 - **Code Quality**: Ruff linting and formatting applied throughout
 
 Built for daily use in demanding multi-monitor, high-DPI development environments with comprehensive cross-platform support! 🚀

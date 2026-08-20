@@ -177,35 +177,38 @@ class EnhancedBarManager:
     def _calculate_icon_background(self, bg_color: str, fg_color: str) -> str:
         """
         @brief Calculate appropriate icon background color for systray visibility
-        
+
         Automatically determines a suitable background color for systray icons
         based on the bar's background color luminance. For dark backgrounds,
         returns a lighter mid-tone color for better icon visibility.
-        
+
         @param bg_color: Background color (hex string, e.g., '#000000')
         @param fg_color: Foreground color (hex string, e.g., '#ffffff')
         @return Appropriate icon background color (hex string)
         """
         # Remove '#' prefix if present
-        bg = bg_color.lstrip('#')
-        fg = fg_color.lstrip('#')
-        
+        bg = bg_color.lstrip("#")
+
         # Calculate relative luminance using sRGB formula
         # https://www.w3.org/TR/WCAG20/#relativeluminancedef
         def get_luminance(hex_color: str) -> float:
             """Calculate relative luminance of a hex color"""
-            r, g, b = int(hex_color[0:2], 16), int(hex_color[2:4], 16), int(hex_color[4:6], 16)
+            r, g, b = (
+                int(hex_color[0:2], 16),
+                int(hex_color[2:4], 16),
+                int(hex_color[4:6], 16),
+            )
             r, g, b = r / 255.0, g / 255.0, b / 255.0
-            
+
             # Apply sRGB gamma correction
             def adjust(c):
                 return c / 12.92 if c <= 0.03928 else ((c + 0.055) / 1.055) ** 2.4
-            
+
             r, g, b = adjust(r), adjust(g), adjust(b)
             return 0.2126 * r + 0.7152 * g + 0.0722 * b
-        
+
         bg_luminance = get_luminance(bg)
-        
+
         # For dark backgrounds (luminance < 0.5), use a medium gray
         # This provides good contrast for dark icons without being too bright
         if bg_luminance < 0.5:
@@ -861,7 +864,9 @@ class EnhancedBarManager:
                 return (
                     1
                     if self.suffix_value > other.suffix_value
-                    else -1 if self.suffix_value < other.suffix_value else 0
+                    else -1
+                    if self.suffix_value < other.suffix_value
+                    else 0
                 )
             if self.suffix == "pl":
                 return 1

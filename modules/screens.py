@@ -25,7 +25,7 @@ class ScreenManager:
         """Detect number of screens using system tools"""
         # Mark as detected to avoid redundant calls
         self._detected = True
-        
+
         if self.display_override == 0:
             try:
                 if self._is_xephyr_environment():

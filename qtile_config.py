@@ -5,10 +5,7 @@ Centralized configuration for qtile - DPI AWARE VERSION
 @brief Centralized qtile configuration with automatic DPI scaling support
 @author qtile configuration system
 
-All user-conf            "wallpaper_picker": f"{self.home}/bin/pick            "wallpaper_picker": f"{self.home}/bin/pickwall.sh",
-            "wallpaper_random": f"{self.home}/bin/wallpaper.ksh -r",
-            "lock_session": self.platform_config.get_command(l.sh",
-            "wallpaper_random": f"{self.home}/bin/wallpaper.ksh -r",rable settings in one place with automatic DPI scaling.
+All user-configurable settings live in one place with automatic DPI scaling.
 Provides platform-aware defaults, font management, and cross-platform
 compatibility for both X11 and Wayland environments.
 
@@ -23,6 +20,7 @@ from pathlib import Path
 from typing import Any
 
 from libqtile.log_utils import logger
+
 from modules.dpi_utils import get_dpi_manager, scale_font, scale_size
 from modules.font_utils import get_available_font
 from modules.platform import get_platform_config, get_platform_info
@@ -96,9 +94,6 @@ class QtileConfig:
 
         # Setup D-Bus session bus address if not already set
         self._setup_dbus_environment()
-        
-        # Setup GTK CSS for systray icon colors
-        self._setup_gtk_icon_colors()
 
     def _find_suitable_shell(self) -> str | None:
         """Find a suitable shell for sourcing environment files"""
@@ -172,7 +167,7 @@ class QtileConfig:
     def _setup_dbus_environment(self):
         """
         Setup D-Bus session bus address for notification support
-        
+
         Sets DBUS_SESSION_BUS_ADDRESS if not already set, trying common locations.
         This is needed for qtile's notification system to work properly.
         """
@@ -221,51 +216,6 @@ class QtileConfig:
             # If all else fails, just continue without D-Bus
             # The notification system will log a warning but qtile will still work
             pass
-
-    def _setup_gtk_icon_colors(self):
-        """
-        Setup GTK icon colors for systray symbolic icons
-        
-        Symbolic icons (like nm-applet) use GTK CSS styling for colors.
-        This creates a custom GTK CSS override to force light-colored icons
-        in the systray even on dark panels.
-        """
-        import os
-        from pathlib import Path
-
-        gtk3_config_dir = Path(self.home) / ".config" / "gtk-3.0"
-        gtk3_config_dir.mkdir(parents=True, exist_ok=True)
-        
-        css_file = gtk3_config_dir / "gtk.css"
-        
-        # CSS to force light symbolic icons
-        icon_css = """
-/* Force light-colored symbolic icons in systray */
-.sn-item {
-    -gtk-icon-style: symbolic;
-    color: #ffffff; /* Light icon color */
-    -gtk-icon-shadow: none;
-}
-
-/* Alternative selector for some apps */
-#sn-item-box {
-    color: #ffffff;
-}
-"""
-        
-        try:
-            # Read existing CSS if present
-            existing_css = ""
-            if css_file.exists():
-                existing_css = css_file.read_text()
-            
-            # Only add our rules if not already present
-            if ".sn-item" not in existing_css:
-                with css_file.open("a") as f:
-                    f.write("\n" + icon_css)
-                logger.info(f"Added systray icon color rules to {css_file}")
-        except Exception as e:
-            logger.warning(f"Could not update GTK CSS for icon colors: {e}")
 
     # ===== FONT SETTINGS =====
     #

@@ -23,7 +23,7 @@ class TestWindowCommands:
 
     def test_initialization(self, window_commands: WindowCommands) -> None:
         """Test WindowCommands initialization"""
-        assert hasattr(window_commands, 'qtile_config')
+        assert hasattr(window_commands, "qtile_config")
 
     def test_window_to_previous_screen(self, window_commands: WindowCommands) -> None:
         """Test moving window to previous screen"""
@@ -38,7 +38,9 @@ class TestWindowCommands:
 
         mock_window.togroup.assert_called_once_with("group1")
 
-    def test_window_to_previous_screen_first_screen(self, window_commands: WindowCommands) -> None:
+    def test_window_to_previous_screen_first_screen(
+        self, window_commands: WindowCommands
+    ) -> None:
         """Test moving window to previous screen when on first screen"""
         mock_qtile = MagicMock()
         mock_qtile.screens = [MagicMock(), MagicMock()]
@@ -64,7 +66,9 @@ class TestWindowCommands:
 
         mock_window.togroup.assert_called_once_with("group2")
 
-    def test_window_to_next_screen_last_screen(self, window_commands: WindowCommands) -> None:
+    def test_window_to_next_screen_last_screen(
+        self, window_commands: WindowCommands
+    ) -> None:
         """Test moving window to next screen when on last screen"""
         mock_qtile = MagicMock()
         mock_qtile.screens = [MagicMock(), MagicMock()]
@@ -77,7 +81,9 @@ class TestWindowCommands:
 
         mock_window.togroup.assert_not_called()
 
-    def test_toggle_fullscreen_with_window(self, window_commands: WindowCommands) -> None:
+    def test_toggle_fullscreen_with_window(
+        self, window_commands: WindowCommands
+    ) -> None:
         """Test toggling fullscreen with a window"""
         mock_qtile = MagicMock()
         mock_window = MagicMock()
@@ -95,7 +101,9 @@ class TestWindowCommands:
         # Should not raise exception
         window_commands.toggle_fullscreen(mock_qtile)
 
-    def test_smart_maximize_not_maximized(self, window_commands: WindowCommands) -> None:
+    def test_smart_maximize_not_maximized(
+        self, window_commands: WindowCommands
+    ) -> None:
         """Test smart maximize when window is not maximized"""
         mock_qtile = MagicMock()
         mock_window = MagicMock()
@@ -106,7 +114,9 @@ class TestWindowCommands:
 
         mock_window.toggle_maximize.assert_called_once()
 
-    def test_smart_maximize_already_maximized(self, window_commands: WindowCommands) -> None:
+    def test_smart_maximize_already_maximized(
+        self, window_commands: WindowCommands
+    ) -> None:
         """Test smart maximize when window is already maximized"""
         mock_qtile = MagicMock()
         mock_window = MagicMock()
@@ -125,8 +135,9 @@ class TestWindowCommands:
         # Should not raise exception
         window_commands.smart_maximize(mock_qtile)
 
-
-    def test_focus_prev_screen_uses_qtile_command(self, window_commands: WindowCommands) -> None:
+    def test_focus_prev_screen_uses_qtile_command(
+        self, window_commands: WindowCommands
+    ) -> None:
         """Screen focus must call prev_screen (cmd_ prefix removed in qtile 0.35)."""
         mock_qtile = MagicMock()
         mock_qtile.current_screen.group.windows = []
@@ -136,7 +147,9 @@ class TestWindowCommands:
         mock_qtile.prev_screen.assert_called_once()
         mock_qtile.cmd_prev_screen.assert_not_called()
 
-    def test_focus_next_screen_uses_qtile_command(self, window_commands: WindowCommands) -> None:
+    def test_focus_next_screen_uses_qtile_command(
+        self, window_commands: WindowCommands
+    ) -> None:
         """Screen focus must call next_screen (cmd_ prefix removed in qtile 0.35)."""
         mock_qtile = MagicMock()
         mock_qtile.current_screen.group.windows = []
@@ -235,11 +248,11 @@ class TestLayoutAwareCommands:
         """Test smart shrink with MonadTall layout"""
         mock_qtile = MagicMock()
         mock_layout = MagicMock()
-        mock_layout.name = 'monadtall'
+        mock_layout.name = "monadtall"
         mock_group = MagicMock()
         mock_group.layout = mock_layout
         mock_qtile.current_group = mock_group
-        
+
         # Test that the method executes without error
         layout_commands.smart_shrink(mock_qtile)
         # Just verify the method completes successfully
@@ -249,83 +262,93 @@ class TestLayoutAwareCommands:
         """Test smart grow with MonadTall layout"""
         mock_qtile = MagicMock()
         mock_layout = MagicMock()
-        mock_layout.name = 'monadtall'
+        mock_layout.name = "monadtall"
         mock_group = MagicMock()
         mock_group.layout = mock_layout
         mock_qtile.current_group = mock_group
-        
+
         # Test that the method executes without error
         layout_commands.smart_grow(mock_qtile)
         # Just verify the method completes successfully
         assert True  # Method executed without exception
 
-    def test_smart_grow_shrink_tile_layout(self, layout_commands: LayoutAwareCommands) -> None:
+    def test_smart_grow_shrink_tile_layout(
+        self, layout_commands: LayoutAwareCommands
+    ) -> None:
         """Test smart grow/shrink with Tile layout"""
         mock_qtile = MagicMock()
         mock_layout = MagicMock()
-        mock_layout.name = 'tile'
+        mock_layout.name = "tile"
         mock_group = MagicMock()
         mock_group.layout = mock_layout
         mock_qtile.current_group = mock_group
-        
+
         # Test that the methods execute without error
         layout_commands.smart_grow(mock_qtile)
         layout_commands.smart_shrink(mock_qtile)
         # Just verify the methods complete successfully
         assert True  # Methods executed without exception
 
-    def test_smart_grow_shrink_vertical_bsp_layout(self, layout_commands: LayoutAwareCommands) -> None:
+    def test_smart_grow_shrink_vertical_bsp_layout(
+        self, layout_commands: LayoutAwareCommands
+    ) -> None:
         """Test smart grow/shrink with BSP layout (vertical)"""
         mock_qtile = MagicMock()
         mock_layout = MagicMock()
-        mock_layout.name = 'bsp'
+        mock_layout.name = "bsp"
         mock_group = MagicMock()
         mock_group.layout = mock_layout
         mock_qtile.current_group = mock_group
-        
+
         # Test that the methods execute without error
         layout_commands.smart_grow_vertical(mock_qtile)
         layout_commands.smart_shrink_vertical(mock_qtile)
         # Just verify the methods complete successfully
         assert True  # Methods executed without exception
 
-    def test_smart_grow_shrink_unsupported_layout(self, layout_commands: LayoutAwareCommands) -> None:
+    def test_smart_grow_shrink_unsupported_layout(
+        self, layout_commands: LayoutAwareCommands
+    ) -> None:
         """Test smart grow/shrink with unsupported layout"""
         mock_qtile = MagicMock()
         mock_layout = MagicMock()
-        mock_layout.name = 'unsupported'
+        mock_layout.name = "unsupported"
         mock_group = MagicMock()
         mock_group.layout = mock_layout
         mock_qtile.current_group = mock_group
-        
+
         # Should not raise exception
         layout_commands.smart_grow(mock_qtile)
         layout_commands.smart_shrink(mock_qtile)
 
-    def test_smart_normalize_with_normalize_method(self, layout_commands: LayoutAwareCommands) -> None:
+    def test_smart_normalize_with_normalize_method(
+        self, layout_commands: LayoutAwareCommands
+    ) -> None:
         """Test smart normalize with layout that has normalize method"""
         mock_qtile = MagicMock()
         mock_layout = MagicMock()
-        mock_layout.name = 'tile'
+        mock_layout.name = "tile"
         mock_group = MagicMock()
         mock_group.layout = mock_layout
         mock_qtile.current_group = mock_group
-        
+
         # Test that the method executes without error
         layout_commands.smart_normalize(mock_qtile)
         # Just verify the method completes successfully
         assert True  # Method executed without exception
 
-    def test_smart_normalize_without_normalize_method(self, layout_commands: LayoutAwareCommands) -> None:
+    def test_smart_normalize_without_normalize_method(
+        self, layout_commands: LayoutAwareCommands
+    ) -> None:
         """Test smart normalize with layout that doesn't have normalize method"""
         mock_qtile = MagicMock()
         mock_layout = MagicMock()
-        mock_layout.name = 'max'
+        mock_layout.name = "max"
         del mock_layout.normalize  # Remove normalize method
         mock_group = MagicMock()
         mock_group.layout = mock_layout
         mock_qtile.current_group = mock_group
-        
+
         # Should not raise exception
         layout_commands.smart_normalize(mock_qtile)
         assert True  # Method executed without exception
@@ -334,11 +357,11 @@ class TestLayoutAwareCommands:
         """Test smart flip with MonadTall layout"""
         mock_qtile = MagicMock()
         mock_layout = MagicMock()
-        mock_layout.name = 'monadtall'
+        mock_layout.name = "monadtall"
         mock_group = MagicMock()
         mock_group.layout = mock_layout
         mock_qtile.current_group = mock_group
-        
+
         # Test that the method executes without error
         layout_commands.smart_flip(mock_qtile)
         # Just verify the method completes successfully
@@ -348,11 +371,11 @@ class TestLayoutAwareCommands:
         """Test smart flip with Tile layout"""
         mock_qtile = MagicMock()
         mock_layout = MagicMock()
-        mock_layout.name = 'tile'
+        mock_layout.name = "tile"
         mock_group = MagicMock()
         mock_group.layout = mock_layout
         mock_qtile.current_group = mock_group
-        
+
         # Test that the method executes without error
         layout_commands.smart_flip(mock_qtile)
         # Just verify the method completes successfully
@@ -362,11 +385,11 @@ class TestLayoutAwareCommands:
         """Test smart flip with unsupported layout"""
         mock_qtile = MagicMock()
         mock_layout = MagicMock()
-        mock_layout.name = 'max'
+        mock_layout.name = "max"
         del mock_layout.flip  # Remove flip method
         mock_group = MagicMock()
         mock_group.layout = mock_layout
         mock_qtile.current_group = mock_group
-        
+
         # Should not raise exception
         layout_commands.smart_flip(mock_qtile)

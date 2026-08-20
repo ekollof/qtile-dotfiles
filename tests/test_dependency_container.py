@@ -19,14 +19,14 @@ class TestManagerDependencies:
         mock_dpi_manager = MagicMock()
         mock_platform_config = MagicMock()
         mock_config = MagicMock()
-        
+
         deps = ManagerDependencies(
             color_manager=mock_color_manager,
             dpi_manager=mock_dpi_manager,
             platform_config=mock_platform_config,
-            config=mock_config
+            config=mock_config,
         )
-        
+
         assert deps.color_manager == mock_color_manager
         assert deps.dpi_manager == mock_dpi_manager
         assert deps.platform_config == mock_platform_config
@@ -38,19 +38,19 @@ class TestManagerDependencies:
         mock_dpi_manager = MagicMock()
         mock_platform_config = MagicMock()
         mock_config = MagicMock()
-        
+
         deps = ManagerDependencies(
             color_manager=mock_color_manager,
             dpi_manager=mock_dpi_manager,
             platform_config=mock_platform_config,
-            config=mock_config
+            config=mock_config,
         )
-        
+
         # Check that all expected attributes exist
-        assert hasattr(deps, 'color_manager')
-        assert hasattr(deps, 'dpi_manager')
-        assert hasattr(deps, 'platform_config')
-        assert hasattr(deps, 'config')
+        assert hasattr(deps, "color_manager")
+        assert hasattr(deps, "dpi_manager")
+        assert hasattr(deps, "platform_config")
+        assert hasattr(deps, "config")
 
     def test_dependency_types(self) -> None:
         """Test dependency types are maintained"""
@@ -58,16 +58,16 @@ class TestManagerDependencies:
         mock_dpi_manager = MagicMock()
         mock_platform_config = MagicMock()
         mock_config = MagicMock()
-        
+
         deps = ManagerDependencies(
             color_manager=mock_color_manager,
             dpi_manager=mock_dpi_manager,
             platform_config=mock_platform_config,
-            config=mock_config
+            config=mock_config,
         )
-        
+
         # Should not modify the dependencies
-        assert type(deps.color_manager) == type(mock_color_manager)
-        assert type(deps.dpi_manager) == type(mock_dpi_manager)
-        assert type(deps.platform_config) == type(mock_platform_config)
-        assert type(deps.config) == type(mock_config)
+        assert type(deps.color_manager) is type(mock_color_manager)
+        assert type(deps.dpi_manager) is type(mock_dpi_manager)
+        assert type(deps.platform_config) is type(mock_platform_config)
+        assert type(deps.config) is type(mock_config)

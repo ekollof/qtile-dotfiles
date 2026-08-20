@@ -18,45 +18,44 @@ class TestDPIManager:
     def test_initialization(self) -> None:
         """Test DPIManager initialization"""
         manager: DPIManager = DPIManager()
-        assert hasattr(manager, '_dpi')
-        assert hasattr(manager, '_scale_factor')
+        assert hasattr(manager, "_dpi")
+        assert hasattr(manager, "_scale_factor")
 
     def test_detect_dpi_fallback(self) -> None:
         """Test DPI detection fallback when no methods work"""
         manager: DPIManager = DPIManager()
 
         # Mock all detection methods to fail
-        with patch.object(manager, '_detect_with_fallbacks', return_value=96.0):
+        with patch.object(manager, "_detect_with_fallbacks", return_value=96.0):
             dpi: float = manager.detect_dpi()
             assert dpi == 96.0
 
-    @patch('subprocess.run')
+    @patch("subprocess.run")
     def test_try_xdpyinfo_success(self, mock_run: MagicMock) -> None:
         """Test xdpyinfo DPI detection success"""
         mock_run.return_value = MagicMock(
-            returncode=0,
-            stdout="resolution:    192x192 dots per inch"
+            returncode=0, stdout="resolution:    192x192 dots per inch"
         )
 
         manager: DPIManager = DPIManager()
         result: float | None = manager._try_xdpyinfo()  # type: ignore
         assert result == 192
 
-    @patch('subprocess.run')
+    @patch("subprocess.run")
     def test_try_xdpyinfo_failure(self, mock_run: MagicMock) -> None:
         """Test xdpyinfo DPI detection failure"""
-        mock_run.side_effect = subprocess.TimeoutExpired('xdpyinfo', 2)
+        mock_run.side_effect = subprocess.TimeoutExpired("xdpyinfo", 2)
 
         manager: DPIManager = DPIManager()
         result: float | None = manager._try_xdpyinfo()  # type: ignore
         assert result is None
 
-    @patch('subprocess.run')
+    @patch("subprocess.run")
     def test_try_xrandr_success(self, mock_run: MagicMock) -> None:
         """Test xrandr DPI detection success"""
         mock_run.return_value = MagicMock(
             returncode=0,
-            stdout="HDMI-1 connected primary 1920x1080+0+0 (normal left inverted right x axis y axis) 597mm x 336mm"
+            stdout="HDMI-1 connected primary 1920x1080+0+0 (normal left inverted right x axis y axis) 597mm x 336mm",
         )
 
         manager: DPIManager = DPIManager()
@@ -64,10 +63,10 @@ class TestDPIManager:
         # Calculate expected DPI: (1920 / (597/25.4)) ≈ 81.8, rounded to 82
         assert result == 82
 
-    @patch('subprocess.run')
+    @patch("subprocess.run")
     def test_try_xrandr_failure(self, mock_run: MagicMock) -> None:
         """Test xrandr DPI detection failure"""
-        mock_run.side_effect = subprocess.TimeoutExpired('xrandr', 2)
+        mock_run.side_effect = subprocess.TimeoutExpired("xrandr", 2)
 
         manager: DPIManager = DPIManager()
         result: float | None = manager._try_xrandr()  # type: ignore
@@ -105,7 +104,7 @@ class TestDPIManager:
             # Restore the original method
             manager._try_xresources = original_method  # type: ignore  # type: ignore
 
-    @patch('os.getenv')
+    @patch("os.getenv")
     def test_try_environment_success(self, mock_getenv: MagicMock) -> None:
         """Test environment variable DPI detection success"""
         mock_getenv.return_value = "2.0"
@@ -114,7 +113,7 @@ class TestDPIManager:
         result: float | None = manager._try_environment()  # type: ignore
         assert result == 192.0  # 96 * 2.0
 
-    @patch('os.getenv')
+    @patch("os.getenv")
     def test_try_environment_failure(self, mock_getenv: MagicMock) -> None:
         """Test environment variable DPI detection failure"""
         mock_getenv.return_value = None
@@ -140,7 +139,7 @@ class TestDPIManager:
         manager: DPIManager = DPIManager()
         manager._dpi = None  # type: ignore
 
-        with patch.object(manager, 'detect_dpi', return_value=96.0):
+        with patch.object(manager, "detect_dpi", return_value=96.0):
             assert manager.dpi == 96.0
 
     def test_scale_factor_property(self) -> None:
@@ -194,7 +193,7 @@ class TestDPIManager:
 
         # Test various sizes and their expected rounding
         assert manager.scale_font(12) == 15  # 15.0 rounds normally
-        assert manager.scale_font(8) == 10   # 10.0 rounds normally
+        assert manager.scale_font(8) == 10  # 10.0 rounds normally
 
     def test_get_scaling_info(self) -> None:
         """Test scaling info dictionary"""
@@ -204,37 +203,37 @@ class TestDPIManager:
 
         info: dict[str, Any] = manager.get_scaling_info()
 
-        assert info['dpi'] == 144
-        assert info['scale_factor'] == 1.5
-        assert info['category'] == 'High DPI'
-        assert info['recommended_font_base'] == 14
-        assert info['bar_height'] == 42  # 28 * 1.5
-        assert info['icon_size'] == 24   # 16 * 1.5
-        assert info['margin'] == 6       # 4 * 1.5
+        assert info["dpi"] == 144
+        assert info["scale_factor"] == 1.5
+        assert info["category"] == "High DPI"
+        assert info["recommended_font_base"] == 14
+        assert info["bar_height"] == 42  # 28 * 1.5
+        assert info["icon_size"] == 24  # 16 * 1.5
+        assert info["margin"] == 6  # 4 * 1.5
 
     def test_get_dpi_category_standard(self) -> None:
         """Test DPI category classification - Standard"""
         manager: DPIManager = DPIManager()
         manager._dpi = 96  # type: ignore
-        assert manager._get_dpi_category() == 'Standard DPI'  # type: ignore
+        assert manager._get_dpi_category() == "Standard DPI"  # type: ignore
 
     def test_get_dpi_category_high(self) -> None:
         """Test DPI category classification - High"""
         manager: DPIManager = DPIManager()
         manager._dpi = 120  # type: ignore
-        assert manager._get_dpi_category() == 'High DPI'  # type: ignore
+        assert manager._get_dpi_category() == "High DPI"  # type: ignore
 
     def test_get_dpi_category_very_high(self) -> None:
         """Test DPI category classification - Very High"""
         manager: DPIManager = DPIManager()
         manager._dpi = 180  # type: ignore
-        assert manager._get_dpi_category() == 'Very High DPI'  # type: ignore
+        assert manager._get_dpi_category() == "Very High DPI"  # type: ignore
 
     def test_get_dpi_category_ultra_high(self) -> None:
         """Test DPI category classification - Ultra High"""
         manager: DPIManager = DPIManager()
         manager._dpi = 300  # type: ignore
-        assert manager._get_dpi_category() == 'Ultra High DPI'  # type: ignore
+        assert manager._get_dpi_category() == "Ultra High DPI"  # type: ignore
 
     def test_get_recommended_base_font_standard(self) -> None:
         """Test recommended base font for standard DPI"""
@@ -266,7 +265,7 @@ class TestGlobalFunctions:
 
         assert manager1 is manager2
 
-    @patch('modules.dpi_utils.get_dpi_manager')
+    @patch("modules.dpi_utils.get_dpi_manager")
     def test_scale_size_function(self, mock_get_manager: MagicMock) -> None:
         """Test scale_size convenience function"""
         mock_manager: MagicMock = MagicMock()
@@ -277,7 +276,7 @@ class TestGlobalFunctions:
         assert result == 20
         mock_manager.scale.assert_called_once_with(10)
 
-    @patch('modules.dpi_utils.get_dpi_manager')
+    @patch("modules.dpi_utils.get_dpi_manager")
     def test_scale_font_function(self, mock_get_manager: MagicMock) -> None:
         """Test scale_font convenience function"""
         mock_manager: MagicMock = MagicMock()
@@ -288,7 +287,7 @@ class TestGlobalFunctions:
         assert result == 16
         mock_manager.scale_font.assert_called_once_with(12)
 
-    @patch('modules.dpi_utils.get_dpi_manager')
+    @patch("modules.dpi_utils.get_dpi_manager")
     def test_get_dpi_function(self, mock_get_manager: MagicMock) -> None:
         """Test get_dpi convenience function"""
         mock_manager: MagicMock = MagicMock()
@@ -296,10 +295,11 @@ class TestGlobalFunctions:
         mock_get_manager.return_value = mock_manager
 
         from modules.dpi_utils import get_dpi
+
         result: float = get_dpi()
         assert result == 144
 
-    @patch('modules.dpi_utils.get_dpi_manager')
+    @patch("modules.dpi_utils.get_dpi_manager")
     def test_get_scale_factor_function(self, mock_get_manager: MagicMock) -> None:
         """Test get_scale_factor convenience function"""
         mock_manager: MagicMock = MagicMock()
@@ -307,6 +307,7 @@ class TestGlobalFunctions:
         mock_get_manager.return_value = mock_manager
 
         from modules.dpi_utils import get_scale_factor
+
         result: float = get_scale_factor()
         assert result == 1.5
 
@@ -319,7 +320,7 @@ class TestIntegration:
         manager: DPIManager = DPIManager()
 
         # Mock the detection chain
-        with patch.object(manager, '_detect_with_fallbacks', return_value=120):
+        with patch.object(manager, "_detect_with_fallbacks", return_value=120):
             dpi: float = manager.detect_dpi()
             assert dpi == 120
 

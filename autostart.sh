@@ -30,8 +30,8 @@ fi
 echo $$ >"$PIDFILE"
 echo "$(date +%s)" >"$LOCKFILE"
 
-# Source profile for environment variables
-. ~/.profile 2>/dev/null || true &
+# Source profile for environment variables before starting child processes.
+. "$HOME/.profile" 2>/dev/null || true
 
 # Set QT theme
 export QT_QPA_PLATFORMTHEME=qt5ct

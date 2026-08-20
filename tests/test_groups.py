@@ -23,8 +23,8 @@ class TestGroupsModule:
         mock_config.groups = [("1", {}), ("2", {})]
         mock_config.floating_rules = []
         mock_color_manager = MagicMock()
-        
-        with patch('modules.groups.get_config', return_value=mock_config):
+
+        with patch("modules.groups.get_config", return_value=mock_config):
             group_manager = create_group_manager(mock_color_manager)
             assert group_manager is not None
 
@@ -34,8 +34,8 @@ class TestGroupsModule:
         mock_config.groups = [("web", {}), ("term", {})]
         mock_config.floating_rules = []
         mock_color_manager = MagicMock()
-        
-        with patch('modules.groups.get_config', return_value=mock_config):
+
+        with patch("modules.groups.get_config", return_value=mock_config):
             group_manager = create_group_manager(mock_color_manager)
             # Should return some kind of object/manager
             assert group_manager is not None
