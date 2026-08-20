@@ -71,6 +71,15 @@ class ClientHooks:
             """Handle terminal window unswallowing"""
             self._handle_unswallow(window)
 
+        @hook.subscribe.group_window_add
+        def rescue_scratchpad_strays(group: Any, window: Any) -> None:
+            """
+            ScratchPad is invisible (no screen). Regular clients that land
+            there vanish while still playing audio. Bounce anything that is
+            not an active dropdown off the pad.
+            """
+            self._rescue_scratchpad_strays(group, window)
+
         @hook.subscribe.client_focus
         def log_window_focus(window: Any) -> None:
             """Log window focus events for debugging"""
@@ -87,6 +96,32 @@ class ClientHooks:
             if hasattr(window, "urgent") and window.urgent:
                 window_name = self.window_manager._get_window_name(window)
                 logger.info(f"Window marked urgent: {window_name}")
+
+    def _rescue_scratchpad_strays(self, group: Any, window: Any) -> None:
+        """
+        @brief Move non-dropdown windows off the invisible scratch group
+        @param group Group the window was added to
+        @param window Client that joined the group
+        """
+        try:
+            if getattr(group, "name", None) != "scratch":
+                return
+            dropdowns = getattr(group, "dropdowns", {}) or {}
+            if any(getattr(dd, "window", None) is window for dd in dropdowns.values()):
+                return
+            qtile = getattr(window, "qtile", None)
+            dest = getattr(qtile, "current_group", None) if qtile else None
+            dest_name = getattr(dest, "name", None)
+            if not dest_name or dest_name == "scratch":
+                dest_name = "2:web"
+            logger.warning(
+                "Window %r was on invisible scratchpad; moving to %s",
+                getattr(window, "name", window),
+                dest_name,
+            )
+            window.togroup(dest_name)
+        except Exception as e:
+            logger.debug(f"Could not rescue scratchpad stray: {e}")
 
     def _set_floating_by_class(self, window: Any) -> None:
         """
