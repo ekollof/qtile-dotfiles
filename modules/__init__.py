@@ -13,7 +13,7 @@ This package contains modular components for qtile configuration:
 
 @author Andrath
 @note Features: Automatic color reloading, Wayland compatibility, multi-screen support
-@note This module follows Python 3.10+ standards and project guidelines
+@note This module targets Python 3.12+ and follows project guidelines
 """
 
 __version__ = "1.0.0"

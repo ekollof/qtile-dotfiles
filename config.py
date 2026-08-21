@@ -12,7 +12,7 @@ This module provides the main qtile configuration with:
 - Modular bar, key, group, and hook management
 - Cross-platform portability (Linux, BSD)
 
-@note This configuration follows modern Python 3.10+ standards
+@note This configuration targets Python 3.12+ and modern Qtile APIs
 """
 
 import importlib
@@ -66,13 +66,13 @@ from qtile_config import get_config
 # System configuration
 hostname = os.uname().nodename
 homedir = str(Path.home())
-terminal = "st"
 
 # Fix QT apps
 os.environ["QT_QPA_PLATFORMTHEME"] = "qt5ct"
 
 # Initialize managers
 qtile_config = get_config()
+terminal = qtile_config.terminal
 bar_manager = create_bar_manager(color_manager, qtile_config)
 key_manager = create_key_manager(color_manager)
 group_manager = create_group_manager(color_manager)

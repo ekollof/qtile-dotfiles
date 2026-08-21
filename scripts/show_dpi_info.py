@@ -7,7 +7,7 @@ Displays current DPI detection results, scaling factors, and provides
 testing utilities for qtile's DPI-aware configuration system.
 
 @author Qtile configuration system
-@note This script follows Python 3.10+ standards and project guidelines
+@note This script targets Python 3.12+ and follows project guidelines
 """
 
 import sys

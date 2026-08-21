@@ -132,5 +132,5 @@ Only the **source code** that generates the icons is tracked in git.
 ## Credits
 
 - **Platform Mascots**: Custom SVG implementations of official OS mascots
-- **Dynamic System**: Built with modern Python 3.10+ features
+- **Dynamic System**: Built with modern Python 3.12+ features
 - **Legacy Icons**: Feather Icons, Tabler Icons, DevIcons (MIT License)

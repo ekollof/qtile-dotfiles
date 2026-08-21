@@ -3,7 +3,7 @@
 Compliance audit script for qtile configuration project
 
 Checks code compliance against project rules defined in AGENTS.md:
-- Python 3.10+ features and modern syntax
+- Python 3.12+ features and modern syntax
 - Doxygen-compatible documentation standards
 - Cross-platform portability requirements
 - Code quality standards (PEP 8, type hints, error handling)
@@ -97,7 +97,7 @@ class ComplianceAuditor:
         self, file_path: Path, content: str, tree: ast.AST
     ) -> None:
         """
-        @brief Check for modern Python 3.10+ syntax compliance
+        @brief Check for modern Python 3.12+ syntax compliance
         @param file_path: Path to the file being checked
         @param content: File content as string
         @param tree: Parsed AST tree
@@ -108,27 +108,27 @@ class ComplianceAuditor:
         legacy_types = [
             (
                 r"from typing import.*\bDict\b",
-                "Use 'dict' instead of 'Dict' (Python 3.9+)",
+                "Use 'dict' instead of 'Dict' (required for Python 3.12+)",
             ),
             (
                 r"from typing import.*\bList\b",
-                "Use 'list' instead of 'List' (Python 3.9+)",
+                "Use 'list' instead of 'List' (required for Python 3.12+)",
             ),
             (
                 r"from typing import.*\bTuple\b",
-                "Use 'tuple' instead of 'Tuple' (Python 3.9+)",
+                "Use 'tuple' instead of 'Tuple' (required for Python 3.12+)",
             ),
             (
                 r"from typing import.*\bSet\b",
-                "Use 'set' instead of 'Set' (Python 3.9+)",
+                "Use 'set' instead of 'Set' (required for Python 3.12+)",
             ),
             (
                 r"from typing import.*\bUnion\b",
-                "Use '|' union syntax instead of 'Union' (Python 3.10+)",
+                "Use '|' union syntax instead of 'Union' (required for Python 3.12+)",
             ),
             (
                 r"from typing import.*\bOptional\b",
-                "Use '| None' instead of 'Optional' (Python 3.10+)",
+                "Use '| None' instead of 'Optional' (required for Python 3.12+)",
             ),
         ]
 
@@ -163,7 +163,7 @@ class ComplianceAuditor:
                 "Use 'pathlib.Path' instead of 'os.path' for better portability",
             )
 
-        # Look for match statements usage (good practice for Python 3.10+)
+        # Look for structural pattern matching where it improves readability.
         has_match = any(isinstance(node, ast.Match) for node in ast.walk(tree))
         has_if_elif_chains = self._detect_long_if_elif_chains(tree)
 

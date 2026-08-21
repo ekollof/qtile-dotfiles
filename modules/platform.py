@@ -184,10 +184,10 @@ class PlatformConfig:
         @return Dictionary mapping platforms to terminal preference lists
         """
         return {
-            "linux": ["st", "alacritty", "kitty", "xterm"],
-            "openbsd": ["st", "urxvt", "xterm"],
-            "freebsd": ["st", "alacritty", "xterm"],
-            "netbsd": ["st", "urxvt", "xterm"],
+            "linux": ["kitty", "st", "alacritty", "xterm"],
+            "openbsd": ["kitty", "st", "urxvt", "xterm"],
+            "freebsd": ["kitty", "st", "alacritty", "xterm"],
+            "netbsd": ["kitty", "st", "urxvt", "xterm"],
         }
 
     def _get_browser_preferences(self) -> dict[str, list[str]]:
@@ -397,7 +397,7 @@ class PlatformMascotGenerator:
         """
         system = platform.system().lower()
 
-        # Use modern match statement (Python 3.10+)
+        # Use structural pattern matching supported by Python 3.12+
         match system:
             case "openbsd":
                 return "openbsd"

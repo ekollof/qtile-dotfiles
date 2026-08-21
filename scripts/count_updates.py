@@ -88,7 +88,9 @@ class Dewey:
             return (
                 1
                 if a.suffix_value > b.suffix_value
-                else -1 if a.suffix_value < b.suffix_value else 0
+                else -1
+                if a.suffix_value < b.suffix_value
+                else 0
             )
         if a.suffix == "pl":
             return 1

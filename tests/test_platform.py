@@ -180,10 +180,12 @@ class TestPlatformConfig:
         config: PlatformConfig = PlatformConfig()
 
         linux_prefs: list[str] = config._get_terminal_preferences()["linux"]  # type: ignore
+        assert linux_prefs[:2] == ["kitty", "st"]
         assert "st" in linux_prefs
         assert "alacritty" in linux_prefs
 
         openbsd_prefs: list[str] = config._get_terminal_preferences()["openbsd"]  # type: ignore
+        assert openbsd_prefs[:2] == ["kitty", "st"]
         assert "st" in openbsd_prefs
         assert "urxvt" in openbsd_prefs
 
@@ -259,7 +261,7 @@ class TestPlatformConfig:
         with patch.object(platform, "system", return_value="Linux"):
             config: PlatformConfig = PlatformConfig()
             result: str = config.get_application("terminal")
-            assert result == "st"  # First preference
+            assert result == "st"  # Kitty unavailable, use st
 
     @patch("shutil.which")
     def test_get_application_openbsd(self, mock_which: MagicMock) -> None:
@@ -273,7 +275,7 @@ class TestPlatformConfig:
         with patch.object(platform, "system", return_value="OpenBSD"):
             config: PlatformConfig = PlatformConfig()
             result: str = config.get_application("terminal")
-            assert result == "st"  # First preference
+            assert result == "st"  # Kitty unavailable, use st
 
     @patch("shutil.which")
     def test_get_application_fallback(self, mock_which: MagicMock) -> None:

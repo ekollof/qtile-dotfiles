@@ -386,11 +386,11 @@ install_freebsd_dependencies() {
     log_info "Installing system dependencies for FreeBSD..."
 
     $PRIV_CMD pkg install -y \
-        python3 \
-        py39-pip \
-        py39-psutil \
-        py39-cairocffi \
-        py39-xcffib \
+        py312-qtile \
+        py312-pip \
+        py312-psutil \
+        py312-cairocffi \
+        py312-xcffib \
         cairo \
         pango \
         gdk-pixbuf2 \
@@ -406,8 +406,8 @@ install_freebsd_dependencies() {
         xlock || {
             log_warn "Some optional packages failed to install, continuing..."
         }
-    $PRIV_CMD pkg install -y py39-watchdog 2>/dev/null || \
-        log_warn "py39-watchdog not available from packages (optional)"
+    $PRIV_CMD pkg install -y py312-watchdog 2>/dev/null || \
+        log_warn "py312-watchdog not available from packages (optional)"
 
     log_success "System dependencies installed"
 }

@@ -44,7 +44,7 @@ Runtime Python dependencies this config actually imports: `libqtile`, local `qti
 - Use `pathlib.Path`. Prefer `shutil.which` over hard-coded `/usr/bin/...` except when you are enumerating well-known prefixes (`/usr/bin`, `/usr/local/bin`, `/usr/pkg/bin`).
 - Never assume GNU coreutils, Linux-only sysfs, systemd, GNU `readlink -f`, bash arrays, or `/proc` without a fallback.
 - OpenBSD: no D-Bus requirement; battery via `apm`; package updates via `count_updates.py` Dewey comparison; custom Qtile ports live at `https://github.com/ekollof/openbsd-ports`.
-- FreeBSD/NetBSD: `pkg` / `pkgin`, `sysctl`. Package names may be `py39-*` in `install.sh` (historical); do not “modernize” those names without checking current ports.
+- OpenBSD package repositories currently provide Python 3.13 by default and use version-neutral `py3-*` package names. FreeBSD 15.1 provides Python 3.12 packages with `py312-*` names. FreeBSD/NetBSD use `pkg` / `pkgin` and `sysctl`; verify versioned package names against the target ports before changing them.
 - Command availability: check, then fall back. Dual-verify OS (`platform.system()` + `uname` + tool existence) so a Linux box with `pkg` does not get classified as FreeBSD.
 - Default applications come from `PlatformConfig` / `qtile_config.py`, not from Linux-only names baked into key bindings.
 
@@ -122,7 +122,7 @@ python3 -c "from qtile_config import get_config; print('Config OK')"
 - Tests live in `tests/test_*.py` and mock `libqtile` / platform as needed. They do not start a window manager.
 - `pytest.ini` sets `--cov=modules --cov-fail-under=80`. Do not lower that gate to land a change.
 - After behavior changes: add or update tests. After DPI/bar work: `python3 scripts/show_dpi_info.py` is the operator check; unit tests still belong in `tests/`.
-- `scripts/audit_compliance.py` checks 3.10+ syntax, docstring style, and portability heuristics against this file. It skips `scripts/` itself.
+- `scripts/audit_compliance.py` checks Python 3.12+ syntax, docstring style, and portability heuristics against this file. It skips `scripts/` itself.
 
 Qtile itself is verified with `qtile check` using **the same binary the session runs** (system vs pipx).
 

@@ -7,7 +7,7 @@ Handles pywal/wallust color loading and automatic reloading.
 This module provides a simplified interface to the color management system.
 
 @author Qtile configuration system
-@note This module follows Python 3.10+ standards and project guidelines
+@note This module targets Python 3.12+ and follows project guidelines
 """
 
 # Import from consolidated color system

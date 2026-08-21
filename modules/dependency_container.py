@@ -11,7 +11,7 @@ Features:
 - Clean separation of concerns
 
 @author Qtile configuration system
-@note This module follows Python 3.10+ standards and project guidelines
+@note This module targets Python 3.12+ and follows project guidelines
 """
 
 from dataclasses import dataclass

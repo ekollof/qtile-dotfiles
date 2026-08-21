@@ -198,10 +198,11 @@ pipx ensurepath
 ```bash
 # NOTE: Official qtile packages are not yet available in OpenBSD ports
 # Use custom ports from: https://github.com/ekollof/openbsd-ports
+# OpenBSD package repositories provide Python 3.13 as the default Python 3.
 
 # Install custom qtile and qtile-extras ports first, then:
 
-# Essential dependencies
+# Essential dependencies for the repository's Python 3.13 packages
 doas pkg_add py3-psutil
 
 # Recommended for full functionality  
@@ -218,9 +219,8 @@ doas pkg_add xrandr xdpyinfo
 **FreeBSD:**
 
 ```bash
-# Essential package
-pkg install qtile
-# Install psutil for the Python interpreter used by Qtile.
+# Essential packages for FreeBSD's Python 3.12 ports
+pkg install py312-qtile py312-psutil py312-cairocffi py312-xcffib py312-watchdog
 
 # Recommended for full functionality
 pkg install rofi dmenu picom dunst unclutter xrandr

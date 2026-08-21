@@ -1,4 +1,4 @@
-# Ruff configuration for Python 3.10+ compliance and modern syntax
+# Ruff configuration for Python 3.12+ compliance and modern syntax
 # This configuration enforces modern Python patterns while being practical for qtile
 
 target-version = "py312"
@@ -6,12 +6,12 @@ line-length = 88
 indent-width = 4
 
 [lint]
-# Enable rule categories for Python 3.10+ compliance
+# Enable rule categories for Python 3.12+ compliance
 select = [
     "E",   # pycodestyle errors
     "W",   # pycodestyle warnings
     "F",   # pyflakes
-    "UP",  # pyupgrade (modernization) - KEY for 3.10+ compliance
+    "UP",  # pyupgrade (modernization) for Python 3.12+
     "I",   # isort (import sorting)
     "N",   # pep8-naming
     "B",   # flake8-bugbear
