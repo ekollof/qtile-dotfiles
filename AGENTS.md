@@ -18,7 +18,7 @@ A modular `~/.config/qtile` tree:
 | `autostart.sh` | Session startup. **ksh** on purpose (`#!/bin/ksh`); do not rewrite as POSIX sh. |
 | `reconfigure_screens.py` | Manual/hotplug screen refresh helper. |
 | `tests/` | Pytest unit tests for `modules/` (not a live Qtile session). |
-| `scripts/` | Operator/dev utilities (DPI dump, icon tools, docs, log monitor). Not imported by Qtile at runtime except `scripts/count_updates.py` used by bar widgets. |
+| `scripts/` | Operator/dev utilities (DPI diagnostics, docs, compliance, and log monitoring). Not imported by Qtile at runtime except `scripts/count_updates.py` used by bar widgets. |
 | `icons/` | SVG sources plus generated `dynamic/` and `themed/` caches. |
 
 Runtime Python dependencies this config actually imports: `libqtile`, local `qtile_extras`, `psutil` (CPU/memory widgets), `watchdog` (color file watching; polling fallback exists), optional `dbus` / `dbus-fast` (notifications). Do not assume PyPI `qtile-extras` is installed.

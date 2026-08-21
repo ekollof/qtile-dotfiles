@@ -1,134 +1,61 @@
 # Scripts Directory
 
-This directory contains utility scripts for managing and customizing the qtile configuration.
+These are optional operator and development utilities. They are not imported
+by Qtile at runtime, except for `count_updates.py`, which is used by the
+OpenBSD update widget.
 
-## Available Scripts
+## Runtime Utility
 
-### � `qtile_log_monitor.py`
+### `count_updates.py`
 
-Monitor qtile logs with configurable log levels
+Queries OpenBSD package indexes and compares installed packages using OpenBSD
+Dewey version ordering. It prints an update count by default or lists updates
+with `--list`.
 
-```bash
-# Monitor with default settings (INFO level)
-python3 scripts/qtile_log_monitor.py
+## Diagnostics
 
-# Set debug level and monitor
+### `show_dpi_info.py`
+
+Displays detected DPI, the scale factor, and representative scaled sizes.
+
+```sh
+python3 scripts/show_dpi_info.py
+```
+
+### `qtile_log_monitor.py`
+
+Finds the Qtile command and log file, optionally changes the Qtile log level,
+and follows log output.
+
+```sh
 python3 scripts/qtile_log_monitor.py --level debug
-
-# Show info about log configuration
-python3 scripts/qtile_log_monitor.py --info
-
-# Just tail log without changing level
-python3 scripts/qtile_log_monitor.py --no-set-level
-
-# Show specific number of lines without following
 python3 scripts/qtile_log_monitor.py --lines 100 --no-follow
 ```
 
-**Features:**
+### `test_font_sizes.py`
 
-- Automatically finds qtile command and log file location
-- Sets qtile log level via CLI (DEBUG, INFO, WARNING, ERROR, CRITICAL)
-- Tails log file in real-time (like `tail -f`)
-- Cross-platform Python fallback if system `tail` not available
-- Shows log file information and current qtile status
+Shows font and bar-size options after DPI scaling, along with the current
+configuration values.
 
-**Log Levels:**
-
-- `DEBUG`: Detailed diagnostic information
-- `INFO`: General information (default)
-- `WARNING`: Warning messages about potential issues
-- `ERROR`: Error messages about failures
-- `CRITICAL`: Critical errors that may cause qtile to stop
-
-### �🔤 `test_font_sizes.py`
-
-Test different font sizes before applying changes
-
-```bash
+```sh
 python3 scripts/test_font_sizes.py
 ```
 
-**Features:**
+## Development Utilities
 
-- Shows how different font sizes look with your current DPI
-- Displays both raw and DPI-scaled values
-- Provides recommendations based on your display
-- Shows current configuration settings
+### `audit_compliance.py`
 
-**Usage:**
+Checks owned Python modules against the project’s Python 3.12+, documentation,
+portability, and code-quality conventions.
 
-1. Run the script to see available font size combinations
-2. Choose the size that looks best for your setup
-3. Edit `qtile_config.py` and modify the `preferred_fontsize` and `preferred_icon_fontsize` properties
-4. Restart qtile with `Super+Ctrl+R`
+### `generate_docs.py`
 
-### 🖼️ Icon Management Scripts
-
-(Legacy scripts for the old icon system - mostly superseded by the new dynamic system)
-
-#### `download_icons.py`
-
-Download and process icons from various sources.
-
-#### `fix_svg_colors.py`
-
-Adjust SVG icon colors to match your theme.
-
-#### `switch_icons.py`
-
-Switch between different icon systems (SVG, PNG, Nerd Font, etc.).
-
-#### `improve_icons.py`
-
-Enhance and optimize existing icons.
-
-#### `preview_icons.py`
-
-Preview icons before applying them.
-
-#### `show_dpi_info.py`
-
-Display DPI information for your current setup.
-
-## Quick Start
-
-### Font Size Customization
-
-```bash
-# 1. Test different sizes
-python3 scripts/test_font_sizes.py
-
-# 2. Edit qtile_config.py - change these values:
-def preferred_fontsize(self) -> int:
-    return 14  # Larger text (was 12)
-
-def preferred_icon_fontsize(self) -> int:
-    return 18  # Larger icons (was 16)
-
-# 3. Restart qtile
-# Press Super+Ctrl+R
-```
-
-### Icon System (Legacy)
-
-```bash
-# Check current icon system
-python3 scripts/switch_icons.py status
-
-# Switch to different icon types
-python3 scripts/switch_icons.py svg      # Vector icons
-python3 scripts/switch_icons.py image    # Bitmap icons  
-python3 scripts/switch_icons.py dynamic  # Modern dynamic system
-```
-
-## DPI Scaling
-
-All scripts are DPI-aware and will automatically scale values for high-resolution displays. Use `show_dpi_info.py` to check your current DPI settings.
+Regenerates the Doxygen documentation when Doxygen and Doxypypy are installed.
+It is not required for running Qtile.
 
 ## Notes
 
-- The **dynamic icon system** (new) automatically generates themed icons and is the recommended approach
-- The **legacy icon scripts** are still available for compatibility and advanced customization
-- Always restart qtile after making configuration changes
-- Font size changes are immediately effective after restart
+- The dynamic icon system generates themed icons directly; no icon-switching
+  script is needed.
+- Run `qtile check` for the authoritative configuration validation.
+- Run the repository test suite with `python3 -m pytest tests -q`.

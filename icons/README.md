@@ -70,26 +70,12 @@ Uses Nerd Font character codes for icons.
 ### 4. Text Symbols
 Uses simple text characters as icon replacements.
 
-## Switching Icon Systems
+## Icon Backend Selection
 
-```bash
-cd ~/.config/qtile
-
-# Use modern dynamic system (default)
-python3 scripts/switch_icons.py dynamic
-
-# Use static SVG icons  
-python3 scripts/switch_icons.py svg
-
-# Use bitmap images
-python3 scripts/switch_icons.py image
-
-# Use Nerd Font icons
-python3 scripts/switch_icons.py nerd_font
-
-# Check current status
-python3 scripts/switch_icons.py status
-```
+The bar configuration selects the dynamic icon system automatically. It falls
+back through SVG, bitmap, Nerd Font, and text symbols when required assets or
+dependencies are unavailable. The active backend is available through the bar
+manager status helpers.
 
 ## Manual Icon Regeneration
 
