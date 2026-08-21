@@ -5,7 +5,7 @@ Tests for commands module
 @brief Comprehensive test suite for the commands module
 """
 
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -206,10 +206,18 @@ class TestSystemCommands:
         """Test show hotkeys"""
         mock_qtile = MagicMock()
         mock_key_manager = MagicMock()
-        # Test that the method executes without error
-        system_commands.show_hotkeys(mock_qtile, mock_key_manager)
-        # Just verify the method completes successfully
-        assert True  # Method executed without exception
+        mock_hotkey_display = MagicMock()
+
+        with patch(
+            "modules.hotkeys.create_hotkey_display",
+            return_value=mock_hotkey_display,
+        ) as mock_create:
+            system_commands.show_hotkeys(mock_qtile, mock_key_manager)
+
+        mock_create.assert_called_once_with(
+            mock_key_manager, system_commands.color_manager
+        )
+        mock_hotkey_display.show_hotkeys.assert_called_once_with()
 
     def test_test_notifications(self, system_commands: SystemCommands) -> None:
         """Test notification testing"""
