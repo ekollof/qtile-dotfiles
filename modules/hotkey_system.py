@@ -132,7 +132,7 @@ class HotkeyCategorizer:
     """Handles categorization and organization of hotkeys"""
 
     def __init__(self) -> None:
-        self.categories = {
+        self.categories: dict[str, list[Any]] = {
             "Window Management": [],
             "Layout Control": [],
             "Group/Workspace": [],

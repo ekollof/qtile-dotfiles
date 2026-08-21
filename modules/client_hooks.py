@@ -7,6 +7,7 @@ This module provides client/window event handling functionality for qtile,
 including window focusing, floating rules, and client state management.
 """
 
+from collections.abc import Callable
 from typing import Any
 
 from libqtile import hook
@@ -30,7 +31,7 @@ class ClientHooks:
         super().__init__()
         self.config = config
         self.window_manager = window_manager
-        self._enforce_tiling_behavior = None  # Will be set in setup_client_hooks
+        self._enforce_tiling_behavior: Callable[[Any], None] | None = None
 
     def setup_client_hooks(self) -> None:
         """

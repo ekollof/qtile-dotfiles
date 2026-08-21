@@ -94,7 +94,7 @@ class KeyManager:
         """Find potential key binding conflicts"""
         conflicts = []
         all_keys = self.get_keys()
-        key_combinations = {}
+        key_combinations: dict[tuple[tuple[str, ...], str | int], Any] = {}
 
         for key in all_keys:
             combo = (

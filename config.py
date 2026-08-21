@@ -19,6 +19,7 @@ import importlib
 import os
 import sys
 from pathlib import Path
+from typing import Any
 
 # Fix qtile's problematic default floating rules before any layouts are created
 # This prevents electron apps from floating due to has_fixed_size/has_fixed_ratio checks
@@ -121,7 +122,7 @@ mouse = [
 
 # Additional qtile settings (names must match libqtile.confreader.Config)
 dgroups_key_binder = None
-dgroups_app_rules = []
+dgroups_app_rules: list[Any] = []
 follow_mouse_focus = True
 # Valid values: True | False | "floating_only" (qtile 0.26+)
 bring_front_click = True
@@ -177,7 +178,7 @@ def manually_reconfigure_screens() -> None:
         qtile_config = get_config()
         bar_manager = create_bar_manager(color_manager, qtile_config)
         new_screens = bar_manager.create_screens(new_screen_count)
-        qtile.config.screens = new_screens
+        qtile.config.screens = new_screens  # type: ignore[attr-defined]
 
         # Restart to apply changes
-        qtile.restart()
+        qtile.restart()  # type: ignore[attr-defined]

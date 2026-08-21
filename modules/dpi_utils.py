@@ -15,8 +15,8 @@ class DPIManager:
     """Manages DPI detection and scaling calculations"""
 
     def __init__(self) -> None:
-        self._dpi = None
-        self._scale_factor = None
+        self._dpi: float | None = None
+        self._scale_factor: float | None = None
         # Don't call detect_dpi() in __init__ to make testing easier
 
     def detect_dpi(self) -> float:

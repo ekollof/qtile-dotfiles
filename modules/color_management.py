@@ -14,16 +14,22 @@ from typing import Any
 from libqtile import qtile
 from libqtile.log_utils import logger
 
+EventHandlerBase: Any
+ObserverFactory: Any
+
 try:
-    from watchdog.events import FileSystemEventHandler
-    from watchdog.observers import Observer
+    from watchdog.events import FileSystemEventHandler as _EventHandlerBase
+    from watchdog.observers import Observer as _ObserverFactory
+
+    EventHandlerBase = _EventHandlerBase
+    ObserverFactory = _ObserverFactory
 
     watchdog_available = True
 except ImportError:
     watchdog_available = False
     # Create dummy classes for type checking
-    Observer = None
-    FileSystemEventHandler = None
+    EventHandlerBase = None
+    ObserverFactory = None
     logger.warning("Watchdog not available, using polling fallback")
 
 
@@ -42,8 +48,8 @@ class ColorManager:
             f"{self.last_good_file.name}.backup"
         )
         self.colordict = self._load_colors()
-        self._observer = None
-        self._polling_thread = None
+        self._observer: Any = None
+        self._polling_thread: threading.Thread | None = None
         self._watching = False
         self._shutdown_event = threading.Event()
         self._auto_start_attempted = False
@@ -183,11 +189,15 @@ class ColorManager:
         @brief Start watchdog-based file monitoring for color changes
         @throws Exception if watchdog setup fails
         """
-        if not watchdog_available or Observer is None or FileSystemEventHandler is None:
+        if (
+            not watchdog_available
+            or ObserverFactory is None
+            or EventHandlerBase is None
+        ):
             logger.warning("Watchdog not available, file monitoring disabled")
             return
 
-        class ColorChangeHandler(FileSystemEventHandler):
+        class ColorChangeHandler(EventHandlerBase):
             def __init__(self, manager: Any) -> None:
                 super().__init__()
                 self.manager = manager
@@ -201,7 +211,7 @@ class ColorManager:
                     self.manager._handle_color_change()
 
         try:
-            self._observer = Observer()
+            self._observer = ObserverFactory()
             handler = ColorChangeHandler(self)
             watch_dir = self.colors_file.parent
             watch_dir.mkdir(parents=True, exist_ok=True)

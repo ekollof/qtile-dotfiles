@@ -928,8 +928,8 @@ class PopupManager:
             height = self.config["height"]
 
             # Get current screen dimensions for bounds checking
-            if qtile and qtile.current_screen:
-                screen_height = qtile.current_screen.height
+            if qtile and qtile.current_screen:  # type: ignore[attr-defined]
+                screen_height = qtile.current_screen.height  # type: ignore[attr-defined]
             else:
                 screen_height = 1080
 
@@ -985,7 +985,7 @@ class PopupManager:
         """Schedule cleanup of expired notifications"""
         if not self.cleanup_scheduled and qtile:
             self.cleanup_scheduled = True
-            qtile.call_later(1.0, self._cleanup_expired)
+            qtile.call_later(1.0, self._cleanup_expired)  # type: ignore[attr-defined]
 
     def _cleanup_expired(self) -> None:
         """Clean up expired notifications"""

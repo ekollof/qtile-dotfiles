@@ -42,7 +42,7 @@ def _patch_qtile_extras_widgets() -> None:
     try:
         from libqtile.widget.base import _Widget
 
-        original_length = _Widget.length
+        original_length: Any = _Widget.length
 
         def safe_length_getter(self: Any) -> int:
             if getattr(self, "finalized", False):
@@ -59,7 +59,9 @@ def _patch_qtile_extras_widgets() -> None:
             else:
                 self._length = value
 
-        _Widget.length = property(safe_length_getter, safe_length_setter)
+        _Widget.length = property(  # type: ignore[method-assign, assignment]
+            safe_length_getter, safe_length_setter
+        )
         logger.info("Applied qtile-extras widget.length workaround")
     except Exception as e:
         logger.warning(f"Could not apply qtile-extras workaround: {e}")
@@ -112,7 +114,7 @@ class EnhancedBarManager:
         self.icons = self._initialize_icon_mappings()
 
         # System state cache for dynamic icons
-        self._system_state_cache = {}
+        self._system_state_cache: dict[str, Any] = {}
 
         # Generate themed icon cache (may use fallback colors initially)
         self._update_themed_icon_cache()
@@ -193,12 +195,9 @@ class EnhancedBarManager:
         # https://www.w3.org/TR/WCAG20/#relativeluminancedef
         def get_luminance(hex_color: str) -> float:
             """Calculate relative luminance of a hex color"""
-            r, g, b = (
-                int(hex_color[0:2], 16),
-                int(hex_color[2:4], 16),
-                int(hex_color[4:6], 16),
-            )
-            r, g, b = r / 255.0, g / 255.0, b / 255.0
+            r = float(int(hex_color[0:2], 16)) / 255
+            g = float(int(hex_color[2:4], 16)) / 255
+            b = float(int(hex_color[4:6], 16)) / 255
 
             # Apply sRGB gamma correction
             def adjust(c):
@@ -763,7 +762,7 @@ class EnhancedBarManager:
         colors = colordict.get("colors", {})
         special = colordict.get("special", {})
 
-        widgets = []
+        widgets: list[Any] = []
         for config in self.qtile_config.script_configs:
             if self._script_available(config["script_path"]):
                 # Determine icon based on script name
@@ -1359,7 +1358,7 @@ class EnhancedBarManager:
         @param special: Special colors dictionary
         @return List of widgets for package update checking
         """
-        widgets = []
+        widgets: list[Any] = []
         distros = self._detect_package_manager()
 
         if not distros:

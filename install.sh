@@ -604,8 +604,17 @@ write_session_desktop() {
         "DesktopNames=qtile" \
         "Keywords=wm;tiling")
 
-    if printf '%s\n' "$_body" > "$_dest" 2>/dev/null; then
-        :
+    # Test the destination before redirecting. Shell redirections happen before
+    # printf runs, so a failed unprivileged redirect cannot be silenced by the
+    # command's stderr redirection.
+    if [ -w "$_dest" ] || [ -w "$_dir" ]; then
+        if printf '%s\n' "$_body" >"$_dest" 2>/dev/null; then
+            :
+        elif [ -n "$PRIV_CMD" ]; then
+            printf '%s\n' "$_body" | $PRIV_CMD tee "$_dest" >/dev/null || return 1
+        else
+            return 1
+        fi
     elif [ -n "$PRIV_CMD" ]; then
         printf '%s\n' "$_body" | $PRIV_CMD tee "$_dest" >/dev/null || return 1
     else
@@ -640,29 +649,35 @@ create_desktop_entry() {
         "Qtile (Wayland)" "Qtile Wayland session" "$_wl_exec" "$_exec_qtile" || \
         log_warn "Could not write ~/.local/share/wayland-sessions/qtile.desktop"
 
-    # SDDM scans /usr/local/share/xsessions then /usr/share/xsessions (not
-    # ~/.local/share). Qtile 0.37's packaged file runs
-    # `systemctl --user start --wait qtile.service`, which hangs at the greeter
-    # because graphical-session.target is not up yet. Overwrite both system
-    # locations so every "Qtile" entry starts qtile directly.
+    # SDDM does not scan ~/.local/share/xsessions. Use the native system-wide
+    # session directories for the detected operating system. Qtile 0.37's
+    # packaged file runs `systemctl --user start --wait qtile.service`, which
+    # hangs at the greeter because graphical-session.target is not up yet.
     if [ -n "$PRIV_CMD" ]; then
-        write_session_desktop \
-            /usr/local/share/xsessions/qtile.desktop \
-            "Qtile" "Qtile X11 session" "$_x11_exec" "$_exec_qtile" || \
-            log_warn "Could not write /usr/local/share/xsessions/qtile.desktop"
+        case "$OS_TYPE" in
+            linux)
+                _system_session_dir=/usr/share
+                ;;
+            openbsd|freebsd|netbsd)
+                _system_session_dir=/usr/local/share
+                ;;
+            *)
+                log_warn "Unknown platform: skipping system session entries"
+                return 0
+                ;;
+        esac
 
         write_session_desktop \
-            /usr/share/xsessions/qtile.desktop \
+            "$_system_session_dir/xsessions/qtile.desktop" \
             "Qtile" "Qtile X11 session" "$_x11_exec" "$_exec_qtile" || \
-            log_warn "Could not write /usr/share/xsessions/qtile.desktop"
+            log_warn "Could not write $_system_session_dir/xsessions/qtile.desktop"
 
         write_session_desktop \
-            /usr/local/share/wayland-sessions/qtile.desktop \
+            "$_system_session_dir/wayland-sessions/qtile.desktop" \
             "Qtile (Wayland)" "Qtile Wayland session" "$_wl_exec" "$_exec_qtile" || \
-            log_warn "Could not write /usr/local/share/wayland-sessions/qtile.desktop"
+            log_warn "Could not write $_system_session_dir/wayland-sessions/qtile.desktop"
     else
-        log_warn "No sudo/doas: SDDM will keep using /usr/share/xsessions/qtile.desktop"
-        log_warn "That file starts qtile via systemd user service and hangs at login"
+        log_warn "No sudo/doas: only user-local session entries were installed"
     fi
 }
 

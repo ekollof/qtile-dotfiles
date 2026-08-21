@@ -126,7 +126,7 @@ class TestColorManager:
 
         with (
             patch("modules.color_management.watchdog_available", True),
-            patch("modules.color_management.Observer") as mock_observer_class,
+            patch("modules.color_management.ObserverFactory") as mock_observer_class,
             patch("pathlib.Path.mkdir"),
         ):
             mock_observer: MagicMock = MagicMock()
@@ -395,7 +395,7 @@ class TestIntegration:
         with (
             patch("modules.color_management.watchdog_available", True),
             patch(
-                "modules.color_management.Observer",
+                "modules.color_management.ObserverFactory",
                 side_effect=Exception("Watchdog failed"),
             ),
             patch("threading.Thread") as mock_thread,

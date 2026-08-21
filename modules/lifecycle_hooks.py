@@ -225,8 +225,10 @@ class LifecycleHooks:
         @param event Screen change event (optional)
         """
         try:
-            if qtile and qtile.current_screen:
-                screen_index = qtile.screens.index(qtile.current_screen)
+            if qtile and qtile.current_screen:  # type: ignore[attr-defined]
+                screen_index = qtile.screens.index(  # type: ignore[attr-defined]
+                    qtile.current_screen  # type: ignore[attr-defined]
+                )
                 logger.debug(f"Current screen changed to: {screen_index}")
                 if event is not None:
                     logger.debug(f"Screen change event data: {event}")
@@ -261,9 +263,9 @@ class LifecycleHooks:
                 bar_manager = EnhancedBarManager(self.color_manager, config)
                 new_screens = bar_manager.create_screens(new_screen_count)
 
-                qtile.config.screens = new_screens
+                qtile.config.screens = new_screens  # type: ignore[attr-defined]
                 logger.info(f"Restarting qtile with {new_screen_count} screens")
-                qtile.restart()
+                qtile.restart()  # type: ignore[attr-defined]
             else:
                 logger.warning(
                     "Could not get qtile instance for screen reconfiguration"
@@ -310,7 +312,7 @@ class LifecycleHooks:
 
         # Schedule retiling with a small delay to ensure all windows are restored
         if qtile:
-            qtile.call_later(1.0, retile_windows)
+            qtile.call_later(1.0, retile_windows)  # type: ignore[attr-defined]
 
     def get_screen_status(self) -> dict[str, Any]:
         """
@@ -324,10 +326,14 @@ class LifecycleHooks:
                 "screen_count": get_screen_count(),
                 "detection_delay": self.config.screen_settings["detection_delay"],
                 "startup_delay": self.config.screen_settings["startup_delay"],
-                "qtile_screens": len(qtile.screens) if qtile else 0,
+                "qtile_screens": (  # type: ignore[attr-defined]
+                    len(qtile.screens) if qtile else 0  # type: ignore[attr-defined]
+                ),
                 "current_screen": (
-                    qtile.screens.index(qtile.current_screen)
-                    if qtile and qtile.current_screen
+                    qtile.screens.index(  # type: ignore[attr-defined]
+                        qtile.current_screen  # type: ignore[attr-defined]
+                    )
+                    if qtile and qtile.current_screen  # type: ignore[attr-defined]
                     else None
                 ),
             }
@@ -342,7 +348,7 @@ class LifecycleHooks:
                         "y": screen.y,
                         "group": screen.group.name if screen.group else None,
                     }
-                    for i, screen in enumerate(qtile.screens)
+                    for i, screen in enumerate(qtile.screens)  # type: ignore[attr-defined]
                 ]
 
             return status
